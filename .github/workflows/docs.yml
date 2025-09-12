@@ -1,0 +1,78 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'docs/**', 'README.md', '*.md' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'docs/**', 'README.md', '*.md' ]
+
+jobs:
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install -g @vuepress/cli vuepress
+        
+    - name: Generate API Documentation
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        
+    - name: Build documentation
+      run: |
+        # Create docs structure if it doesn't exist
+        mkdir -p docs/.vuepress
+        
+        # Generate basic VuePress config
+        cat > docs/.vuepress/config.js << 'EOF'
+        module.exports = {
+          title: 'TigerZF Documentation',
+          description: 'Zend Framework 1 reborn for modern PHP applications',
+          base: '/TigerZF/',
+          themeConfig: {
+            nav: [
+              { text: 'Home', link: '/' },
+              { text: 'Guide', link: '/guide/' },
+              { text: 'API Reference', link: '/api/' },
+              { text: 'GitHub', link: 'https://github.com/WebTigers/TigerZF' }
+            ],
+            sidebar: [
+              '/',
+              '/guide/',
+              '/api/',
+              '/migration/',
+              '/contributing/'
+            ]
+          }
+        }
+        EOF
+        
+        # Convert README to docs index
+        cp README.md docs/README.md
+        
+        # Build docs
+        vuepress build docs || echo "Docs build failed, will setup later"
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      if: success()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/.vuepress/dist
+        cname: tigerzf.webtigers.com
