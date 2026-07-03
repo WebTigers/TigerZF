@@ -246,18 +246,16 @@ class Zend_CodeGenerator_Php_Property_DefaultValue extends Zend_CodeGenerator_Ph
             $type = $this->_getAutoDeterminedType($value);
 
             if ($type == self::TYPE_ARRAY) {
-                $rii = new RecursiveIteratorIterator(
-                    $it = new RecursiveArrayIterator($value),
-                    RecursiveIteratorIterator::SELF_FIRST
-                    );
-                foreach ($rii as $curKey => $curValue) {
-                    if (!$curValue instanceof Zend_CodeGenerator_Php_Property_DefaultValue) {
-                        $curValue = new self(['value' => $curValue]);
-                        $rii->getSubIterator()->offsetSet($curKey, $curValue);
+                // Wrap each element in a DefaultValue so it can render itself; a nested
+                // array becomes a DefaultValue whose own generate() recurses back here.
+                // Replaces a RecursiveArrayIterator walk that tripped the PHP 8.4+
+                // "object as a backing array for ArrayIterator" deprecation (and could
+                // not simply take CHILD_ARRAYS_ONLY because it mutates during iteration).
+                foreach ($value as $key => $element) {
+                    if (!$element instanceof Zend_CodeGenerator_Php_Property_DefaultValue) {
+                        $value[$key] = new self(['value' => $element]);
                     }
-                    $curValue->setArrayDepth($rii->getDepth());
                 }
-                $value = $rii->getSubIterator()->getArrayCopy();
             }
 
         }
