@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* Reconciled CI into a single canonical PHPUnit matrix (8.1–8.5) and dropped the `experimental`/`continue-on-error` flags now that 8.3–8.5 pass; removed the redundant duplicate test job from `ci.yml`
+* Removed obsolete Travis CI config and legacy `php52`/`php7` test ini/scripts
+
+### Fixed
+
+* PHP 8.5 compatibility: replaced deprecated `SplObjectStorage::contains()`/`attach()` with `offsetExists()`/`offsetSet()` in Zend_Pdf
+* PHP 8.4 compatibility: coerced nullable array keys with `(string)` to avoid "null as array offset" deprecations (Zend_Form, Zend_Db_Select, Zend_Http_Client, Zend_Translate, Zend_Navigation, and others)
+* PHP 8.4/8.5 compatibility: removed no-op deprecated calls (`imagedestroy`, `ReflectionProperty::setAccessible`, `xml_parser_free`), replaced non-canonical `(double)` casts, and switched `DOMDocument::$actualEncoding` to `$encoding`
+* Fixed `E_STRICT` usage in the test bootstrap that broke the suite on PHP 8.4+
+* Updated stale test expectations for modern PHP error messages and the PHP 8.3 `highlight_string()` output format change
+
 ## [1.25.0] - 2026-02-24
 
 * dropped PHP 7.1-7.3 support, added 8.2 support (without explicitly aiming to remove all deprecation notices)

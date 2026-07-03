@@ -101,32 +101,24 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "7.4"
-          - "8.0"
           - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
-        experimental:
-          - false
+          - "8.5"
         include:
-          #bare for PHP >=7.2
+          #bare for PHP >=8.1
           - php-extensions-bare: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring"
-          #full for PHP <= 8.0
-          - php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite, mcrypt, rar"
           - php-version: "8.1"
             php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite, mcrypt"
           - php-version: "8.2"
             php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite, mcrypt"
           - php-version: "8.3"
             php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite"
-            experimental: true
           - php-version: "8.4"
             php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite"
-            experimental: true
           - php-version: "8.5"
             php-extensions-full: "none, iconv, json, libxml, xml, dom, simplexml, xmlwriter, tokenizer, mbstring, apcu, ctype, openssl, curl, gd, posix, pdo_sqlite, pdo_mysql, fileinfo, zip, sqlite, soap, bcmath, igbinary, bz2, lzf, memcached, memcache, ldap, sqlite"
-            experimental: true
 
     steps:
       - name: Checkout
@@ -170,10 +162,9 @@ jobs:
         run: |
           bin/parallel-lint --exclude vendor --exclude tests/Zend/Loader/_files/ParseError.php . --checkstyle | cs2pr
 
-      - name: "Run tests on PHP ${{ matrix.php-version }} (Experimental: ${{ matrix.experimental }}) with minimal extensions"
+      - name: "Run tests on PHP ${{ matrix.php-version }} with minimal extensions"
         run: |
           bin/phpunit -c tests/phpunit.xml
-        continue-on-error: ${{ matrix.experimental }}
 
       - name: Setup LDAP
         run: |
@@ -191,7 +182,6 @@ jobs:
           # https://github.com/shivammathur/setup-php/issues/407#issuecomment-773675741
           fail-fast: true
 
-      - name: "Run tests on PHP ${{ matrix.php-version }} (Experimental: ${{ matrix.experimental }}) with extensions"
+      - name: "Run tests on PHP ${{ matrix.php-version }} with extensions"
         run: |
           bin/phpunit -c tests/phpunit.xml
-        continue-on-error: ${{ matrix.experimental }}
