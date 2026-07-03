@@ -556,7 +556,7 @@ class Zend_Http_Client
         }
 
         if ($value === null) {
-            if (isset($parray[$name])) unset($parray[$name]);
+            if (isset($parray[(string) $name])) unset($parray[(string) $name]);
         } else {
             $parray[$name] = $value;
         }

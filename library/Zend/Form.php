@@ -2137,8 +2137,8 @@ class Zend_Form implements Iterator, Countable, Zend_Validate_Interface
             $arrayPath = trim(substr($arrayPath, $arrayPos + 1), ']');
         }
 
-        if (isset($value[$arrayPath])) {
-            $value = $value[$arrayPath];
+        if (isset($value[(string) $arrayPath])) {
+            $value = $value[(string) $arrayPath];
         }
 
         return $value;
