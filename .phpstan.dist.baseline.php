@@ -2318,18 +2318,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/CodeGenerator/Php/Property.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Call to an undefined method RecursiveIterator::getArrayCopy().',
-	'identifier' => 'method.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/CodeGenerator/Php/Property/DefaultValue.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Call to an undefined method RecursiveIterator::offsetSet().',
-	'identifier' => 'method.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/CodeGenerator/Php/Property/DefaultValue.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Method Zend_Config_Writer_Ini::_prepareValue() should return string but returns float|int.',
 	'identifier' => 'return.type',
 	'count' => 1,
@@ -5840,7 +5828,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Feed/Abstract.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Access to an undefined property DOMElement::$actualEncoding.',
+	'rawMessage' => 'Access to an undefined property DOMElement::$encoding.',
 	'identifier' => 'property.notFound',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Feed/Atom.php',

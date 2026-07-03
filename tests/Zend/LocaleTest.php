@@ -965,7 +965,6 @@ class Zend_LocaleTest extends TestCase
 
         $class = new ReflectionClass('Zend_Locale');
         $property = $class->getProperty('_localeData');
-        $property->setAccessible(true);
 
         $locale = new Zend_Locale();
         $localeData = $property->getValue($locale);
