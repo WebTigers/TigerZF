@@ -1,0 +1,788 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>61.5. Query Construction API</title>
+<link rel="stylesheet" type="text/css" href="dbstyle.css">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Programmer's Reference Guide">
+<link rel="up" href="zend.search.lucene.html" title="Chapter 61. Zend_Search_Lucene">
+<link rel="prev" href="zend.search.lucene.query-language.html" title="61.4. Query Language">
+<link rel="next" href="zend.search.lucene.charset.html" title="61.6. Character Set">
+<link rel="part" href="introduction.html" title="Part I. Introduction to Zend Framework">
+<link rel="chapter" href="introduction.overview.html" title="Chapter 1. Overview">
+<link rel="chapter" href="introduction.installation.html" title="Chapter 2. Installation">
+<link rel="part" href="learning.html" title="Part II. Learning Zend Framework">
+<link rel="chapter" href="learning.quickstart.html" title="Chapter 3. Zend Framework Quick Start">
+<link rel="chapter" href="learning.autoloading.html" title="Chapter 4. Autoloading in Zend Framework">
+<link rel="chapter" href="learning.plugins.html" title="Chapter 5. Plugins in Zend Framework">
+<link rel="chapter" href="learning.layout.html" title="Chapter 6. Getting Started with Zend_Layout">
+<link rel="chapter" href="learning.view.placeholders.html" title="Chapter 7. Getting Started Zend_View Placeholders">
+<link rel="chapter" href="learning.form.decorators.html" title="Chapter 8. Understanding and Using Zend Form Decorators">
+<link rel="chapter" href="learning.multiuser.html" title="Chapter 9. Getting Started with Zend_Session, Zend_Auth, and Zend_Acl">
+<link rel="chapter" href="learning.lucene.html" title="Chapter 10. Getting Started with Zend_Search_Lucene">
+<link rel="chapter" href="learning.paginator.html" title="Chapter 11. Getting Started with Zend_Paginator">
+<link rel="part" href="reference.html" title="Part III. Zend Framework Reference">
+<link rel="chapter" href="zend.acl.html" title="Chapter 12. Zend_Acl">
+<link rel="chapter" href="zend.amf.html" title="Chapter 13. Zend_Amf">
+<link rel="chapter" href="zend.application.html" title="Chapter 14. Zend_Application">
+<link rel="chapter" href="zend.auth.html" title="Chapter 15. Zend_Auth">
+<link rel="chapter" href="zend.barcode.html" title="Chapter 16. Zend_Barcode">
+<link rel="chapter" href="zend.cache.html" title="Chapter 17. Zend_Cache">
+<link rel="chapter" href="zend.captcha.html" title="Chapter 18. Zend_Captcha">
+<link rel="chapter" href="zend.cloud.html" title="Chapter 19. SimpleCloud API: Zend_Cloud">
+<link rel="chapter" href="zend.codegenerator.html" title="Chapter 20. Zend_CodeGenerator">
+<link rel="chapter" href="zend.config.html" title="Chapter 21. Zend_Config">
+<link rel="chapter" href="zend.config.writer.html" title="Chapter 22. Zend_Config_Writer">
+<link rel="chapter" href="zend.console.getopt.html" title="Chapter 23. Zend_Console_Getopt">
+<link rel="chapter" href="zend.controller.html" title="Chapter 24. Zend_Controller">
+<link rel="chapter" href="zend.currency.html" title="Chapter 25. Zend_Currency">
+<link rel="chapter" href="zend.date.html" title="Chapter 26. Zend_Date">
+<link rel="chapter" href="zend.db.html" title="Chapter 27. Zend_Db">
+<link rel="chapter" href="zend.debug.html" title="Chapter 28. Zend_Debug">
+<link rel="chapter" href="zend.dojo.html" title="Chapter 29. Zend_Dojo">
+<link rel="chapter" href="zend.dom.html" title="Chapter 30. Zend_Dom">
+<link rel="chapter" href="zend.event-manager.html" title="Chapter 31. Zend_EventManager">
+<link rel="chapter" href="zend.exception.html" title="Chapter 32. Zend_Exception">
+<link rel="chapter" href="zend.feed.html" title="Chapter 33. Zend_Feed">
+<link rel="chapter" href="zend.file.html" title="Chapter 34. Zend_File">
+<link rel="chapter" href="zend.filter.html" title="Chapter 35. Zend_Filter">
+<link rel="chapter" href="zend.form.html" title="Chapter 36. Zend_Form">
+<link rel="chapter" href="zend.gdata.html" title="Chapter 37. Zend_Gdata">
+<link rel="chapter" href="zend.http.html" title="Chapter 38. Zend_Http">
+<link rel="chapter" href="zend.json.html" title="Chapter 39. Zend_Json">
+<link rel="chapter" href="zend.layout.html" title="Chapter 40. Zend_Layout">
+<link rel="chapter" href="zend.ldap.html" title="Chapter 41. Zend_Ldap">
+<link rel="chapter" href="zend.loader.html" title="Chapter 42. Zend_Loader">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.factory.html" title="factory">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.get-registered-autoloaders.html" title="getRegisteredAutoloaders">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-fallback-autoloader.html" title="setFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.is-fallback-autoloader.html" title="isFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespace.html" title="registerNamespace">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespaces.html" title="registerNamespaces">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefix.html" title="registerPrefix">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefixes.html" title="registerPrefixes">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register.html" title="register">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-map.html" title="registerAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-maps.html" title="registerAutoloadMaps">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.get-autoload-map.html" title="getAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register.html" title="register">
+<link rel="chapter" href="zend.locale.html" title="Chapter 43. Zend_Locale">
+<link rel="chapter" href="zend.log.html" title="Chapter 44. Zend_Log">
+<link rel="chapter" href="zend.mail.html" title="Chapter 45. Zend_Mail">
+<link rel="chapter" href="zend.markup.html" title="Chapter 46. Zend_Markup">
+<link rel="chapter" href="zend.measure.html" title="Chapter 47. Zend_Measure">
+<link rel="chapter" href="zend.memory.html" title="Chapter 48. Zend_Memory">
+<link rel="chapter" href="zend.mime.html" title="Chapter 49. Zend_Mime">
+<link rel="chapter" href="zend.mobile.push.html" title="Chapter 50. Zend_Mobile_Push">
+<link rel="chapter" href="zend.navigation.html" title="Chapter 51. Zend_Navigation">
+<link rel="chapter" href="zend.oauth.html" title="Chapter 52. Zend_Oauth">
+<link rel="chapter" href="zend.openid.html" title="Chapter 53. Zend_OpenId">
+<link rel="chapter" href="zend.paginator.html" title="Chapter 54. Zend_Paginator">
+<link rel="chapter" href="zend.pdf.html" title="Chapter 55. Zend_Pdf">
+<link rel="chapter" href="zend.progressbar.html" title="Chapter 56. Zend_ProgressBar">
+<link rel="chapter" href="zend.queue.html" title="Chapter 57. Zend_Queue">
+<link rel="chapter" href="zend.reflection.html" title="Chapter 58. Zend_Reflection">
+<link rel="chapter" href="zend.registry.html" title="Chapter 59. Zend_Registry">
+<link rel="chapter" href="zend.rest.html" title="Chapter 60. Zend_Rest">
+<link rel="chapter" href="zend.search.lucene.html" title="Chapter 61. Zend_Search_Lucene">
+<link rel="chapter" href="zend.serializer.html" title="Chapter 62. Zend_Serializer">
+<link rel="chapter" href="zend.server.html" title="Chapter 63. Zend_Server">
+<link rel="chapter" href="zend.service.html" title="Chapter 64. Zend_Service">
+<link rel="chapter" href="zend.session.html" title="Chapter 65. Zend_Session">
+<link rel="chapter" href="zend.soap.html" title="Chapter 66. Zend_Soap">
+<link rel="chapter" href="zend.tag.html" title="Chapter 67. Zend_Tag">
+<link rel="chapter" href="zend.test.html" title="Chapter 68. Zend_Test">
+<link rel="chapter" href="zend.text.html" title="Chapter 69. Zend_Text">
+<link rel="chapter" href="zend.timesync.html" title="Chapter 70. Zend_TimeSync">
+<link rel="chapter" href="zend.tool.html" title="Chapter 71. Zend_Tool">
+<link rel="chapter" href="zend.tool.framework.html" title="Chapter 72. Zend_Tool_Framework">
+<link rel="chapter" href="zend.tool.project.html" title="Chapter 73. Zend_Tool_Project">
+<link rel="chapter" href="zend.translate.html" title="Chapter 74. Zend_Translate">
+<link rel="chapter" href="zend.uri.html" title="Chapter 75. Zend_Uri">
+<link rel="chapter" href="zend.validate.html" title="Chapter 76. Zend_Validate">
+<link rel="chapter" href="zend.version.html" title="Chapter 77. Zend_Version">
+<link rel="chapter" href="zend.view.html" title="Chapter 78. Zend_View">
+<link rel="chapter" href="zend.wildfire.html" title="Chapter 79. Zend_Wildfire">
+<link rel="chapter" href="zend.xmlrpc.html" title="Chapter 80. Zend_XmlRpc">
+<link rel="appendix" href="requirements.html" title="Appendix A. Zend Framework Requirements">
+<link rel="appendix" href="migration.html" title="Appendix B. Zend Framework Migration Notes">
+<link rel="appendix" href="coding-standard.html" title="Appendix C. Zend Framework Coding Standard for PHP">
+<link rel="appendix" href="doc-standard.html" title="Appendix D. Zend Framework Documentation Standard">
+<link rel="appendix" href="project-structure.html" title="Appendix E. Recommended Project Structure for Zend Framework MVC Applications">
+<link rel="appendix" href="performance.html" title="Appendix F. Zend Framework Performance Guide">
+<link rel="appendix" href="copyrights.html" title="Appendix G. Copyright Information">
+<link rel="index" href="the.index.html" title="Index">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.exceptions" title="61.5.1. Query Parser Exceptions">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.term-query" title="61.5.2. Term Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.multiterm-query" title="61.5.3. Multi-Term Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.boolean-query" title="61.5.4. Boolean Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.wildcard" title="61.5.5. Wildcard Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.fuzzy" title="61.5.6. Fuzzy Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.phrase-query" title="61.5.7. Phrase Query">
+<link rel="subsection" href="zend.search.lucene.query-api.html#zend.search.lucene.queries.range" title="61.5.8. Range Query">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.5. Query Construction API</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-language.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.charset.html">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.query-api"></a>61.5. Query Construction API</h2></div></div></div>
+<p>
+        In addition to parsing a string query automatically it's also possible to construct them
+        with the query <acronym class="acronym">API</acronym>.
+    </p>
+<p>
+        User queries can be combined with queries created through the query <acronym class="acronym">API</acronym>.
+        Simply use the query parser to construct a query from a string:
+    </p>
+<pre class="programlisting">
+$query = Zend_Search_Lucene_Search_QueryParser::parse($queryString);
+</pre>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.exceptions"></a>61.5.1. Query Parser Exceptions</h3></div></div></div>
+<p>
+            The query parser may generate two types of exceptions:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="classname">Zend_Search_Lucene_Exception</code> is thrown if something
+                        goes wrong in the query parser itself.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Search_Lucene_Search_QueryParserException</code> is
+                        thrown when there is an error in the query syntax.
+                    </p></li>
+</ul></div>
+<p>
+
+            It's a good idea to catch
+            <code class="classname">Zend_Search_Lucene_Search_QueryParserException</code>s and handle them
+            appropriately:
+        </p>
+<pre class="programlisting">
+try {
+    $query = Zend_Search_Lucene_Search_QueryParser::parse($queryString);
+} catch (Zend_Search_Lucene_Search_QueryParserException $e) {
+    echo "Query syntax error: " . $e-&gt;getMessage() . "\n";
+}
+</pre>
+<p>
+            The same technique should be used for the find() method of a
+            <code class="classname">Zend_Search_Lucene</code> object.
+        </p>
+<p>
+            Starting in 1.5, query parsing exceptions are suppressed by default. If query doesn't
+            conform query language, then it's tokenized using current default analyzer and all
+            tokenized terms are used for searching. Use
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::dontSuppressQueryParsingExceptions()</code>
+            method to turn exceptions on.
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::suppressQueryParsingExceptions()</code>
+            and
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::queryParsingExceptionsSuppressed()</code>
+            methods are also intended to manage exceptions handling behavior.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.term-query"></a>61.5.2. Term Query</h3></div></div></div>
+<p>
+            Term queries can be used for searching with a single term.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
+word1
+</pre>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term  = new Zend_Search_Lucene_Index_Term('word1', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            The term field is optional. <code class="classname">Zend_Search_Lucene</code> searches through
+            all indexed fields in each document if the field is not specified:
+        </p>
+<pre class="programlisting">
+// Search for 'word1' in all indexed fields
+$term  = new Zend_Search_Lucene_Index_Term('word1');
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.multiterm-query"></a>61.5.3. Multi-Term Query</h3></div></div></div>
+<p>
+            Multi-term queries can be used for searching with a set of terms.
+        </p>
+<p>
+            Each term in a set can be defined as <span class="emphasis"><em>required</em></span>,
+            <span class="emphasis"><em>prohibited</em></span>, or <span class="emphasis"><em>neither</em></span>.
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>required</em></span> means that documents not matching this term
+                        will not match the query;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>prohibited</em></span> means that documents matching this term will
+                        not match the query;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>neither</em></span>, in which case matched documents are neither
+                        prohibited from, nor required to, match the term. A document must match at
+                        least 1 term, however, to match the query.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            If optional terms are added to a query with required terms, both queries will have the
+            same result set but the optional terms may affect the score of the matched documents.
+        </p>
+<p>
+            Both search methods can be used for multi-term queries.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
++word1 author:word2 -word3
+</pre>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>'+' is used to define a required term.</p></li>
+<li class="listitem"><p>'-' is used to define a prohibited term.</p></li>
+<li class="listitem"><p>
+                    'field:' prefix is used to indicate a document field for a search.
+                    If it's omitted, then all fields are searched.
+                </p></li>
+</ul></div>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_MultiTerm();
+
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'), true);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2', 'author'),
+                null);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'), false);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            It's also possible to specify terms list within MultiTerm query constructor:
+        </p>
+<pre class="programlisting">
+$terms = array(new Zend_Search_Lucene_Index_Term('word1'),
+               new Zend_Search_Lucene_Index_Term('word2', 'author'),
+               new Zend_Search_Lucene_Index_Term('word3'));
+$signs = array(true, null, false);
+
+$query = new Zend_Search_Lucene_Search_Query_MultiTerm($terms, $signs);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            The <code class="varname">$signs</code> array contains information about the term type:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">TRUE</code> is used to define required term.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">FALSE</code> is used to define prohibited term.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">NULL</code> is used to define a term that is neither required
+                        nor prohibited.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.boolean-query"></a>61.5.4. Boolean Query</h3></div></div></div>
+<p>
+            Boolean queries allow to construct query using other queries and boolean operators.
+        </p>
+<p>
+            Each subquery in a set can be defined as <span class="emphasis"><em>required</em></span>,
+            <span class="emphasis"><em>prohibited</em></span>, or <span class="emphasis"><em>optional</em></span>.
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>required</em></span> means that documents not matching this
+                        subquery will not match the query;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>prohibited</em></span> means that documents matching this subquery
+                        will not match the query;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>optional</em></span>, in which case matched documents are neither
+                        prohibited from, nor required to, match the subquery. A document must match
+                        at least 1 subquery, however, to match the query.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            If optional subqueries are added to a query with required subqueries, both queries will
+            have the same result set but the optional subqueries may affect the score of the matched
+            documents.
+        </p>
+<p>
+            Both search methods can be used for boolean queries.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
++(word1 word2 word3) (author:word4 author:word5) -(word6)
+</pre>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    '+' is used to define a required subquery.
+                </p></li>
+<li class="listitem"><p>
+                    '-' is used to define a prohibited subquery.
+                </p></li>
+<li class="listitem"><p>
+                    'field:' prefix is used to indicate a document field for a search.
+                    If it's omitted, then all fields are searched.
+                </p></li>
+</ul></div>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Boolean();
+
+$subquery1 = new Zend_Search_Lucene_Search_Query_MultiTerm();
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'));
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2'));
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'));
+
+$subquery2 = new Zend_Search_Lucene_Search_Query_MultiTerm();
+$subquery2-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word4', 'author'));
+$subquery2-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word5', 'author'));
+
+$term6 = new Zend_Search_Lucene_Index_Term('word6');
+$subquery3 = new Zend_Search_Lucene_Search_Query_Term($term6);
+
+$query-&gt;addSubquery($subquery1, true  /* required */);
+$query-&gt;addSubquery($subquery2, null  /* optional */);
+$query-&gt;addSubquery($subquery3, false /* prohibited */);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            It's also possible to specify subqueries list within Boolean query constructor:
+        </p>
+<pre class="programlisting">
+...
+$subqueries = array($subquery1, $subquery2, $subquery3);
+$signs = array(true, null, false);
+
+$query = new Zend_Search_Lucene_Search_Query_Boolean($subqueries, $signs);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            The <code class="varname">$signs</code> array contains information about the subquery type:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">TRUE</code> is used to define required subquery.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">FALSE</code> is used to define prohibited subquery.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">NULL</code> is used to define a subquery that is neither
+                        required nor prohibited.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Each query which uses boolean operators can be rewritten using signs notation and
+            constructed using <acronym class="acronym">API</acronym>. For example:
+        </p>
+<pre class="programlisting">
+word1 AND (word2 AND word3 AND NOT word4) OR word5
+</pre>
+<p>
+            is equivalent to
+        </p>
+<pre class="programlisting">
+(+(word1) +(+word2 +word3 -word4)) (word5)
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.wildcard"></a>61.5.5. Wildcard Query</h3></div></div></div>
+<p>
+            Wildcard queries can be used to search for documents containing strings matching
+            specified patterns.
+        </p>
+<p>
+            The '?' symbol is used as a single character wildcard.
+        </p>
+<p>
+            The '*' symbol is used as a multiple character wildcard.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
+field1:test*
+</pre>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$pattern = new Zend_Search_Lucene_Index_Term('test*', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Wildcard($pattern);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            The term field is optional. <code class="classname">Zend_Search_Lucene</code> searches through
+            all fields on each document if a field is not specified:
+        </p>
+<pre class="programlisting">
+$pattern = new Zend_Search_Lucene_Index_Term('test*');
+$query = new Zend_Search_Lucene_Search_Query_Wildcard($pattern);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.fuzzy"></a>61.5.6. Fuzzy Query</h3></div></div></div>
+<p>
+            Fuzzy queries can be used to search for documents containing strings matching terms
+            similar to specified term.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
+field1:test~
+</pre>
+<p>
+            This query matches documents containing 'test' 'text' 'best' words and others.
+        </p>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Optional similarity can be specified after "~" sign.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
+field1:test~0.4
+</pre>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term, 0.4);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            The term field is optional. <code class="classname">Zend_Search_Lucene</code> searches through
+            all fields on each document if a field is not specified:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.phrase-query"></a>61.5.7. Phrase Query</h3></div></div></div>
+<p>
+            Phrase Queries can be used to search for a phrase within documents.
+        </p>
+<p>
+            Phrase Queries are very flexible and allow the user or developer to search for exact
+            phrases as well as 'sloppy' phrases.
+        </p>
+<p>
+            Phrases can also contain gaps or terms in the same places; they can be generated by
+            the analyzer for different purposes. For example, a term can be duplicated to increase
+            the term its weight, or several synonyms can be placed into a single position.
+        </p>
+<pre class="programlisting">
+$query1 = new Zend_Search_Lucene_Search_Query_Phrase();
+
+// Add 'word1' at 0 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'));
+
+// Add 'word2' at 1 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2'));
+
+// Add 'word3' at 3 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'), 3);
+
+...
+
+$query2 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2', 'word3'), array(0,1,3));
+
+...
+
+// Query without a gap.
+$query3 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2', 'word3'));
+
+...
+
+$query4 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2'), array(0,1), 'annotation');
+</pre>
+<p>
+            A phrase query can be constructed in one step with a class constructor or step by step
+            with <code class="methodname">Zend_Search_Lucene_Search_Query_Phrase::addTerm()</code> method
+            calls.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Search_Query_Phrase</code> class constructor takes
+            three optional arguments:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Search_Query_Phrase(
+    [array $terms[, array $offsets[, string $field]]]
+);
+</pre>
+<p>
+            The <code class="varname">$terms</code> parameter is an array of strings that contains a set of
+            phrase terms. If it's omitted or equal to <code class="constant">NULL</code>, then an empty query
+            is constructed.
+        </p>
+<p>
+            The <code class="varname">$offsets</code> parameter is an array of integers that contains offsets
+            of terms in a phrase. If it's omitted or equal to <code class="constant">NULL</code>, then the
+            terms' positions are assumed to be sequential with no gaps.
+        </p>
+<p>
+            The <code class="varname">$field</code> parameter is a string that indicates the document field
+            to search. If it's omitted or equal to <code class="constant">NULL</code>, then the default field
+            is searched.
+        </p>
+<p>
+            Thus:
+        </p>
+<pre class="programlisting">
+$query =
+    new Zend_Search_Lucene_Search_Query_Phrase(array('zend', 'framework'));
+</pre>
+<p>
+            will search for the phrase 'zend framework' in all fields.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase(
+                 array('zend', 'download'), array(0, 2)
+             );
+</pre>
+<p>
+            will search for the phrase 'zend ????? download' and match 'zend platform download',
+            'zend studio download', 'zend core download', 'zend framework download', and so on.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase(
+                 array('zend', 'framework'), null, 'title'
+             );
+</pre>
+<p>
+            will search for the phrase 'zend framework' in the 'title' field.
+        </p>
+<p>
+            <code class="methodname">Zend_Search_Lucene_Search_Query_Phrase::addTerm()</code> takes two
+            arguments, a required <code class="classname">Zend_Search_Lucene_Index_Term</code> object and an
+            optional position:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Search_Query_Phrase::addTerm(
+    Zend_Search_Lucene_Index_Term $term[, integer $position]
+);
+</pre>
+<p>
+            The <code class="varname">$term</code> parameter describes the next term in the phrase. It must
+            indicate the same field as previous terms, or an exception will be thrown.
+        </p>
+<p>
+            The <code class="varname">$position</code> parameter indicates the term position in the phrase.
+        </p>
+<p>
+            Thus:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend'));
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework'));
+</pre>
+<p>
+            will search for the phrase 'zend framework'.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend'), 0);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework'), 2);
+</pre>
+<p>
+            will search for the phrase 'zend ????? download' and match 'zend platform download',
+            'zend studio download', 'zend core download', 'zend framework download', and so on.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend', 'title'));
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework', 'title'));
+</pre>
+<p>
+            will search for the phrase 'zend framework' in the 'title' field.
+        </p>
+<p>
+            The slop factor sets the number of other words permitted between specified words in the
+            query phrase. If set to zero, then the corresponding query is an exact phrase search.
+            For larger values this works like the WITHIN or NEAR operators.
+        </p>
+<p>
+            The slop factor is in fact an edit distance, where the edits correspond to moving terms
+            in the query phrase. For example, to switch the order of two words requires two moves
+            (the first move places the words atop one another), so to permit re-orderings of
+            phrases, the slop factor must be at least two.
+        </p>
+<p>
+            More exact matches are scored higher than sloppier matches; thus, search results are
+            sorted by exactness. The slop is zero by default, requiring exact matches.
+        </p>
+<p>
+            The slop factor can be assigned after query creation:
+        </p>
+<pre class="programlisting">
+// Query without a gap.
+$query =
+    new Zend_Search_Lucene_Search_Query_Phrase(array('word1', 'word2'));
+
+// Search for 'word1 word2', 'word1 ... word2'
+$query-&gt;setSlop(1);
+$hits1 = $index-&gt;find($query);
+
+// Search for 'word1 word2', 'word1 ... word2',
+// 'word1 ... ... word2', 'word2 word1'
+$query-&gt;setSlop(2);
+$hits2 = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.range"></a>61.5.8. Range Query</h3></div></div></div>
+<p>
+            <a class="link" href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.range" title="61.4.5. Range Searches">Range queries</a> are
+            intended for searching terms within specified interval.
+        </p>
+<p>
+            Query string:
+        </p>
+<pre class="programlisting">
+mod_date:[20020101 TO 20030101]
+title:{Aida TO Carmen}
+</pre>
+<p>or</p>
+<p>
+            Query construction by <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$from = new Zend_Search_Lucene_Index_Term('20020101', 'mod_date');
+$to   = new Zend_Search_Lucene_Index_Term('20030101', 'mod_date');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, $to, true // inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Term fields are optional. <code class="classname">Zend_Search_Lucene</code> searches through all
+            fields if the field is not specified:
+        </p>
+<pre class="programlisting">
+$from = new Zend_Search_Lucene_Index_Term('Aida');
+$to   = new Zend_Search_Lucene_Index_Term('Carmen');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, $to, false // non-inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Either (but not both) of the boundary terms may be set to <code class="constant">NULL</code>.
+            <code class="classname">Zend_Search_Lucene</code> searches from the beginning or
+            up to the end of the dictionary for the specified field(s) in this case:
+        </p>
+<pre class="programlisting">
+// searches for ['20020101' TO ...]
+$from = new Zend_Search_Lucene_Index_Term('20020101', 'mod_date');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, null, true // inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-language.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.charset.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.4. Query Language </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 61.6. Character Set</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+</body>
+</html>

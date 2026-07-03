@@ -1,0 +1,385 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>76.4. Writing Validators</title>
+<link rel="stylesheet" type="text/css" href="dbstyle.css">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Programmer's Reference Guide">
+<link rel="up" href="zend.validate.html" title="Chapter 76. Zend_Validate">
+<link rel="prev" href="zend.validate.validator_chains.html" title="76.3. Validator Chains">
+<link rel="next" href="zend.validate.messages.html" title="76.5. Validation Messages">
+<link rel="part" href="introduction.html" title="Part I. Introduction to Zend Framework">
+<link rel="chapter" href="introduction.overview.html" title="Chapter 1. Overview">
+<link rel="chapter" href="introduction.installation.html" title="Chapter 2. Installation">
+<link rel="part" href="learning.html" title="Part II. Learning Zend Framework">
+<link rel="chapter" href="learning.quickstart.html" title="Chapter 3. Zend Framework Quick Start">
+<link rel="chapter" href="learning.autoloading.html" title="Chapter 4. Autoloading in Zend Framework">
+<link rel="chapter" href="learning.plugins.html" title="Chapter 5. Plugins in Zend Framework">
+<link rel="chapter" href="learning.layout.html" title="Chapter 6. Getting Started with Zend_Layout">
+<link rel="chapter" href="learning.view.placeholders.html" title="Chapter 7. Getting Started Zend_View Placeholders">
+<link rel="chapter" href="learning.form.decorators.html" title="Chapter 8. Understanding and Using Zend Form Decorators">
+<link rel="chapter" href="learning.multiuser.html" title="Chapter 9. Getting Started with Zend_Session, Zend_Auth, and Zend_Acl">
+<link rel="chapter" href="learning.lucene.html" title="Chapter 10. Getting Started with Zend_Search_Lucene">
+<link rel="chapter" href="learning.paginator.html" title="Chapter 11. Getting Started with Zend_Paginator">
+<link rel="part" href="reference.html" title="Part III. Zend Framework Reference">
+<link rel="chapter" href="zend.acl.html" title="Chapter 12. Zend_Acl">
+<link rel="chapter" href="zend.amf.html" title="Chapter 13. Zend_Amf">
+<link rel="chapter" href="zend.application.html" title="Chapter 14. Zend_Application">
+<link rel="chapter" href="zend.auth.html" title="Chapter 15. Zend_Auth">
+<link rel="chapter" href="zend.barcode.html" title="Chapter 16. Zend_Barcode">
+<link rel="chapter" href="zend.cache.html" title="Chapter 17. Zend_Cache">
+<link rel="chapter" href="zend.captcha.html" title="Chapter 18. Zend_Captcha">
+<link rel="chapter" href="zend.cloud.html" title="Chapter 19. SimpleCloud API: Zend_Cloud">
+<link rel="chapter" href="zend.codegenerator.html" title="Chapter 20. Zend_CodeGenerator">
+<link rel="chapter" href="zend.config.html" title="Chapter 21. Zend_Config">
+<link rel="chapter" href="zend.config.writer.html" title="Chapter 22. Zend_Config_Writer">
+<link rel="chapter" href="zend.console.getopt.html" title="Chapter 23. Zend_Console_Getopt">
+<link rel="chapter" href="zend.controller.html" title="Chapter 24. Zend_Controller">
+<link rel="chapter" href="zend.currency.html" title="Chapter 25. Zend_Currency">
+<link rel="chapter" href="zend.date.html" title="Chapter 26. Zend_Date">
+<link rel="chapter" href="zend.db.html" title="Chapter 27. Zend_Db">
+<link rel="chapter" href="zend.debug.html" title="Chapter 28. Zend_Debug">
+<link rel="chapter" href="zend.dojo.html" title="Chapter 29. Zend_Dojo">
+<link rel="chapter" href="zend.dom.html" title="Chapter 30. Zend_Dom">
+<link rel="chapter" href="zend.event-manager.html" title="Chapter 31. Zend_EventManager">
+<link rel="chapter" href="zend.exception.html" title="Chapter 32. Zend_Exception">
+<link rel="chapter" href="zend.feed.html" title="Chapter 33. Zend_Feed">
+<link rel="chapter" href="zend.file.html" title="Chapter 34. Zend_File">
+<link rel="chapter" href="zend.filter.html" title="Chapter 35. Zend_Filter">
+<link rel="chapter" href="zend.form.html" title="Chapter 36. Zend_Form">
+<link rel="chapter" href="zend.gdata.html" title="Chapter 37. Zend_Gdata">
+<link rel="chapter" href="zend.http.html" title="Chapter 38. Zend_Http">
+<link rel="chapter" href="zend.json.html" title="Chapter 39. Zend_Json">
+<link rel="chapter" href="zend.layout.html" title="Chapter 40. Zend_Layout">
+<link rel="chapter" href="zend.ldap.html" title="Chapter 41. Zend_Ldap">
+<link rel="chapter" href="zend.loader.html" title="Chapter 42. Zend_Loader">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.factory.html" title="factory">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.get-registered-autoloaders.html" title="getRegisteredAutoloaders">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-fallback-autoloader.html" title="setFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.is-fallback-autoloader.html" title="isFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespace.html" title="registerNamespace">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespaces.html" title="registerNamespaces">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefix.html" title="registerPrefix">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefixes.html" title="registerPrefixes">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register.html" title="register">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-map.html" title="registerAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-maps.html" title="registerAutoloadMaps">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.get-autoload-map.html" title="getAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register.html" title="register">
+<link rel="chapter" href="zend.locale.html" title="Chapter 43. Zend_Locale">
+<link rel="chapter" href="zend.log.html" title="Chapter 44. Zend_Log">
+<link rel="chapter" href="zend.mail.html" title="Chapter 45. Zend_Mail">
+<link rel="chapter" href="zend.markup.html" title="Chapter 46. Zend_Markup">
+<link rel="chapter" href="zend.measure.html" title="Chapter 47. Zend_Measure">
+<link rel="chapter" href="zend.memory.html" title="Chapter 48. Zend_Memory">
+<link rel="chapter" href="zend.mime.html" title="Chapter 49. Zend_Mime">
+<link rel="chapter" href="zend.mobile.push.html" title="Chapter 50. Zend_Mobile_Push">
+<link rel="chapter" href="zend.navigation.html" title="Chapter 51. Zend_Navigation">
+<link rel="chapter" href="zend.oauth.html" title="Chapter 52. Zend_Oauth">
+<link rel="chapter" href="zend.openid.html" title="Chapter 53. Zend_OpenId">
+<link rel="chapter" href="zend.paginator.html" title="Chapter 54. Zend_Paginator">
+<link rel="chapter" href="zend.pdf.html" title="Chapter 55. Zend_Pdf">
+<link rel="chapter" href="zend.progressbar.html" title="Chapter 56. Zend_ProgressBar">
+<link rel="chapter" href="zend.queue.html" title="Chapter 57. Zend_Queue">
+<link rel="chapter" href="zend.reflection.html" title="Chapter 58. Zend_Reflection">
+<link rel="chapter" href="zend.registry.html" title="Chapter 59. Zend_Registry">
+<link rel="chapter" href="zend.rest.html" title="Chapter 60. Zend_Rest">
+<link rel="chapter" href="zend.search.lucene.html" title="Chapter 61. Zend_Search_Lucene">
+<link rel="chapter" href="zend.serializer.html" title="Chapter 62. Zend_Serializer">
+<link rel="chapter" href="zend.server.html" title="Chapter 63. Zend_Server">
+<link rel="chapter" href="zend.service.html" title="Chapter 64. Zend_Service">
+<link rel="chapter" href="zend.session.html" title="Chapter 65. Zend_Session">
+<link rel="chapter" href="zend.soap.html" title="Chapter 66. Zend_Soap">
+<link rel="chapter" href="zend.tag.html" title="Chapter 67. Zend_Tag">
+<link rel="chapter" href="zend.test.html" title="Chapter 68. Zend_Test">
+<link rel="chapter" href="zend.text.html" title="Chapter 69. Zend_Text">
+<link rel="chapter" href="zend.timesync.html" title="Chapter 70. Zend_TimeSync">
+<link rel="chapter" href="zend.tool.html" title="Chapter 71. Zend_Tool">
+<link rel="chapter" href="zend.tool.framework.html" title="Chapter 72. Zend_Tool_Framework">
+<link rel="chapter" href="zend.tool.project.html" title="Chapter 73. Zend_Tool_Project">
+<link rel="chapter" href="zend.translate.html" title="Chapter 74. Zend_Translate">
+<link rel="chapter" href="zend.uri.html" title="Chapter 75. Zend_Uri">
+<link rel="chapter" href="zend.validate.html" title="Chapter 76. Zend_Validate">
+<link rel="chapter" href="zend.version.html" title="Chapter 77. Zend_Version">
+<link rel="chapter" href="zend.view.html" title="Chapter 78. Zend_View">
+<link rel="chapter" href="zend.wildfire.html" title="Chapter 79. Zend_Wildfire">
+<link rel="chapter" href="zend.xmlrpc.html" title="Chapter 80. Zend_XmlRpc">
+<link rel="appendix" href="requirements.html" title="Appendix A. Zend Framework Requirements">
+<link rel="appendix" href="migration.html" title="Appendix B. Zend Framework Migration Notes">
+<link rel="appendix" href="coding-standard.html" title="Appendix C. Zend Framework Coding Standard for PHP">
+<link rel="appendix" href="doc-standard.html" title="Appendix D. Zend Framework Documentation Standard">
+<link rel="appendix" href="project-structure.html" title="Appendix E. Recommended Project Structure for Zend Framework MVC Applications">
+<link rel="appendix" href="performance.html" title="Appendix F. Zend Framework Performance Guide">
+<link rel="appendix" href="copyrights.html" title="Appendix G. Copyright Information">
+<link rel="index" href="the.index.html" title="Index">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">76.4. Writing Validators</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.validate.validator_chains.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 76. Zend_Validate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.validate.messages.html">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.validate.writing_validators"></a>76.4. Writing Validators</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Validate</code> supplies a set of commonly needed validators, but
+        inevitably, developers will wish to write custom validators for their particular needs. The
+        task of writing a custom validator is described in this section.
+    </p>
+<p>
+        <code class="classname">Zend_Validate_Interface</code> defines two methods,
+        <code class="methodname">isValid()</code> and <code class="methodname">getMessages()</code>, that may
+        be implemented by user classes in order to create custom validation objects. An object that
+        implements <code class="classname">Zend_Validate_Interface</code> interface may be added to a
+        validator chain with <code class="methodname">Zend_Validate::addValidator()</code>. Such objects
+        may also be used with <a class="link" href="zend.filter.input.html" title="35.5. Zend_Filter_Input"><code class="classname">Zend_Filter_Input</code></a>.
+    </p>
+<p>
+        As you may already have inferred from the above description of
+        <code class="classname">Zend_Validate_Interface</code>, validation classes provided with Zend
+        Framework return a boolean value for whether or not a value validates successfully. They
+        also provide information about <span class="emphasis"><em>why</em></span> a value failed validation. The
+        availability of the reasons for validation failures may be valuable to an application for
+        various purposes, such as providing statistics for usability analysis.
+    </p>
+<p>
+        Basic validation failure message functionality is implemented in
+        <code class="classname">Zend_Validate_Abstract</code>. To include this functionality when creating a
+        validation class, simply extend <code class="classname">Zend_Validate_Abstract</code>. In the
+        extending class you would implement the <code class="methodname">isValid()</code> method logic and
+        define the message variables and message templates that correspond to the types of
+        validation failures that can occur. If a value fails your validation tests, then
+        <code class="methodname">isValid()</code> should return <code class="constant">FALSE</code>. If the value
+        passes your validation tests, then <code class="methodname">isValid()</code> should return
+        <code class="constant">TRUE</code>.
+    </p>
+<p>
+        In general, the <code class="methodname">isValid()</code> method should not throw any exceptions,
+        except where it is impossible to determine whether or not the input value is valid. A few
+        examples of reasonable cases for throwing an exception might be if a file cannot be opened,
+        an <acronym class="acronym">LDAP</acronym> server could not be contacted, or a database connection is
+        unavailable, where such a thing may be required for validation success or failure to be
+        determined.
+    </p>
+<div class="example">
+<a name="zend.validate.writing_validators.example.simple"></a><p class="title"><b>Example 76.3. Creating a Simple Validation Class</b></p>
+<div class="example-contents">
+<p>
+            The following example demonstrates how a very simple custom validator might be written.
+            In this case the validation rules are simply that the input value must be a floating
+            point value.
+        </p>
+<pre class="programlisting">
+class MyValid_Float extends Zend_Validate_Abstract
+{
+    const FLOAT = 'float';
+
+    protected $_messageTemplates = array(
+        self::FLOAT =&gt; "'%value%' is not a floating point value"
+    );
+
+    public function isValid($value)
+    {
+        $this-&gt;_setValue($value);
+
+        if (!is_float($value)) {
+            $this-&gt;_error(self::FLOAT);
+            return false;
+        }
+
+        return true;
+    }
+}
+</pre>
+<p>
+            The class defines a template for its single validation failure message, which includes
+            the built-in magic parameter, <span class="emphasis"><em>%value%</em></span>. The call to
+            <code class="methodname">_setValue()</code> prepares the object to insert the tested value into
+            the failure message automatically, should the value fail validation. The call to
+            <code class="methodname">_error()</code> tracks a reason for validation failure.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.validate.writing_validators.example.conditions.dependent"></a><p class="title"><b>Example 76.4. Writing a Validation Class having Dependent Conditions</b></p>
+<div class="example-contents">
+<p>
+            The following example demonstrates a more complex set of validation rules, where it is
+            required that the input value be numeric and within the range of minimum and maximum
+            boundary values. An input value would fail validation for exactly one of the following
+            reasons:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>The input value is not numeric.</p></li>
+<li class="listitem"><p>The input value is less than the minimum allowed value.</p></li>
+<li class="listitem"><p>The input value is more than the maximum allowed value.</p></li>
+</ul></div>
+<p>
+            These validation failure reasons are then translated to definitions in the class:
+        </p>
+<pre class="programlisting">
+class MyValid_NumericBetween extends Zend_Validate_Abstract
+{
+    const MSG_NUMERIC = 'msgNumeric';
+    const MSG_MINIMUM = 'msgMinimum';
+    const MSG_MAXIMUM = 'msgMaximum';
+
+    public $minimum = 0;
+    public $maximum = 100;
+
+    protected $_messageVariables = array(
+        'min' =&gt; 'minimum',
+        'max' =&gt; 'maximum'
+    );
+
+    protected $_messageTemplates = array(
+        self::MSG_NUMERIC =&gt; "'%value%' is not numeric",
+        self::MSG_MINIMUM =&gt; "'%value%' must be at least '%min%'",
+        self::MSG_MAXIMUM =&gt; "'%value%' must be no more than '%max%'"
+    );
+
+    public function isValid($value)
+    {
+        $this-&gt;_setValue($value);
+
+        if (!is_numeric($value)) {
+            $this-&gt;_error(self::MSG_NUMERIC);
+            return false;
+        }
+
+        if ($value &lt; $this-&gt;minimum) {
+            $this-&gt;_error(self::MSG_MINIMUM);
+            return false;
+        }
+
+        if ($value &gt; $this-&gt;maximum) {
+            $this-&gt;_error(self::MSG_MAXIMUM);
+            return false;
+        }
+
+        return true;
+    }
+}
+</pre>
+<p>
+            The public properties <code class="varname">$minimum</code> and <code class="varname">$maximum</code> have
+            been established to provide the minimum and maximum boundaries, respectively, for a
+            value to successfully validate. The class also defines two message variables that
+            correspond to the public properties and allow <span class="property">min</span> and
+            <span class="property">max</span> to be used in message templates as magic parameters, just as
+            with <span class="property">value</span>.
+        </p>
+<p>
+            Note that if any one of the validation checks in <code class="methodname">isValid()</code>
+            fails, an appropriate failure message is prepared, and the method immediately returns
+            <code class="constant">FALSE</code>. These validation rules are therefore sequentially dependent.
+            That is, if one test should fail, there is no need to test any subsequent validation
+            rules. This need not be the case, however. The following example illustrates how to
+            write a class having independent validation rules, where the validation object may
+            return multiple reasons why a particular validation attempt failed.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.validate.writing_validators.example.conditions.independent"></a><p class="title"><b>Example 76.5. Validation with Independent Conditions, Multiple Reasons for Failure</b></p>
+<div class="example-contents">
+<p>
+            Consider writing a validation class for password strength enforcement - when a user is
+            required to choose a password that meets certain criteria for helping secure user
+            accounts. Let us assume that the password security criteria enforce that the password:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>is at least 8 characters in length,</p></li>
+<li class="listitem"><p>contains at least one uppercase letter,</p></li>
+<li class="listitem"><p>contains at least one lowercase letter,</p></li>
+<li class="listitem"><p>and contains at least one digit character.</p></li>
+</ul></div>
+<p>
+            The following class implements these validation criteria:
+        </p>
+<pre class="programlisting">
+class MyValid_PasswordStrength extends Zend_Validate_Abstract
+{
+    const LENGTH = 'length';
+    const UPPER  = 'upper';
+    const LOWER  = 'lower';
+    const DIGIT  = 'digit';
+
+    protected $_messageTemplates = array(
+        self::LENGTH =&gt; "'%value%' must be at least 8 characters in length",
+        self::UPPER  =&gt; "'%value%' must contain at least one uppercase letter",
+        self::LOWER  =&gt; "'%value%' must contain at least one lowercase letter",
+        self::DIGIT  =&gt; "'%value%' must contain at least one digit character"
+    );
+
+    public function isValid($value)
+    {
+        $this-&gt;_setValue($value);
+
+        $isValid = true;
+
+        if (strlen($value) &lt; 8) {
+            $this-&gt;_error(self::LENGTH);
+            $isValid = false;
+        }
+
+        if (!preg_match('/[A-Z]/', $value)) {
+            $this-&gt;_error(self::UPPER);
+            $isValid = false;
+        }
+
+        if (!preg_match('/[a-z]/', $value)) {
+            $this-&gt;_error(self::LOWER);
+            $isValid = false;
+        }
+
+        if (!preg_match('/\d/', $value)) {
+            $this-&gt;_error(self::DIGIT);
+            $isValid = false;
+        }
+
+        return $isValid;
+    }
+}
+</pre>
+<p>
+            Note that the four criteria tests in <code class="methodname">isValid()</code> do not
+            immediately return <code class="constant">FALSE</code>. This allows the validation class to
+            provide <span class="emphasis"><em>all</em></span> of the reasons that the input password failed to meet
+            the validation requirements. if, for example, a user were to input the string "#$%" as a
+            password, <code class="methodname">isValid()</code> would cause all four validation failure
+            messages to be returned by a subsequent call to <code class="methodname">getMessages()</code>.
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.validate.validator_chains.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.validate.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.validate.messages.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">76.3. Validator Chains </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 76.5. Validation Messages</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+</body>
+</html>

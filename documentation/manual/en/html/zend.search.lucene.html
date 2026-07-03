@@ -1,0 +1,851 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Chapter 61. Zend_Search_Lucene</title>
+<link rel="stylesheet" type="text/css" href="dbstyle.css">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Programmer's Reference Guide">
+<link rel="up" href="reference.html" title="Part III. Zend Framework Reference">
+<link rel="prev" href="zend.rest.server.html" title="60.3. Zend_Rest_Server">
+<link rel="next" href="zend.search.lucene.index-creation.html" title="61.2. Building Indexes">
+<link rel="part" href="introduction.html" title="Part I. Introduction to Zend Framework">
+<link rel="chapter" href="introduction.overview.html" title="Chapter 1. Overview">
+<link rel="chapter" href="introduction.installation.html" title="Chapter 2. Installation">
+<link rel="part" href="learning.html" title="Part II. Learning Zend Framework">
+<link rel="chapter" href="learning.quickstart.html" title="Chapter 3. Zend Framework Quick Start">
+<link rel="chapter" href="learning.autoloading.html" title="Chapter 4. Autoloading in Zend Framework">
+<link rel="chapter" href="learning.plugins.html" title="Chapter 5. Plugins in Zend Framework">
+<link rel="chapter" href="learning.layout.html" title="Chapter 6. Getting Started with Zend_Layout">
+<link rel="chapter" href="learning.view.placeholders.html" title="Chapter 7. Getting Started Zend_View Placeholders">
+<link rel="chapter" href="learning.form.decorators.html" title="Chapter 8. Understanding and Using Zend Form Decorators">
+<link rel="chapter" href="learning.multiuser.html" title="Chapter 9. Getting Started with Zend_Session, Zend_Auth, and Zend_Acl">
+<link rel="chapter" href="learning.lucene.html" title="Chapter 10. Getting Started with Zend_Search_Lucene">
+<link rel="chapter" href="learning.paginator.html" title="Chapter 11. Getting Started with Zend_Paginator">
+<link rel="part" href="reference.html" title="Part III. Zend Framework Reference">
+<link rel="chapter" href="zend.acl.html" title="Chapter 12. Zend_Acl">
+<link rel="chapter" href="zend.amf.html" title="Chapter 13. Zend_Amf">
+<link rel="chapter" href="zend.application.html" title="Chapter 14. Zend_Application">
+<link rel="chapter" href="zend.auth.html" title="Chapter 15. Zend_Auth">
+<link rel="chapter" href="zend.barcode.html" title="Chapter 16. Zend_Barcode">
+<link rel="chapter" href="zend.cache.html" title="Chapter 17. Zend_Cache">
+<link rel="chapter" href="zend.captcha.html" title="Chapter 18. Zend_Captcha">
+<link rel="chapter" href="zend.cloud.html" title="Chapter 19. SimpleCloud API: Zend_Cloud">
+<link rel="chapter" href="zend.codegenerator.html" title="Chapter 20. Zend_CodeGenerator">
+<link rel="chapter" href="zend.config.html" title="Chapter 21. Zend_Config">
+<link rel="chapter" href="zend.config.writer.html" title="Chapter 22. Zend_Config_Writer">
+<link rel="chapter" href="zend.console.getopt.html" title="Chapter 23. Zend_Console_Getopt">
+<link rel="chapter" href="zend.controller.html" title="Chapter 24. Zend_Controller">
+<link rel="chapter" href="zend.currency.html" title="Chapter 25. Zend_Currency">
+<link rel="chapter" href="zend.date.html" title="Chapter 26. Zend_Date">
+<link rel="chapter" href="zend.db.html" title="Chapter 27. Zend_Db">
+<link rel="chapter" href="zend.debug.html" title="Chapter 28. Zend_Debug">
+<link rel="chapter" href="zend.dojo.html" title="Chapter 29. Zend_Dojo">
+<link rel="chapter" href="zend.dom.html" title="Chapter 30. Zend_Dom">
+<link rel="chapter" href="zend.event-manager.html" title="Chapter 31. Zend_EventManager">
+<link rel="chapter" href="zend.exception.html" title="Chapter 32. Zend_Exception">
+<link rel="chapter" href="zend.feed.html" title="Chapter 33. Zend_Feed">
+<link rel="chapter" href="zend.file.html" title="Chapter 34. Zend_File">
+<link rel="chapter" href="zend.filter.html" title="Chapter 35. Zend_Filter">
+<link rel="chapter" href="zend.form.html" title="Chapter 36. Zend_Form">
+<link rel="chapter" href="zend.gdata.html" title="Chapter 37. Zend_Gdata">
+<link rel="chapter" href="zend.http.html" title="Chapter 38. Zend_Http">
+<link rel="chapter" href="zend.json.html" title="Chapter 39. Zend_Json">
+<link rel="chapter" href="zend.layout.html" title="Chapter 40. Zend_Layout">
+<link rel="chapter" href="zend.ldap.html" title="Chapter 41. Zend_Ldap">
+<link rel="chapter" href="zend.loader.html" title="Chapter 42. Zend_Loader">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.factory.html" title="factory">
+<link rel="refentry" href="zend.loader.autoloader-factory.methods.get-registered-autoloaders.html" title="getRegisteredAutoloaders">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.set-fallback-autoloader.html" title="setFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.is-fallback-autoloader.html" title="isFallbackAutoloader">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespace.html" title="registerNamespace">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-namespaces.html" title="registerNamespaces">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefix.html" title="registerPrefix">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register-prefixes.html" title="registerPrefixes">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.standard-autoloader.methods.register.html" title="register">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.constructor.html" title="__construct">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.set-options.html" title="setOptions">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-map.html" title="registerAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register-autoload-maps.html" title="registerAutoloadMaps">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.get-autoload-map.html" title="getAutoloadMap">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.autoload.html" title="autoload">
+<link rel="refentry" href="zend.loader.class-map-autoloader.methods.register.html" title="register">
+<link rel="chapter" href="zend.locale.html" title="Chapter 43. Zend_Locale">
+<link rel="chapter" href="zend.log.html" title="Chapter 44. Zend_Log">
+<link rel="chapter" href="zend.mail.html" title="Chapter 45. Zend_Mail">
+<link rel="chapter" href="zend.markup.html" title="Chapter 46. Zend_Markup">
+<link rel="chapter" href="zend.measure.html" title="Chapter 47. Zend_Measure">
+<link rel="chapter" href="zend.memory.html" title="Chapter 48. Zend_Memory">
+<link rel="chapter" href="zend.mime.html" title="Chapter 49. Zend_Mime">
+<link rel="chapter" href="zend.mobile.push.html" title="Chapter 50. Zend_Mobile_Push">
+<link rel="chapter" href="zend.navigation.html" title="Chapter 51. Zend_Navigation">
+<link rel="chapter" href="zend.oauth.html" title="Chapter 52. Zend_Oauth">
+<link rel="chapter" href="zend.openid.html" title="Chapter 53. Zend_OpenId">
+<link rel="chapter" href="zend.paginator.html" title="Chapter 54. Zend_Paginator">
+<link rel="chapter" href="zend.pdf.html" title="Chapter 55. Zend_Pdf">
+<link rel="chapter" href="zend.progressbar.html" title="Chapter 56. Zend_ProgressBar">
+<link rel="chapter" href="zend.queue.html" title="Chapter 57. Zend_Queue">
+<link rel="chapter" href="zend.reflection.html" title="Chapter 58. Zend_Reflection">
+<link rel="chapter" href="zend.registry.html" title="Chapter 59. Zend_Registry">
+<link rel="chapter" href="zend.rest.html" title="Chapter 60. Zend_Rest">
+<link rel="chapter" href="zend.search.lucene.html" title="Chapter 61. Zend_Search_Lucene">
+<link rel="chapter" href="zend.serializer.html" title="Chapter 62. Zend_Serializer">
+<link rel="chapter" href="zend.server.html" title="Chapter 63. Zend_Server">
+<link rel="chapter" href="zend.service.html" title="Chapter 64. Zend_Service">
+<link rel="chapter" href="zend.session.html" title="Chapter 65. Zend_Session">
+<link rel="chapter" href="zend.soap.html" title="Chapter 66. Zend_Soap">
+<link rel="chapter" href="zend.tag.html" title="Chapter 67. Zend_Tag">
+<link rel="chapter" href="zend.test.html" title="Chapter 68. Zend_Test">
+<link rel="chapter" href="zend.text.html" title="Chapter 69. Zend_Text">
+<link rel="chapter" href="zend.timesync.html" title="Chapter 70. Zend_TimeSync">
+<link rel="chapter" href="zend.tool.html" title="Chapter 71. Zend_Tool">
+<link rel="chapter" href="zend.tool.framework.html" title="Chapter 72. Zend_Tool_Framework">
+<link rel="chapter" href="zend.tool.project.html" title="Chapter 73. Zend_Tool_Project">
+<link rel="chapter" href="zend.translate.html" title="Chapter 74. Zend_Translate">
+<link rel="chapter" href="zend.uri.html" title="Chapter 75. Zend_Uri">
+<link rel="chapter" href="zend.validate.html" title="Chapter 76. Zend_Validate">
+<link rel="chapter" href="zend.version.html" title="Chapter 77. Zend_Version">
+<link rel="chapter" href="zend.view.html" title="Chapter 78. Zend_View">
+<link rel="chapter" href="zend.wildfire.html" title="Chapter 79. Zend_Wildfire">
+<link rel="chapter" href="zend.xmlrpc.html" title="Chapter 80. Zend_XmlRpc">
+<link rel="appendix" href="requirements.html" title="Appendix A. Zend Framework Requirements">
+<link rel="appendix" href="migration.html" title="Appendix B. Zend Framework Migration Notes">
+<link rel="appendix" href="coding-standard.html" title="Appendix C. Zend Framework Coding Standard for PHP">
+<link rel="appendix" href="doc-standard.html" title="Appendix D. Zend Framework Documentation Standard">
+<link rel="appendix" href="project-structure.html" title="Appendix E. Recommended Project Structure for Zend Framework MVC Applications">
+<link rel="appendix" href="performance.html" title="Appendix F. Zend Framework Performance Guide">
+<link rel="appendix" href="copyrights.html" title="Appendix G. Copyright Information">
+<link rel="index" href="the.index.html" title="Index">
+<link rel="section" href="zend.search.lucene.html#zend.search.lucene.overview" title="61.1. Overview">
+<link rel="section" href="zend.search.lucene.index-creation.html" title="61.2. Building Indexes">
+<link rel="section" href="zend.search.lucene.searching.html" title="61.3. Searching an Index">
+<link rel="section" href="zend.search.lucene.query-language.html" title="61.4. Query Language">
+<link rel="section" href="zend.search.lucene.query-api.html" title="61.5. Query Construction API">
+<link rel="section" href="zend.search.lucene.charset.html" title="61.6. Character Set">
+<link rel="section" href="zend.search.lucene.extending.html" title="61.7. Extensibility">
+<link rel="section" href="zend.search.lucene.java-lucene.html" title="61.8. Interoperating with Java Lucene">
+<link rel="section" href="zend.search.lucene.advanced.html" title="61.9. Advanced">
+<link rel="section" href="zend.search.lucene.best-practice.html" title="61.10. Best Practices">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Chapter 61. Zend_Search_Lucene</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.rest.server.html">Prev</a> </td>
+<th width="60%" align="center">Part III. Zend Framework Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.index-creation.html">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.search.lucene"></a>Chapter 61. Zend_Search_Lucene</h2></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.search.lucene.html#zend.search.lucene.overview">61.1. Overview</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.introduction">61.1.1. Introduction</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.documents-and-fields">61.1.2. Document and Field Objects</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.understanding-field-types">61.1.3. Understanding Field Types</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.html-documents">61.1.4. HTML documents</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.docx-documents">61.1.5. Word 2007 documents</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.pptx-documents">61.1.6. Powerpoint 2007 documents</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.html#zend.search.lucene.index-creation.xlsx-documents">61.1.7. Excel 2007 documents</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.index-creation.html">61.2. Building Indexes</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.creating">61.2.1. Creating a New Index</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.updating">61.2.2. Updating Index</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.document-updating">61.2.3. Updating Documents</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.counting">61.2.4. Retrieving Index Size</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.optimization">61.2.5. Index optimization</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.optimization.maxbuffereddocs">61.2.5.1. MaxBufferedDocs auto-optimization option</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.optimization.maxmergedocs">61.2.5.2. MaxMergeDocs auto-optimization option</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.optimization.mergefactor">61.2.5.3. MergeFactor auto-optimization option</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.permissions">61.2.6. Permissions</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.limitations">61.2.7. Limitations</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.limitations.index-size">61.2.7.1. Index size</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.limitations.filesystems">61.2.7.2. Supported Filesystems</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.searching.html">61.3. Searching an Index</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.query_building">61.3.1. Building Queries</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.query_building.parsing">61.3.1.1. Query Parsing</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.results">61.3.2. Search Results</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.results-limiting">61.3.3. Limiting the Result Set</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.results-scoring">61.3.4. Results Scoring</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.sorting">61.3.5. Search Result Sorting</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.searching.html#zend.search.lucene.searching.highlighting">61.3.6. Search Results Highlighting</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.query-language.html">61.4. Query Language</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.terms">61.4.1. Terms</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.fields">61.4.2. Fields</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.wildcard">61.4.3. Wildcards</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.modifiers">61.4.4. Term Modifiers</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.range">61.4.5. Range Searches</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.fuzzy">61.4.6. Fuzzy Searches</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.matched-terms-limitations">61.4.7. Matched terms limitation</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.proximity-search">61.4.8. Proximity Searches</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boosting">61.4.9. Boosting a Term</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean">61.4.10. Boolean Operators</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.and">61.4.10.1. AND</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.or">61.4.10.2. OR</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.not">61.4.10.3. NOT</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.other-form">61.4.10.4. &amp;&amp;, ||, and ! operators</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.plus">61.4.10.5. +</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.minus">61.4.10.6. -</a></span></dt>
+<dt><span class="sect3"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.boolean.no-operator">61.4.10.7. No Operator</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.grouping">61.4.11. Grouping</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.field-grouping">61.4.12. Field Grouping</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.escaping">61.4.13. Escaping Special Characters</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.query-api.html">61.5. Query Construction API</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.exceptions">61.5.1. Query Parser Exceptions</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.term-query">61.5.2. Term Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.multiterm-query">61.5.3. Multi-Term Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.boolean-query">61.5.4. Boolean Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.wildcard">61.5.5. Wildcard Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.fuzzy">61.5.6. Fuzzy Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.phrase-query">61.5.7. Phrase Query</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.query-api.html#zend.search.lucene.queries.range">61.5.8. Range Query</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.charset.html">61.6. Character Set</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.charset.html#zend.search.lucene.charset.description">61.6.1. UTF-8 and single-byte character set support</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.charset.html#zend.search.lucene.charset.default_analyzer">61.6.2. Default text analyzer</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.charset.html#zend.search.lucene.charset.utf_analyzer">61.6.3. UTF-8 compatible text analyzers</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.extending.html">61.7. Extensibility</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.extending.html#zend.search.lucene.extending.analysis">61.7.1. Text Analysis</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.extending.html#zend.search.lucene.extending.filters">61.7.2. Tokens Filtering</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.extending.html#zend.search.lucene.extending.scoring">61.7.3. Scoring Algorithms</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.extending.html#zend.search.lucene.extending.storage">61.7.4. Storage Containers</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.java-lucene.html">61.8. Interoperating with Java Lucene</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.java-lucene.html#zend.search.lucene.index-creation.file-formats">61.8.1. File Formats</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.java-lucene.html#zend.search.lucene.index-creation.index-directory">61.8.2. Index Directory</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.java-lucene.html#zend.search.lucene.java-lucene.source-code">61.8.3. Java Source Code</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.advanced.html">61.9. Advanced</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.advanced.html#zend.search.lucene.advanced.format_migration">61.9.1. Starting from 1.6, handling index format transformations</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.advanced.html#zend.search.lucene.advanced.static">61.9.2. Using the index as static property</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.search.lucene.best-practice.html">61.10. Best Practices</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.field-names">61.10.1. Field names</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.indexing-performance">61.10.2. Indexing performance</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.shutting-down">61.10.3. Index during Shut Down</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.unique-id">61.10.4. Retrieving documents by unique id</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.memory-usage">61.10.5. Memory Usage</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.encoding">61.10.6. Encoding</a></span></dt>
+<dt><span class="sect2"><a href="zend.search.lucene.best-practice.html#zend.search.lucene.best-practice.maintenance">61.10.7. Index maintenance</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.overview"></a>61.1. Overview</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.introduction"></a>61.1.1. Introduction</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> is a general purpose text search engine
+            written entirely in <acronym class="acronym">PHP</acronym> 5. Since it stores its index on the
+            filesystem and does not require a database server, it can add search capabilities to
+            almost any <acronym class="acronym">PHP</acronym>-driven website.
+            <code class="classname">Zend_Search_Lucene</code> supports the following features:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Ranked searching - best results returned first</p></li>
+<li class="listitem"><p>
+                       Many powerful query types: phrase queries, boolean queries, wildcard queries,
+                       proximity queries, range queries and many others.
+                    </p></li>
+<li class="listitem"><p>Search by specific field (e.g., title, author, contents)</p></li>
+</ul></div>
+<p>
+
+            <code class="classname">Zend_Search_Lucene</code> was derived from the Apache Lucene project.
+            The currently (starting from ZF 1.6) supported Lucene index format versions are 1.4 -
+            2.3. For more information on Lucene, visit <a class="ulink" href="http://lucene.apache.org/java/docs/" target="_top">http://lucene.apache.org/java/docs/</a>.
+        </p>
+<div class="note"><table border="0" summary="Note: ">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left"></th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Previous <code class="classname">Zend_Search_Lucene</code> implementations support the
+                Lucene 1.4 (1.9) - 2.1 index formats.
+            </p>
+<p>
+                Starting from Zend Framework 1.5 any index created using pre-2.1 index format is
+                automatically upgraded to Lucene 2.1 format after the
+                <code class="classname">Zend_Search_Lucene</code> update and will not be compatible with
+                <code class="classname">Zend_Search_Lucene</code> implementations included into Zend
+                Framework 1.0.x.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.documents-and-fields"></a>61.1.2. Document and Field Objects</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> operates with documents as atomic objects for
+            indexing. A document is divided into named fields, and fields have content that can be
+            searched.
+        </p>
+<p>
+            A document is represented by the <code class="classname">Zend_Search_Lucene_Document</code>
+            class, and this objects of this class contain instances of
+            <code class="classname">Zend_Search_Lucene_Field</code> that represent the fields on the
+            document.
+        </p>
+<p>
+            It is important to note that any information can be added to the index.
+            Application-specific information or metadata can be stored in the document
+            fields, and later retrieved with the document during search.
+        </p>
+<p>
+            It is the responsibility of your application to control the indexer.
+            This means that data can be indexed from any source
+            that is accessible by your application. For example, this could be the
+            filesystem, a database, an <acronym class="acronym">HTML</acronym> form, etc.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Field</code> class provides several static methods to
+            create fields with different characteristics:
+        </p>
+<pre class="programlisting">
+$doc = new Zend_Search_Lucene_Document();
+
+// Field is not tokenized, but is indexed and stored within the index.
+// Stored fields can be retrived from the index.
+$doc-&gt;addField(Zend_Search_Lucene_Field::Keyword('doctype',
+                                                 'autogenerated'));
+
+// Field is not tokenized nor indexed, but is stored in the index.
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed('created',
+                                                   time()));
+
+// Binary String valued Field that is not tokenized nor indexed,
+// but is stored in the index.
+$doc-&gt;addField(Zend_Search_Lucene_Field::Binary('icon',
+                                                $iconData));
+
+// Field is tokenized and indexed, and is stored in the index.
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('annotation',
+                                              'Document annotation text'));
+
+// Field is tokenized and indexed, but is not stored in the index.
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('contents',
+                                                  'My document content'));
+</pre>
+<p>
+            Each of these methods (excluding the
+            <code class="methodname">Zend_Search_Lucene_Field::Binary()</code> method) has an optional
+            <code class="varname">$encoding</code> parameter for specifying input data encoding.
+        </p>
+<p>
+            Encoding may differ for different documents as well as for different fields within one
+            document:
+        </p>
+<pre class="programlisting">
+$doc = new Zend_Search_Lucene_Document();
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('title',
+                                              $title,
+                                              'iso-8859-1'));
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('contents',
+                                                  $contents,
+                                                  'utf-8'));
+</pre>
+<p>
+            If encoding parameter is omitted, then the current locale is used at processing time.
+            For example:
+        </p>
+<pre class="programlisting">
+setlocale(LC_ALL, 'de_DE.iso-8859-1');
+...
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('contents', $contents));
+</pre>
+<p>
+            Fields are always stored and returned from the index in UTF-8 encoding. Any required
+            conversion to UTF-8 happens automatically.
+        </p>
+<p>
+            Text analyzers (<a class="link" href="zend.search.lucene.extending.html#zend.search.lucene.extending.analysis" title="61.7.1. Text Analysis">see below</a>)
+            may also convert text to some other encodings. Actually, the default analyzer converts
+            text to 'ASCII//TRANSLIT' encoding. Be careful, however; this translation may depend on
+            current locale.
+        </p>
+<p>
+            Fields' names are defined at your discretion in the <code class="methodname">addField()</code>
+            method.
+        </p>
+<p>
+            Java Lucene uses the 'contents' field as a default field to search.
+            <code class="classname">Zend_Search_Lucene</code> searches through all fields by default, but
+            the behavior is configurable. See the <a class="link" href="zend.search.lucene.query-language.html#zend.search.lucene.query-language.fields" title="61.4.2. Fields">"Default search field"</a>
+            chapter for details.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.understanding-field-types"></a>61.1.3. Understanding Field Types</h3></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">Keyword</code> fields are stored and indexed, meaning that they can be
+                    searched as well as displayed in search results. They are not split up into
+                    separate words by tokenization. Enumerated database fields usually translate
+                    well to Keyword fields in <code class="classname">Zend_Search_Lucene</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">UnIndexed</code> fields are not searchable, but they are returned with
+                    search hits. Database timestamps, primary keys, file system paths, and other
+                    external identifiers are good candidates for UnIndexed fields.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">Binary</code> fields are not tokenized or indexed, but are stored for
+                    retrieval with search hits. They can be used to store any data encoded as a
+                    binary string, such as an image icon.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">Text</code> fields are stored, indexed, and tokenized. Text fields are
+                    appropriate for storing information like subjects and titles that need to be
+                    searchable as well as returned with search results.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="code">UnStored</code> fields are tokenized and indexed, but not stored in the
+                    index. Large amounts of text are best indexed using this type of field. Storing
+                    data creates a larger index on disk, so if you need to search but not redisplay
+                    the data, use an UnStored field. UnStored fields are practical when using a
+                    <code class="classname">Zend_Search_Lucene</code> index in combination with a relational
+                    database. You can index large data fields with UnStored fields for searching,
+                    and retrieve them from your relational database by using a separate field as an
+                    identifier.
+               </p>
+<div class="table">
+<a name="zend.search.lucene.index-creation.understanding-field-types.table"></a><p class="title"><b>Table 61.1. Zend_Search_Lucene_Field Types</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Search_Lucene_Field Types" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Field Type</th>
+<th>Stored</th>
+<th>Indexed</th>
+<th>Tokenized</th>
+<th>Binary</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Keyword</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>UnIndexed</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Binary</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Text</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>UnStored</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.html-documents"></a>61.1.4. HTML documents</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> offers a <acronym class="acronym">HTML</acronym> parsing
+            feature. Documents can be created directly from a <acronym class="acronym">HTML</acronym> file or
+            string:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Html::loadHTMLFile($filename);
+$index-&gt;addDocument($doc);
+...
+$doc = Zend_Search_Lucene_Document_Html::loadHTML($htmlString);
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Html</code> class uses the
+            <code class="methodname">DOMDocument::loadHTML()</code> and
+            <code class="methodname">DOMDocument::loadHTMLFile()</code> methods to parse the source
+            <acronym class="acronym">HTML</acronym>, so it doesn't need <acronym class="acronym">HTML</acronym> to be well formed or
+            to be <acronym class="acronym">XHTML</acronym>. On the other hand, it's sensitive to the encoding
+            specified by the "meta http-equiv" header tag.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Html</code> class recognizes document title,
+            body and document header meta tags.
+        </p>
+<p>
+            The 'title' field is actually the /html/head/title value. It's stored within the index,
+            tokenized and available for search.
+        </p>
+<p>
+            The 'body' field is the actual body content of the <acronym class="acronym">HTML</acronym> file or
+            string. It doesn't include scripts, comments or attributes.
+        </p>
+<p>
+            The <code class="methodname">loadHTML()</code> and <code class="methodname">loadHTMLFile()</code>
+            methods of <code class="classname">Zend_Search_Lucene_Document_Html</code> class also have
+            second optional argument. If it's set to <code class="constant">TRUE</code>, then body content is
+            also stored within index and can be retrieved from the index. By default, the body is
+            tokenized and indexed, but not stored.
+        </p>
+<p>
+            The third parameter of <code class="methodname">loadHTML()</code> and
+            <code class="methodname">loadHTMLFile()</code> methods optionally specifies source
+            <acronym class="acronym">HTML</acronym> document encoding. It's used if encoding is not specified using
+            Content-type HTTP-EQUIV meta tag.
+        </p>
+<p>
+            Other document header meta tags produce additional document fields. The field 'name' is
+            taken from 'name' attribute, and the 'content' attribute populates the field 'value'.
+            Both are tokenized, indexed and stored, so documents may be searched by their meta tags
+            (for example, by keywords).
+        </p>
+<p>
+            Parsed documents may be augmented by the programmer with any other field:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Html::loadHTML($htmlString);
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed('created',
+                                                   time()));
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed('updated',
+                                                   time()));
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('annotation',
+                                              'Document annotation text'));
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+            Document links are not included in the generated document, but may be retrieved with
+            the <code class="methodname">Zend_Search_Lucene_Document_Html::getLinks()</code> and
+            <code class="methodname">Zend_Search_Lucene_Document_Html::getHeaderLinks()</code> methods:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Html::loadHTML($htmlString);
+$linksArray = $doc-&gt;getLinks();
+$headerLinksArray = $doc-&gt;getHeaderLinks();
+</pre>
+<p>
+            Starting from Zend Framework 1.6 it's also possible to exclude links with
+            <code class="code">rel</code> attribute set to <code class="code">'nofollow'</code>. Use
+            <code class="methodname">Zend_Search_Lucene_Document_Html::setExcludeNoFollowLinks($true)</code>
+            to turn on this option.
+        </p>
+<p>
+            <code class="methodname">Zend_Search_Lucene_Document_Html::getExcludeNoFollowLinks()</code>
+            method returns current state of "Exclude nofollow links" flag.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.docx-documents"></a>61.1.5. Word 2007 documents</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> offers a Word 2007 parsing feature. Documents
+            can be created directly from a Word 2007 file:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Docx::loadDocxFile($filename);
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Docx</code> class uses the
+            <code class="code">ZipArchive</code> class and <code class="code">simplexml</code> methods to parse the source
+            document. If the <code class="code">ZipArchive</code> class (from module php_zip) is not available,
+            the <code class="classname">Zend_Search_Lucene_Document_Docx</code> will also not be available
+            for use with Zend Framework.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Docx</code> class recognizes document meta
+            data and document text. Meta data consists, depending on document contents, of filename,
+            title, subject, creator, keywords, description, lastModifiedBy, revision, modified,
+            created.
+        </p>
+<p>
+            The 'filename' field is the actual Word 2007 file name.
+        </p>
+<p>
+            The 'title' field is the actual document title.
+        </p>
+<p>
+            The 'subject' field is the actual document subject.
+        </p>
+<p>
+            The 'creator' field is the actual document creator.
+        </p>
+<p>
+            The 'keywords' field contains the actual document keywords.
+        </p>
+<p>
+            The 'description' field is the actual document description.
+        </p>
+<p>
+            The 'lastModifiedBy' field is the username who has last modified the actual document.
+        </p>
+<p>
+            The 'revision' field is the actual document revision number.
+        </p>
+<p>
+            The 'modified' field is the actual document last modified date / time.
+        </p>
+<p>
+            The 'created' field is the actual document creation date / time.
+        </p>
+<p>
+            The 'body' field is the actual body content of the Word 2007 document. It only includes
+            normal text, comments and revisions are not included.
+        </p>
+<p>
+            The <code class="methodname">loadDocxFile()</code> methods of
+            <code class="classname">Zend_Search_Lucene_Document_Docx</code> class also have second optional
+            argument. If it's set to <code class="constant">TRUE</code>, then body content is also stored
+            within index and can be retrieved from the index. By default, the body is tokenized and
+            indexed, but not stored.
+        </p>
+<p>
+            Parsed documents may be augmented by the programmer with any other field:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Docx::loadDocxFile($filename);
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed(
+    'indexTime',
+    time())
+);
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text(
+    'annotation',
+    'Document annotation text')
+);
+$index-&gt;addDocument($doc);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.pptx-documents"></a>61.1.6. Powerpoint 2007 documents</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> offers a Powerpoint 2007 parsing feature.
+            Documents can be created directly from a Powerpoint 2007 file:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Pptx::loadPptxFile($filename);
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Pptx</code> class uses the
+            <code class="code">ZipArchive</code> class and <code class="code">simplexml</code> methods to parse the source
+            document. If the <code class="code">ZipArchive</code> class (from module php_zip) is not available,
+            the <code class="classname">Zend_Search_Lucene_Document_Pptx</code> will also not be available
+            for use with Zend Framework.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Pptx</code> class recognizes document meta
+            data and document text. Meta data consists, depending on document contents, of filename,
+            title, subject, creator, keywords, description, lastModifiedBy, revision, modified,
+            created.
+        </p>
+<p>
+            The 'filename' field is the actual Powerpoint 2007 file name.
+        </p>
+<p>
+            The 'title' field is the actual document title.
+        </p>
+<p>
+            The 'subject' field is the actual document subject.
+        </p>
+<p>
+            The 'creator' field is the actual document creator.
+        </p>
+<p>
+            The 'keywords' field contains the actual document keywords.
+        </p>
+<p>
+            The 'description' field is the actual document description.
+        </p>
+<p>
+            The 'lastModifiedBy' field is the username who has last modified the actual document.
+        </p>
+<p>
+            The 'revision' field is the actual document revision number.
+        </p>
+<p>
+            The 'modified' field is the actual document last modified date / time.
+        </p>
+<p>
+            The 'created' field is the actual document creation date / time.
+        </p>
+<p>
+            The 'body' field is the actual content of all slides and slide notes in the Powerpoint
+            2007 document.
+        </p>
+<p>
+            The <code class="methodname">loadPptxFile()</code> methods of
+            <code class="classname">Zend_Search_Lucene_Document_Pptx</code> class also have second optional
+            argument. If it's set to <code class="constant">TRUE</code>, then body content is also stored
+            within index and can be retrieved from the index. By default, the body is tokenized and
+            indexed, but not stored.
+        </p>
+<p>
+            Parsed documents may be augmented by the programmer with any other field:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Pptx::loadPptxFile($filename);
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed(
+    'indexTime',
+    time()));
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text(
+    'annotation',
+    'Document annotation text'));
+$index-&gt;addDocument($doc);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.xlsx-documents"></a>61.1.7. Excel 2007 documents</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> offers a Excel 2007 parsing feature. Documents
+            can be created directly from a Excel 2007 file:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Xlsx::loadXlsxFile($filename);
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Xlsx</code> class uses the
+            <code class="code">ZipArchive</code> class and <code class="code">simplexml</code> methods to parse the source
+            document. If the <code class="code">ZipArchive</code> class (from module php_zip) is not available,
+            the <code class="classname">Zend_Search_Lucene_Document_Xlsx</code> will also not be available
+            for use with Zend Framework.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene_Document_Xlsx</code> class recognizes document meta
+            data and document text. Meta data consists, depending on document contents, of filename,
+            title, subject, creator, keywords, description, lastModifiedBy, revision, modified,
+            created.
+        </p>
+<p>
+            The 'filename' field is the actual Excel 2007 file name.
+        </p>
+<p>
+            The 'title' field is the actual document title.
+        </p>
+<p>
+            The 'subject' field is the actual document subject.
+        </p>
+<p>
+            The 'creator' field is the actual document creator.
+        </p>
+<p>
+            The 'keywords' field contains the actual document keywords.
+        </p>
+<p>
+            The 'description' field is the actual document description.
+        </p>
+<p>
+            The 'lastModifiedBy' field is the username who has last modified the actual document.
+        </p>
+<p>
+            The 'revision' field is the actual document revision number.
+        </p>
+<p>
+            The 'modified' field is the actual document last modified date / time.
+        </p>
+<p>
+            The 'created' field is the actual document creation date / time.
+        </p>
+<p>
+            The 'body' field is the actual content of all cells in all worksheets of the Excel 2007
+            document.
+        </p>
+<p>
+            The <code class="methodname">loadXlsxFile()</code> methods of
+            <code class="classname">Zend_Search_Lucene_Document_Xlsx</code> class also have second optional
+            argument. If it's set to <code class="constant">TRUE</code>, then body content is also stored
+            within index and can be retrieved from the index. By default, the body is tokenized and
+            indexed, but not stored.
+        </p>
+<p>
+            Parsed documents may be augmented by the programmer with any other field:
+        </p>
+<pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Xlsx::loadXlsxFile($filename);
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed(
+    'indexTime',
+    time()));
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text(
+    'annotation',
+    'Document annotation text'));
+$index-&gt;addDocument($doc);
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.rest.server.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.index-creation.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">60.3. Zend_Rest_Server </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 61.2. Building Indexes</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+</body>
+</html>

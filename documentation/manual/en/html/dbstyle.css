@@ -1,79 +1,152 @@
+/* ==========================================================================
+   TigerZF Manual stylesheet
+   Restyles the DocBook-XSL chunked HTML output. Every page links this file,
+   so editing it re-themes the whole manual. Targets the standard DocBook
+   classes (.sect1-4, .programlisting, .note/.warning/.tip, .navheader, .toc…).
+   ========================================================================== */
+
+:root {
+  --accent:        #c8641e;   /* TigerZF amber */
+  --accent-dark:   #9c4c14;
+  --ink:           #24292f;
+  --ink-soft:      #57606a;
+  --rule:          #e3e6ea;
+  --bg:            #ffffff;
+  --code-bg:       #f6f8fa;
+  --note-bg:       #eef5fd;  --note-bd:    #4a90d9;
+  --tip-bg:        #eef8f0;  --tip-bd:     #48a860;
+  --warn-bg:       #fdf3e7;  --warn-bd:    #d98b2b;
+  --caution-bg:    #fdecec;  --caution-bd: #d64545;
+  --maxw: 52rem;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
 body {
-    font-family: Tahoma, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  margin: 0 auto;
+  max-width: var(--maxw);
+  padding: 1.5rem 1.5rem 4rem;
 }
 
-h1, h2, h3, h4, h5 {
-    font-family: Arial, serif;
+/* ---- Headings ---- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
+  line-height: 1.25;
+  color: #1b1f24;
+  margin: 2rem 0 0.75rem;
+  font-weight: 650;
+}
+h1 { font-size: 2rem; margin-top: 1rem; }
+h2 { font-size: 1.5rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.05rem; }
+h5, h6 { font-size: 1rem; color: var(--ink-soft); }
+
+/* ---- Links ---- */
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-dark); text-decoration: underline; }
+
+/* ---- Paragraphs / lists ---- */
+p { margin: 0.75rem 0; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+
+/* ---- Code ---- */
+code, tt, .literal, .classname, .methodname, .property, .constant, .command, .filename {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9em;
+}
+:not(pre) > code, .literal, .classname, .methodname, .property, .constant, .filename {
+  background: var(--code-bg);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+}
+.classname, .methodname { color: var(--accent-dark); }
+
+pre.programlisting, pre.screen, pre.synopsis {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  white-space: pre;
 }
 
-h2 {
-    font-size: 1.3em;
+/* ---- Admonitions (note / tip / warning / caution) ---- */
+.note, .tip, .warning, .caution, .important {
+  margin: 1.25rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border-left: 4px solid var(--note-bd);
+  background: var(--note-bg);
 }
+.note    { border-left-color: var(--note-bd);    background: var(--note-bg); }
+.tip     { border-left-color: var(--tip-bd);     background: var(--tip-bg); }
+.warning { border-left-color: var(--warn-bd);    background: var(--warn-bg); }
+.caution { border-left-color: var(--caution-bd); background: var(--caution-bg); }
+.important { border-left-color: var(--accent);   background: var(--code-bg); }
+.note h3, .tip h3, .warning h3, .caution h3, .important h3,
+.note .title, .tip .title, .warning .title { margin: 0 0 .35rem; font-size: 1rem; }
+/* DocBook renders admonitions as a table with an icon cell; keep it tidy */
+.note table, .tip table, .warning table, .caution table { border: 0; width: 100%; }
+.note td, .tip td, .warning td, .caution td { border: 0; padding: 0; vertical-align: top; }
+.note img, .tip img, .warning img, .caution img { margin-right: .6rem; }
 
-h3, h4, h5 {
-    font-size: 1em;
-    margin: 0.2em;
+/* ---- Tables ---- */
+.table, table.doctable, .informaltable table, table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.95rem;
 }
+th, td { border: 1px solid var(--rule); padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+thead th, th { background: var(--code-bg); font-weight: 650; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+.table p.title { font-weight: 600; margin: 1rem 0 .3rem; }
 
-div.note, div.warning, div.tip {
-    margin-left: 0.3in;
-    margin-right: 0.5in;
-    border: solid 1px blue;
-    background-color: #e0e0e0;
-    padding: 0.1in;
+/* ---- Navigation header/footer ---- */
+.navheader, .navfooter {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
 }
+.navheader { border-bottom: 1px solid var(--rule); padding-bottom: .6rem; margin-bottom: 1.5rem; }
+.navfooter { border-top: 1px solid var(--rule); padding-top: .6rem; margin-top: 3rem; }
+.navheader table, .navfooter table { width: 100%; border: 0; }
+.navheader td, .navfooter td { border: 0; padding: .1rem .3rem; }
+.navheader th { border: 0; font-size: 1rem; font-weight: 650; color: var(--ink); }
 
-div.note img, div.warning img, div.tip img {
-    margin-right: 0.1in;
-    border: solid 1px blue;
-}
+/* ---- Table of contents ---- */
+.toc { margin: 1rem 0 2rem; }
+.toc p b, .toc > b { font-size: 1.1rem; }
+.toc dl { margin: .3rem 0; }
+.toc dt { margin: .2rem 0; }
+.toc dd { margin-left: 1.25rem; }
 
-pre.programlisting {
-    border: solid 1px #444;
-    background-color: #e0e0e0;
-    padding: 0.1in;
-    margin: 0.2in;
-    clear: right;
-}
+/* ---- Title pages / misc ---- */
+.titlepage { margin-bottom: 1rem; }
+.titlepage hr { display: none; }
+.revinfo { color: var(--ink-soft); font-size: .8rem; margin-top: 2rem; }
+.emphasis { font-style: italic; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
+img { max-width: 100%; height: auto; }
 
-pre.screen {
-    border: solid 1px #777;
-    background-color: #ddd;
-    padding: 0.1in;
-    margin: 0.2in;
-    clear: right;
-}
-
-div.variablelist dl dt span.term {
-    font-weight: bold;
-}
-
-hr { display: none; }
-
-div.navheader {
-    padding-bottom: 0.1in;
-    border-bottom: solid 1px black;
-    border-color: #aaa;
-}
-div.navfooter {
-    margin-top: 0.1in;
-    border-top: solid 1px black;
-    border-color: #aaa;
-    padding-top: 0.1in;
-}
-
-div.figure-float {
-    float: right;
-    margin-left: 2em;
-    margin-bottom: 2em;
-}
-
-div.revinfo {
-    text-align: center;
-    font-size: 0.7em;
-    font-style: italic;
-}
-
-code.code {
-    font-family: "Lucida Console", monospace;
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  body { font-size: 16px; padding: 1rem 1rem 3rem; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  pre.programlisting, pre.screen { font-size: 0.8rem; }
 }
