@@ -39,8 +39,13 @@ if (version_compare(Version::id(), '4.0.0', '<')) {
 
 /*
  * Set error reporting to the level to which Zend Framework code must comply.
+ *
+ * Note: E_STRICT was deprecated in PHP 8.4 (and its notices folded into E_ALL
+ * back in PHP 5.4). Referencing the constant on 8.4+ emits a deprecation notice
+ * whose output breaks header-sensitive components (e.g. Zend_Session) during
+ * bootstrap, so we rely on E_ALL alone.
  */
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 
 /*
  * Determine the root, library, and tests directories of the framework

@@ -63,7 +63,6 @@ class Zend_Log_Writer_StreamTest extends TestCase
         } catch (TypeError $e) {
             $this->assertMatchesRegularExpression('/must be of t/i', $e->getMessage());
         }
-        xml_parser_free($resource);
     }
 
     /**
@@ -105,7 +104,8 @@ class Zend_Log_Writer_StreamTest extends TestCase
             $this->assertMatchesRegularExpression('/cannot be opened/i', $e->getMessage());
         } catch (Error $e) {
             $this->assertTrue($e instanceof ValueError);
-            $this->assertMatchesRegularExpression('/cannot be empty/i', $e->getMessage());
+            // PHP's empty-path message wording varies across 8.x ("cannot"/"must not be empty")
+            $this->assertMatchesRegularExpression('/be empty/i', $e->getMessage());
         }
     }
 
@@ -138,7 +138,8 @@ class Zend_Log_Writer_StreamTest extends TestCase
             $this->assertMatchesRegularExpression('/unable to write/i', $e->getMessage());
         } catch (Error $e) {
             $this->assertTrue($e instanceof TypeError);
-            $this->assertMatchesRegularExpression('/resource is not a valid/i', $e->getMessage());
+            // PHP 8 fwrite() TypeError: "...must be an open stream resource" (was "resource is not a valid...")
+            $this->assertMatchesRegularExpression('/stream resource/i', $e->getMessage());
         }
     }
 
@@ -157,7 +158,8 @@ class Zend_Log_Writer_StreamTest extends TestCase
             $this->assertMatchesRegularExpression('/unable to write/i', $e->getMessage());
         } catch (Error $e) {
             $this->assertTrue($e instanceof TypeError);
-            $this->assertMatchesRegularExpression('/resource is not a valid/i', $e->getMessage());
+            // PHP 8 fwrite() TypeError: "...must be an open stream resource" (was "resource is not a valid...")
+            $this->assertMatchesRegularExpression('/stream resource/i', $e->getMessage());
         }
     }
 

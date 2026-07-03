@@ -269,7 +269,8 @@ class Zend_ProgressBar_Adapter_ConsoleTest extends TestCase
     {
         $beforePHP8 = version_compare(PHP_VERSION, '8.0.0', '<');
         $this->expectException($beforePHP8 ? Zend_ProgressBar_Adapter_Exception::class : ValueError::class);
-        $this->expectExceptionMessage($beforePHP8 ? "Unable to open stream" : "cannot be empty");
+        // PHP's empty-path message wording varies across 8.x ("cannot"/"must not be empty")
+        $this->expectExceptionMessage($beforePHP8 ? "Unable to open stream" : "be empty");
         $adapter = new Zend_ProgressBar_Adapter_Console();
         $adapter->setOutputStream(null);
     }
