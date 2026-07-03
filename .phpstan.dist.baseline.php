@@ -5840,7 +5840,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Feed/Abstract.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Access to an undefined property DOMElement::$actualEncoding.',
+	'rawMessage' => 'Access to an undefined property DOMElement::$encoding.',
 	'identifier' => 'property.notFound',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Feed/Atom.php',

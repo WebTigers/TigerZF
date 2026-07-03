@@ -8,8 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* Raised the minimum PHP requirement to 8.1 (dropped 7.4/8.0) and removed the now-redundant `symfony/polyfill-php81` runtime dependency (it remains available transitively for dev tooling)
 * Reconciled CI into a single canonical PHPUnit matrix (8.1–8.5) and dropped the `experimental`/`continue-on-error` flags now that 8.3–8.5 pass; removed the redundant duplicate test job from `ci.yml`
+* Bumped the remaining CI tool runners (PHPStan, PHP-CS-Fixer, Rector) to PHP 8.1
 * Removed obsolete Travis CI config and legacy `php52`/`php7` test ini/scripts
+
+### Removed
+
+* Dropped the non-functional PHPCS workflow and its undeclared, broken toolchain (`php_codesniffer` 4.x could not load the referenced `PHPCompatibility` standard); a working compatibility lint can be reinstated separately
 
 ### Fixed
 
