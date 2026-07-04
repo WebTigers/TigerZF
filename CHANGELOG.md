@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.30.0] - 2026-07-04
 
 ### Changed
 
+* Declared the project license as `(MIT AND BSD-3-Clause)` — TigerZF's own work is MIT (`LICENSE`); the inherited Zend Framework code retains its BSD-3-Clause license (`LICENSE.txt`)
 * Raised the minimum PHP requirement to 8.1 (dropped 7.4/8.0) and removed the now-redundant `symfony/polyfill-php81` runtime dependency (it remains available transitively for dev tooling)
 * Reconciled CI into a single canonical PHPUnit matrix (8.1–8.5) and dropped the `experimental`/`continue-on-error` flags now that 8.3–8.5 pass; removed the redundant duplicate test job from `ci.yml`
 * Bumped the remaining CI tool runners (PHPStan, PHP-CS-Fixer, Rector) to PHP 8.1
@@ -15,15 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+* `symfony/polyfill-php83` runtime dependency — no longer needed after the `Zend_Date` fix below; a full `library/` + `tests/` grep confirmed no other PHP 8.3-only functions, classes, or attributes are used
+* Repository housekeeping: DocBook manual sources and 23 unbuilt translation directories (the built HTML manual is retained), `demos/`, `Vagrantfile`, the `Zend_Tool` `zf.*` CLI shims, the orphaned `.phpcs.dist.xml`, a dead duplicate PHPStan baseline, and stale SVN-era dev docs
 * Dropped the non-functional PHPCS workflow and its undeclared, broken toolchain (`php_codesniffer` 4.x could not load the referenced `PHPCompatibility` standard); a working compatibility lint can be reinstated separately
 
 ### Fixed
 
+* `Zend_Date`: replaced a bogus `str_decrement()` call (a PHP 8.3 string function mistakenly applied to decrement a parsed month/day) with plain arithmetic — fixes a latent `ValueError` on malformed date input, and removes the last reason `symfony/polyfill-php83` was required
 * PHP 8.5 compatibility: replaced deprecated `SplObjectStorage::contains()`/`attach()` with `offsetExists()`/`offsetSet()` in Zend_Pdf
 * PHP 8.4 compatibility: coerced nullable array keys with `(string)` to avoid "null as array offset" deprecations (Zend_Form, Zend_Db_Select, Zend_Http_Client, Zend_Translate, Zend_Navigation, and others)
 * PHP 8.4/8.5 compatibility: removed no-op deprecated calls (`imagedestroy`, `ReflectionProperty::setAccessible`, `xml_parser_free`), replaced non-canonical `(double)` casts, and switched `DOMDocument::$actualEncoding` to `$encoding`
 * Fixed `E_STRICT` usage in the test bootstrap that broke the suite on PHP 8.4+
 * Updated stale test expectations for modern PHP error messages and the PHP 8.3 `highlight_string()` output format change
+
+### Tooling
+
+* Raised the PHPStan analysis floor to PHP 8.1 (was 7.4) and regenerated the baseline against the supported 8.1–8.5 range
+
+### Documentation
+
+* Rebuilt the complete ZF1 manual as a modern, self-hosted, **searchable** site in both **English and Spanish** — full-text search (SQLite FTS5 with scroll-to-anchor), a language switcher with English-fallback, filterable navigation, and PHP syntax highlighting. Live at <https://tigerzf.webtigers.com/docs>
 
 ## [1.25.0] - 2026-02-24
 
