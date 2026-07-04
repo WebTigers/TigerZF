@@ -1,0 +1,177 @@
+<?php $title = 'Chapter 50. Zend_Mobile_Push'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Chapter 50. Zend_Mobile_Push</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mime.part.phtml">Prev</a> </td>
+<th width="60%" align="center">Part III. Zend Framework Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mobile.push.apns.phtml">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.mobile.push"></a>Chapter 50. Zend_Mobile_Push</h2></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.mobile.push.phtml#zend.mobile.push.introduction">50.1. Zend_Mobile_Push Introduction</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="zend.mobile.push.phtml#zend.mobile.push.common-functionality">50.1.1. Common Functionality</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="zend.mobile.push.apns.phtml">50.2. Zend_Mobile_Push_Apns</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.mobile.push.apns.phtml#zend.mobile.push.apns.server">50.2.1. Pushing Messages</a></span></dt>
+<dt><span class="sect2"><a href="zend.mobile.push.apns.phtml#zend.mobile.push.apns.feedback">50.2.2. Getting Feedback</a></span></dt>
+<dt><span class="sect2"><a href="zend.mobile.push.apns.phtml#zend.mobile.push.apns.message">50.2.3. Advanced Messages</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.mobile.push.apns.phtml#zend.mobile.push.apns.message.alerts">50.2.3.1. Alerts</a></span></dt>
+<dt><span class="sect3"><a href="zend.mobile.push.apns.phtml#zend.mobile.push.apns.message.custom-data">50.2.3.2. Custom Data</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.mobile.push.gcm.phtml">50.3. Zend_Mobile_Push_Gcm</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.server">50.3.1. Pushing Messages</a></span></dt>
+<dt><span class="sect2"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.message">50.3.2. Advanced Messages</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.message.delay-while-idle">50.3.2.1. Delay While Idle</a></span></dt>
+<dt><span class="sect3"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.message.ttl">50.3.2.2. Time to Live</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.response">50.3.3. Response</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.mobile.push.gcm.phtml#zend.mobile.push.gcm.response.result">50.3.3.1. Results</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.mobile.push.mpns.phtml">50.4. Zend_Mobile_Push_Mpns</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.mobile.push.mpns.phtml#zend.mobile.push.mpns.server">50.4.1. Pushing Messages</a></span></dt>
+<dt><span class="sect2"><a href="zend.mobile.push.mpns.phtml#zend.mobile.push.mpns.message">50.4.2. Advanced Messages</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.mobile.push.mpns.phtml#zend.mobile.push.mpns.message.tile">50.4.2.1. Tile Messages</a></span></dt>
+<dt><span class="sect3"><a href="zend.mobile.push.mpns.phtml#zend.mobile.push.mpns.message.toast">50.4.2.2. Toast Messages</a></span></dt>
+</dl></dd>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.mobile.push.introduction"></a>50.1. Zend_Mobile_Push Introduction</h2></div></div></div>
+<p>
+        Zend_Mobile_Push provides the ability for sending push notifications to
+        the vendor specific notification servers.  Currently this list includes
+        APNS (iTouch/iPad/iPhone), GCM (Google Android) and MPNS (Windows Phone). 
+    </p>
+<p>
+        Since many of the underlying implementations vary; please see each
+        specific notification class for usage details.  Outlined below are
+        details on the common functionality that exists between the
+        implementations.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mobile.push.common-functionality"></a>50.1.1. Common Functionality</h3></div></div></div>
+<p>
+            While each individual push notification adapter contains specific
+            functionality; there are commonalities that have been attempted to
+            make implementation of the adapters easier.
+        </p>
+<div class="table">
+<a name="zend.mobile.push.common-functionality.adapters"></a><p class="title"><b>Table 50.1. Adapters</b></p>
+<div class="table-contents"><table class="table" summary="Adapters" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Method</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">close</td>
+<td align="left">Allows you to close an already open connection;
+                            if no connection is open will simply default the
+                            state.</td>
+</tr>
+<tr>
+<td align="left">connect</td>
+<td align="left">Generally only utilized for APNS; however,
+                            assists in maintaining the connection state.</td>
+</tr>
+<tr>
+<td align="left">isConnected</td>
+<td align="left">Allows you to see if you are already connected.</td>
+</tr>
+<tr>
+<td align="left">send</td>
+<td align="left">Allows you to pass in a message to send.  This
+                            will send the message to the corresponding system.
+                            Note that the send method for APNS will lazily connect
+                            if you are not already connected.</td>
+</tr>
+<tr>
+<td align="left">setOptions</td>
+<td align="left">Allows you to set options in bulk for the
+                            adapters.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Each individual message varies in implementation; again like
+            adapters there are some commonalities that have been addressed to
+            ensure consistency between messages.
+        </p>
+<div class="table">
+<a name="zend.mobile.push.common-functionality.messages"></a><p class="title"><b>Table 50.2. Messages</b></p>
+<div class="table-contents"><table class="table" summary="Messages" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Method</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">(set|get)Token</td>
+<td align="left">Allows you to set or get the token or device id /
+                        unique id that is for any specific device.  For APNS
+                        this is the device ID, for GCM it is the registration
+                        id and for MPNS it equates to the push url.</td>
+</tr>
+<tr>
+<td align="left">(set|get)Id</td>
+<td align="left">Sets the distict message id that you would give a
+                        message.</td>
+</tr>
+<tr>
+<td align="left">setOptions</td>
+<td align="left">Allows you to set a messages options in bulk.</td>
+</tr>
+<tr>
+<td align="left">validate</td>
+<td align="left">Does a <span class="emphasis"><em>very</em></span> simple test on
+                            the message to ensure that it can be sent through
+                            the adapter.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mime.part.phtml">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mobile.push.apns.phtml">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">49.3. Zend_Mime_Part </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Home</a></td>
+<td width="40%" align="right" valign="top"> 50.2. Zend_Mobile_Push_Apns</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

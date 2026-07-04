@@ -1,0 +1,153 @@
+<?php $title = 'Chapter 21. Zend_Config'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Chapter 21. Zend_Config</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.codegenerator.reference.phtml">Prev</a> </td>
+<th width="60%" align="center">Part III. Zend Framework Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.theory_of_operation.phtml">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.config"></a>Chapter 21. Zend_Config</h2></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.config.phtml#zend.config.introduction">21.1. Introduction</a></span></dt>
+<dt><span class="sect1"><a href="zend.config.theory_of_operation.phtml">21.2. Theory of Operation</a></span></dt>
+<dt><span class="sect1"><a href="zend.config.adapters.ini.phtml">21.3. Zend_Config_Ini</a></span></dt>
+<dt><span class="sect1"><a href="zend.config.adapters.json.phtml">21.4. Zend_Config_Json</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.config.adapters.json.phtml#zend.config.adapters.json.intro">21.4.1. Overview</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.json.phtml#zend.config.adapters.json.quick-start">21.4.2. Quick Start</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.json.phtml#zend.config.adapters.json.options">21.4.3. Configuration Options</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.json.phtml#zend.config.adapters.json.methods">21.4.4. Available Methods</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.config.adapters.xml.phtml">21.5. Zend_Config_Xml</a></span></dt>
+<dt><span class="sect1"><a href="zend.config.adapters.yaml.phtml">21.6. Zend_Config_Yaml</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.intro">21.6.1. Overview</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.quick-start">21.6.2. Quick Start</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.options">21.6.3. Configuration Options</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.methods">21.6.4. Available Methods</a></span></dt>
+<dt><span class="sect2"><a href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.examples">21.6.5. Examples</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.config.introduction"></a>21.1. Introduction</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Config</code> is designed to simplify the access to, and the use of,
+        configuration data within applications. It provides a nested object property based user
+        interface for accessing this configuration data within application code. The configuration
+        data may come from a variety of media supporting hierarchical data storage. Currently
+        <code class="classname">Zend_Config</code> provides adapters for configuration data that are stored
+        in text files with <a class="link" href="zend.config.adapters.ini.phtml" title="21.3. Zend_Config_Ini"><code class="classname">Zend_Config_Ini</code></a> and
+        <a class="link" href="zend.config.adapters.xml.phtml" title="21.5. Zend_Config_Xml"><code class="classname">Zend_Config_Xml</code></a>.
+    </p>
+<div class="example">
+<a name="zend.config.introduction.example.using"></a><p class="title"><b>Example 21.1. Using Zend_Config</b></p>
+<div class="example-contents">
+<p>
+            Normally it is expected that users would use one of the adapter classes such as <a class="link" href="zend.config.adapters.ini.phtml" title="21.3. Zend_Config_Ini"><code class="classname">Zend_Config_Ini</code></a> or
+            <a class="link" href="zend.config.adapters.xml.phtml" title="21.5. Zend_Config_Xml"><code class="classname">Zend_Config_Xml</code></a>,
+            but if configuration data are available in a <acronym class="acronym">PHP</acronym> array, one may
+            simply pass the data to the <code class="classname">Zend_Config</code> constructor in order to
+            utilize a simple object-oriented interface:
+        </p>
+<pre class="programlisting">
+// Given an array of configuration data
+$configArray = array(
+    'webhost'  =&gt; 'www.example.com',
+    'database' =&gt; array(
+        'adapter' =&gt; 'pdo_mysql',
+        'params'  =&gt; array(
+            'host'     =&gt; 'db.example.com',
+            'username' =&gt; 'dbuser',
+            'password' =&gt; 'secret',
+            'dbname'   =&gt; 'mydatabase'
+        )
+    )
+);
+
+// Create the object-oriented wrapper upon the configuration data
+$config = new Zend_Config($configArray);
+
+// Print a configuration datum (results in 'www.example.com')
+echo $config-&gt;webhost;
+
+// Use the configuration data to connect to the database
+$db = Zend_Db::factory($config-&gt;database-&gt;adapter,
+                       $config-&gt;database-&gt;params-&gt;toArray());
+
+// Alternative usage: simply pass the Zend_Config object.
+// The Zend_Db factory knows how to interpret it.
+$db = Zend_Db::factory($config-&gt;database);
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+        As illustrated in the example above, <code class="classname">Zend_Config</code> provides nested
+        object property syntax to access configuration data passed to its constructor.
+    </p>
+<p>
+        Along with the object oriented access to the data values,
+        <code class="classname">Zend_Config</code> also has <code class="methodname">get()</code> which will
+        return the supplied default value if the data element doesn't exist. For example:
+    </p>
+<pre class="programlisting">
+$host = $config-&gt;database-&gt;get('host', 'localhost');
+</pre>
+<div class="example">
+<a name="zend.config.introduction.example.file.php"></a><p class="title"><b>Example 21.2. Using Zend_Config with a PHP Configuration File</b></p>
+<div class="example-contents">
+<p>
+            It is often desirable to use a pure <acronym class="acronym">PHP</acronym>-based configuration file.
+            The following code illustrates how easily this can be accomplished:
+        </p>
+<pre class="programlisting">
+// config.php
+return array(
+    'webhost'  =&gt; 'www.example.com',
+    'database' =&gt; array(
+        'adapter' =&gt; 'pdo_mysql',
+        'params'  =&gt; array(
+            'host'     =&gt; 'db.example.com',
+            'username' =&gt; 'dbuser',
+            'password' =&gt; 'secret',
+            'dbname'   =&gt; 'mydatabase'
+        )
+    )
+);
+</pre>
+<pre class="programlisting">
+// Configuration consumption
+$config = new Zend_Config(require 'config.php');
+
+// Print a configuration datum (results in 'www.example.com')
+echo $config-&gt;webhost;
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.codegenerator.reference.phtml">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.theory_of_operation.phtml">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">20.3. Zend_CodeGenerator Reference </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Home</a></td>
+<td width="40%" align="right" valign="top"> 21.2. Theory of Operation</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>
