@@ -193,7 +193,7 @@
       var text = h.textContent.replace(/^\s*[\d.]+\.?\s*/, "").trim();
       if (text) items.push({ id: id, text: text, lvl: h.tagName === "H2" ? 2 : 3 });
     });
-    if (items.length < 2) { pagenav.classList.add("empty"); return; }
+    if (items.length < 2) { pagenav.classList.add("empty"); doc.documentElement.classList.add("tzf-no-pagenav"); return; }
 
     var htm = '<div class="hd">' + (i18n.onthispage || "On this page") + '</div><div class="tzf-links"><span class="tzf-marker"></span>';
     items.forEach(function (it) {
