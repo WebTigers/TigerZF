@@ -1,7 +1,5 @@
 # TigerZF - Zend Framework Reborn for Modern PHP
 
-![TigerZF](https://imgur.com/S0i6qOh.png)
-
 ## The Legend Returns
 
 TigerZF is a powerful continuation of the legendary Zend Framework 1, meticulously updated and optimized for modern PHP applications. Built on the solid foundation of [zf1-future](https://github.com/Shardj/zf1-future), TigerZF brings the battle-tested reliability of ZF1 into the modern era of PHP development.
@@ -11,8 +9,8 @@ TigerZF is a powerful continuation of the legendary Zend Framework 1, meticulous
 When Zend abandoned ZF1, millions of production applications were left behind. But great frameworks don't die - they evolve. TigerZF represents that evolution:
 
 - **Battle-Tested Architecture**: Over 15 years of production proven patterns
-- **Modern PHP Support**: Fully compatible with PHP 7.1 through 8.3+
-- **Enterprise Ready**: Trusted by Fortune 500 companies worldwide
+- **Modern PHP Support**: Fully compatible with PHP 8.1 through 8.5
+- **Enterprise Ready**: Trusted by production applications worldwide
 - **Community Driven**: Actively maintained by passionate developers who refuse to let excellence die
 
 ## Features
@@ -26,7 +24,7 @@ When Zend abandoned ZF1, millions of production applications were left behind. B
 - **Internationalization**: Full i18n/l10n support out of the box
 
 ### Modern Enhancements
-- **PHP 8.3 Compatibility**: Fully tested and optimized for the latest PHP versions
+- **PHP 8.1–8.5 Compatibility**: Fully tested and optimized for current PHP versions, deprecation-free
 - **Composer Integration**: Modern dependency management
 - **PSR Compatibility**: Where it makes sense, without breaking the ZF1 philosophy
 - **Security Updates**: All known vulnerabilities patched and maintained
@@ -62,14 +60,13 @@ $application->bootstrap()->run();
 
 ## System Requirements
 
-- PHP 7.1 or higher (tested up to 8.3)
+- PHP 8.1 or higher (tested through 8.5)
 - Composer for dependency management
 - Web server with URL rewriting support
 
 ## Documentation
 
-- [TigerZF Documentation](https://github.com/WebTigers/TigerZF/wiki) (Coming Soon)
-- [Original ZF1 Manual](https://framework.zend.com/manual/1.12/en/manual.html) (Still Relevant)
+- [TigerZF Manual](https://tigerzf.webtigers.com/docs) — the full ZF1 reference manual, modernized (available in English and Spanish)
 - [Migration Guide](https://github.com/WebTigers/TigerZF/blob/main/MIGRATION.md) (Coming Soon)
 
 ## Why Choose TigerZF Over Other Frameworks?
@@ -108,7 +105,7 @@ TigerZF development is sponsored by:
 
 ## License
 
-TigerZF is released under the BSD 3-Clause License, maintaining compatibility with the original Zend Framework license. See [LICENSE.txt](LICENSE.txt) for details.
+TigerZF's own code and modernization work are released under the **MIT License** (see [LICENSE](LICENSE)). It incorporates Zend Framework 1, which remains under the original **BSD 3-Clause License** (see [LICENSE.txt](LICENSE.txt)); those notices are retained in the inherited source files.
 
 ## Acknowledgments
 
