@@ -8,7 +8,9 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
@@ -28,7 +30,10 @@ jobs:
 
     - name: Create Release Archive
       run: |
-        tar -czf tigerzf-${GITHUB_REF#refs/tags/}.tar.gz \
+        NAME="tigerzf-${GITHUB_REF#refs/tags/}.tar.gz"
+        # build into a temp dir so the archive isn't written inside the tree it
+        # is reading (which causes "tar: .: file changed as we read it", exit 1)
+        tar -czf "$RUNNER_TEMP/$NAME" \
           --exclude='.git*' \
           --exclude='tests' \
           --exclude='demos' \
@@ -37,6 +42,7 @@ jobs:
           --exclude='Vagrantfile' \
           --exclude='.travis.yml' \
           .
+        mv "$RUNNER_TEMP/$NAME" .
         
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3
