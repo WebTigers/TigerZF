@@ -20,10 +20,12 @@ jobs:
         
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest --no-dev
-      
-    - name: Run tests
-      run: composer test
-      
+
+    # Note: the full test suite runs on every push/PR via phpunit.yml (with the
+    # required memory_limit=-1). Re-running it here needs dev deps (which --no-dev
+    # skips) and would just duplicate that gate, so the release builds from
+    # already-green main.
+
     - name: Create Release Archive
       run: |
         tar -czf tigerzf-${GITHUB_REF#refs/tags/}.tar.gz \
