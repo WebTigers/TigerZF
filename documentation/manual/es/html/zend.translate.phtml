@@ -1,0 +1,219 @@
+<?php $title = 'Capítulo 74. Zend_Translate'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 74. Zend_Translate</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tool.project.internals.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.translate.adapter.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.translate"></a>Capítulo 74. Zend_Translate</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.translate.phtml#zend.translate.introduction">74.1. Introducción</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="zend.translate.phtml#zend.translate.introduction.adapters">74.1.1. Iniciándose en el multilingüismo</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="zend.translate.adapter.phtml">74.2. Adaptadores para Zend_Translate</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.translate.adapter.phtml#zend.translate.adapter.decision">74.2.1. Cómo decidir qué adaptador de traducción usar</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.array">74.2.1.1. Zend_Translate_Adapter_Array</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.csv">74.2.1.2. Zend_Translate_Adapter_Csv</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.gettext">74.2.1.3. Zend_Translate_Adapter_Gettext</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.ini">74.2.1.4. Zend_Translate_Adapter_Ini</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.tbx">74.2.1.5. Zend_Translate_Adapter_Tbx</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.tmx">74.2.1.6. Zend_Translate_Adapter_Tmx</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.qt">74.2.1.7. Zend_Translate_Adapter_Qt</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.xliff">74.2.1.8. Zend_Translate_Adapter_Xliff</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.adapter.phtml#zend.translate.adapter.xmltm">74.2.1.9. Zend_Translate_Adapter_XmlTm</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.translate.adapter.phtml#zend.translate.adapter.selfwritten">74.2.2. Integrar adaptadores escritos por uno mismo</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.adapter.phtml#zend.translate.adapter.caching">74.2.3. Acelerar todos los adaptadores</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.translate.using.phtml">74.3. Uso de adaptadores de traducción</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="zend.translate.using.phtml#zend.translate.using.structure">74.3.1. Estructuras de las fuentes de traducción</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="zend.translate.sourcecreation.phtml">74.4. Creación de archivos fuente</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.translate.sourcecreation.phtml#zend.translate.sourcecreation.array">74.4.1. Creación de archivos fuente Array</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.sourcecreation.phtml#zend.translate.sourcecreation.gettext">74.4.2. Creación de archivos fuente Gettext</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.sourcecreation.phtml#zend.translate.sourcecreation.tmx">74.4.3. Creación de archivos fuente TMX</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.sourcecreation.phtml#zend.translate.sourcecreation.csv">74.4.4. Creación de archivos fuente CSV</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.sourcecreation.phtml#zend.translate.sourcecreation.ini">74.4.5. Creación de archivos fuente INI</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.translate.additional.phtml">74.5. Características adicionales para la traducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.options">74.5.1. Opciones para los adaptadores</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.languages">74.5.2. Gestión de idiomas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.translate.additional.phtml#zend.translate.additional.languages.automatic">74.5.2.1. Gestión automática de idiomas</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.additional.phtml#zend.translate.additional.languages.territory">74.5.2.2. Uso de un país como idioma</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.detection">74.5.3. Detección automática de fuentes</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.directory">74.5.3.1. Idioma mediante nombres de directorios</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.filename">74.5.3.2. Idioma mediante nombres de archivo</a></span></dt>
+<dd><dl>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.filename.complete">74.5.3.2.1. Nombre de archivo completo</a></span></dt>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.filename.extension">74.5.3.2.2. Extensión del archivo</a></span></dt>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.filename.token">74.5.3.2.3. Tokens del nombre de archivo</a></span></dt>
+</dl></dd>
+<dt><span class="sect3"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.ignore">74.5.3.3. Ignorar archivos y directorios especiales</a></span></dt>
+<dd><dl>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.ignore.string">74.5.3.3.1. Ignorar un directorio o archivo especial</a></span></dt>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.ignore.array.files">74.5.3.3.2. Ignorar varios directorios o archivos</a></span></dt>
+<dt><span class="sect4"><a href="zend.translate.additional.phtml#zend.translate.additional.detection.ignore.array.names">74.5.3.3.3. Ignorar nombres específicos</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.rerouting">74.5.4. Enrutamiento de traducciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.combination">74.5.5. Combinación de múltiples fuentes de traducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.istranslated">74.5.6. Comprobación de traducciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.logging">74.5.7. Cómo registrar traducciones no encontradas</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.additional.phtml#zend.translate.additional.sourcedata">74.5.8. Acceso a los datos de origen</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.translate.plurals.phtml">74.6. Notaciones plurales para la traducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.translate.plurals.phtml#zend.translate.plurals.traditional">74.6.1. Traducciones plurales tradicionales</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.plurals.phtml#zend.translate.plurals.modern">74.6.2. Traducciones plurales modernas</a></span></dt>
+<dt><span class="sect2"><a href="zend.translate.plurals.phtml#zend.translate.plurals.source">74.6.3. Archivos fuente con plurales</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.translate.plurals.phtml#zend.translate.plurals.source.array">74.6.3.1. Fuente Array con definiciones de plural</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.plurals.phtml#zend.translate.plurals.source.csv">74.6.3.2. Fuente Csv con definiciones de plural</a></span></dt>
+<dt><span class="sect3"><a href="zend.translate.plurals.phtml#zend.translate.plurals.source.gettext">74.6.3.3. Fuente Gettext con definiciones de plural</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.translate.plurals.phtml#zend.translate.plurals.customrules">74.6.4. Reglas de plural personalizadas</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.translate.introduction"></a>74.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Translate</code> es la solución de Zend Framework para aplicaciones
+        multilingües.
+    </p>
+<p>
+        En las aplicaciones multilingües, el contenido debe traducirse a
+        varios idiomas y mostrarse en función del idioma del usuario.
+        <acronym class="acronym">PHP</acronym> ya ofrece varias formas de abordar este tipo de problemas, sin embargo
+        la solución de <acronym class="acronym">PHP</acronym> presenta algunos problemas:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em>API inconsistente:</em></span>
+                No existe una única <acronym class="acronym">API</acronym> para los distintos formatos de origen.
+                El uso de gettext, por ejemplo, es muy complicado.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>PHP solo soporta gettext y arrays nativos:</em></span>
+                <acronym class="acronym">PHP</acronym> por sí mismo solo ofrece soporte para arrays o gettext.
+                Todos los demás formatos de origen se tienen que codificar manualmente,
+                porque no existe soporte nativo.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Sin detección del idioma predeterminado:</em></span>
+                El idioma predeterminado del usuario no se puede detectar sin
+                un conocimiento profundo de los aspectos internos de
+                los distintos navegadores web.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Gettext no es seguro para hilos (thread-safe):</em></span>
+                La biblioteca gettext de <acronym class="acronym">PHP</acronym> no es segura para hilos, y no
+                debería usarse en un entorno multihilo.
+                Esto se debe a problemas del propio gettext, no de <acronym class="acronym">PHP</acronym>,
+                pero es un problema existente.
+            </p></li>
+</ul></div>
+<p>
+        <code class="classname">Zend_Translate</code> no tiene los problemas anteriores. Por eso
+        recomendamos usar <code class="classname">Zend_Translate</code> en lugar de las funciones nativas de
+        <acronym class="acronym">PHP</acronym>. Los beneficios de <code class="classname">Zend_Translate</code> son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em>Soporta múltiples formatos de origen:</em></span>
+                <code class="classname">Zend_Translate</code> soporta varios formatos de origen, incluyendo
+                los soportados por <acronym class="acronym">PHP</acronym>, y otros formatos como archivos TMX
+                y CSV.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Gettext seguro para hilos:</em></span>
+                El lector de gettext de <code class="classname">Zend_Translate</code> es seguro para hilos.
+                No hay problemas al usarlo en entornos multihilo.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>API sencilla y genérica:</em></span>
+                La <acronym class="acronym">API</acronym> de <code class="classname">Zend_Translate</code> es muy sencilla
+                y requiere solo un puñado de funciones.
+                Así que es fácil de aprender y fácil de mantener.
+                Todos los formatos de origen se manejan de la misma manera, de modo que si el formato
+                de sus archivos fuente cambia de Gettext a TMX,
+                solo necesita cambiar una línea de código para especificar el
+                adaptador de almacenamiento.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Detección del idioma estándar del usuario:</em></span>
+                El idioma preferido del usuario que accede al sitio puede
+                detectarse y ser usado por <code class="classname">Zend_Translate</code>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Detección automática de fuentes:</em></span>
+                <code class="classname">Zend_Translate</code> es capaz de detectar e integrar
+                múltiples archivos fuente y, además, detectar el locale que se debe usar en función
+                del directorio o los nombres de archivo.
+            </p></li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.introduction.adapters"></a>74.1.1. Iniciándose en el multilingüismo</h3></div></div></div>
+<p>
+            Así que comencemos con el negocio del multilingüismo.
+            Lo que queremos hacer es traducir la salida de nuestras
+            cadenas para que la vista produzca la salida traducida.
+            De lo contrario tendríamos que escribir una vista
+            para cada idioma, y a nadie le gustaría hacer esto.
+            Por lo general, los sitios multilingües son muy sencillos en su diseño.
+            Solo hay cuatro pasos que tendría que realizar:
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+                    Decidir qué adaptador desea usar;
+                </p></li>
+<li class="listitem"><p>
+                    Crear su vista e integrar <code class="classname">Zend_Translate</code> en su
+                    código;
+                </p></li>
+<li class="listitem"><p>
+                    Crear el archivo fuente a partir de su código;
+                </p></li>
+<li class="listitem"><p>
+                    Traducir su archivo fuente al idioma deseado.
+                </p></li>
+</ol></div>
+<p>
+            Las siguientes secciones le guiarán a través de los cuatro pasos.
+            Lea las próximas páginas para crear su propia
+            aplicación web multilingüe.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tool.project.internals.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.translate.adapter.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">73.4. Detalles internos de Zend_Tool_Project </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 74.2. Adaptadores para Zend_Translate</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

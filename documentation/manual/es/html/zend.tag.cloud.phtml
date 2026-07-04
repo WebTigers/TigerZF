@@ -1,0 +1,203 @@
+<?php $title = '67.2. Zend_Tag_Cloud'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">67.2. Zend_Tag_Cloud</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tag.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 67. Zend_Tag</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.test.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.tag.cloud"></a>67.2. Zend_Tag_Cloud</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Tag_Cloud</code> es la parte de renderizado de
+        <code class="classname">Zend_Tag</code>. Por defecto viene con un conjunto de decoradores
+        <acronym class="acronym">HTML</acronym>, que te permiten crear nubes de etiquetas para un sitio web, pero
+        también te proporciona dos clases abstractas para crear tus propios
+        decoradores, para crear nubes de etiquetas en documentos <acronym class="acronym">PDF</acronym> por ejemplo.
+    </p>
+<p>
+        Puedes instanciar y configurar <code class="classname">Zend_Tag_Cloud</code> ya sea
+        programáticamente o completamente mediante un array o una instancia de
+        <code class="classname">Zend_Config</code>. Las opciones disponibles son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="property">cloudDecorator</span>: define el decorador para la
+                nube. Puede ser el nombre de la clase que debe ser
+                cargada por el cargador de plugins, una instancia de
+                <code class="classname">Zend_Tag_Cloud_Decorator_Cloud</code> o un array
+                que contenga la cadena 'decorator' y opcionalmente
+                un array 'options', que se pasará al
+                constructor del decorador.
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">tagDecorator</span>: define el decorador para las etiquetas
+                individuales. Puede ser el nombre de la clase que debe ser
+                cargada por el cargador de plugins, una instancia de
+                <code class="classname">Zend_Tag_Cloud_Decorator_Tag</code> o un array
+                que contenga la cadena 'decorator' y opcionalmente
+                un array 'options', que se pasará al
+                constructor del decorador.
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">pluginLoader</span>: un cargador de plugins diferente para usar.
+                Debe ser una instancia de
+                <code class="classname">Zend_Loader_PluginLoader_Interface</code>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">prefixPath</span>: rutas de prefijo para añadir al cargador
+                de plugins. Debe ser un array que contenga las claves prefix y path o
+                múltiples arrays que contengan las claves prefix y path. Los
+                elementos no válidos serán omitidos.
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">itemList</span>: una lista de elementos diferente para usar. Debe ser una
+                instancia de <code class="classname">Zend_Tag_ItemList</code>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">tags</span>: una lista de etiquetas para asignar a la nube. Cada
+                etiqueta debe implementar <code class="classname">Zend_Tag_Taggable</code> o ser
+                un array que se pueda usar para instanciar
+                <code class="classname">Zend_Tag_Item</code>.
+            </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.tag.cloud.example.using"></a><p class="title"><b>Ejemplo 67.2. Uso de Zend_Tag_Cloud</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo ilustra un caso básico de cómo crear una nube de
+            etiquetas, añadirle múltiples etiquetas y finalmente renderizarla.
+        </p>
+<pre class="programlisting">
+// Create the cloud and assign static tags to it
+$cloud = new Zend_Tag_Cloud(array(
+    'tags' =&gt; array(
+        array('title' =&gt; 'Code', 'weight' =&gt; 50,
+              'params' =&gt; array('url' =&gt; '/tag/code')),
+        array('title' =&gt; 'Zend Framework', 'weight' =&gt; 1,
+              'params' =&gt; array('url' =&gt; '/tag/zend-framework')),
+        array('title' =&gt; 'PHP', 'weight' =&gt; 5,
+              'params' =&gt; array('url' =&gt; '/tag/php')),
+    )
+));
+
+// Render the cloud
+echo $cloud;
+</pre>
+<p>
+            Esto mostrará la nube de etiquetas con las tres etiquetas, distribuidas con
+            los tamaños de fuente por defecto.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tag.cloud.decorators"></a>67.2.1. Decoradores</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Tag_Cloud</code> requiere dos tipos de decoradores para poder
+            renderizar una nube de etiquetas. Esto incluye un decorador que renderiza
+            las etiquetas individuales, así como un decorador que renderiza la nube
+            que las envuelve. <code class="classname">Zend_Tag_Cloud</code> incluye un conjunto de decoradores por defecto
+            para formatear una nube de etiquetas en <acronym class="acronym">HTML</acronym>. Este conjunto creará por defecto una
+            nube de etiquetas como una lista ul/li, distribuida con diferentes tamaños de fuente según
+            los valores de peso de las etiquetas asignadas a ellas.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tag.cloud.decorators.htmltag"></a>67.2.1.1. Decorador de etiqueta HTML</h4></div></div></div>
+<p>
+                El decorador de etiqueta <acronym class="acronym">HTML</acronym> renderizará por defecto cada etiqueta en un
+                elemento anchor, rodeado por un elemento li. El anchor en sí es
+                fijo y no se puede cambiar, pero el elemento o elementos que lo rodean sí.
+            </p>
+<div class="note"><table border="0" summary="Note: URL parameter">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Parámetro URL</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Dado que el decorador de etiqueta <acronym class="acronym">HTML</acronym> siempre rodea el título de la etiqueta con
+                    un anchor, debes definir un parámetro <acronym class="acronym">URL</acronym> para cada
+                    etiqueta usada en él.
+                </p></td></tr>
+</table></div>
+<p>
+                El decorador de etiqueta puede distribuir diferentes tamaños de fuente sobre
+                los anchors o una lista definida de nombres de clase. Al establecer
+                opciones para una de esas posibilidades, la correspondiente
+                se habilitará automáticamente. Las siguientes opciones de configuración
+                están disponibles:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="property">fontSizeUnit</span>: define la unidad de tamaño de fuente
+                        usada para todos los tamaños de fuente. Los valores posibles son:
+                        em, ex, px, in, cm, mm, pt, pc y %.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="property">minFontSize</span>: el tamaño de fuente mínimo
+                        distribuido entre las etiquetas (debe ser un entero).
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="property">maxFontSize</span>: el tamaño de fuente máximo
+                        distribuido entre las etiquetas (debe ser un entero).
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="property">classList</span>: un array de clases distribuidas
+                        entre las etiquetas.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="property">htmlTags</span>: un array de etiquetas <acronym class="acronym">HTML</acronym>
+                        que rodean el anchor. Cada elemento puede ser una cadena, que
+                        se usa entonces como tipo de elemento, o un array que contenga
+                        una lista de atributos para el elemento, definida como par
+                        clave/valor. En este caso, la clave del array se usa como tipo de
+                        elemento.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tag.cloud.decorators.htmlcloud"></a>67.2.1.2. Decorador de nube HTML</h4></div></div></div>
+<p>
+                El decorador de nube <acronym class="acronym">HTML</acronym> rodeará las etiquetas <acronym class="acronym">HTML</acronym>
+                con un elemento ul por defecto y no añadirá separación. Al igual que en el decorador
+                de etiqueta, puedes definir múltiples etiquetas <acronym class="acronym">HTML</acronym> que las rodeen y
+                además definir un separador. Las opciones disponibles son:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="property">separator</span>: define el separador que
+                        se coloca entre todas las etiquetas.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="property">htmlTags</span>: un array de etiquetas <acronym class="acronym">HTML</acronym>
+                        que rodean todas las etiquetas. Cada elemento puede ser una cadena, que
+                        se usa entonces como tipo de elemento, o un array que contenga
+                        una lista de atributos para el elemento, definida como par
+                        clave/valor. En este caso, la clave del array se usa como tipo de elemento.
+                    </p></li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tag.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.tag.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.test.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 67. Zend_Tag </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 68. Zend_Test</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

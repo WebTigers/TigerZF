@@ -1,0 +1,986 @@
+<?php $title = '16.3. Objetos Zend_Barcode'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">16.3. Objetos Zend_Barcode</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.barcode.creation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 16. Zend_Barcode</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.barcode.renderers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.barcode.objects"></a>16.3. Objetos Zend_Barcode</h2></div></div></div>
+<p>
+        Los objetos de código de barras permiten generar códigos de barras independientemente del
+        soporte de renderizado. Después de la generación, puede recuperar el código de barras como un
+        array de instrucciones de dibujo que puede proporcionar a un renderizador.
+    </p>
+<p>
+        Los objetos tienen un gran número de opciones. La mayoría de ellas son comunes a todos los
+        objetos. Estas opciones se pueden establecer de cuatro formas:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Como un array o un objeto <code class="classname">Zend_Config</code> pasado al
+                constructor.
+            </p></li>
+<li class="listitem"><p>
+                Como un array pasado al método <code class="methodname">setOptions()</code>.
+            </p></li>
+<li class="listitem"><p>
+                Como un objeto <code class="classname">Zend_Config</code> pasado al
+                método <code class="methodname">setConfig()</code>.
+            </p></li>
+<li class="listitem"><p>Mediante métodos de establecimiento (setters) individuales para cada tipo de configuración.</p></li>
+</ul></div>
+<div class="example">
+<a name="zend.barcode.objects.configuration"></a><p class="title"><b>Ejemplo 16.7. Diferentes formas de parametrizar un objeto de código de barras</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array('text' =&gt; 'ZEND-FRAMEWORK', 'barHeight' =&gt; 40);
+
+// Case 1: constructor
+$barcode = new Zend_Barcode_Object_Code39($options);
+
+// Case 2: setOptions()
+$barcode = new Zend_Barcode_Object_Code39();
+$barcode-&gt;setOptions($options);
+
+// Case 3: setConfig()
+$config  = new Zend_Config($options);
+$barcode = new Zend_Barcode_Object_Code39();
+$barcode-&gt;setConfig($config);
+
+// Case 4: individual setters
+$barcode = new Zend_Barcode_Object_Code39();
+$barcode-&gt;setText('ZEND-FRAMEWORK')
+        -&gt;setBarHeight(40);
+</pre></div>
+</div>
+<br class="example-break"><div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.objects.common.options"></a>16.3.1. Opciones comunes</h3></div></div></div>
+<p>
+            En la siguiente lista, los valores no tienen unidades; usaremos el término "unidad". Por
+            ejemplo, el valor por defecto de la "barra fina" es "1 unidad". Las unidades reales dependen
+            del soporte de renderizado (consulte <a class="link" href="zend.barcode.renderers.phtml" title="16.4. Zend_Barcode Renderers">la
+                documentación de los renderizadores</a> para más información). Los setters se
+            nombran poniendo en mayúscula la letra inicial de la opción y anteponiendo el nombre con
+            "set" (por ejemplo, "barHeight" se convierte en "setBarHeight"). Todas las opciones tienen
+            un getter correspondiente prefijado con "get" (por ejemplo, "getBarHeight"). Las opciones
+            disponibles son:
+        </p>
+<div class="table">
+<a name="zend.barcode.objects.common.options.table"></a><p class="title"><b>Tabla 16.1. Opciones comunes</b></p>
+<div class="table-contents"><table class="table" summary="Common Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>barcodeNamespace</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="classname">Zend_Barcode_Object</code></td>
+<td>
+                            Espacio de nombres del código de barras; por ejemplo, si necesita extender
+                            los objetos incrustados
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>barHeight</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>50</td>
+<td>Altura de las barras</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>barThickWidth</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>3</td>
+<td>Ancho de la barra gruesa</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>barThinWidth</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>1</td>
+<td>Ancho de la barra fina</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>factor</em></span></td>
+<td>
+                            <span class="type">Integer</span>, <span class="type">Float</span>,
+                            <span class="type">String</span> o <span class="type">Boolean</span>
+                        </td>
+<td>1</td>
+<td>Factor por el cual multiplicar los anchos de las barras y los tamaños de fuente</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>foreColor</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0 (negro)</td>
+<td>
+                            Color de la barra y del texto. Se puede proporcionar como un entero
+                            o como un valor <acronym class="acronym">HTML</acronym> (por ejemplo, "#333333")
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>backgroundColor</em></span></td>
+<td>
+<span class="type">Integer</span> o <span class="type">String</span>
+</td>
+<td>16777125 (blanco)</td>
+<td>
+                            Color del fondo. Se puede proporcionar como un entero
+                            o como un valor <acronym class="acronym">HTML</acronym> (por ejemplo, "#333333")
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>reverseColor</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>Permite intercambiar el color de la barra y del fondo</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>orientation</em></span></td>
+<td>
+                            <span class="type">Integer</span>, <span class="type">Float</span>,
+                            <span class="type">String</span> o <span class="type">Boolean</span>
+                        </td>
+<td>0</td>
+<td>Orientación del código de barras</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>font</em></span></td>
+<td>
+<span class="type">String</span> o <span class="type">Integer</span>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            Ruta a una fuente <acronym class="acronym">TTF</acronym> o un número entre 1 y 5
+                            si se usa generación de imágenes con GD (fuentes internas)
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>fontSize</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>10</td>
+<td>Tamaño de la fuente (no aplicable con fuentes numéricas)</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>withBorder</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>Dibuja un borde alrededor del código de barras y de las zonas de silencio</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>withQuietZones</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>Deja una zona de silencio antes y después del código de barras</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>drawText</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>Establece si el texto se muestra debajo del código de barras</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>stretchText</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>Especifica si el texto se estira a lo largo de todo el código de barras</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>withChecksum</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            Indica si el checksum se añade o no automáticamente al
+                            código de barras
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>withChecksumInText</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            Indica si el checksum se muestra o no en la representación
+                            textual
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>text</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>El texto a representar como código de barras</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.common.options.barcodefont"></a>16.3.1.1. Caso particular del método estático setBarcodeFont()</h4></div></div></div>
+<p>
+                Puede establecer una fuente común para todos sus objetos utilizando el método estático
+                <code class="methodname">Zend_Barcode_Object::setBarcodeFont()</code>. Este valor
+                siempre puede ser sobrescrito para objetos individuales utilizando el método
+                <code class="methodname">setFont()</code>.
+            </p>
+<pre class="programlisting">
+// In your bootstrap:
+Zend_Barcode_Object::setBarcodeFont('my_font.ttf');
+
+// Later in your code:
+Zend_Barcode::render(
+    'code39',
+    'pdf',
+    array('text' =&gt; 'ZEND-FRAMEWORK')
+); // will use 'my_font.ttf'
+
+// or:
+Zend_Barcode::render(
+    'code39',
+    'image',
+    array(
+        'text' =&gt; 'ZEND-FRAMEWORK',
+        'font' =&gt; 3
+    )
+); // will use the 3rd GD internal font
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.objects.common.getters"></a>16.3.2. Getters adicionales comunes</h3></div></div></div>
+<p></p>
+<div class="table">
+<a name="zend.barcode.objects.common.getters.table"></a><p class="title"><b>Tabla 16.2. Getters comunes</b></p>
+<div class="table-contents"><table class="table" summary="Common Getters" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Getter</th>
+<th>Tipo de dato</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="methodname">getType()</code></td>
+<td><span class="type">String</span></td>
+<td>
+                            Devuelve el nombre de la clase del código de barras sin el espacio de
+                            nombres (por ejemplo, <code class="classname">Zend_Barcode_Object_Code39</code>
+                            devuelve simplemente "code39")
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getRawText()</code></td>
+<td><span class="type">String</span></td>
+<td>Devuelve el texto original proporcionado al objeto</td>
+</tr>
+<tr>
+<td><code class="methodname">getTextToDisplay()</code></td>
+<td><span class="type">String</span></td>
+<td>
+                            Devuelve el texto a mostrar, incluyendo, si está activado, el valor del
+                            checksum
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getQuietZone()</code></td>
+<td><span class="type">Integer</span></td>
+<td>
+                            Devuelve el tamaño del espacio necesario antes y después del código de
+                            barras sin ningún dibujo
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getInstructions()</code></td>
+<td><span class="type">Array</span></td>
+<td>Devuelve las instrucciones de dibujo como un array.</td>
+</tr>
+<tr>
+<td><code class="methodname">getHeight($recalculate = false)</code></td>
+<td><span class="type">Integer</span></td>
+<td>
+                            Devuelve la altura del código de barras calculada después de una posible
+                            rotación
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getWidth($recalculate = false)</code></td>
+<td><span class="type">Integer</span></td>
+<td>
+                            Devuelve el ancho del código de barras calculado después de una posible
+                            rotación
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getOffsetTop($recalculate = false)</code></td>
+<td><span class="type">Integer</span></td>
+<td>
+                            Devuelve la posición de la parte superior del código de barras calculada
+                            después de una posible rotación
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getOffsetLeft($recalculate = false)</code></td>
+<td><span class="type">Integer</span></td>
+<td>
+                            Devuelve la posición de la parte izquierda del código de barras calculada
+                            después de una posible rotación
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.objects.details"></a>16.3.3. Descripción de los códigos de barras incluidos</h3></div></div></div>
+<p>
+        A continuación encontrará información detallada sobre todos los tipos de código de barras
+        incluidos por defecto con Zend Framework.
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.error"></a>16.3.3.1. Zend_Barcode_Object_Error</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.error.png" align="middle" width="400">
+        </p>
+<p>
+            Este código de barras es un caso especial. Se utiliza internamente para renderizar
+            automáticamente una excepción capturada por el componente <code class="classname">Zend_Barcode</code>.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.code128"></a>16.3.3.2. Zend_Barcode_Object_Code128</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.code128.png" align="middle" width="152">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Code 128
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> el conjunto completo de caracteres ASCII
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> opcional (módulo 103)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> variable
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.code25"></a>16.3.3.3. Zend_Barcode_Object_Code25</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.code25.png" align="middle" width="152">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Code 25 (o Code 2 of 5 o Code 25 Industrial)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> opcional (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> variable
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.code25interleaved"></a>16.3.3.4. Zend_Barcode_Object_Code25interleaved</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.int25.png" align="middle" width="101">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Code25</code>
+            (Code 2 of 5), y tiene las mismas particularidades y opciones, y añade lo siguiente:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Code 2 of 5 Interleaved
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> opcional (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> variable (siempre número par de caracteres)
+                </p></li>
+</ul></div>
+<p>
+            Las opciones disponibles incluyen:
+        </p>
+<div class="table">
+<a name="zend.barcode.objects.details.code25interleaved.table"></a><p class="title"><b>Tabla 16.3. Opciones de Zend_Barcode_Object_Code25interleaved</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Barcode_Object_Code25interleaved Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td><span class="emphasis"><em>withBearerBars</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>Dibuja una barra gruesa en la parte superior e inferior del código de barras.</td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres no es par,
+                <code class="classname">Zend_Barcode_Object_Code25interleaved</code> añadirá
+                automáticamente el cero que falte al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.ean2"></a>16.3.3.5. Zend_Barcode_Object_Ean2</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.ean2.png" align="middle" width="41">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Ean5</code>
+            (<acronym class="acronym">EAN</acronym> 5), y tiene las mismas particularidades y opciones, y añade lo
+            siguiente:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">EAN</acronym>-2
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> solo se usa internamente pero no se muestra
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 2 caracteres
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 2,
+                <code class="classname">Zend_Barcode_Object_Ean2</code> añadirá
+                automáticamente el cero que falte al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.ean5"></a>16.3.3.6. Zend_Barcode_Object_Ean5</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.ean5.png" align="middle" width="68">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Ean13</code>
+            (<acronym class="acronym">EAN</acronym> 13), y tiene las mismas particularidades y opciones, y añade lo
+            siguiente:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">EAN</acronym>-5
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> solo se usa internamente pero no se muestra
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 5 caracteres
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 5,
+                <code class="classname">Zend_Barcode_Object_Ean5</code> añadirá
+                automáticamente el cero que falte al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.ean8"></a>16.3.3.7. Zend_Barcode_Object_Ean8</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.ean8.png" align="middle" width="82">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Ean13</code>
+            (<acronym class="acronym">EAN</acronym> 13), y tiene las mismas particularidades y opciones, y añade lo
+            siguiente:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">EAN</acronym>-8
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 8 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 8,
+                <code class="classname">Zend_Barcode_Object_Ean8</code> añadirá
+                automáticamente el cero que falte al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.ean13"></a>16.3.3.8. Zend_Barcode_Object_Ean13</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.ean13.png" align="middle" width="113">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">EAN</acronym>-13
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 13 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Si el número de caracteres es inferior a 13,
+                <code class="classname">Zend_Barcode_Object_Ean13</code> añadirá
+                automáticamente el cero que falte al texto del código de barras.
+            </p>
+<p>
+                La opción <span class="property">withQuietZones</span> no tiene efecto con este código de barras.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.code39"></a>16.3.3.9. Zend_Barcode_Object_Code39</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.introduction.example-1.png" align="middle" width="275">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Code 39
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span>
+                    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ -.$/+%'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> opcional (módulo 43)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> variable
+                </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_Barcode_Object_Code39</code> añadirá automáticamente
+                los caracteres de inicio y fin ('*') por usted.
+            </p></td></tr>
+</table></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.identcode"></a>16.3.3.10. Zend_Barcode_Object_Identcode</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.identcode.png" align="middle" width="137">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Code25interleaved</code>
+            (Code 2 of 5 Interleaved), y hereda algunas de sus capacidades; también tiene algunas
+            particularidades propias.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Identcode (Deutsche Post Identcode)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10 diferente de Code25)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 12 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 12,
+                <code class="classname">Zend_Barcode_Object_Identcode</code> añadirá automáticamente
+                los ceros que falten al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.itf14"></a>16.3.3.11. Zend_Barcode_Object_Itf14</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.itf14.png" align="middle" width="155">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Code25interleaved</code>
+            (Code 2 of 5 Interleaved), y hereda algunas de sus capacidades; también tiene algunas
+            particularidades propias.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">ITF</acronym>-14
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 14 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 14,
+                <code class="classname">Zend_Barcode_Object_Itf14</code> añadirá automáticamente
+                los ceros que falten al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.leitcode"></a>16.3.3.12. Zend_Barcode_Object_Leitcode</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.leitcode.png" align="middle" width="155">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Identcode</code>
+            (Deutsche Post Identcode), y hereda algunas de sus capacidades; también tiene algunas
+            particularidades propias.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Leitcode (Deutsche Post Leitcode)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10 diferente de Code25)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 14 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 14,
+                <code class="classname">Zend_Barcode_Object_Leitcode</code> añadirá
+                automáticamente los ceros que falten al texto del código de barras.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.planet"></a>16.3.3.13. Zend_Barcode_Object_Planet</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.planet.png" align="middle" width="286">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Planet (PostaL Alpha Numeric Encoding Technique)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 12 o 14 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.postnet"></a>16.3.3.14. Zend_Barcode_Object_Postnet</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.postnet.png" align="middle" width="286">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Postnet (POSTal Numeric Encoding Technique)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 6, 7, 10 o 12 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.royalmail"></a>16.3.3.15. Zend_Barcode_Object_Royalmail</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.royalmail.png" align="middle" width="158">
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> Royal Mail o <acronym class="acronym">RM4SCC</acronym> (Royal Mail
+                    4-State Customer Code)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> variable
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.upca"></a>16.3.3.16. Zend_Barcode_Object_Upca</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.upca.png" align="middle" width="115">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Ean13</code>
+            (<acronym class="acronym">EAN</acronym>-13), y hereda algunas de sus capacidades; también tiene algunas
+            particularidades propias.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">UPC</acronym>-A (Universal Product Code)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 12 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Si el número de caracteres es inferior a 12,
+                <code class="classname">Zend_Barcode_Object_Upca</code> añadirá
+                automáticamente los ceros que falten al texto del código de barras.
+            </p>
+<p>
+                La opción <span class="property">withQuietZones</span> no tiene efecto con este código de barras.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.barcode.objects.details.upce"></a>16.3.3.17. Zend_Barcode_Object_Upce</h4></div></div></div>
+<p>
+            <img src="figures/zend.barcode.objects.details.upce.png" align="middle" width="71">
+        </p>
+<p>
+            Este código de barras extiende <code class="classname">Zend_Barcode_Object_Upca</code>
+            (<acronym class="acronym">UPC</acronym>-A), y hereda algunas de sus capacidades; también tiene algunas
+            particularidades propias. El primer carácter del texto a codificar
+            es el sistema (0 o 1).
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Nombre:</em></span> <acronym class="acronym">UPC</acronym>-E (Universal Product Code)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Caracteres permitidos:</em></span> '0123456789'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Checksum:</em></span> obligatorio (módulo 10)
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Longitud:</em></span> 8 caracteres (incluyendo el checksum)
+                </p></li>
+</ul></div>
+<p>
+            No hay opciones particulares para este código de barras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si el número de caracteres es inferior a 8,
+                <code class="classname">Zend_Barcode_Object_Upce</code> añadirá
+                automáticamente los ceros que falten al texto del código de barras.
+            </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Si el primer carácter del texto a codificar no es 0 o 1,
+                <code class="classname">Zend_Barcode_Object_Upce</code> lo
+                reemplazará automáticamente por 0.
+            </p>
+<p>
+                La opción <span class="property">withQuietZones</span> no tiene efecto con este código de barras.
+            </p>
+</td></tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.barcode.creation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.barcode.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.barcode.renderers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">16.2. Creación de códigos de barras utilizando la clase Zend_Barcode </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 16.4. Renderizadores de Zend_Barcode</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

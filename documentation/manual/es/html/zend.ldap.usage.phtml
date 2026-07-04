@@ -1,0 +1,190 @@
+<?php $title = '41.3. Escenarios de uso'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">41.3. Escenarios de uso</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.ldap.api.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 41. Zend_Ldap</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.ldap.tools.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.ldap.usage"></a>41.3. Escenarios de uso</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.usage.authentication"></a>41.3.1. Escenarios de autenticación</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.authentication.openldap"></a>41.3.1.1. OpenLDAP</h4></div></div></div>
+<p></p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.authentication.activedirectory"></a>41.3.1.2. ActiveDirectory</h4></div></div></div>
+<p></p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.usage.basic"></a>41.3.2. Operaciones CRUD básicas</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.basic.retrieve"></a>41.3.2.1. Obtener datos del LDAP</h4></div></div></div>
+<div class="example">
+<a name="zend.ldap.usage.basic.retrieve.dn"></a><p class="title"><b>Ejemplo 41.1. Obtener una entrada por su DN</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$hm = $ldap-&gt;getEntry('cn=Hugo Müller,ou=People,dc=my,dc=local');
+/*
+$hm is an array of the following structure
+array(
+    'dn'          =&gt; 'cn=Hugo Müller,ou=People,dc=my,dc=local',
+    'cn'          =&gt; array('Hugo Müller'),
+    'sn'          =&gt; array('Müller'),
+    'objectclass' =&gt; array('inetOrgPerson', 'top'),
+    ...
+)
+*/
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.ldap.usage.basic.retrieve.exists"></a><p class="title"><b>Ejemplo 41.2. Comprobar la existencia de un DN dado</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$isThere = $ldap-&gt;exists('cn=Hugo Müller,ou=People,dc=my,dc=local');
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.ldap.usage.basic.retrieve.counting-children"></a><p class="title"><b>Ejemplo 41.3. Contar los hijos de un DN dado</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$childrenCount = $ldap-&gt;countChildren(
+                            'cn=Hugo Müller,ou=People,dc=my,dc=local');
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.ldap.usage.basic.retrieve.search"></a><p class="title"><b>Ejemplo 41.4. Buscar en el árbol LDAP</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$result = $ldap-&gt;search('(objectclass=*)',
+                        'ou=People,dc=my,dc=local',
+                        Zend_Ldap_Ext::SEARCH_SCOPE_ONE);
+foreach ($result as $item) {
+    echo $item["dn"] . ': ' . $item['cn'][0] . PHP_EOL;
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.basic.add"></a>41.3.2.2. Añadir datos al LDAP</h4></div></div></div>
+<div class="example">
+<a name="id1803"></a><p class="title"><b>Ejemplo 41.5. Añadir una nueva entrada al LDAP</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$entry = array();
+Zend_Ldap_Attribute::setAttribute($entry, 'cn', 'Hans Meier');
+Zend_Ldap_Attribute::setAttribute($entry, 'sn', 'Meier');
+Zend_Ldap_Attribute::setAttribute($entry, 'objectClass', 'inetOrgPerson');
+$ldap-&gt;add('cn=Hans Meier,ou=People,dc=my,dc=local', $entry);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.basic.delete"></a>41.3.2.3. Eliminar del LDAP</h4></div></div></div>
+<div class="example">
+<a name="id1804"></a><p class="title"><b>Ejemplo 41.6. Eliminar una entrada existente del LDAP</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$ldap-&gt;delete('cn=Hans Meier,ou=People,dc=my,dc=local');
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.basic.update"></a>41.3.2.4. Actualizar el LDAP</h4></div></div></div>
+<div class="example">
+<a name="id1805"></a><p class="title"><b>Ejemplo 41.7. Actualizar una entrada existente en el LDAP</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$hm = $ldap-&gt;getEntry('cn=Hugo Müller,ou=People,dc=my,dc=local');
+Zend_Ldap_Attribute::setAttribute($hm, 'mail', 'mueller@my.local');
+Zend_Ldap_Attribute::setPassword($hm,
+                                 'newPa$$w0rd',
+                                 Zend_Ldap_Attribute::PASSWORD_HASH_SHA1);
+$ldap-&gt;update('cn=Hugo Müller,ou=People,dc=my,dc=local', $hm);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.usage.extended"></a>41.3.3. Operaciones avanzadas</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.usage.extended.copy-and-move"></a>41.3.3.1. Copiar y mover entradas en el LDAP</h4></div></div></div>
+<div class="example">
+<a name="zend.ldap.usage.extended.copy-and-move.copy"></a><p class="title"><b>Ejemplo 41.8. Copiar una entrada LDAP recursivamente junto con todos sus descendientes</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$ldap-&gt;copy('cn=Hugo Müller,ou=People,dc=my,dc=local',
+            'cn=Hans Meier,ou=People,dc=my,dc=local',
+            true);
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.ldap.usage.extended.copy-and-move.move-to-subtree"></a><p class="title"><b>Ejemplo 41.9.
+                    Mover una entrada LDAP recursivamente junto con todos sus descendientes a un subárbol diferente
+                </b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(/* ... */);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind();
+$ldap-&gt;moveToSubtree('cn=Hugo Müller,ou=People,dc=my,dc=local',
+                     'ou=Dismissed,dc=my,dc=local',
+                     true);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.ldap.api.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.ldap.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.ldap.tools.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">41.2. Resumen de la API </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 41.4. Herramientas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

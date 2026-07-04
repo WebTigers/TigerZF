@@ -1,0 +1,286 @@
+<?php $title = '64.16. Zend_Service_Amazon_Sqs'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.16. Zend_Service_Amazon_Sqs</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.s3.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.audioscrobbler.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.sqs"></a>64.16. Zend_Service_Amazon_Sqs</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.introduction"></a>64.16.1. Introducción</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://aws.amazon.com/sqs/" target="_top">Amazon Simple Queue Service
+                (Amazon SQS)</a> ofrece una cola alojada, fiable y altamente escalable
+            para almacenar mensajes mientras viajan entre equipos. Al
+            usar Amazon SQS, los desarrolladores pueden mover datos fácilmente entre
+            componentes distribuidos de sus aplicaciones que realizan diferentes
+            tareas, sin perder mensajes ni requerir que cada componente esté
+            siempre disponible. Amazon SQS facilita la construcción de un flujo de trabajo
+            automatizado, funcionando en estrecha conjunción con Amazon Elastic
+            Compute Cloud (Amazon EC2) y los demás servicios web de infraestructura de <acronym class="acronym">AWS</acronym>.
+        </p>
+<p>
+            Amazon SQS funciona exponiendo la infraestructura de mensajería a escala web
+            de Amazon como un servicio web. Cualquier equipo en Internet puede
+            añadir o leer mensajes sin necesidad de software instalado ni configuraciones
+            especiales de cortafuegos. Los componentes de las aplicaciones que usan Amazon SQS
+            pueden ejecutarse de forma independiente, y no necesitan estar en la misma red,
+            desarrollarse con las mismas tecnologías, ni ejecutarse al mismo tiempo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.registering"></a>64.16.2. Registro en Amazon SQS</h3></div></div></div>
+<p>
+            Antes de poder empezar con
+            <code class="classname">Zend_Service_Amazon_Sqs</code>, primero debe
+            registrarse para obtener una cuenta. Consulte la página <a class="ulink" href="http://aws.amazon.com/sqs/faqs/" target="_top">SQS FAQ</a> en
+            el sitio web de Amazon para más información.
+        </p>
+<p>
+            Después de registrarse, recibirá una clave de aplicación y una clave secreta.
+            Necesitará ambas para acceder al servicio SQS.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.apiDocumentation"></a>64.16.3. Documentación de la API</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Service_Amazon_Sqs</code> proporciona
+            el envoltorio <acronym class="acronym">PHP</acronym> para la interfaz REST de Amazon SQS. Consulte la
+            <a class="ulink" href="http://developer.amazonwebservices.com/connect/kbcategory.jspa?categoryID=31" target="_top">documentación
+                de Amazon SQS</a> para una descripción detallada del
+            servicio. Necesitará estar familiarizado con los conceptos básicos para
+            poder usar este servicio.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.features"></a>64.16.4. Características</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Amazon_Sqs</code> proporciona
+            la siguiente funcionalidad:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Un único punto para configurar sus credenciales de autenticación
+                    de amazon.sqs que se pueden usar en todos los
+                    espacios de nombres de amazon.sqs.
+                </p></li>
+<li class="listitem"><p>
+                    Un objeto proxy que es más conveniente de usar que un cliente
+                    <acronym class="acronym">HTTP</acronym> por sí solo, eliminando en su mayoría la necesidad de construir manualmente
+                    peticiones POST <acronym class="acronym">HTTP</acronym> para acceder al servicio REST.
+                </p></li>
+<li class="listitem"><p>
+                    Un envoltorio de respuesta que analiza el cuerpo de cada respuesta y lanza
+                    una excepción si se produce un error, eliminando la necesidad de
+                    comprobar repetidamente el éxito de muchos comandos.
+                </p></li>
+<li class="listitem"><p>
+                    Métodos de conveniencia adicionales para algunas de las operaciones
+                    más comunes.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.storing-your-first"></a>64.16.5. Primeros pasos</h3></div></div></div>
+<p>
+            Una vez que se haya registrado en Amazon SQS, estará listo para crear
+            su cola y almacenar algunos mensajes en SQS. Cada cola puede contener
+            una cantidad ilimitada de mensajes, identificados por nombre.
+        </p>
+<p>
+            El siguiente ejemplo muestra cómo crear una cola, y cómo almacenar y
+            recuperar mensajes.
+        </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.storing-your-first.example"></a><p class="title"><b>Ejemplo 64.70. Ejemplo de uso de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+
+$queue_url = $sqs-&gt;create('test');
+
+$message = 'this is a test';
+$message_id = $sqs-&gt;send($queue_url, $message);
+
+foreach ($sqs-&gt;receive($queue_url) as $message) {
+    echo $message['body'].'&lt;br/&gt;';
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Dado que el servicio <code class="classname">Zend_Service_Amazon_Sqs</code>
+            requiere autenticación, debería pasar sus credenciales (clave de AWS
+            y clave secreta) al constructor. Si solo usa una cuenta,
+            puede establecer credenciales predeterminadas para el servicio:
+        </p>
+<pre class="programlisting">
+Zend_Service_Amazon_Sqs::setKeys($my_aws_key, $my_aws_secret_key);
+$sqs = new Zend_Service_Amazon_Sqs();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.queues"></a>64.16.6. Operaciones de cola</h3></div></div></div>
+<p>
+            Todos los mensajes de SQS se almacenan en colas. Una cola debe crearse
+            antes de cualquier operación con mensajes. Los nombres de cola deben ser únicos
+            bajo su clave de acceso y clave secreta.
+        </p>
+<p>
+            Los nombres de cola pueden contener letras minúsculas, dígitos, puntos (.),
+            guiones bajos (_), y guiones (-). No se permite ningún otro símbolo. Los nombres
+            de cola pueden tener un máximo de 80 caracteres.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">create()</code> crea una nueva cola.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">delete()</code> elimina todos los mensajes de
+                    la cola.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.queues.removalExample"></a><p class="title"><b>Ejemplo 64.71. Ejemplo de eliminación de cola de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$queue_url = $sqs-&gt;create('test_1');
+$sqs-&gt;delete($queue_url);
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">count()</code> obtiene el número aproximado
+                    de mensajes en la cola.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.queues.countExample"></a><p class="title"><b>Ejemplo 64.72. Ejemplo de recuento de cola de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$queue_url = $sqs-&gt;create('test_1');
+$sqs-&gt;send($queue_url, 'this is a test');
+$count = $sqs-&gt;count($queue_url); // Returns '1'
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">getQueues()</code> devuelve la lista de
+                    nombres de todas las colas que pertenecen al usuario.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.queues.listExample"></a><p class="title"><b>Ejemplo 64.73. Ejemplo de listado de colas de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$list = $sqs-&gt;getQueues();
+foreach($list as $queue) {
+   echo "I have queue $queue\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.sqs.messages"></a>64.16.7. Operaciones con mensajes</h3></div></div></div>
+<p>
+            Una vez creada una cola, se pueden enviar mensajes simples a la cola
+            y recibirlos posteriormente. Los mensajes pueden tener hasta 8 KB de
+            longitud. Si se necesitan mensajes más largos, consulte <a class="ulink" href="http://framework.zend.com/manual/en/zend.service.amazon.s3.html" target="_top">S3</a>.
+            No hay límite en el número de mensajes que puede contener una cola.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <code class="methodname">sent($queue_url, $message)</code> envía el
+                    <code class="varname">$message</code> a la <acronym class="acronym">URL</acronym> de cola SQS <code class="varname">$queue_url</code>.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.messages.sendExample"></a><p class="title"><b>Ejemplo 64.74. Ejemplo de envío de mensaje de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$queue_url = $sqs-&gt;create('test_queue');
+$sqs-&gt;send($queue_url, 'this is a test message');
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">receive($queue_url)</code> recupera
+                    mensajes de la cola.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.messages.receiveExample"></a><p class="title"><b>Ejemplo 64.75. Ejemplo de recepción de mensaje de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$queue_url = $sqs-&gt;create('test_queue');
+$sqs-&gt;send($queue_url, 'this is a test message');
+foreach ($sqs-&gt;receive($queue_url) as $message) {
+    echo "got message ".$message['body'].'&lt;br/&gt;';
+}
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">deleteMessage($queue_url, $handle)</code>
+                    elimina un mensaje de una cola. Un mensaje primero debe ser
+                    recibido usando el método <code class="methodname">receive()</code>
+                    antes de poder ser eliminado.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.sqs.messages.deleteExample"></a><p class="title"><b>Ejemplo 64.76. Ejemplo de eliminación de mensaje de Zend_Service_Amazon_Sqs</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sqs = new Zend_Service_Amazon_Sqs($my_aws_key, $my_aws_secret_key);
+$queue_url = $sqs-&gt;create('test_queue');
+$sqs-&gt;send($queue_url, 'this is a test message');
+foreach ($sqs-&gt;receive($queue_url) as $message) {
+    echo "got message ".$message['body'].'&lt;br/&gt;';
+
+    if ($sqs-&gt;deleteMessage($queue_url, $message['handle'])) {
+        echo "Message deleted";
+    }
+    else {
+        echo "Message not deleted";
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.s3.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.audioscrobbler.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.15. Zend_Service_Amazon_S3 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.17. Zend_Service_Audioscrobbler</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

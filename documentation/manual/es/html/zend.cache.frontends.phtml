@@ -1,0 +1,977 @@
+<?php $title = '17.3. Frontends de Zend_Cache'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">17.3. Frontends de Zend_Cache</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cache.theory.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 17. Zend_Cache</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cache.backends.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cache.frontends"></a>17.3. Frontends de Zend_Cache</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.core"></a>17.3.1. Zend_Cache_Core</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.core.introduction"></a>17.3.1.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Core</code> es un frontend especial porque es el núcleo
+                del módulo. Es un frontend de caché genérico y es extendido por otras clases.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Todos los frontends heredan de <code class="classname">Zend_Cache_Core</code> de modo que
+                    sus métodos y opciones (descritos abajo) también estarán disponibles en otros
+                    frontends, por lo que no se documentarán allí.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.core.options"></a>17.3.1.2. Opciones disponibles</h4></div></div></div>
+<p>
+                Estas opciones se pasan al método factory tal como se demostró en ejemplos anteriores.
+            </p>
+<div class="table">
+<a name="zend.cache.frontends.core.options.table"></a><p class="title"><b>Tabla 17.1. Opciones del frontend Core</b></p>
+<div class="table-contents"><table class="table" summary="Core Frontend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>caching</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                                habilita / deshabilita la caché (puede ser muy útil para la depuración de
+                                scripts en caché)
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_id_prefix</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Un prefijo para todos los ids de caché; si se establece en <code class="constant">NULL</code>,
+                                no se usará ningún prefijo de id de caché. El prefijo de id de caché esencialmente
+                                crea un espacio de nombres en la caché, permitiendo que múltiples aplicaciones
+                                o sitios web usen una caché compartida. Cada aplicación o sitio web puede
+                                usar un prefijo de id de caché distinto para que ciertos ids de caché puedan
+                                usarse más de una vez.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>lifetime</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>3600</td>
+<td>
+                                tiempo de vida de la caché (en segundos); si se establece en <code class="constant">NULL</code>,
+                                la caché es válida para siempre.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>logging</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                si se establece en <code class="constant">TRUE</code>, se activa el registro
+                                mediante <code class="classname">Zend_Log</code>
+                                (pero el sistema es más lento)
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>write_control</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                                Habilita / deshabilita el control de escritura (la caché se lee justo después
+                                de escribir para detectar entradas corruptas); habilitar write_control
+                                ralentizará ligeramente la escritura de la caché pero no la lectura de la
+                                caché (puede detectar algunos archivos de caché corruptos, pero no es un
+                                control perfecto)
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>automatic_serialization</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                Habilita / deshabilita la serialización automática, puede usarse para guardar
+                                directamente datos que no son cadenas (pero es más lento)
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>automatic_cleaning_factor</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>10</td>
+<td>
+                                Deshabilita / Ajusta el proceso de limpieza automática (recolector de basura):
+                                0 significa sin limpieza automática de la caché, 1 significa limpieza
+                                sistemática de la caché y x &gt; 1 significa limpieza automática aleatoria
+                                1 vez de cada x operaciones de escritura.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>ignore_user_abort</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                si se establece en <code class="constant">TRUE</code>, el núcleo establecerá el
+                                indicador ignore_user_abort de <acronym class="acronym">PHP</acronym> dentro del
+                                método <code class="methodname">save()</code> para evitar corrupciones de
+                                caché en algunos casos
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.core.examples"></a>17.3.1.3. Ejemplos</h4></div></div></div>
+<p>
+                Se da un ejemplo en el manual al principio.
+            </p>
+<p>
+                Si solo se almacenan cadenas en caché (porque con la opción "automatic_serialization",
+                es posible almacenar algunos booleanos), se puede usar una construcción más compacta como:
+            </p>
+<pre class="programlisting">
+// we assume you already have $cache
+
+$id = 'myBigLoop'; // cache id of "what we want to cache"
+
+if ( ($data = $cache-&gt;load($id)) === false ) {
+    // cache miss
+
+    $data = '';
+    for ($i = 0; $i &lt; 10000; $i++) {
+        $data = $data . $i;
+    }
+
+    $cache-&gt;save($data);
+
+}
+
+// [...] do something with $data (echo it, pass it on etc.)
+</pre>
+<p>
+                Si desea cachear múltiples bloques o instancias de datos, la idea es la misma:
+            </p>
+<pre class="programlisting">
+// make sure you use unique identifiers:
+$id1 = 'foo';
+$id2 = 'bar';
+
+// block 1
+if ( ($data = $cache-&gt;load($id1)) === false ) {
+    // cache missed
+
+    $data = '';
+    for ($i=0;$i&lt;10000;$i++) {
+        $data = $data . $i;
+    }
+
+    $cache-&gt;save($data);
+
+}
+echo($data);
+
+// this isn't affected by caching
+echo('NEVER CACHED! ');
+
+// block 2
+if ( ($data = $cache-&gt;load($id2)) === false ) {
+    // cache missed
+
+    $data = '';
+    for ($i=0;$i&lt;10000;$i++) {
+        $data = $data . '!';
+    }
+
+    $cache-&gt;save($data);
+
+}
+echo($data);
+</pre>
+<p>
+                Si desea cachear valores especiales (booleanos con la opción "automatic_serialization")
+                o cadenas vacías, no puede usar la construcción compacta anterior. Debe
+                probar formalmente el registro de caché.
+            </p>
+<pre class="programlisting">
+// the compact construction
+// (not good if you cache empty strings and/or booleans)
+if ( ($data = $cache-&gt;load($id)) === false ) {
+
+    // cache missed
+
+    // [...] we make $data
+
+    $cache-&gt;save($data);
+
+}
+
+// we do something with $data
+
+// [...]
+
+// the complete construction (works in any case)
+if (!($cache-&gt;test($id))) {
+
+    // cache missed
+
+    // [...] we make $data
+
+    $cache-&gt;save($data);
+
+} else {
+
+    // cache hit
+
+    $data = $cache-&gt;load($id);
+
+}
+
+// we do something with $data
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.output"></a>17.3.2. Zend_Cache_Frontend_Output</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.output.introduction"></a>17.3.2.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Output</code> es un frontend de captura de salida.
+                Utiliza el almacenamiento en búfer de salida en <acronym class="acronym">PHP</acronym> para capturar todo
+                lo que hay entre sus métodos <code class="methodname">start()</code> y <code class="methodname">end()</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.output.options"></a>17.3.2.2. Opciones disponibles</h4></div></div></div>
+<p>
+                Este frontend no tiene ninguna opción específica aparte de las de
+                <code class="classname">Zend_Cache_Core</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.output.examples"></a>17.3.2.3. Ejemplos</h4></div></div></div>
+<p>
+                Se da un ejemplo en el manual al principio. Aquí está con cambios menores:
+            </p>
+<pre class="programlisting">
+// if it is a cache miss, output buffering is triggered
+if (!($cache-&gt;start('mypage'))) {
+
+    // output everything as usual
+    echo 'Hello world! ';
+    echo 'This is cached ('.time().') ';
+
+    $cache-&gt;end(); // output buffering ends
+
+}
+
+echo 'This is never cached ('.time().').';
+</pre>
+<p>
+                Usando esta forma es bastante fácil establecer el caché de salida en un proyecto
+                que ya está funcionando con poca o ninguna refactorización de código.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.function"></a>17.3.3. Zend_Cache_Frontend_Function</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.function.introduction"></a>17.3.3.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Function</code> cachea los resultados de las
+                llamadas a funciones. Tiene un único método principal llamado <code class="methodname">call()</code>
+                que toma un nombre de función y los parámetros para la llamada en un array.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.function.options"></a>17.3.3.2. Opciones disponibles</h4></div></div></div>
+<div class="table">
+<a name="zend.cache.frontends.function.options.table"></a><p class="title"><b>Tabla 17.2. Opciones del frontend Function</b></p>
+<div class="table-contents"><table class="table" summary="Function Frontend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>cache_by_default</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                                si es <code class="constant">TRUE</code>, las llamadas a funciones se cachean
+                                por defecto
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cached_functions</em></span></td>
+<td><span class="type">Array</span></td>
+<td> </td>
+<td>nombres de funciones que siempre se cachearán</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>non_cached_functions</em></span></td>
+<td><span class="type">Array</span></td>
+<td> </td>
+<td>nombres de funciones que nunca deben cachearse</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.function.examples"></a>17.3.3.3. Ejemplos</h4></div></div></div>
+<p>
+                Usar la función <code class="methodname">call()</code> es lo mismo que usar
+                <code class="methodname">call_user_func_array()</code> en <acronym class="acronym">PHP</acronym>:
+            </p>
+<pre class="programlisting">
+$cache-&gt;call('veryExpensiveFunc', $params);
+
+// $params is an array
+// For example to call veryExpensiveFunc(1, 'foo', 'bar') with
+// caching, you can use
+// $cache-&gt;call('veryExpensiveFunc', array(1, 'foo', 'bar'))
+</pre>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Function</code> es lo bastante inteligente
+                como para cachear tanto el valor de retorno de la función como su salida interna.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Se puede pasar cualquier función interna o definida por el usuario, con la
+                    excepción de <code class="methodname">array()</code>, <code class="methodname">echo()</code>,
+                    <code class="methodname">empty()</code>, <code class="methodname">eval()</code>,
+                    <code class="methodname">exit()</code>, <code class="methodname">isset()</code>,
+                    <code class="methodname">list()</code>, <code class="methodname">print()</code> y
+                    <code class="methodname">unset()</code>.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.class"></a>17.3.4. Zend_Cache_Frontend_Class</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.class.introduction"></a>17.3.4.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Class</code> es diferente de
+                <code class="classname">Zend_Cache_Frontend_Function</code> porque permite cachear
+                llamadas a métodos de objetos y métodos estáticos.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.class.options"></a>17.3.4.2. Opciones disponibles</h4></div></div></div>
+<div class="table">
+<a name="zend.cache.frontends.class.options.table"></a><p class="title"><b>Tabla 17.3. Opciones del frontend Class</b></p>
+<div class="table-contents"><table class="table" summary="Class Frontend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+<span class="emphasis"><em>cached_entity</em></span> (requerido)</td>
+<td><span class="type">Mixed</span></td>
+<td> </td>
+<td>
+                                  si se establece con un nombre de clase, se cacheará una clase
+                                  abstracta y solo se usarán llamadas estáticas; si se establece con
+                                  un objeto, se cachearán los métodos de ese objeto
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_by_default</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                                  si es <code class="constant">TRUE</code>, las llamadas se cachearán por
+                                  defecto
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cached_methods</em></span></td>
+<td><span class="type">Array</span></td>
+<td> </td>
+<td>nombres de métodos que siempre se cachearán</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>non_cached_methods</em></span></td>
+<td><span class="type">Array</span></td>
+<td> </td>
+<td>nombres de métodos que nunca deben cachearse</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.class.examples"></a>17.3.4.3. Ejemplos</h4></div></div></div>
+<p>
+                Por ejemplo, para cachear llamadas estáticas:
+            </p>
+<pre class="programlisting">
+class Test {
+
+    // Static method
+    public static function foobar($param1, $param2) {
+        echo "foobar_output($param1, $param2)";
+        return "foobar_return($param1, $param2)";
+    }
+
+}
+
+// [...]
+$frontendOptions = array(
+    'cached_entity' =&gt; 'Test' // The name of the class
+);
+// [...]
+
+// The cached call
+$result = $cache-&gt;foobar('1', '2');
+</pre>
+<p>
+                Para cachear llamadas a métodos clásicos:
+            </p>
+<pre class="programlisting">
+class Test {
+
+    private $_string = 'hello !';
+
+    public function foobar2($param1, $param2) {
+        echo($this-&gt;_string);
+        echo "foobar2_output($param1, $param2)";
+        return "foobar2_return($param1, $param2)";
+    }
+
+}
+
+// [...]
+$frontendOptions = array(
+    'cached_entity' =&gt; new Test() // An instance of the class
+);
+// [...]
+
+// The cached call
+$result = $cache-&gt;foobar2('1', '2');
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.file"></a>17.3.5. Zend_Cache_Frontend_File</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.file.introduction"></a>17.3.5.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_File</code> es un frontend gobernado por el
+                tiempo de modificación de un "archivo maestro". Es realmente interesante para
+                ejemplos en cuestiones de configuración o plantillas. También es posible usar
+                múltiples archivos maestros.
+            </p>
+<p>
+                Por ejemplo, tiene un archivo de configuración <acronym class="acronym">XML</acronym> que es analizado
+                por una función que devuelve un "objeto de configuración" (como con
+                <code class="classname">Zend_Config</code>). Con
+                <code class="classname">Zend_Cache_Frontend_File</code>, se puede almacenar el "objeto de
+                configuración" en caché (para evitar el análisis del archivo de configuración
+                <acronym class="acronym">XML</acronym> cada vez) pero con una especie de dependencia fuerte del
+                "archivo maestro". Así, si el archivo de configuración
+                <acronym class="acronym">XML</acronym> se modifica, la caché se invalida inmediatamente.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.file.options"></a>17.3.5.2. Opciones disponibles</h4></div></div></div>
+<div class="table">
+<a name="zend.cache.frontends.file.options.table"></a><p class="title"><b>Tabla 17.4. Opciones del frontend File</b></p>
+<div class="table-contents"><table class="table" summary="File Frontend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>master_file (obsoleto)</em></span></td>
+<td><span class="type">String</span></td>
+<td>''</td>
+<td>la ruta y el nombre completos del archivo maestro</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>master_files</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>un array con las rutas completas de los archivos maestros</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>master_files_mode</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">Zend_Cache_Frontend_File::MODE_OR</code></td>
+<td>
+                                <code class="constant">Zend_Cache_Frontend_File::MODE_AND</code> o
+                                <code class="constant">Zend_Cache_Frontend_File::MODE_OR</code>; si es
+                                <code class="constant">MODE_AND</code>, todos los archivos maestros deben
+                                ser tocados para obtener una invalidación de la caché; si es
+                                <code class="constant">MODE_OR</code>, basta con que se toque un solo
+                                archivo maestro para obtener una invalidación de la caché
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>ignore_missing_master_files</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                si es <code class="constant">TRUE</code>, los archivos maestros faltantes
+                                se ignoran silenciosamente (de lo contrario se lanza una excepción)
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.file.examples"></a>17.3.5.3. Ejemplos</h4></div></div></div>
+<p>
+                El uso de este frontend es el mismo que el de <code class="classname">Zend_Cache_Core</code>.
+                No hay necesidad de un ejemplo específico: lo único que hay que hacer es
+                definir el <span class="emphasis"><em>master_file</em></span> al usar el factory.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.page"></a>17.3.6. Zend_Cache_Frontend_Page</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.page.introduction"></a>17.3.6.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Page</code> es como
+                <code class="classname">Zend_Cache_Frontend_Output</code> pero está diseñado para una página
+                completa. Es imposible usar <code class="classname">Zend_Cache_Frontend_Page</code> para
+                cachear solo un bloque.
+            </p>
+<p>
+                Por otro lado, el "id de caché" se calcula automáticamente con
+                <code class="varname">$_SERVER['REQUEST_URI']</code> y (dependiendo de las opciones)
+                <code class="varname">$_GET</code>, <code class="varname">$_POST</code>, <code class="varname">$_SESSION</code>,
+                <code class="varname">$_COOKIE</code>, <code class="varname">$_FILES</code>. Además, solo hay que
+                llamar a un método (<code class="methodname">start()</code>) porque la llamada a
+                <code class="methodname">end()</code> es completamente automática cuando termina la página.
+            </p>
+<p>
+                Por el momento, no está implementado, pero planeamos añadir un sistema condicional
+                <acronym class="acronym">HTTP</acronym> para ahorrar ancho de banda (el sistema enviará un
+                <acronym class="acronym">HTTP</acronym> 304 Not Modified si la caché tiene un acierto y si el
+                navegador ya tiene la versión correcta).
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Este frontend opera registrando una función de retorno de llamada (callback) que
+                    se invoca cuando se limpia el búfer de salida que utiliza. Para que esto funcione
+                    correctamente, debe ser el último búfer de salida en la petición. Para garantizar
+                    esto, el almacenamiento en búfer de salida usado por el Dispatcher <span class="emphasis"><em>debe</em></span>
+                    deshabilitarse llamando al método <code class="methodname">setParam()</code> de
+                    <code class="classname">Zend_Controller_Front</code>, por ejemplo,
+                    <span class="command"><strong>$front-&gt;setParam('disableOutputBuffering', true);</strong></span> o añadiendo
+                    "resources.frontcontroller.params.disableOutputBuffering = true"
+                    a su archivo de configuración de arranque (se asume <acronym class="acronym">INI</acronym>) si usa
+                    <code class="classname">Zend_Application</code>.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.page.options"></a>17.3.6.2. Opciones disponibles</h4></div></div></div>
+<div class="table">
+<a name="zend.cache.frontends.page.options.table"></a><p class="title"><b>Tabla 17.5. Opciones del frontend Page</b></p>
+<div class="table-contents"><table class="table" summary="Page Frontend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>http_conditional</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                usa el sistema http_conditional (no implementado por el momento)
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>debug_header</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                                si es <code class="constant">TRUE</code>, se añade un texto de depuración
+                                antes de cada página en caché
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>default_options</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array(...see below...)</code></td>
+<td>
+                                un array asociativo de opciones por defecto:
+                                <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto) cache</em></span>: la caché está activa si es
+                                            <code class="constant">TRUE</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">FALSE</code> por
+                                                defecto) cache_with_get_variables</em></span>: si es
+                                            <code class="constant">TRUE</code>,
+                                            la caché sigue activa aunque haya variables en el
+                                            array <code class="varname">$_GET</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">FALSE</code> por
+                                                defecto) cache_with_post_variables</em></span>: si es
+                                            <code class="constant">TRUE</code>,
+                                            la caché sigue activa aunque haya variables en el
+                                            array <code class="varname">$_POST</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">FALSE</code> por
+                                                defecto) cache_with_session_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            la caché sigue activa aunque haya variables en el
+                                            array <code class="varname">$_SESSION</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">FALSE</code> por
+                                                defecto) cache_with_files_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            la caché sigue activa aunque haya variables en el
+                                            array <code class="varname">$_FILES</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">FALSE</code> por
+                                                defecto) cache_with_cookie_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            la caché sigue activa aunque haya variables en el
+                                            array <code class="varname">$_COOKIE</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto) make_id_with_get_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            el id de caché dependerá del contenido del
+                                            array <code class="varname">$_GET</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto) make_id_with_post_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            el id de caché dependerá del contenido del
+                                            array <code class="varname">$_POST</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto)
+                                                make_id_with_session_variables</em></span>: si es
+                                            <code class="constant">TRUE</code>,
+                                            el id de caché dependerá del contenido de
+                                            la array <code class="varname">$_SESSION</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto) make_id_with_files_variables</em></span>:
+                                            si es <code class="constant">TRUE</code>,
+                                            el id de caché dependerá del contenido del
+                                            array <code class="varname">$_FILES</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(boolean, <code class="constant">TRUE</code> por
+                                                defecto)
+                                                make_id_with_cookie_variables</em></span>: si es
+                                            <code class="constant">TRUE</code>,
+                                            el id de caché dependerá del contenido de
+                                            la array <code class="varname">$_COOKIE</code>
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(int, <code class="constant">FALSE</code> por
+                                                defecto) specific_lifetime</em></span>: si no es
+                                            <code class="constant">FALSE</code>, se usará el
+                                            tiempo de vida indicado para la expresión regular elegida
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(array, <code class="methodname">array()</code> por
+                                                defecto) tags</em></span>: etiquetas para el registro
+                                            de caché
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em>(int, <code class="constant">NULL</code> por defecto)
+                                                priority</em></span>: prioridad (si el backend
+                                            lo soporta)
+                                        </p></li>
+</ul></div>
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>regexps</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>
+                                un array asociativo para establecer opciones solo para algunos
+                                <code class="constant">REQUEST_URI</code>; las claves son expresiones regulares
+                                (<acronym class="acronym">PCRE</acronym>), los valores son arrays asociativos
+                                con opciones específicas a establecer si la expresión regular
+                                coincide con <code class="varname">$_SERVER['REQUEST_URI']</code> (vea
+                                default_options para la lista de opciones disponibles); si varias
+                                expresiones regulares coinciden con
+                                <code class="varname">$_SERVER['REQUEST_URI']</code>, solo se usará la
+                                última
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>memorize_headers</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>
+                                un array de cadenas correspondientes a algunos nombres de cabeceras
+                                <acronym class="acronym">HTTP</acronym>. Las cabeceras listadas se almacenarán
+                                junto con los datos de la caché y se "reproducirán" cuando la caché
+                                tenga un acierto
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.page.examples"></a>17.3.6.3. Ejemplos</h4></div></div></div>
+<p>
+                El uso de <code class="classname">Zend_Cache_Frontend_Page</code> es realmente trivial:
+            </p>
+<pre class="programlisting">
+// [...] // require, configuration and factory
+
+$cache-&gt;start();
+// if the cache is hit, the result is sent to the browser
+// and the script stop here
+
+// rest of the page ...
+</pre>
+<p>
+                un ejemplo más complejo que muestra una forma de obtener una gestión centralizada
+                de la caché en un archivo de arranque (para usar con
+                <code class="classname">Zend_Controller</code>, por ejemplo)
+            </p>
+<pre class="programlisting">
+/*
+ * You should avoid putting too many lines before the cache section.
+ * For example, for optimal performances, "require_once" or
+ * "Zend_Loader::loadClass" should be after the cache section.
+ */
+
+$frontendOptions = array(
+   'lifetime' =&gt; 7200,
+   'debug_header' =&gt; true, // for debugging
+   'regexps' =&gt; array(
+       // cache the whole IndexController
+       '^/$' =&gt; array('cache' =&gt; true),
+
+       // cache the whole IndexController
+       '^/index/' =&gt; array('cache' =&gt; true),
+
+       // we don't cache the ArticleController...
+       '^/article/' =&gt; array('cache' =&gt; false),
+
+       // ... but we cache the "view" action of this ArticleController
+       '^/article/view/' =&gt; array(
+           'cache' =&gt; true,
+
+           // and we cache even there are some variables in $_POST
+           'cache_with_post_variables' =&gt; true,
+
+           // but the cache will be dependent on the $_POST array
+           'make_id_with_post_variables' =&gt; true
+       )
+   )
+);
+
+$backendOptions = array(
+    'cache_dir' =&gt; '/tmp/'
+);
+
+// getting a Zend_Cache_Frontend_Page object
+$cache = Zend_Cache::factory('Page',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+
+$cache-&gt;start();
+// if the cache is hit, the result is sent to the browser and the
+// script stop here
+
+// [...] the end of the bootstrap file
+// these lines won't be executed if the cache is hit
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.page.cancel"></a>17.3.6.4. El método específico Cancel</h4></div></div></div>
+<p>
+                Debido a cuestiones de diseño, en algunos casos (por ejemplo cuando se usan
+                códigos de retorno <acronym class="acronym">HTTP</acronym> distintos de 200), podría
+                necesitar cancelar el proceso de caché actual. Por eso introducimos para este
+                frontend en particular el método <code class="methodname">cancel()</code>.
+            </p>
+<pre class="programlisting">
+// [...] // require, configuration and factory
+
+$cache-&gt;start();
+
+// [...]
+
+if ($someTest) {
+    $cache-&gt;cancel();
+    // [...]
+}
+
+// [...]
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.frontends.capture"></a>17.3.7. Zend_Cache_Frontend_Capture</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cache.frontends.capture.introduction"></a>17.3.7.1. Introducción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Cache_Frontend_Capture</code> es como
+                <code class="classname">Zend_Cache_Frontend_Output</code> pero está diseñado para una página
+                completa. Es imposible usar <code class="classname">Zend_Cache_Frontend_Capture</code> para
+                cachear solo un bloque. Esta clase está diseñada específicamente para funcionar
+                en conjunto solo con el backend <code class="classname">Zend_Cache_Backend_Static</code>
+                para ayudar a cachear páginas completas de <acronym class="acronym">HTML</acronym> / <acronym class="acronym">XML</acronym>
+                u otro contenido en un archivo físico estático del sistema de archivos local.
+            </p>
+<p>
+                Consulte la documentación de
+                <code class="classname">Zend_Cache_Backend_Static</code> para todos los casos de uso
+                relativos a esta clase.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Este frontend opera registrando una función de retorno de llamada (callback) que
+                    se invoca cuando se limpia el búfer de salida que utiliza. Para que esto funcione
+                    correctamente, debe ser el último búfer de salida en la petición. Para garantizar
+                    esto, el almacenamiento en búfer de salida usado por el Dispatcher <span class="emphasis"><em>debe</em></span>
+                    deshabilitarse llamando al método <code class="methodname">setParam()</code> de
+                    <code class="classname">Zend_Controller_Front</code>, por ejemplo,
+                    <span class="command"><strong>$front-&gt;setParam('disableOutputBuffering', true);</strong></span> o añadiendo
+                    "resources.frontcontroller.params.disableOutputBuffering = true"
+                    a su archivo de configuración de arranque (se asume <acronym class="acronym">INI</acronym>) si usa
+                    <code class="classname">Zend_Application</code>.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cache.theory.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cache.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cache.backends.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">17.2. La teoría de funcionamiento de la caché </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 17.4. Backends de Zend_Cache</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

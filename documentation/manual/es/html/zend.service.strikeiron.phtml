@@ -1,0 +1,404 @@
+<?php $title = '64.29. Zend_Service_StrikeIron'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.29. Zend_Service_StrikeIron</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.slideshare.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.strikeiron.bundled-services.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.strikeiron"></a>64.29. Zend_Service_StrikeIron</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Service_StrikeIron</code> proporciona un cliente <acronym class="acronym">PHP</acronym> 5 para
+        los servicios web de StrikeIron. Consulte las siguientes secciones:
+    </p>
+<p>
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><a class="link" href="zend.service.strikeiron.phtml" title="64.29. Zend_Service_StrikeIron">Zend_Service_StrikeIron</a></p></li></ul></div>
+<p>
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <a class="link" href="zend.service.strikeiron.bundled-services.phtml" title="64.30. Zend_Service_StrikeIron: Bundled Services">Servicios incluidos</a>
+                </p></li></ul></div>
+<p>
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <a class="link" href="zend.service.strikeiron.advanced-uses.phtml" title="64.31. Zend_Service_StrikeIron: Advanced Uses">Usos avanzados</a>
+                </p></li></ul></div>
+<p>
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.overview"></a>64.29.1. Resumen</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://www.strikeiron.com" target="_top">StrikeIron</a>
+            ofrece cientos de servicios de datos comerciales ("Data as a Service")
+            como impuesto sobre ventas en línea, tipos de cambio, cotizaciones bursátiles, geocódigos, verificación
+            de direcciones global, páginas amarillas/blancas, indicaciones de conducción de MapQuest,
+            comprobación de crédito comercial de Dun &amp; Bradstreet, y mucho, mucho más.
+        </p>
+<p>
+            Cada servicio web de StrikeIron comparte una <acronym class="acronym">API</acronym> <acronym class="acronym">SOAP</acronym> (y REST)
+            estándar, lo que facilita integrar y gestionar múltiples servicios.
+            StrikeIron también gestiona la facturación de clientes de todos los servicios en una única
+            cuenta, lo que resulta ideal para proveedores de soluciones. Comience
+            con servicios web gratuitos en
+            <a class="ulink" href="http://www.strikeiron.com/sdp" target="_top">http://www.strikeiron.com/sdp</a>.
+        </p>
+<p>
+            Los servicios de StrikeIron pueden utilizarse a través de la
+            <a class="ulink" href="http://us.php.net/soap" target="_top">extensión <acronym class="acronym">SOAP</acronym> de PHP 5</a>
+            por sí sola. Sin embargo, usar StrikeIron de esta manera no ofrece una interfaz
+            ideal al estilo <acronym class="acronym">PHP</acronym>. El componente
+            <code class="classname">Zend_Service_StrikeIron</code> proporciona una capa ligera sobre
+            la extensión <acronym class="acronym">SOAP</acronym> para trabajar con los servicios de StrikeIron de una
+            manera más conveniente y al estilo <acronym class="acronym">PHP</acronym>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                La extensión <acronym class="acronym">SOAP</acronym> de <acronym class="acronym">PHP</acronym> 5 debe estar instalada y
+                habilitada para usar <code class="classname">Zend_Service_StrikeIron</code>.
+            </p></td></tr>
+</table></div>
+<p>
+            El componente <code class="classname">Zend_Service_StrikeIron</code> proporciona:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Un único punto para configurar sus credenciales de autenticación de StrikeIron
+                        que puede usarse en muchos servicios de StrikeIron.
+                    </p></li>
+<li class="listitem"><p>
+                        Una forma estándar de recuperar la información de su suscripción a StrikeIron,
+                        como el estado de la licencia y el número de peticiones restantes para un servicio.
+                    </p></li>
+<li class="listitem"><p>
+                        La posibilidad de usar cualquier servicio de StrikeIron a partir de su WSDL sin
+                        crear una clase envoltorio <acronym class="acronym">PHP</acronym>, y la opción de crear
+                        un envoltorio para una interfaz más conveniente.
+                    </p></li>
+<li class="listitem"><p>
+                        Envoltorios para tres servicios populares de StrikeIron.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.registering"></a>64.29.2. Registro en StrikeIron</h3></div></div></div>
+<p>
+            Antes de poder comenzar con <code class="classname">Zend_Service_StrikeIron</code>, debe
+            primero <a class="ulink" href="http://strikeiron.com/Register.aspx" target="_top">registrarse</a> para obtener una
+            cuenta de desarrollador de StrikeIron.
+        </p>
+<p>
+            Después de registrarse, recibirá un nombre de usuario y contraseña de StrikeIron.
+            Estos se usarán al conectarse a StrikeIron mediante
+            <code class="classname">Zend_Service_StrikeIron</code>.
+        </p>
+<p>
+            También necesitará <a class="ulink" href="http://www.strikeiron.com/ProductDetail.aspx?p=257" target="_top">suscribirse</a>
+            al servicio web Super Data Pack de StrikeIron.
+        </p>
+<p>
+            Ambos pasos de registro son gratuitos y pueden realizarse con relativa rapidez a través
+            del sitio web de StrikeIron.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.getting-started"></a>64.29.3. Primeros pasos</h3></div></div></div>
+<p>
+            Una vez que se haya <a class="ulink" href="http://strikeiron.com/Register.aspx" target="_top">registrado</a>
+            para una cuenta de StrikeIron y se haya suscrito al
+            <a class="ulink" href="http://www.strikeiron.com/ProductDetail.aspx?p=257" target="_top">Super Data Pack</a>,
+            estará listo para comenzar a usar <code class="classname">Zend_Service_StrikeIron</code>.
+        </p>
+<p>
+            StrikeIron consta de cientos de servicios web diferentes.
+            <code class="classname">Zend_Service_StrikeIron</code> puede usarse con muchos de estos servicios
+            pero proporciona envoltorios compatibles para tres de ellos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <a class="link" href="zend.service.strikeiron.bundled-services.phtml#zend.service.strikeiron.bundled-services.zip-code-information" title="64.30.1. ZIP Code Information">Información
+                        de código postal</a>
+                </p></li>
+<li class="listitem"><p>
+                    <a class="link" href="zend.service.strikeiron.bundled-services.phtml#zend.service.strikeiron.bundled-services.us-address-verification" title="64.30.2. U.S. Address Verification">Verificación
+                        de direcciones en EE.UU.</a>
+                </p></li>
+<li class="listitem"><p>
+                    <a class="link" href="zend.service.strikeiron.bundled-services.phtml#zend.service.strikeiron.bundled-services.sales-use-tax-basic" title="64.30.3. Sales &amp; Use Tax Basic">Impuesto
+                        sobre ventas y uso básico</a>
+                </p></li>
+</ul></div>
+<p>
+            La clase <code class="classname">Zend_Service_StrikeIron</code> proporciona una manera sencilla
+            de especificar la información de su cuenta de StrikeIron y otras opciones en
+            su constructor. También tiene un método de fábrica que devolverá clientes
+            para los servicios de StrikeIron:
+        </p>
+<pre class="programlisting">
+$strikeIron = new Zend_Service_StrikeIron(array('username' =&gt; 'your-username',
+                                                'password' =&gt; 'your-password'));
+
+$taxBasic = $strikeIron-&gt;getService(array('class' =&gt; 'SalesUseTaxBasic'));
+</pre>
+<p>
+            El método <code class="methodname">getService()</code> devolverá un cliente para cualquier
+            servicio de StrikeIron por el nombre de su clase envoltorio <acronym class="acronym">PHP</acronym>. En este
+            caso, el nombre 'SalesUseTaxBasic' hace referencia a la clase envoltorio
+            <code class="classname">Zend_Service_StrikeIron_SalesUseTaxBasic</code>. Se incluyen envoltorios
+            para tres servicios y se describen en
+            <a class="link" href="zend.service.strikeiron.bundled-services.phtml" title="64.30. Zend_Service_StrikeIron: Bundled Services">Servicios incluidos</a>.
+        </p>
+<p>
+            El método <code class="methodname">getService()</code> también puede devolver un cliente para
+            un servicio de StrikeIron que aún no tenga un envoltorio <acronym class="acronym">PHP</acronym>. Esto se
+            explica en
+            <a class="link" href="zend.service.strikeiron.advanced-uses.phtml#zend.service.strikeiron.advanced-uses.services-by-wsdl" title="64.31.1. Using Services by WSDL">Uso de servicios
+                mediante WSDL</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.making-first-query"></a>64.29.4. Realizando su primera consulta</h3></div></div></div>
+<p>
+            Una vez que haya usado el método <code class="methodname">getService()</code> para obtener un cliente
+            de un servicio de StrikeIron en particular, puede utilizar ese cliente
+            llamando a sus métodos como cualquier otro objeto <acronym class="acronym">PHP</acronym>.
+        </p>
+<pre class="programlisting">
+$strikeIron = new Zend_Service_StrikeIron(array('username' =&gt; 'your-username',
+                                                'password' =&gt; 'your-password'));
+
+// Get a client for the Sales &amp; Use Tax Basic service
+$taxBasic = $strikeIron-&gt;getService(array('class' =&gt; 'SalesUseTaxBasic'));
+
+// Query tax rate for Ontario, Canada
+$rateInfo = $taxBasic-&gt;getTaxRateCanada(array('province' =&gt; 'ontario'));
+echo $rateInfo-&gt;province;
+echo $rateInfo-&gt;abbreviation;
+echo $rateInfo-&gt;GST;
+</pre>
+<p>
+            En el ejemplo anterior, el método <code class="methodname">getService()</code> se usa
+            para devolver un cliente para el servicio <a class="link" href="zend.service.strikeiron.bundled-services.phtml#zend.service.strikeiron.bundled-services.sales-use-tax-basic" title="64.30.3. Sales &amp; Use Tax Basic">Impuesto sobre
+                ventas y uso básico</a>. El objeto cliente se almacena en
+            <code class="varname">$taxBasic</code>.
+        </p>
+<p>
+            A continuación se llama al método <code class="methodname">getTaxRateCanada()</code> en el
+            servicio. Se usa un array asociativo para suministrar parámetros con nombre al
+            método. Esta es la manera en que se llaman todos los métodos de StrikeIron.
+        </p>
+<p>
+            El resultado de <code class="methodname">getTaxRateCanada()</code> se almacena en
+            <code class="varname">$rateInfo</code> y tiene propiedades como <span class="property">province</span>
+            y <code class="constant">GST</code>.
+        </p>
+<p>
+            Muchos de los servicios de StrikeIron son tan sencillos de usar como el ejemplo anterior. Consulte
+            <a class="link" href="zend.service.strikeiron.bundled-services.phtml" title="64.30. Zend_Service_StrikeIron: Bundled Services">Servicios incluidos</a>
+            para obtener información detallada sobre tres servicios de StrikeIron.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.examining-results"></a>64.29.5. Examinando resultados</h3></div></div></div>
+<p>
+            Al aprender o depurar los servicios de StrikeIron, a menudo resulta útil volcar el
+            resultado devuelto por una llamada a un método. El resultado siempre será un objeto que es una
+            instancia de <code class="classname">Zend_Service_StrikeIron_Decorator</code>. Este es un
+            pequeño objeto <a class="ulink" href="http://en.wikipedia.org/wiki/Decorator_pattern" target="_top">decorador</a>
+            que envuelve los resultados de la llamada al método.
+        </p>
+<p>
+            La forma más sencilla de examinar un resultado del servicio es usar las funciones integradas
+            de <acronym class="acronym">PHP</acronym> como <a class="ulink" href="http://www.php.net/print_r" target="_top">print_r()</a>:
+        </p>
+<pre class="programlisting">
+&lt;?php
+$strikeIron = new Zend_Service_StrikeIron(array('username' =&gt; 'your-username',
+                                                'password' =&gt; 'your-password'));
+
+$taxBasic = $strikeIron-&gt;getService(array('class' =&gt; 'SalesUseTaxBasic'));
+
+$rateInfo = $taxBasic-&gt;getTaxRateCanada(array('province' =&gt; 'ontario'));
+print_r($rateInfo);
+?&gt;
+
+Zend_Service_StrikeIron_Decorator Object
+(
+    [_name:protected] =&gt; GetTaxRateCanadaResult
+    [_object:protected] =&gt; stdClass Object
+        (
+            [abbreviation] =&gt; ON
+            [province] =&gt; ONTARIO
+            [GST] =&gt; 0.06
+            [PST] =&gt; 0.08
+            [total] =&gt; 0.14
+            [HST] =&gt; Y
+        )
+)
+</pre>
+<p>
+            En la salida anterior, vemos que el decorador (<code class="varname">$rateInfo</code>) envuelve un
+            objeto llamado <code class="classname">GetTaxRateCanadaResult</code>, el resultado de la llamada a
+            <code class="methodname">getTaxRateCanada()</code>.
+        </p>
+<p>
+            Esto significa que <code class="varname">$rateInfo</code> tiene propiedades públicas como
+            <span class="property">abbreviation</span>, <span class="property">province</span>, y
+            <code class="constant">GST</code>. Se accede a ellas como
+            <span class="command"><strong>$rateInfo-&gt;province</strong></span>.
+        </p>
+<div class="tip"><table border="0" summary="Tip">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+<th align="left">Consejo</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Las propiedades de resultado de StrikeIron a veces comienzan con una letra mayúscula, como
+                <span class="property">Foo</span> o <span class="property">Bar</span>, mientras que la mayoría de las
+                propiedades de objetos <acronym class="acronym">PHP</acronym> normalmente comienzan con una letra minúscula, como
+                en <span class="property">foo</span> o <span class="property">bar</span>. El decorador
+                realizará automáticamente esta inflexión, de modo que puede leer una propiedad <span class="property">Foo</span>
+                como <span class="property">foo</span>.
+            </p></td></tr>
+</table></div>
+<p>
+            Si alguna vez necesita obtener el objeto original o su nombre a partir del decorador, use los
+            métodos respectivos <code class="methodname">getDecoratedObject()</code> y
+            <code class="methodname">getDecoratedObjectName()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.handling-errors"></a>64.29.6. Manejo de errores</h3></div></div></div>
+<p>
+            Los ejemplos anteriores son ingenuos, es decir, no se mostró manejo de errores.
+            Es posible que StrikeIron devuelva un fallo durante una llamada a un
+            método. Eventos como credenciales de cuenta incorrectas o una suscripción caducada
+            pueden hacer que StrikeIron genere un fallo.
+        </p>
+<p>
+            Se lanzará una excepción cuando ocurra tal fallo. Debe
+            anticipar y capturar estas excepciones al realizar llamadas a métodos del
+            servicio:
+        </p>
+<pre class="programlisting">
+$strikeIron = new Zend_Service_StrikeIron(array('username' =&gt; 'your-username',
+                                                'password' =&gt; 'your-password'));
+
+$taxBasic = $strikeIron-&gt;getService(array('class' =&gt; 'SalesUseTaxBasic'));
+
+try {
+
+  $taxBasic-&gt;getTaxRateCanada(array('province' =&gt; 'ontario'));
+
+} catch (Zend_Service_StrikeIron_Exception $e) {
+
+  // error handling for events like connection
+  // problems or subscription errors
+
+}
+</pre>
+<p>
+            Las excepciones lanzadas siempre serán
+            <code class="classname">Zend_Service_StrikeIron_Exception</code>.
+        </p>
+<p>
+            Es importante entender la diferencia entre las excepciones y
+            las llamadas a métodos fallidas normales. Las excepciones ocurren en
+            condiciones <span class="emphasis"><em>excepcionales</em></span>, como
+            que la red se caiga o que su suscripción caduque.
+            Las llamadas a métodos fallidas que son un evento habitual,
+            como que <code class="methodname">getTaxRateCanada()</code> no encuentre la
+            <span class="property">province</span> que suministró, no producirán una excepción.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Cada vez que realice una llamada a un método de un servicio de StrikeIron, debe
+                comprobar la validez del objeto de respuesta y también estar
+                preparado para capturar una excepción.
+            </p></td></tr>
+</table></div>
+<p></p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.strikeiron.checking-subscription"></a>64.29.7. Comprobación de su suscripción</h3></div></div></div>
+<p>
+            StrikeIron proporciona muchos servicios diferentes. Algunos de ellos son
+            gratuitos, algunos están disponibles en régimen de prueba, y otros son de solo suscripción de pago.
+            Al usar StrikeIron, es importante conocer el estado de su suscripción
+            para los servicios que está usando y comprobarlo regularmente.
+        </p>
+<p>
+            Cada cliente de StrikeIron devuelto por el método <code class="methodname">getService()</code>
+            tiene la capacidad de comprobar el estado de la suscripción para ese servicio usando
+            el método <code class="methodname">getSubscriptionInfo()</code> del cliente:
+        </p>
+<pre class="programlisting">
+// Get a client for the Sales &amp; Use Tax Basic service
+$strikeIron = new Zend_Service_StrikeIron(array('username' =&gt; 'your-username',
+                                                'password' =&gt; 'your-password'));
+
+$taxBasic = $strikeIron-&gt;getService(array('class =&gt; 'SalesUseTaxBasic'));
+
+// Check remaining hits for the Sales &amp; Use Tax Basic service
+$subscription = $taxBasic-&gt;getSubscriptionInfo();
+echo $subscription-&gt;remainingHits;
+</pre>
+<p>
+            El método <code class="methodname">getSubscriptionInfo()</code> devolverá un objeto
+            que típicamente tiene una propiedad <span class="property">remainingHits</span>. Es
+            importante comprobar el estado de cada servicio que esté usando. Si
+            se realiza una llamada a un método a StrikeIron después de que se hayan agotado los
+            aciertos restantes, ocurrirá una excepción.
+        </p>
+<p>
+            Comprobar su suscripción a un servicio no usa ningún acierto restante
+            del servicio. Cada vez que se realiza una llamada a un método del servicio,
+            el número de aciertos restantes se almacenará en caché y este valor en caché será
+            devuelto por <code class="methodname">getSubscriptionInfo()</code> sin conectarse
+            de nuevo al servicio. Para forzar a <code class="methodname">getSubscriptionInfo()</code>
+            a anular su caché y consultar la información de suscripción de nuevo, use
+            <code class="methodname">getSubscriptionInfo(true)</code>.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.slideshare.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.strikeiron.bundled-services.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.28. Zend_Service_SlideShare </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.30. Zend_Service_StrikeIron: Servicios incluidos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

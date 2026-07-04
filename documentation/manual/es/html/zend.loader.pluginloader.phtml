@@ -1,0 +1,266 @@
+<?php $title = '42.4. Carga de Plugins'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">42.4. Carga de Plugins</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.loader.autoloader-resource.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 42. Zend_Loader</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.loader.spl-autoloader.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.loader.pluginloader"></a>42.4. Carga de Plugins</h2></div></div></div>
+<p>
+        Varios componentes de Zend Framework son enchufables (pluggable), y permiten la carga
+        de funcionalidad dinámica especificando un prefijo de clase y una ruta a los archivos de clase
+        que no necesariamente están en el <span class="property">include_path</span> o no
+        necesariamente siguen las convenciones de nomenclatura tradicionales.
+        <code class="classname">Zend_Loader_PluginLoader</code> proporciona la funcionalidad común para
+        este proceso.
+    </p>
+<p>
+        El uso básico de <code class="classname">PluginLoader</code> sigue las convenciones de nomenclatura
+        de Zend Framework de una clase por archivo, usando el guion bajo como
+        separador de directorio al resolver rutas. Permite pasar un prefijo de
+        clase opcional para anteponer al determinar si una clase de plugin
+        concreta está cargada. Además, las rutas se buscan en orden LIFO. Debido a la búsqueda
+        LIFO y a los prefijos de clase, esto le permite definir espacios de nombres para sus
+        plugins, y así sobrescribir plugins de rutas registradas anteriormente.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.pluginloader.usage"></a>42.4.1. Caso de uso básico</h3></div></div></div>
+<p>
+            Primero, supongamos la siguiente estructura de directorios y archivos
+            de clase, y que el directorio de nivel superior y el directorio de biblioteca están en
+            el include_path:
+        </p>
+<pre class="programlisting">
+application/
+    modules/
+        foo/
+            views/
+                helpers/
+                    FormLabel.php
+                    FormSubmit.php
+        bar/
+            views/
+                helpers/
+                    FormSubmit.php
+library/
+    Zend/
+        View/
+            Helper/
+                FormLabel.php
+                FormSubmit.php
+                FormText.php
+</pre>
+<p>
+            Ahora, creemos un cargador de plugins para abordar los diversos
+            repositorios de view helper disponibles:
+        </p>
+<pre class="programlisting">
+$loader = new Zend_Loader_PluginLoader();
+$loader-&gt;addPrefixPath('Zend_View_Helper', 'Zend/View/Helper/')
+       -&gt;addPrefixPath('Foo_View_Helper',
+                       'application/modules/foo/views/helpers')
+       -&gt;addPrefixPath('Bar_View_Helper',
+                       'application/modules/bar/views/helpers');
+</pre>
+<p>
+            Entonces podemos cargar un view helper dado usando solo la parte del
+            nombre de clase que sigue a los prefijos según se definieron al añadir las rutas:
+        </p>
+<pre class="programlisting">
+// load 'FormText' helper:
+$formTextClass = $loader-&gt;load('FormText'); // 'Zend_View_Helper_FormText';
+
+// load 'FormLabel' helper:
+$formLabelClass = $loader-&gt;load('FormLabel'); // 'Foo_View_Helper_FormLabel'
+
+// load 'FormSubmit' helper:
+$formSubmitClass = $loader-&gt;load('FormSubmit'); // 'Bar_View_Helper_FormSubmit'
+</pre>
+<p>
+            Una vez cargada la clase, ahora podemos instanciarla.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                En algunos casos, puede usar el mismo prefijo para varias rutas.
+                <code class="classname">Zend_Loader_PluginLoader</code> en realidad registra un
+                array de rutas para cada prefijo dado; la última registrada
+                será la primera comprobada. Esto es particularmente útil si
+                está utilizando componentes del incubador (incubator).
+            </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Paths may be defined at instantiation">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Las rutas se pueden definir en la instanciación</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Opcionalmente puede proporcionar un array de pares prefijo / ruta (o
+                prefijo / rutas -- se permiten varias rutas) como parámetro para
+                el constructor:
+            </p>
+<pre class="programlisting">
+$loader = new Zend_Loader_PluginLoader(array(
+    'Zend_View_Helper' =&gt; 'Zend/View/Helper/',
+    'Foo_View_Helper'  =&gt; 'application/modules/foo/views/helpers',
+    'Bar_View_Helper'  =&gt; 'application/modules/bar/views/helpers'
+));
+</pre>
+</td></tr>
+</table></div>
+<p>
+            <code class="classname">Zend_Loader_PluginLoader</code> también le permite opcionalmente
+            compartir plugins entre objetos que admiten plugins, sin necesidad de
+            utilizar una instancia singleton. Lo hace a través de un registro
+            estático. Indique el nombre del registro en la instanciación como segundo parámetro
+            del constructor:
+        </p>
+<pre class="programlisting">
+// Store plugins in static registry 'foobar':
+$loader = new Zend_Loader_PluginLoader(array(), 'foobar');
+</pre>
+<p>
+            Otros componentes que instancian el <code class="classname">PluginLoader</code>
+            usando el mismo nombre de registro tendrán entonces acceso a las rutas
+            y plugins ya cargados.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.pluginloader.paths"></a>42.4.2. Manipulación de rutas de plugins</h3></div></div></div>
+<p>
+            El ejemplo de la sección anterior muestra cómo añadir rutas a un
+            cargador de plugins. ¿Qué pasa si desea determinar las rutas ya
+            cargadas, o eliminar una o más?
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getPaths($prefix = null)</code> devuelve todas las rutas como
+                    pares prefijo / ruta si no se proporciona ningún <code class="varname">$prefix</code>,
+                    o solo las rutas registradas para un prefijo dado si un
+                    <code class="varname">$prefix</code> está presente.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">clearPaths($prefix = null)</code> eliminará todas las
+                    rutas registradas por defecto, o solo las asociadas con un
+                    prefijo dado, si el <code class="varname">$prefix</code> se proporciona y
+                    está presente en la pila.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">removePrefixPath($prefix, $path = null)</code> le permite
+                    eliminar selectivamente una ruta específica asociada con un
+                    prefijo dado. Si no se proporciona ningún <code class="varname">$path</code>, se
+                    eliminan todas las rutas para ese prefijo. Si se proporciona un <code class="varname">$path</code>
+                    y existe para ese prefijo, solo se eliminará esa ruta.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.pluginloader.checks"></a>42.4.3. Comprobación de plugins y obtención de nombres de clase</h3></div></div></div>
+<p>
+            A veces simplemente desea determinar si una clase de plugin ha sido
+            cargada antes de realizar una acción. <code class="methodname">isLoaded()</code> toma un
+            nombre de plugin, y devuelve el estado.
+        </p>
+<p>
+            Otro caso de uso común para <code class="classname">PluginLoader</code> es
+            determinar los nombres de clase de plugin completamente calificados de las clases cargadas;
+            <code class="methodname">getClassName()</code> proporciona esta funcionalidad. Normalmente,
+            esto se usaría junto con <code class="methodname">isLoaded()</code>:
+        </p>
+<pre class="programlisting">
+if ($loader-&gt;isLoaded('Adapter')) {
+    $class   = $loader-&gt;getClassName('Adapter');
+    $adapter = call_user_func(array($class, 'getInstance'));
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.pluginloader.performance"></a>42.4.4. Cómo obtener mejor rendimiento para los plugins</h3></div></div></div>
+<p>
+            La carga de plugins puede ser una operación costosa. En esencia, necesita
+            recorrer en bucle cada prefijo, y luego cada ruta del prefijo, hasta que
+            encuentra un archivo que coincide -- y que define la clase esperada.
+            En los casos en que el archivo existe pero no define la clase, se
+            añadirá un error a la pila de errores de <acronym class="acronym">PHP</acronym>, lo cual también es una
+            operación costosa. La pregunta entonces es: ¿cómo puede mantener
+            la flexibilidad de los plugins y también abordar el rendimiento?
+        </p>
+<p>
+            <code class="classname">Zend_Loader_PluginLoader</code> ofrece una característica opcional para
+            precisamente esta situación, una caché de inclusión de archivos de clase. Cuando está habilitada,
+            creará un archivo que contiene todas las inclusiones exitosas, que puede
+            invocar desde su bootstrap. Usando esta estrategia, puede
+            mejorar considerablemente el rendimiento de sus servidores de producción.
+        </p>
+<div class="example">
+<a name="zend.loader.pluginloader.performance.example"></a><p class="title"><b>Ejemplo 42.6. Uso de la caché de inclusión de archivos de clase de PluginLoader</b></p>
+<div class="example-contents">
+<p>
+                Para usar la caché de inclusión de archivos de clase, simplemente inserte el
+                siguiente código en su bootstrap:
+            </p>
+<pre class="programlisting">
+$classFileIncCache = APPLICATION_PATH . '/../data/pluginLoaderCache.php';
+if (file_exists($classFileIncCache)) {
+    include_once $classFileIncCache;
+}
+Zend_Loader_PluginLoader::setIncludeFileCache($classFileIncCache);
+</pre>
+<p>
+                Obviamente, la ruta y el nombre de archivo variarán según sus necesidades.
+                Este código debe aparecer lo antes posible, para asegurar que
+                los componentes basados en plugins puedan hacer uso de él.
+            </p>
+<p>
+                Durante el desarrollo, puede que desee deshabilitar la caché. Un
+                método para hacerlo es usar una clave de configuración para
+                determinar si el cargador de plugins debe cachear o no.
+            </p>
+<pre class="programlisting">
+$classFileIncCache = APPLICATION_PATH . '/../data/pluginLoaderCache.php';
+if (file_exists($classFileIncCache)) {
+    include_once $classFileIncCache;
+}
+if ($config-&gt;enablePluginLoaderCache) {
+    Zend_Loader_PluginLoader::setIncludeFileCache($classFileIncCache);
+}
+</pre>
+<p>
+                Esta técnica le permite mantener sus modificaciones en su
+                archivo de configuración en lugar de en el código.
+            </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.loader.autoloader-resource.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.loader.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.loader.spl-autoloader.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">42.3. Autocargadores de recursos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 42.5. La interfaz SplAutoloader</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,506 @@
+<?php $title = '61.4. Lenguaje de consulta'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.4. Lenguaje de consulta</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.searching.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.query-api.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.query-language"></a>61.4. Lenguaje de consulta</h2></div></div></div>
+<p>
+        Java Lucene y <code class="classname">Zend_Search_Lucene</code> proporcionan lenguajes de consulta
+        bastante potentes.
+    </p>
+<p>
+        Estos lenguajes son mayormente iguales, con algunas diferencias menores que se mencionan a continuación.
+    </p>
+<p>
+        La documentación completa de la sintaxis del lenguaje de consulta de Java Lucene se puede encontrar
+        <a class="ulink" href="http://lucene.apache.org/java/2_3_0/queryparsersyntax.html" target="_top">aquí</a>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.terms"></a>61.4.1. Términos</h3></div></div></div>
+<p>
+            Una consulta se descompone en términos y operadores. Existen tres tipos de términos: Términos
+            simples, Frases y Subconsultas.
+        </p>
+<p>
+            Un término simple es una sola palabra como "test" o "hello".
+        </p>
+<p>
+            Una frase es un grupo de palabras rodeado por comillas dobles, como "hello dolly".
+        </p>
+<p>
+            Una subconsulta es una consulta rodeada de paréntesis, como "(hello dolly)".
+        </p>
+<p>
+            Múltiples términos pueden combinarse mediante operadores booleanos para formar consultas
+            complejas (ver más abajo).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.fields"></a>61.4.2. Campos</h3></div></div></div>
+<p>
+            Lucene soporta campos de datos. Al realizar una búsqueda puede especificar un campo,
+            o usar el campo predeterminado. Los nombres de los campos dependen de los datos indexados y el campo
+            predeterminado se define mediante la configuración actual.
+        </p>
+<p>
+            La primera y más significativa diferencia con Java Lucene es que los términos se buscan
+            en <span class="emphasis"><em>todos los campos</em></span> por defecto.
+        </p>
+<p>
+            Existen dos métodos estáticos en la clase <code class="classname">Zend_Search_Lucene</code>
+            que permiten al desarrollador configurar estos ajustes:
+        </p>
+<pre class="programlisting">
+$defaultSearchField = Zend_Search_Lucene::getDefaultSearchField();
+...
+Zend_Search_Lucene::setDefaultSearchField('contents');
+</pre>
+<p>
+            El valor <code class="constant">NULL</code> indica que la búsqueda se realiza en todos los
+            campos. Es la configuración predeterminada.
+        </p>
+<p>
+            Puede buscar en campos específicos escribiendo el nombre del campo seguido de dos puntos ":" seguido
+            por el término que está buscando.
+        </p>
+<p>
+            Como ejemplo, supongamos que un índice de Lucene contiene dos campos - title y text - con
+            text como campo predeterminado. Si desea encontrar el documento titulado "The Right Way"
+            que contiene el texto "don't go this way", puede escribir:
+        </p>
+<pre class="programlisting">
+title:"The Right Way" AND text:go
+</pre>
+<p>
+            o
+        </p>
+<pre class="programlisting">
+title:"Do it right" AND go
+</pre>
+<p>
+            Debido a que "text" es el campo predeterminado, no se requiere el indicador de campo.
+        </p>
+<p>
+            Nota: El campo solo es válido para el término, frase o subconsulta que precede
+            directamente, por lo que la consulta
+        </p>
+<pre class="programlisting">
+title:Do it right
+</pre>
+<p>
+            Solo encontrará "Do" en el campo title. Encontrará "it" y "right" en el campo
+            predeterminado (si el campo predeterminado está configurado) o en todos los campos indexados (si el
+            campo predeterminado está configurado a <code class="constant">NULL</code>).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.wildcard"></a>61.4.3. Comodines</h3></div></div></div>
+<p>
+            Lucene soporta búsquedas con comodines de un solo carácter y de múltiples caracteres dentro de
+            términos individuales (pero no dentro de consultas de frase).
+        </p>
+<p>
+            Para realizar una búsqueda con comodín de un solo carácter use el símbolo "?".
+        </p>
+<p>
+            Para realizar una búsqueda con comodín de múltiples caracteres use el símbolo "*".
+        </p>
+<p>
+            La búsqueda con comodín de un solo carácter busca cadenas que coincidan con el término con el "?"
+            reemplazado por cualquier carácter único. Por ejemplo, para buscar "text" o "test" puede
+            usar la búsqueda:
+        </p>
+<pre class="programlisting">
+te?t
+</pre>
+<p>
+            Las búsquedas con comodín de múltiples caracteres buscan 0 o más caracteres al comparar cadenas
+            contra términos. Por ejemplo, para buscar test, tests o tester, puede usar la búsqueda:
+        </p>
+<pre class="programlisting">
+test*
+</pre>
+<p>
+            Puede usar "?", "*" o ambos en cualquier posición del término:
+        </p>
+<pre class="programlisting">
+*wr?t*
+</pre>
+<p>
+            Esto busca "write", "wrote", "written", "rewrite", "rewrote", etc.
+        </p>
+<p>
+            A partir de ZF 1.7.7 los patrones con comodines necesitan cierto prefijo sin comodines. La
+            longitud predeterminada del prefijo es 3 (como en Java Lucene). Así, los términos "*", "te?t", "*wr?t*"
+            provocarán una excepción
+
+            <a href="#ftn.id46634" class="footnote" name="id46634"><sup class="footnote">[14]</sup></a>.
+        </p>
+<p>
+            Esto se puede modificar usando los métodos
+            <code class="methodname">Zend_Search_Lucene_Search_Query_Wildcard::getMinPrefixLength()</code>
+            y
+            <code class="methodname">Zend_Search_Lucene_Search_Query_Wildcard::setMinPrefixLength()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.modifiers"></a>61.4.4. Modificadores de término</h3></div></div></div>
+<p>
+            Lucene soporta la modificación de términos de consulta para ofrecer una amplia gama de opciones de búsqueda.
+        </p>
+<p>
+            El modificador "~" puede usarse para especificar búsqueda por proximidad en frases o búsqueda
+            difusa (fuzzy) para términos individuales.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.range"></a>61.4.5. Búsquedas por rango</h3></div></div></div>
+<p>
+            Las consultas por rango permiten al desarrollador o usuario buscar documentos cuyos valores de
+            campo(s) estén entre el límite inferior y superior especificados por la consulta de rango. Las consultas
+            por rango pueden ser inclusivas o exclusivas de los límites superior e inferior. La ordenación se
+            realiza lexicográficamente.
+        </p>
+<pre class="programlisting">
+mod_date:[20020101 TO 20030101]
+</pre>
+<p>
+            Esto encontrará documentos cuyos campos mod_date tengan valores entre 20020101 y
+            20030101, inclusive. Tenga en cuenta que las consultas por rango no están reservadas para campos de
+            fecha. También podría usar consultas por rango con campos que no sean de fecha:
+        </p>
+<pre class="programlisting">
+title:{Aida TO Carmen}
+</pre>
+<p>
+            Esto encontrará todos los documentos cuyos títulos se ordenarían entre Aida y Carmen, pero
+            sin incluir Aida y Carmen.
+        </p>
+<p>
+            Las consultas por rango inclusivas se denotan con corchetes. Las consultas por rango exclusivas se
+            denotan con llaves.
+        </p>
+<p>
+            Si no se especifica el campo, entonces <code class="classname">Zend_Search_Lucene</code> busca el
+            intervalo especificado en todos los campos por defecto.
+        </p>
+<pre class="programlisting">
+{Aida TO Carmen}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.fuzzy"></a>61.4.6. Búsquedas difusas</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code>, al igual que Java Lucene, soporta búsquedas difusas
+            (fuzzy) basadas en la Distancia de Levenshtein, o algoritmo de Distancia de Edición. Para realizar una
+            búsqueda difusa use la tilde, "~", al final de un término de una sola palabra. Por ejemplo, para
+            buscar un término similar en ortografía a "roam" use la búsqueda difusa:
+        </p>
+<pre class="programlisting">
+roam~
+</pre>
+<p>
+            Esta búsqueda encontrará términos como foam y roams. Un parámetro adicional (opcional) puede
+            especificar la similitud requerida. El valor está entre 0 y 1; con un valor más cercano a 1
+            solo se emparejarán los términos con mayor similitud. Por ejemplo:
+        </p>
+<pre class="programlisting">
+roam~0.8
+</pre>
+<p>
+            El valor predeterminado que se usa si no se proporciona el parámetro es 0.5.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.matched-terms-limitations"></a>61.4.7. Límite de términos coincidentes</h3></div></div></div>
+<p>
+            Las consultas con comodines, rango y búsqueda difusa pueden coincidir con demasiados términos. Esto
+            puede provocar una degradación increíble del rendimiento de búsqueda.
+        </p>
+<p>
+            Por eso <code class="classname">Zend_Search_Lucene</code> establece un límite de términos coincidentes
+            por consulta (subconsulta). Este límite puede obtenerse y establecerse usando los métodos
+            <code class="methodname">Zend_Search_Lucene::getTermsPerQueryLimit()</code> y
+            <code class="methodname">Zend_Search_Lucene::setTermsPerQueryLimit($limit)</code>.
+        </p>
+<p>
+            El límite predeterminado de términos coincidentes por consulta es 1024.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.proximity-search"></a>61.4.8. Búsquedas por proximidad</h3></div></div></div>
+<p>
+            Lucene soporta encontrar palabras de una frase que estén dentro de una distancia de palabras
+            especificada en una cadena. Para realizar una búsqueda por proximidad use la tilde, "~", al final de
+            la frase. Por ejemplo, para buscar "Zend" y "Framework" dentro de 10 palabras entre sí en un
+            documento use la búsqueda:
+        </p>
+<pre class="programlisting">
+"Zend Framework"~10
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.boosting"></a>61.4.9. Impulsar (boost) un término</h3></div></div></div>
+<p>
+            Java Lucene y <code class="classname">Zend_Search_Lucene</code> proporcionan el nivel de relevancia de
+            los documentos coincidentes en función de los términos encontrados. Para impulsar la relevancia de un
+            término use el símbolo de intercalación, "^", con un factor de impulso (un número) al final del
+            término que está buscando. Cuanto mayor sea el factor de impulso, más relevante será el término.
+        </p>
+<p>
+            El impulso (boosting) le permite controlar la relevancia de un documento impulsando términos
+            individuales. Por ejemplo, si está buscando
+        </p>
+<pre class="programlisting">
+PHP framework
+</pre>
+<p>
+            y desea que el término "PHP" sea más relevante, impúlselo usando el símbolo ^ junto con
+            el factor de impulso al lado del término. Escribiría:
+        </p>
+<pre class="programlisting">
+PHP^4 framework
+</pre>
+<p>
+            Esto hará que los documentos con el término <acronym class="acronym">PHP</acronym> parezcan más relevantes. También
+            puede impulsar términos de frase y subconsultas como en el ejemplo:
+        </p>
+<pre class="programlisting">
+"PHP framework"^4 "Zend Framework"
+</pre>
+<p>
+            Por defecto, el factor de impulso es 1. Aunque el factor de impulso debe ser positivo,
+            puede ser menor que 1 (p. ej. 0.2).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.boolean"></a>61.4.10. Operadores booleanos</h3></div></div></div>
+<p>
+            Los operadores booleanos permiten combinar términos mediante operadores lógicos.
+            Lucene soporta AND, "+", OR, NOT y "-" como operadores booleanos.
+            Java Lucene requiere que los operadores booleanos estén en MAYÚSCULAS.
+            <code class="classname">Zend_Search_Lucene</code> no lo requiere.
+        </p>
+<p>
+            Los operadores AND, OR y NOT, y "+", "-", definen dos estilos diferentes de construir
+            consultas booleanas. A diferencia de Java Lucene, <code class="classname">Zend_Search_Lucene</code> no
+            permite mezclar estos dos estilos.
+        </p>
+<p>
+            Si se usa el estilo AND/OR/NOT, entonces debe estar presente un operador AND u OR entre todos
+            los términos de la consulta. Cada término también puede ir precedido por el operador NOT. El
+            operador AND tiene mayor precedencia que el operador OR. Esto difiere del comportamiento de Java
+            Lucene.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.and"></a>61.4.10.1. AND</h4></div></div></div>
+<p>
+                El operador AND significa que todos los términos en el "grupo AND" deben coincidir con alguna
+                parte de los campos buscados.
+            </p>
+<p>
+                Para buscar documentos que contengan "PHP framework" y "Zend Framework" use la
+                consulta:
+            </p>
+<pre class="programlisting">
+"PHP framework" AND "Zend Framework"
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.or"></a>61.4.10.2. OR</h4></div></div></div>
+<p>
+                El operador OR divide la consulta en varios términos opcionales.
+            </p>
+<p>
+                Para buscar documentos que contengan "PHP framework" o "Zend Framework" use la
+                consulta:
+            </p>
+<pre class="programlisting">
+"PHP framework" OR "Zend Framework"
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.not"></a>61.4.10.3. NOT</h4></div></div></div>
+<p>
+                El operador NOT excluye documentos que contengan el término posterior a NOT. Pero un "grupo
+                AND" que contenga solo términos con el operador NOT devuelve un conjunto de resultados vacío
+                en lugar del conjunto completo de documentos indexados.
+            </p>
+<p>
+                Para buscar documentos que contengan "PHP framework" pero no "Zend Framework" use
+                la consulta:
+            </p>
+<pre class="programlisting">
+"PHP framework" AND NOT "Zend Framework"
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.other-form"></a>61.4.10.4. Operadores &amp;&amp;, || y !</h4></div></div></div>
+<p>
+                &amp;&amp;, || y ! pueden usarse en lugar de la notación AND, OR y NOT.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.plus"></a>61.4.10.5. +</h4></div></div></div>
+<p>
+                El operador "+" o de requerido estipula que el término posterior al símbolo "+" debe
+                coincidir con el documento.
+            </p>
+<p>
+                Para buscar documentos que deban contener "Zend" y puedan contener "Framework" use la
+                consulta:
+            </p>
+<pre class="programlisting">
++Zend Framework
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.minus"></a>61.4.10.6. -</h4></div></div></div>
+<p>
+                El operador "-" o de prohibición excluye documentos que coincidan con el término posterior al
+                símbolo "-".
+            </p>
+<p>
+                Para buscar documentos que contengan "PHP framework" pero no "Zend Framework" use
+                la consulta:
+            </p>
+<pre class="programlisting">
+"PHP framework" -"Zend Framework"
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.search.lucene.query-language.boolean.no-operator"></a>61.4.10.7. Sin operador</h4></div></div></div>
+<p>
+                Si no se usa ningún operador, el comportamiento de la búsqueda se define mediante el
+                "operador booleano por defecto".
+            </p>
+<p>
+                Este está establecido en 'OR' por defecto.
+            </p>
+<p>
+                Esto implica que cada término es opcional por defecto. Puede o no estar presente dentro del
+                documento, pero los documentos con ese término recibirán una puntuación más alta.
+            </p>
+<p>
+                Para buscar documentos que requieran "PHP framework" y puedan contener "Zend
+                Framework" use la consulta:
+            </p>
+<pre class="programlisting">
++"PHP framework" "Zend Framework"
+</pre>
+<p>
+                El operador booleano por defecto puede establecerse u obtenerse con los métodos
+                <code class="classname">Zend_Search_Lucene_Search_QueryParser::setDefaultOperator($operator)</code>
+                y
+                <code class="classname">Zend_Search_Lucene_Search_QueryParser::getDefaultOperator()</code>,
+                respectivamente.
+            </p>
+<p>
+                Estos métodos operan con las constantes
+                <code class="classname">Zend_Search_Lucene_Search_QueryParser::B_AND</code> y
+                <code class="classname">Zend_Search_Lucene_Search_QueryParser::B_OR</code>.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.grouping"></a>61.4.11. Agrupación</h3></div></div></div>
+<p>
+            Java Lucene y <code class="classname">Zend_Search_Lucene</code> soportan el uso de paréntesis para
+            agrupar cláusulas y formar subconsultas. Esto puede ser útil si desea controlar la
+            precedencia de los operadores lógicos booleanos de una consulta o mezclar diferentes estilos de
+            consulta booleana:
+        </p>
+<pre class="programlisting">
++(framework OR library) +php
+</pre>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> soporta subconsultas anidadas a cualquier nivel.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.field-grouping"></a>61.4.12. Agrupación de campos</h3></div></div></div>
+<p>
+            Lucene también soporta el uso de paréntesis para agrupar múltiples cláusulas en un solo campo.
+        </p>
+<p>
+            Para buscar un título que contenga tanto la palabra "return" como la frase "pink panther"
+            use la consulta:
+        </p>
+<pre class="programlisting">
+title:(+return +"pink panther")
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.query-language.escaping"></a>61.4.13. Escapando caracteres especiales</h3></div></div></div>
+<p>
+            Lucene soporta el escape de caracteres especiales usados en la sintaxis de consulta. La lista
+            actual de caracteres especiales es:
+        </p>
+<p>
+            + - &amp;&amp; || ! ( ) { } [ ] ^ " ~ * ? : \
+        </p>
+<p>
+            + y - dentro de términos individuales se tratan automáticamente como caracteres comunes.
+        </p>
+<p>
+            Para otras instancias de estos caracteres use el \ antes de cada carácter especial que desee
+            escapar. Por ejemplo, para buscar (1+1):2 use la consulta:
+        </p>
+<pre class="programlisting">
+\(1\+1\)\:2
+</pre>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id46634" class="footnote"><p><a href="#id46634" class="para"><sup class="para">[14] </sup></a>
+                    Tenga en cuenta que no se trata de una
+                    <code class="classname">Zend_Search_Lucene_Search_QueryParserException</code>, sino de una
+                    <code class="classname">Zend_Search_Lucene_Exception</code>. Se lanza durante la operación de
+                    reescritura (ejecución) de la consulta.
+                </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.searching.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.query-api.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.3. Búsqueda en un índice </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 61.5. API de construcción de consultas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

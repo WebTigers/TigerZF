@@ -1,0 +1,283 @@
+<?php $title = '64.9. Zend_Service_Amazon_Ec2: Amazon Machine Images (AMI)'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.9. Zend_Service_Amazon_Ec2: Amazon Machine Images (AMI)</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.cloudwatch.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.ebs.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.images"></a>64.9. Zend_Service_Amazon_Ec2: Amazon Machine Images (AMI)</h2></div></div></div>
+<p>
+        Las Amazon Machine Images (AMIs) vienen preconfiguradas con una lista
+        cada vez mayor de sistemas operativos.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.images.info"></a>64.9.1. Utilidades de información de AMI</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.images.register"></a><p class="title"><b>Ejemplo 64.30. Registrar una AMI con EC2</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">register</code> Cada <acronym class="acronym">AMI</acronym> está asociada a un ID único
+                proporcionado por el servicio Amazon EC2 mediante la operación RegisterImage.
+                Durante el registro, Amazon EC2 recupera el manifiesto de imagen especificado
+                desde Amazon S3 y verifica que la imagen pertenezca al
+                usuario que la registra.
+            </p>
+<p>
+                <code class="code">register</code> devuelve el imageId de la imagen registrada.
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+$ip = $ec2_img-&gt;register('imageLocation');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.images.deregister"></a><p class="title"><b>Ejemplo 64.31. Anular el registro de una AMI con EC2</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">deregister</code>, anula el registro de una <acronym class="acronym">AMI</acronym>. Una vez anulado el registro,
+                ya no se pueden lanzar instancias de la <acronym class="acronym">AMI</acronym>.
+            </p>
+<p>
+                <code class="code">deregister</code> devuelve un valor booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+$ip = $ec2_img-&gt;deregister('imageId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.images.describe"></a><p class="title"><b>Ejemplo 64.32. Describir una AMI</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describe</code> Devuelve información sobre <acronym class="acronym">AMI</acronym>s, AKIs y
+                ARIs disponibles para el usuario. La información devuelta incluye el tipo de imagen,
+                códigos de producto, arquitectura, y los IDs del kernel y del disco <acronym class="acronym">RAM</acronym>. Las imágenes
+                disponibles para el usuario incluyen imágenes públicas que cualquier usuario
+                puede lanzar, imágenes privadas propiedad del usuario que hace la solicitud,
+                e imágenes privadas propiedad de otros usuarios para las que el usuario tiene
+                permisos de lanzamiento explícitos.
+            </p>
+<p>
+                </p>
+<div class="table">
+<a name="zend.service.amazon.ec2.images.describe-table"></a><p class="title"><b>Tabla 64.12. Los permisos de lanzamiento se dividen en tres categorías</b></p>
+<div class="table-contents"><table class="table" summary="Launch permissions fall into three categories" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">public</code></td>
+<td>
+                                    <p>
+                                        El propietario de la <acronym class="acronym">AMI</acronym> concedió permisos
+                                        de lanzamiento de la <acronym class="acronym">AMI</acronym> al grupo all.
+                                        Todos los usuarios tienen permisos de lanzamiento para estas
+                                        <code class="constant">AMIs</code>.
+                                    </p>
+                                </td>
+</tr>
+<tr>
+<td><code class="code">explicit</code></td>
+<td>
+                                    <p>
+                                        El propietario de la <acronym class="acronym">AMI</acronym> concedió permisos
+                                        de lanzamiento a un usuario específico.
+                                    </p>
+                                </td>
+</tr>
+<tr>
+<td><code class="code">implicit</code></td>
+<td>
+                                    <p>
+                                        Un usuario tiene permisos de lanzamiento implícitos para todas las
+                                        <code class="constant">AMIs</code> que posee.
+                                    </p>
+                                </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p><br class="table-break">
+            </p>
+<p>
+                La lista de <acronym class="acronym">AMI</acronym>s devuelta se puede modificar especificando
+                IDs de <acronym class="acronym">AMI</acronym>, propietarios de <acronym class="acronym">AMI</acronym>, o usuarios con
+                permisos de lanzamiento. Si no se especifican opciones, Amazon EC2 devuelve todas las
+                <acronym class="acronym">AMI</acronym>s para las que el usuario tiene permisos de lanzamiento.
+            </p>
+<p>
+                Si especifica uno o más IDs de <acronym class="acronym">AMI</acronym>, solo se devuelven las <acronym class="acronym">AMI</acronym>s
+                que tienen los IDs especificados. Si especifica un ID de <acronym class="acronym">AMI</acronym>
+                no válido, se devuelve un error. Si especifica un ID de
+                <acronym class="acronym">AMI</acronym> al que no tiene acceso, no se incluirá
+                en los resultados devueltos.
+            </p>
+<p>
+                Si especifica uno o más propietarios de <acronym class="acronym">AMI</acronym>, solo se devuelven
+                las <acronym class="acronym">AMI</acronym>s de los propietarios especificados y a las que tiene acceso. Los resultados pueden incluir los IDs de cuenta de los propietarios especificados, amazon
+                para <acronym class="acronym">AMI</acronym>s propiedad de Amazon o self para <acronym class="acronym">AMI</acronym>s que
+                usted posee.
+            </p>
+<p>
+                Si especifica una lista de usuarios ejecutables, solo se devuelven los usuarios que tienen permisos de lanzamiento
+                para las <acronym class="acronym">AMI</acronym>s. Puede especificar IDs de cuenta (si
+                posee las <acronym class="acronym">AMI</acronym>(s)), self para <acronym class="acronym">AMI</acronym>s para las que
+                tiene permisos propios o explícitos, o all para <acronym class="acronym">AMI</acronym>s públicas.
+            </p>
+<p>
+                <code class="code">describe</code> devuelve un array con todas las imágenes que coinciden con los criterios
+                que se pasaron. El array contiene imageId, imageLocation, imageState,
+                imageOwnerId, isPublic, architecture, imageType, kernelId, ramdiskId y platform.
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+$ip = $ec2_img-&gt;describe();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.images.attribute"></a>64.9.2. Utilidades de atributos de AMI</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.images.attribute.modify"></a><p class="title"><b>Ejemplo 64.33. Modificar atributos de imagen</b></p>
+<div class="example-contents">
+<p>Modifica un atributo de una <acronym class="acronym">AMI</acronym></p>
+<p>
+                </p>
+<div class="table">
+<a name="zend.service.amazon.ec2.images.attribute.modify-table"></a><p class="title"><b>Tabla 64.13. Atributos válidos</b></p>
+<div class="table-contents"><table class="table" summary="Valid Attributes" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">launchPermission</code></td>
+<td>
+                                    <p>
+                                        Controla quién tiene permiso para lanzar la
+                                        <acronym class="acronym">AMI</acronym>. Los permisos de lanzamiento se pueden conceder a
+                                        usuarios específicos añadiendo userIds.
+                                    </p>
+
+                                    <p>
+                                        Para hacer pública la <acronym class="acronym">AMI</acronym>, añada el grupo
+                                        all.
+                                    </p>
+                                </td>
+</tr>
+<tr>
+<td><code class="code">productCodes</code></td>
+<td>
+                                    <p>
+                                        Asocia un código de producto con las <code class="constant">AMIs</code>.
+                                        Esto permite a los desarrolladores cobrar a los usuarios por el uso de las
+                                        <code class="constant">AMIs</code>. El usuario debe estar registrado para
+                                        el producto antes de poder lanzar la
+                                        <acronym class="acronym">AMI</acronym>. <span class="emphasis"><em>Este es un atributo de escritura
+                                            única; una vez establecido, no se puede cambiar ni
+                                            eliminar.</em></span>
+                                    </p>
+                                </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p><br class="table-break">
+            </p>
+<p>
+                <code class="code">modifyAttribute</code> devuelve un valor booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+// modify the launchPermission of an AMI
+$return = $ec2_img-&gt;modifyAttribute('imageId',
+                                    'launchPermission',
+                                    'add',
+                                    'userId',
+                                    'userGroup');
+
+// set the product code of the AMI.
+$return = $ec2_img-&gt;modifyAttribute('imageId',
+                                    'productCodes',
+                                    'add',
+                                    null,
+                                    null,
+                                    'productCode');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.images.attribute.reset"></a><p class="title"><b>Ejemplo 64.34. Restablecer un atributo de AMI</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">resetAttribute</code> restablecerá el atributo de una <acronym class="acronym">AMI</acronym> a
+                su valor predeterminado. <span class="emphasis"><em>El atributo productCodes no se puede restablecer.</em></span>
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+$return = $ec2_img-&gt;resetAttribute('imageId', 'launchPermission');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.images.attribute.describe"></a><p class="title"><b>Ejemplo 64.35. Describir atributo de AMI</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describeAttribute</code> devuelve información sobre un atributo de una
+                <acronym class="acronym">AMI</acronym>. Solo se puede especificar un atributo por llamada. Actualmente solo
+                se admiten launchPermission y productCodes.
+            </p>
+<p>
+                <code class="code">describeAttribute</code> devuelve un array con el valor del atributo
+                que se solicitó.
+            </p>
+<pre class="programlisting">
+$ec2_img = new Zend_Service_Amazon_Ec2_Image('aws_key','aws_secret_key');
+$return = $ec2_img-&gt;describeAttribute('imageId', 'launchPermission');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.cloudwatch.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.ebs.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.8. Zend_Service_Amazon_Ec2: Monitorización con CloudWatch </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.10. Zend_Service_Amazon_Ec2: Elastic Block Storage (EBS)</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

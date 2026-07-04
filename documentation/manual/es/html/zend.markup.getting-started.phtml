@@ -1,0 +1,108 @@
+<?php $title = '46.2. Primeros pasos con Zend_Markup'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">46.2. Primeros pasos con Zend_Markup</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.markup.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 46. Zend_Markup</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.markup.parsers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.markup.getting-started"></a>46.2. Primeros pasos con Zend_Markup</h2></div></div></div>
+<p>
+        Esta guía para comenzar con <code class="classname">Zend_Markup</code> utiliza el analizador BBCode
+        y el renderizador <acronym class="acronym">HTML</acronym>. Los principios tratados pueden adaptarse a otros
+        analizadores y renderizadores.
+    </p>
+<div class="example">
+<a name="zend.markup.getting-started.basic-usage"></a><p class="title"><b>Ejemplo 46.1. Uso básico de Zend_Markup</b></p>
+<div class="example-contents">
+<p>
+            Primero instanciaremos un objeto <code class="classname">Zend_Markup_Renderer_Html</code>
+            utilizando el método <code class="methodname">Zend_Markup::factory()</code>. Esto también creará
+            un objeto <code class="classname">Zend_Markup_Parser_Bbcode</code> que se añadirá al
+            objeto renderizador.
+        </p>
+<p>
+            Después de eso, utilizaremos el método <code class="methodname">render()</code> para convertir un fragmento
+            de BBCode a <acronym class="acronym">HTML</acronym>.
+        </p>
+<pre class="programlisting">
+// Creates instance of Zend_Markup_Renderer_Html,
+// with Zend_Markup_Parser_BbCode as its parser
+$bbcode = Zend_Markup::factory('Bbcode');
+
+echo $bbcode-&gt;render('[b]bold text[/b] and [i]cursive text[/i]');
+// Outputs: '&lt;strong&gt;bold text&lt;/strong&gt; and &lt;em&gt;cursive text&lt;/em&gt;'
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.markup.getting-started.complicated-example"></a><p class="title"><b>Ejemplo 46.2. Un ejemplo más complicado de Zend_Markup</b></p>
+<div class="example-contents">
+<p>
+            Esta vez, haremos exactamente lo mismo que arriba, pero con un marcado BBCode
+            más complicado.
+        </p>
+<pre class="programlisting">
+$bbcode = Zend_Markup::factory('Bbcode');
+
+$input = &lt;&lt;&lt;EOT
+[list]
+[*]Zend Framework
+[*]Foobar
+[/list]
+EOT;
+
+echo $bbcode-&gt;render($input);
+/*
+Should output something like:
+&lt;ul&gt;
+&lt;li&gt;Zend Framework&lt;/li&gt;
+&lt;li&gt;Foobar&lt;/li&gt;
+&lt;/ul&gt;
+*/
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.markup.getting-started.incorrect-input"></a><p class="title"><b>Ejemplo 46.3. Procesamiento de entradas incorrectas</b></p>
+<div class="example-contents">
+<p>
+            Además de simplemente analizar y renderizar marcado como BBCode,
+            <code class="classname">Zend_Markup</code> también es capaz de manejar entradas incorrectas. La mayoría de los procesadores de BBCode
+            no son capaces de renderizar toda la entrada como salida <acronym class="acronym">XHTML</acronym> válida.
+            <code class="classname">Zend_Markup</code> corrige entradas anidadas incorrectamente, y también
+            cierra etiquetas que no se cerraron:
+        </p>
+<pre class="programlisting">
+$bbcode = Zend_Markup::factory('Bbcode');
+
+echo $bbcode-&gt;render('some [i]wrong [b]sample [/i] text');
+// Note that the '[b]' tag is never closed, and is also incorrectly
+// nested; regardless, Zend_Markup renders it correctly as:
+// some &lt;em&gt;wrong &lt;strong&gt;sample &lt;/strong&gt;&lt;/em&gt;&lt;strong&gt; text&lt;/strong&gt;
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.markup.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.markup.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.markup.parsers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 46. Zend_Markup </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 46.3. Analizadores de Zend_Markup</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

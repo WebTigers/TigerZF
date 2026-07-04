@@ -1,0 +1,853 @@
+<?php $title = '64.22. Zend_Service_LiveDocx'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.22. Zend_Service_LiveDocx</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.flickr.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.rackspace.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.livedocx"></a>64.22. Zend_Service_LiveDocx</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.livedocx.introduction"></a>64.22.1. Introducción a LiveDocx</h3></div></div></div>
+<p>
+            LiveDocx es un servicio <acronym class="acronym">SOAP</acronym> que permite a los desarrolladores generar documentos
+            de procesamiento de texto combinando datos estructurados de <acronym class="acronym">PHP</acronym> con una
+            plantilla, creada en un procesador de texto. El documento resultante puede guardarse como un archivo
+            <acronym class="acronym">PDF</acronym>, <acronym class="acronym">DOCX</acronym>, <acronym class="acronym">DOC</acronym>,
+            <acronym class="acronym">HTML</acronym> o <acronym class="acronym">RTF</acronym>. LiveDocx implementa <a class="ulink" href="http://en.wikipedia.org/wiki/Mail_merge" target="_top">combinación de correspondencia</a> en
+            <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            La familia de componentes <code class="classname">Zend_Service_LiveDocx</code> proporciona una interfaz limpia
+            y sencilla para la <a class="ulink" href="http://www.livedocx.com" target="_top">API de LiveDocx</a>
+            y además ofrece funcionalidad para mejorar el rendimiento de la red.
+        </p>
+<p>
+            Además de esta sección del manual, si está interesado en aprender más sobre
+            <code class="classname">Zend_Service_LiveDocx</code> y el servicio <acronym class="acronym">SOAP</acronym>
+            backend LiveDocx, eche un vistazo a los siguientes recursos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Aplicaciones de demostración incluidas</em></span>. Hay un gran
+                    número de aplicaciones de demostración en el directorio
+                    <span class="emphasis"><em>/demos/Zend/Service/LiveDocx</em></span> del archivo de distribución de Zend Framework
+                    o de la versión trunk, obtenida del repositorio SVN estándar.
+                    Están diseñadas para ponerle al día rápidamente con
+                    <code class="classname">Zend_Service_LiveDocx</code> en cuestión de minutos.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="ulink" href="http://www.phplivedocx.org/" target="_top">
+                    Blog y sitio web de <code class="classname">Zend_Service_LiveDocx</code></a>.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="ulink" href="http://www.livedocx.com/pub/documentation/api.aspx" target="_top">
+                    Documentación de la API SOAP de LiveDocx</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="ulink" href="https://api.livedocx.com/1.2/mailmerge.asmx?wsdl" target="_top">
+                    WSDL de LiveDocx</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="ulink" href="https://www.livedocx.com/" target="_top">Blog y sitio web de LiveDocx</a>.
+                </p></li>
+</ul></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.account"></a>64.22.1.1. Registrarse para obtener una cuenta</h4></div></div></div>
+<p>
+                Antes de poder empezar a usar LiveDocx, primero debe <a class="ulink" href="https://www.livedocx.com/user/account_registration.aspx" target="_top">registrarse</a>
+                para obtener una cuenta. La cuenta es completamente gratuita y solo necesita
+                especificar un <span class="emphasis"><em>nombre de usuario</em></span>, una <span class="emphasis"><em>contraseña</em></span> y
+                una <span class="emphasis"><em>dirección de correo electrónico</em></span>. Sus credenciales de acceso se enviarán a
+                la dirección de correo electrónico que proporcione, así que escríbala con cuidado.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.templates-documents"></a>64.22.1.2. Plantillas y documentos</h4></div></div></div>
+<p>
+                LiveDocx diferencia entre los siguientes términos: 1)
+                <span class="emphasis"><em>plantilla</em></span> y 2) <span class="emphasis"><em>documento</em></span>. Para
+                comprender plenamente la documentación y, de hecho, la propia <acronym class="acronym">API</acronym>, es
+                importante que cualquier programador que utilice LiveDocx entienda la diferencia.
+            </p>
+<p>
+                El término <span class="emphasis"><em>plantilla</em></span> se utiliza para referirse al archivo de entrada, creado
+                en un procesador de texto, que contiene el formato y los campos de texto. Puede descargar una
+                <a class="ulink" href="http://www.phplivedocx.org/wp-content/uploads/2009/01/license-agreement-template.docx" target="_top">plantilla
+                    de ejemplo</a>, almacenada como archivo <acronym class="acronym">DOCX</acronym>. El término
+                <span class="emphasis"><em>documento</em></span> se utiliza para referirse al archivo de salida que contiene la
+                plantilla, rellenada con datos; es decir, el documento terminado. Puede descargar un
+                <a class="ulink" href="http://www.phplivedocx.org/wp-content/uploads/2009/01/license-agreement-document.pdf" target="_top">documento
+                    de ejemplo</a>, almacenado como archivo <acronym class="acronym">PDF</acronym>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.formats"></a>64.22.1.3. Formatos de archivo compatibles</h4></div></div></div>
+<p>
+                LiveDocx admite los siguientes formatos de archivo:
+            </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.livedocx.formats.template"></a>64.22.1.3.1. Formatos de archivo de plantilla (entrada)</h5></div></div></div>
+<p>
+                    Las plantillas pueden guardarse en cualquiera de los siguientes formatos de archivo:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Office_Open_XML" target="_top">DOCX</a> -
+                            formato Office Open <acronym class="acronym">XML</acronym>
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/DOC_(computing)" target="_top">DOC</a> -
+                            formato Microsoft Word <acronym class="acronym">DOC</acronym>
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Rich_Text_Format" target="_top">RTF</a> -
+                            formato de archivo de texto enriquecido
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://www.textcontrol.com/" target="_top">TXD</a> - formato TX Text Control
+                        </p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.livedocx.formats.document"></a>64.22.1.3.2. Formatos de archivo de documento (salida):</h5></div></div></div>
+<p>
+                    El documento resultante puede guardarse en cualquiera de los siguientes formatos de archivo:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Office_Open_XML" target="_top">DOCX</a> -
+                            formato Office Open <acronym class="acronym">XML</acronym>
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/DOC_(computing)" target="_top">DOC</a> -
+                            formato Microsoft Word <acronym class="acronym">DOC</acronym>
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Xhtml" target="_top">HTML</a> -
+                            formato <acronym class="acronym">XHTML</acronym> 1.0 transitional
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Rich_Text_Format" target="_top">RTF</a> -
+                            formato de archivo de texto enriquecido
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Portable_Document_Format" target="_top">PDF</a>
+                            - Acrobat Portable Document Format
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://www.textcontrol.com/" target="_top">TXD</a> - formato TX Text Control
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Text_file" target="_top">TXT</a> -
+                            texto plano <acronym class="acronym">ANSI</acronym>
+                        </p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.livedocx.formats.imageimport"></a>64.22.1.3.3. Formatos de archivo de imagen (importación):</h5></div></div></div>
+<p>
+                    Las imágenes se pueden combinar en las plantillas en cualquiera de los siguientes formatos de archivo:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/BMP_file_format" target="_top">BMP</a> -
+                            formato de imagen de mapa de bits
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/GIF" target="_top">GIF</a> - Graphics
+                            Interchange Format
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Jpg" target="_top">JPG</a> - formato Joint
+                            Photographic Experts Group
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Portable_Network_Graphics" target="_top">PNG</a>
+                            - formato Portable Network Graphics
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Tagged_Image_File_Format" target="_top">TIFF</a>
+                            - Tagged Image File Format
+                        </p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.livedocx.formats.imageexport"></a>64.22.1.3.4. Formatos de archivo de imagen (salida):</h5></div></div></div>
+<p>
+                    El documento resultante puede exportarse a cualquiera de los siguientes formatos de archivo
+                    gráfico:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/BMP_file_format" target="_top">BMP</a> -
+                            formato de imagen de mapa de bits
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/GIF" target="_top">GIF</a> - Graphics
+                            Interchange Format
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Jpg" target="_top">JPG</a> - formato Joint
+                            Photographic Experts Group
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Portable_Network_Graphics" target="_top">PNG</a>
+                            - formato Portable Network Graphics
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Tagged_Image_File_Format" target="_top">TIFF</a>
+                            - Tagged Image File Format
+                        </p></li>
+<li class="listitem"><p>
+                            <a class="ulink" href="http://en.wikipedia.org/wiki/Windows_Metafile" target="_top">WMF</a> -
+                            formato Windows Meta File
+                        </p></li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.livedocx.mailmerge"></a>64.22.2. Zend_Service_LiveDocx_MailMerge</h3></div></div></div>
+<p>
+             <code class="classname">Zend_Service_LiveDocx_MailMerge</code> es el objeto de combinación de correspondencia en la
+             familia <code class="classname">Zend_Service_LiveDocx</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.generation"></a>64.22.2.1. Proceso de generación de documentos</h4></div></div></div>
+<p>
+                El proceso de generación de documentos puede simplificarse con la siguiente ecuación:
+            </p>
+<p>
+                <span class="emphasis"><em>Plantilla + Datos = Documento</em></span>
+            </p>
+<p>
+                O expresado mediante el siguiente diagrama:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.generation-diabasic_zoom.png">
+            </p>
+<p>
+                Los datos se insertan en la plantilla para crear un documento.
+            </p>
+<p>
+                Una plantilla, creada en una aplicación de procesamiento de texto, como Microsoft Word, se
+                carga en LiveDocx. Luego, los datos se insertan en la plantilla y el documento
+                resultante se guarda en cualquier formato compatible.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.templates"></a>64.22.2.2. Creación de plantillas en Microsoft Word 2007</h4></div></div></div>
+<p>
+                Comience abriendo Microsoft Word y creando un nuevo documento. A continuación, abra el
+                cuadro de diálogo <span class="emphasis"><em>Campo</em></span>. Este tiene el siguiente aspecto:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.templates-msworddialog_zoom.png">
+            </p>
+<p>
+                Cuadro de diálogo Campo de Microsoft Word 2007.
+            </p>
+<p>
+                Usando este diálogo, puede insertar los campos de combinación requeridos en su documento.
+                A continuación se muestra una captura de pantalla de un acuerdo de licencia en Microsoft Word 2007. Los campos
+                de combinación se marcan como <span class="command"><strong>{ MERGEFIELD FieldName }</strong></span>:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.templates-mswordtemplatefull_zoom.png">
+            </p>
+<p>
+                Plantilla en Microsoft Word 2007.
+            </p>
+<p>
+                Ahora, guarde la plantilla como <span class="emphasis"><em>template.docx</em></span>.
+            </p>
+<p>
+                 En el siguiente paso, vamos a rellenar los campos de combinación con datos textuales desde
+                 <acronym class="acronym">PHP</acronym>.
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.templates-mswordtemplatecropped_zoom.png">
+            </p>
+<p>
+                Plantilla recortada en Microsoft Word 2007.
+            </p>
+<p>
+                Para rellenar los campos de combinación en la captura de pantalla recortada anterior de la <a class="ulink" href="http://www.phplivedocx.org/wp-content/uploads/2009/01/license-agreement-template.docx" target="_top">plantilla</a>
+                en Microsoft Word, todo lo que tenemos que codificar es lo siguiente:
+            </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;setLocalTemplate('template.docx');
+
+$phpLiveDocx-&gt;assign('software', 'Magic Graphical Compression Suite v1.9')
+            -&gt;assign('licensee', 'Henry Döner-Meyer')
+            -&gt;assign('company',  'Co-Operation');
+
+$phpLiveDocx-&gt;createDocument();
+
+$document = $phpLiveDocx-&gt;retrieveDocument('pdf');
+
+file_put_contents('document.pdf', $document);
+</pre>
+<p>
+                El documento resultante se escribe en disco en el archivo
+                <span class="emphasis"><em>document.pdf</em></span>. Este archivo ahora puede postprocesarse, enviarse por
+                correo electrónico o simplemente mostrarse, como se ilustra a continuación en <span class="emphasis"><em>Document Viewer
+                    2.26.1</em></span> en <span class="emphasis"><em>Ubuntu 9.04</em></span>:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.templates-msworddocument_zoom.png">
+            </p>
+<p>
+                Documento resultante como <acronym class="acronym">PDF</acronym> en Document Viewer 2.26.1.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.imagemerge"></a>64.22.2.3. Combinación de datos de imagen</h4></div></div></div>
+<p>
+                Usando <code class="classname">Zend_Service_LiveDocx_MailMerge</code> también es posible combinar imágenes en
+                una plantilla. Esta funcionalidad es útil, por ejemplo, en el caso de una aplicación de identificación
+                para una conferencia. Además del nombre y el nombre de la empresa que deben aparecer en
+                la identificación, es posible insertar una foto del delegado, usando la API.
+            </p>
+<p>
+                Aunque suena un poco contraintuitivo, la combinación de imágenes también funciona con
+                campos de texto, como se describe en la sección anterior. De hecho, insertar un campo de texto
+                para una imagen es idéntico a insertar un campo de texto para información textual.
+                La única diferencia es la convención de nomenclatura del campo de texto. Mientras que un campo
+                de texto para información textual puede tener (casi) cualquier identificador, un campo de texto para
+                una imagen debe comenzar con <span class="emphasis"><em>image:</em></span>. Por ejemplo, en el caso de nuestra aplicación
+                de identificación, tendríamos los siguientes 3 campos:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.templates-imagemerge_zoom.png">
+            </p>
+<p>
+                El campo de texto, en el que se insertarán los datos de imagen se llama <span class="emphasis"><em>image:photo</em></span>
+                y puede rellenarse igual que cualquier otro campo de texto, usando el método assign. Los
+                campos de texto <span class="emphasis"><em>name</em></span> y <span class="emphasis"><em>company</em></span> son campos de texto
+                regulares para información textual.
+            </p>
+<p>
+                Antes de insertar datos gráficos, primero debemos subir la imagen al servidor
+                backend de LiveDocx. Esto puede lograrse usando el método <span class="emphasis"><em>uploadImage($filename)</em></span>.
+            </p>
+<p>El siguiente fragmento de código ilustra el flujo:</p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('username')
+            -&gt;setPassword('password');
+
+$photoFilename = 'dailemaitre.jpg';
+
+if (!$phpLiveDocx-&gt;imageExists($photoFilename)) {
+    $phpLiveDocx-&gt;uploadImage($photoFilename);
+}
+
+$phpLiveDocx-&gt;setLocalTemplate('template.docx');
+
+$phpLiveDocx-&gt;assign('name',        'Daï Lemaitre')
+            -&gt;assign('company',     'Megasoft Co-operation')
+            -&gt;assign('date',        Zend_Date::now()-&gt;toString(Zend_Date::DATE_LONG))
+            -&gt;assign('image:photo', $photoFilename);
+
+$phpLiveDocx-&gt;createDocument();
+
+$document = $phpLiveDocx-&gt;retrieveDocument('pdf');
+
+file_put_contents('document.pdf', $document);
+
+$phpLiveDocx-&gt;deleteImage($photoFilename);
+</pre>
+<p>
+                Tenga en cuenta que todas las imágenes subidas a su cuenta de LiveDocx deben tener un nombre de
+                archivo único. En el caso de que solo pretenda usar la imagen una vez (como es
+                probable para nuestra aplicación de identificación), tiene sentido eliminarla
+                inmediatamente del backend, usando el método <span class="emphasis"><em>deleteImage($filename)</em></span>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.advanced"></a>64.22.2.4. Combinación de correspondencia avanzada</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Service_LiveDocx_MailMerge</code> permite a los diseñadores insertar
+                cualquier número de campos de texto en una plantilla. Estos campos de texto se rellenan con datos
+                cuando se llama a <span class="emphasis"><em>createDocument()</em></span>.
+            </p>
+<p>
+                Además de los campos de texto, también es posible especificar regiones de un documento, que
+                deben repetirse.
+            </p>
+<p>
+                Por ejemplo, en una factura telefónica es necesario imprimir una lista de todas las
+                conexiones, incluyendo el número de destino, la duración y el coste de cada llamada. Esta
+                funcionalidad de fila repetida puede lograrse con los llamados bloques.
+            </p>
+<p>
+                Los <span class="emphasis"><em>bloques</em></span> son simplemente regiones de un documento, que se repiten
+                cuando se llama a <code class="methodname">createDocument()</code>. En un bloque se puede especificar
+                cualquier número de <span class="emphasis"><em>campos de bloque</em></span>.
+            </p>
+<p>
+                Los bloques constan de dos objetivos de documento consecutivos con un nombre único. La siguiente
+                captura de pantalla ilustra estos objetivos y sus nombres en rojo:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.advanced-mergefieldblockformat_zoom.png">
+            </p>
+<p>
+                El formato de un bloque es el siguiente:
+            </p>
+<pre class="programlisting">
+blockStart_ + unique name
+blockEnd_ + unique name
+</pre>
+<p>Por ejemplo:</p>
+<pre class="programlisting">
+blockStart_block1
+blockEnd_block1
+</pre>
+<p>
+                El contenido de un bloque se repite, hasta que se hayan inyectado en la plantilla todos los datos
+                asignados en los campos de bloque. Los datos para los campos de bloque se especifican en
+                <acronym class="acronym">PHP</acronym> como un array multi-asociativo.
+            </p>
+<p>
+                La siguiente captura de pantalla de una plantilla en Microsoft Word 2007 muestra cómo se usan
+                los campos de bloque:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.advanced-mswordblockstemplate_zoom.png">
+            </p>
+<p>
+                Plantilla, ilustrando bloques en Microsoft Word 2007.
+            </p>
+<p>
+                El siguiente código rellena la plantilla anterior con datos.
+            </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;setLocalTemplate('template.doc');
+
+$billConnections = array(
+    array(
+        'connection_number'   =&gt; '+49 421 335 912',
+        'connection_duration' =&gt; '00:00:07',
+        'fee'                 =&gt; '€ 0.03',
+    ),
+    array(
+        'connection_number'   =&gt; '+49 421 335 913',
+        'connection_duration' =&gt; '00:00:07',
+        'fee'                 =&gt; '€ 0.03',
+    ),
+    array(
+        'connection_number'   =&gt; '+49 421 335 914',
+        'connection_duration' =&gt; '00:00:07',
+        'fee'                 =&gt; '€ 0.03',
+    ),
+    array(
+        'connection_number'   =&gt; '+49 421 335 916',
+        'connection_duration' =&gt; '00:00:07',
+        'fee'                 =&gt; '€ 0.03',
+    ),
+);
+
+$phpLiveDocx-&gt;assign('connection', $billConnections);
+
+// ... assign other data here ...
+
+$phpLiveDocx-&gt;createDocument();
+$document = $phpLiveDocx-&gt;retrieveDocument('pdf');
+file_put_contents('document.pdf', $document);
+</pre>
+<p>
+                Los datos, especificados en el array <code class="varname">$billConnections</code>, se
+                repiten en la plantilla en el bloque connection. Las claves del array
+                (<code class="varname">connection_number</code>, <code class="varname">connection_duration</code> y
+                <code class="varname">fee</code>) son los nombres de los campos de bloque; sus datos se insertan, una fila
+                por iteración.
+            </p>
+<p>
+                El documento resultante se escribe en disco en el archivo
+                <span class="emphasis"><em>document.pdf</em></span>. Este archivo ahora puede postprocesarse, enviarse por
+                correo electrónico o simplemente mostrarse, como se ilustra a continuación en <span class="emphasis"><em>Document Viewer
+                    2.26.1</em></span> en <span class="emphasis"><em>Ubuntu 9.04</em></span>:
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.advanced-mswordblocksdocument_zoom.png">
+            </p>
+<p>
+                Documento resultante como <acronym class="acronym">PDF</acronym> en Document Viewer 2.26.1.
+            </p>
+<p>
+                Puede descargar el archivo de <acronym class="acronym">DOC</acronym> <a class="ulink" href="http://www.phplivedocx.org/wp-content/uploads/2009/01/telephone-bill-template.doc" target="_top">plantilla</a>
+                y el <a class="ulink" href="http://www.phplivedocx.org/wp-content/uploads/2009/01/telephone-bill-document.pdf" target="_top">documento
+                    PDF</a> resultante.
+            </p>
+<p>
+                <span class="emphasis"><em>NOTA:</em></span> los bloques no se pueden anidar.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.bitmaps"></a>64.22.2.5. Generación de archivos de imagen de mapa de bits</h4></div></div></div>
+<p>
+                Además de los formatos de archivo de documento,
+                <code class="classname">Zend_Service_LiveDocx_MailMerge</code> también permite exportar documentos
+                a varios formatos de archivo de imagen (<acronym class="acronym">BMP</acronym>,
+                <acronym class="acronym">GIF</acronym>, <acronym class="acronym">JPG</acronym>, <acronym class="acronym">PNG</acronym> y
+                <acronym class="acronym">TIFF</acronym>). Cada página del documento se guarda en un archivo.
+            </p>
+<p>
+                El siguiente ejemplo ilustra el uso de <code class="methodname">getBitmaps($fromPage,
+                    $toPage, $zoomFactor, $format)</code> y
+                <code class="methodname">getAllBitmaps($zoomFactor, $format)</code>.
+            </p>
+<p>
+                <code class="varname">$fromPage</code> es el número de página inferior del rango de páginas que
+                debe devolverse como imagen y <code class="varname">$toPage</code> el número de página
+                superior. <code class="varname">$zoomFactor</code> es el tamaño de las imágenes, como porcentaje,
+                relativo al tamaño de página original. El rango de este parámetro es de 10 a 400.
+                <code class="varname">$format</code> es el formato de las imágenes devueltas por este método. Los
+                formatos compatibles pueden obtenerse llamando a
+                <code class="methodname">getImageExportFormats()</code>.
+            </p>
+<pre class="programlisting">
+$date = new Zend_Date();
+$date-&gt;setLocale('en_US');
+
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;setLocalTemplate('template.docx');
+
+$phpLiveDocx-&gt;assign('software', 'Magic Graphical Compression Suite v1.9')
+            -&gt;assign('licensee', 'Daï Lemaitre')
+            -&gt;assign('company',  'Megasoft Co-operation')
+            -&gt;assign('date',     $date-&gt;get(Zend_Date::DATE_LONG))
+            -&gt;assign('time',     $date-&gt;get(Zend_Date::TIME_LONG))
+            -&gt;assign('city',     'Lyon')
+            -&gt;assign('country',  'France');
+
+$phpLiveDocx-&gt;createDocument();
+
+// Get all bitmaps
+// (zoomFactor, format)
+$bitmaps = $phpLiveDocx-&gt;getAllBitmaps(100, 'png');
+
+// Get just bitmaps in specified range
+// (fromPage, toPage, zoomFactor, format)
+// $bitmaps = $phpLiveDocx-&gt;getBitmaps(2, 2, 100, 'png');
+
+foreach ($bitmaps as $pageNumber =&gt; $bitmapData) {
+    $filename = sprintf('documentPage%d.png', $pageNumber);
+    file_put_contents($filename, $bitmapData);
+}
+</pre>
+<p>
+                Esto produce dos archivos (<code class="filename">documentPage1.png</code> y
+                <code class="filename">documentPage2.png</code>) y los escribe en disco en el mismo
+                directorio que el archivo <acronym class="acronym">PHP</acronym> ejecutable.
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.bitmaps-documentpage1_zoom.png">
+            </p>
+<p>
+                documentPage1.png.
+            </p>
+<p>
+                <img src="figures/zend.service.livedocx.mailmerge.bitmaps-documentpage2_zoom.png">
+            </p>
+<p>
+                documentPage2.png.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.templates-types"></a>64.22.2.6. Plantillas locales frente a remotas</h4></div></div></div>
+<p>
+                Las plantillas pueden almacenarse <span class="emphasis"><em>localmente</em></span>, en la máquina cliente, o
+                <span class="emphasis"><em>remotamente</em></span>, en el servidor. Cada enfoque tiene ventajas y
+                desventajas.
+            </p>
+<p>
+                En el caso de que una plantilla se almacene localmente, debe transferirse del cliente
+                al servidor en cada solicitud. Si el contenido de la plantilla rara vez cambia, este
+                enfoque es ineficiente. Del mismo modo, si la plantilla tiene varios megabytes de tamaño,
+                puede tardar bastante tiempo en transferirse al servidor. Las plantillas locales son útiles
+                en situaciones en las que el contenido de la plantilla cambia constantemente.
+            </p>
+<p>
+                El siguiente código ilustra cómo usar una plantilla local.
+            </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;setLocalTemplate('./template.docx');
+
+// assign data and create document
+</pre>
+<p>
+                En el caso de que una plantilla se almacene remotamente, se sube una vez al servidor
+                y luego simplemente se referencia en todas las solicitudes posteriores. Obviamente, esto es mucho
+                más rápido que usar una plantilla local, ya que la plantilla no tiene que transferirse
+                en cada solicitud. Para aplicaciones críticas en velocidad, se recomienda usar el
+                método de plantilla remota.
+            </p>
+<p>
+                El siguiente código ilustra cómo subir una plantilla al servidor:
+            </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;uploadTemplate('template.docx');
+</pre>
+<p>
+                El siguiente código ilustra cómo referenciar la plantilla almacenada remotamente en todas
+                las solicitudes posteriores:
+            </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$phpLiveDocx-&gt;setRemoteTemplate('template.docx');
+
+// assign data and create document
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.livedocx.mailmerge.information"></a>64.22.2.7. Obtención de información</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Service_LiveDocx_MailMerge</code> proporciona una serie de métodos
+                para obtener información sobre nombres de campos, fuentes disponibles y formatos compatibles.
+            </p>
+<div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getfieldname"></a><p class="title"><b>Ejemplo 64.102. Obtener un array de nombres de campos en una plantilla</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los nombres de campos en la
+                    plantilla especificada. Esta funcionalidad es útil, en el caso de que cree una
+                    aplicación, en la que un usuario final pueda actualizar una plantilla.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$templateName = 'template-1-text-field.docx';
+$phpLiveDocx-&gt;setLocalTemplate($templateName);
+
+$fieldNames = $phpLiveDocx-&gt;getFieldNames();
+foreach ($fieldNames as $fieldName) {
+    printf('- %s%s', $fieldName, PHP_EOL);
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getblockfieldname"></a><p class="title"><b>Ejemplo 64.103. Obtener un array de nombres de campos de bloque en una plantilla</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los nombres de campos de bloque en la
+                    plantilla especificada. Esta funcionalidad es útil, en el caso de que cree una
+                    aplicación, en la que un usuario final pueda actualizar una plantilla. Antes de que dichas
+                    plantillas puedan rellenarse, es necesario averiguar los nombres de los campos de bloque
+                    que contienen.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+$templateName = 'template-block-fields.doc';
+$phpLiveDocx-&gt;setLocalTemplate($templateName);
+
+$blockNames = $phpLiveDocx-&gt;getBlockNames();
+foreach ($blockNames as $blockName) {
+    $blockFieldNames = $phpLiveDocx-&gt;getBlockFieldNames($blockName);
+    foreach ($blockFieldNames as $blockFieldName) {
+        printf('- %s::%s%s', $blockName, $blockFieldName, PHP_EOL);
+    }
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getfontnames"></a><p class="title"><b>Ejemplo 64.104. Obtener un array de fuentes instaladas en el servidor</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todas las fuentes instaladas en el
+                    servidor. Puede usar este método para presentar una lista de fuentes que pueden usarse en
+                    una plantilla. Es importante informar al usuario final sobre las fuentes instaladas en
+                    el servidor, ya que solo estas fuentes pueden usarse en una plantilla. En el caso de que una
+                    plantilla contenga fuentes, que no estén disponibles en el servidor,
+                    se producirá una sustitución de fuente. Esto puede provocar resultados indeseables.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+Zend_Debug::dump($phpLiveDocx-&gt;getFontNames());
+</pre>
+<p>
+                    <span class="emphasis"><em>NOTA:</em></span> Como el valor devuelto de este método cambia con muy poca
+                    frecuencia, se recomienda encarecidamente usar una caché, como
+                    <code class="classname">Zend_Cache</code>; esto acelerará considerablemente su
+                    aplicación.
+                </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.gettemplateformats"></a><p class="title"><b>Ejemplo 64.105. Obtener un array de formatos de archivo de plantilla compatibles</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los formatos de archivo de plantilla
+                    compatibles. Este método es particularmente útil en el caso de que deba mostrarse una lista
+                    combinada que permita al usuario final seleccionar el formato de entrada del
+                    proceso de generación de documentación.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge()
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+Zend_Debug::dump($phpLiveDocx-&gt;getTemplateFormats());
+</pre>
+<p>
+                    <span class="emphasis"><em>NOTA:</em></span> Como el valor devuelto de este método cambia con muy poca
+                    frecuencia, se recomienda encarecidamente usar una caché, como
+                    <code class="classname">Zend_Cache</code>; esto acelerará considerablemente su
+                    aplicación.
+                </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getdocumentformats"></a><p class="title"><b>Ejemplo 64.106. Obtener un array de formatos de archivo de documento compatibles</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los formatos de archivo de documento
+                    compatibles. Este método es particularmente útil en el caso de que deba mostrarse una lista
+                    combinada que permita al usuario final seleccionar el formato de salida del
+                    proceso de generación de documentación.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+Zend_Debug::dump($phpLiveDocx-&gt;getDocumentFormats());
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getimageimportformats"></a><p class="title"><b>Ejemplo 64.107. Obtener un array de formatos de archivo de importación de imagen compatibles</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los formatos de archivo de imagen de
+                    entrada compatibles.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+Zend_Debug::dump($phpLiveDocx-&gt;getImageImportFormats());
+</pre>
+<p>
+                    <span class="emphasis"><em>NOTA:</em></span> Como el valor devuelto de este método cambia con muy poca
+                    frecuencia, se recomienda encarecidamente usar una caché, como
+                    <code class="classname">Zend_Cache</code>; esto acelerará considerablemente su
+                    aplicación.
+                </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.livedocx.mailmerge.information.getimageexportformats"></a><p class="title"><b>Ejemplo 64.108. Obtener un array de formatos de archivo de exportación de imagen compatibles</b></p>
+<div class="example-contents">
+<p>
+                    El siguiente código devuelve y muestra un array de todos los formatos de archivo de imagen de
+                    exportación compatibles. Este método es particularmente útil en el caso de que deba mostrarse
+                    una lista combinada que permita al usuario final seleccionar el formato de salida del
+                    proceso de generación de documentación.
+                </p>
+<pre class="programlisting">
+$phpLiveDocx = new Zend_Service_LiveDocx_MailMerge();
+
+$phpLiveDocx-&gt;setUsername('myUsername')
+            -&gt;setPassword('myPassword');
+
+Zend_Debug::dump($phpLiveDocx-&gt;getImageExportFormats());
+</pre>
+<p>
+                    <span class="emphasis"><em>NOTA:</em></span> Como el valor devuelto de este método cambia con muy poca
+                    frecuencia, se recomienda encarecidamente usar una caché, como
+                    <code class="classname">Zend_Cache</code>; esto acelerará considerablemente su
+                    aplicación.
+                </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.flickr.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.rackspace.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.21. Zend_Service_Flickr </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.23. Zend_Service_Rackspace</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

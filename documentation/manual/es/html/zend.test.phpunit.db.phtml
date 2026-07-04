@@ -1,0 +1,641 @@
+<?php $title = '68.3. Zend_Test_PHPUnit_Db'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">68.3. Zend_Test_PHPUnit_Db</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.test.phpunit.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 68. Zend_Test</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.text.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.test.phpunit.db"></a>68.3. Zend_Test_PHPUnit_Db</h2></div></div></div>
+<p>
+        El acoplamiento entre el acceso a datos y el modelo de dominio a menudo requiere el uso de una base de datos con
+        fines de prueba. Pero la base de datos persiste entre distintas pruebas, lo que lleva a
+        resultados de prueba que pueden afectarse entre sí. Además, preparar la base de datos para poder
+        ejecutar una prueba requiere bastante trabajo. La extensión Database de PHPUnit simplifica las pruebas con una
+        base de datos ofreciendo un mecanismo muy simple para preparar y limpiar la base de datos entre
+        distintas pruebas. Este componente extiende la extensión Database de PHPUnit con código específico
+        de Zend Framework, de modo que escribir pruebas de base de datos contra una aplicación de Zend Framework se
+        simplifica.
+    </p>
+<p>
+        Las pruebas de base de datos se pueden explicar mediante dos entidades conceptuales, DataSets y DataTables.
+        Internamente, la extensión Database de PHPUnit puede construir una estructura de objetos de una base de datos,
+        sus tablas y las filas que contienen a partir de archivos de configuración o del contenido real de la base de datos. Este
+        grafo de objetos abstracto se puede comparar entonces mediante aserciones. Un caso de uso habitual en las pruebas
+        de base de datos consiste en preparar algunas tablas con datos semilla, realizar después ciertas operaciones y,
+        finalmente, afirmar que el estado de la base de datos tras la operación es igual a algún estado esperado
+        predefinido. <code class="classname">Zend_Test_PHPUnit_Db</code> simplifica esta tarea al permitir
+        generar DataSets y DataTables a partir de instancias existentes de <code class="classname">Zend_Db_Table_Abstract</code>
+        o <code class="classname">Zend_Db_Table_Rowset_Abstract</code>.
+    </p>
+<p>
+        Además, este componente permite integrar cualquier
+        <code class="classname">Zend_Db_Adapter_Abstract</code> para las pruebas, mientras que la extensión original
+        solo funciona con <acronym class="acronym">PDO</acronym>. Este componente también incluye una implementación
+        de Test Adapter para <code class="classname">Zend_Db_Adapter_Abstract</code>. Esta
+        permite instanciar un Db Adapter que no requiere base de datos alguna y actúa como una pila de
+        <acronym class="acronym">SQL</acronym> y de resultados que es utilizada por los métodos de la <acronym class="acronym">API</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.test.phpunit.db.quickstart"></a>68.3.1. Inicio rápido</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.test.phpunit.db.quickstart.testcase"></a>68.3.1.1. Configurar un TestCase de base de datos</h4></div></div></div>
+<p>
+            Vamos ahora a escribir algunas pruebas de base de datos para el ejemplo de la base de datos de errores (Bug Database) de la
+            documentación de <code class="classname">Zend_Db_Table</code>. Primero empezamos comprobando que
+            al insertar un nuevo bug este se guarda correctamente en la base de datos. Primero tenemos que
+            configurar una clase de prueba que extienda
+            <code class="classname">Zend_Test_PHPUnit_DatabaseTestCase</code>. Esta clase extiende la
+            extensión Database de PHPUnit, la cual a su vez extiende la clase básica
+            <code class="classname">PHPUnit_Framework_TestCase</code>. Un testcase de base de datos contiene dos
+            métodos abstractos que deben implementarse, uno para la conexión a la base de datos y
+            otro para el dataset inicial que debe usarse como semilla o fixture.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Debería estar familiarizado con la extensión Database de PHPUnit para seguir este inicio rápido
+                con facilidad. Aunque todos los conceptos se explican en esta documentación, puede resultar
+                útil leer primero la documentación de PHPUnit.
+            </p></td></tr>
+</table></div>
+<pre class="programlisting">
+class BugsTest extends Zend_Test_PHPUnit_DatabaseTestCase
+{
+    private $_connectionMock;
+
+    /**
+     * Returns the test database connection.
+     *
+     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
+     */
+    protected function getConnection()
+    {
+        if($this-&gt;_connectionMock == null) {
+            $connection = Zend_Db::factory(...);
+            $this-&gt;_connectionMock = $this-&gt;createZendDbConnection(
+                $connection, 'zfunittests'
+            );
+            Zend_Db_Table_Abstract::setDefaultAdapter($connection);
+        }
+        return $this-&gt;_connectionMock;
+    }
+
+    /**
+     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
+     */
+    protected function getDataSet()
+    {
+        return $this-&gt;createFlatXmlDataSet(
+            dirname(__FILE__) . '/_files/bugsSeed.xml'
+        );
+    }
+}
+</pre>
+<p>
+            Aquí creamos la conexión a la base de datos e insertamos algunos datos semilla en la base de datos. Es
+            importante prestar atención a algunos detalles de este código:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    No se puede devolver directamente un <code class="classname">Zend_Db_Adapter_Abstract</code>
+                    desde el método <code class="methodname">getConnection()</code>, sino un envoltorio (wrapper)
+                    específico de PHPUnit que se genera con el
+                    método <code class="methodname">createZendDbConnection()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    El esquema de la base de datos (tablas y base de datos) no se vuelve a crear en cada
+                    ejecución de la prueba. La base de datos y las tablas deben crearse manualmente antes de ejecutar
+                    las pruebas.
+                </p></li>
+<li class="listitem"><p>
+                    Por defecto, las pruebas de base de datos truncan los datos durante
+                    <code class="methodname">setUp()</code> y a continuación insertan los datos semilla que
+                    devuelve el método <code class="methodname">getDataSet()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Los DataSets deben implementar la interfaz
+                    <code class="classname">PHPUnit_Extensions_Database_DataSet_IDataSet</code>.
+                    PHPUnit incluye una amplia gama de tipos de archivos de configuración <acronym class="acronym">XML</acronym> y YAML
+                    que permiten especificar el aspecto que deben tener las tablas y los datasets, y debería
+                    consultar la documentación de PHPUnit para obtener la información más reciente sobre estas especificaciones de datasets.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.test.phpunit.db.quickstart.dataset"></a>68.3.1.2. Especificar un dataset semilla</h4></div></div></div>
+<p>
+            En la configuración anterior del testcase de base de datos hemos especificado un archivo semilla para el
+            fixture de base de datos. Ahora creamos este archivo especificado en formato Flat <acronym class="acronym">XML</acronym>:
+        </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;dataset&gt;
+    &lt;zfbugs bug_id="1" bug_description="system needs electricity to run"
+        bug_status="NEW" created_on="2007-04-01 00:00:00"
+        updated_on="2007-04-01 00:00:00" reported_by="goofy"
+        assigned_to="mmouse" verified_by="dduck" /&gt;
+    &lt;zfbugs bug_id="2" bug_description="Implement Do What I Mean function"
+        bug_status="VERIFIED" created_on="2007-04-02 00:00:00"
+        updated_on="2007-04-02 00:00:00" reported_by="goofy"
+        assigned_to="mmouse" verified_by="dduck" /&gt;
+    &lt;zfbugs bug_id="3" bug_description="Where are my keys?" bug_status="FIXED"
+        created_on="2007-04-03 00:00:00" updated_on="2007-04-03 00:00:00"
+        reported_by="dduck" assigned_to="mmouse" verified_by="dduck" /&gt;
+    &lt;zfbugs bug_id="4" bug_description="Bug no product" bug_status="INCOMPLETE"
+        created_on="2007-04-04 00:00:00" updated_on="2007-04-04 00:00:00"
+        reported_by="mmouse" assigned_to="goofy" verified_by="dduck" /&gt;
+&lt;/dataset&gt;
+</pre>
+<p>
+            Trabajaremos con estas cuatro entradas en la tabla de base de datos "zfbugs" en los siguientes
+            ejemplos. El esquema MySQL necesario para este ejemplo es:
+        </p>
+<pre class="programlisting">
+CREATE TABLE IF NOT EXISTS `zfbugs` (
+    `bug_id` int(11) NOT NULL auto_increment,
+    `bug_description` varchar(100) default NULL,
+    `bug_status` varchar(20) default NULL,
+    `created_on` datetime default NULL,
+    `updated_on` datetime default NULL,
+    `reported_by` varchar(100) default NULL,
+    `assigned_to` varchar(100) default NULL,
+    `verified_by` varchar(100) default NULL,
+PRIMARY KEY  (`bug_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.test.phpunit.db.quickstart.initial-tests"></a>68.3.1.3. Algunas pruebas iniciales de base de datos</h4></div></div></div>
+<p>
+            Ahora que hemos implementado los dos métodos abstractos requeridos por
+            <code class="classname">Zend_Test_PHPUnit_DatabaseTestCase</code> y especificado el contenido de la base de datos
+            semilla, que se volverá a crear para cada nueva prueba, podemos pasar a hacer
+            nuestra primera aserción. Esta será una prueba para insertar un nuevo bug.
+        </p>
+<pre class="programlisting">
+class BugsTest extends Zend_Test_PHPUnit_DatabaseTestCase
+{
+    public function testBugInsertedIntoDatabase()
+    {
+        $bugsTable = new Bugs();
+
+        $data = array(
+            'created_on'      =&gt; '2007-03-22 00:00:00',
+            'updated_on'      =&gt; '2007-03-22 00:00:00',
+            'bug_description' =&gt; 'Something wrong',
+            'bug_status'      =&gt; 'NEW',
+            'reported_by'     =&gt; 'garfield',
+            'verified_by'     =&gt; 'garfield',
+            'assigned_to'     =&gt; 'mmouse',
+        );
+
+        $bugsTable-&gt;insert($data);
+
+        $ds = new Zend_Test_PHPUnit_Db_DataSet_QueryDataSet(
+            $this-&gt;getConnection()
+        );
+        $ds-&gt;addTable('zfbugs', 'SELECT * FROM zfbugs');
+
+        $this-&gt;assertDataSetsEqual(
+            $this-&gt;createFlatXmlDataSet(dirname(__FILE__)
+                                      . "/_files/bugsInsertIntoAssertion.xml"),
+            $ds
+        );
+    }
+}
+</pre>
+<p>
+            Hasta <code class="methodname">$bugsTable-&gt;insert($data);</code> todo resulta
+            familiar. Las líneas siguientes contienen el nombre del método de aserción. Queremos verificar
+            que, después de insertar el nuevo bug, la base de datos se ha actualizado correctamente con los
+            datos indicados. Para ello creamos una instancia de
+            <code class="classname">Zend_Test_PHPUnit_Db_DataSet_QueryDataSet</code> y le proporcionamos
+            una conexión a la base de datos. A continuación le indicaremos a este dataset que contiene una tabla
+            "zfbugs" que viene dada por una sentencia <acronym class="acronym">SQL</acronym>. Este estado actual/real
+            de la base de datos se compara con el estado esperado de la base de datos, contenido en
+            otro archivo <acronym class="acronym">XML</acronym> "bugsInsertIntoAssertions.xml". Este
+            archivo <acronym class="acronym">XML</acronym> es una ligera variación del mostrado anteriormente y contiene
+            otra fila con los datos esperados:
+        </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;dataset&gt;
+    &lt;!-- previous 4 rows --&gt;
+    &lt;zfbugs bug_id="5" bug_description="Something wrong" bug_status="NEW"
+        created_on="2007-03-22 00:00:00" updated_on="2007-03-22 00:00:00"
+        reported_by="garfield" assigned_to="mmouse" verified_by="garfield" /&gt;
+&lt;/dataset&gt;
+</pre>
+<p>
+            Existen otras formas de comprobar que el estado actual de la base de datos es igual a un estado
+            esperado. La tabla "Bugs" del ejemplo ya conoce mucho sobre su estado interno, así que
+            ¿por qué no aprovecharlo? El siguiente ejemplo comprobará que es posible eliminar
+            de la base de datos:
+        </p>
+<pre class="programlisting">
+class BugsTest extends Zend_Test_PHPUnit_DatabaseTestCase
+{
+    public function testBugDelete()
+    {
+        $bugsTable = new Bugs();
+
+        $bugsTable-&gt;delete(
+            $bugsTable-&gt;getAdapter()-&gt;quoteInto("bug_id = ?", 4)
+        );
+
+        $ds = new Zend_Test_PHPUnit_Db_DataSet_DbTableDataSet();
+        $ds-&gt;addTable($bugsTable);
+
+        $this-&gt;assertDataSetsEqual(
+            $this-&gt;createFlatXmlDataSet(dirname(__FILE__)
+                                      . "/_files/bugsDeleteAssertion.xml"),
+            $ds
+        );
+    }
+}
+</pre>
+<p>
+            Aquí hemos creado un dataset <code class="classname">Zend_Test_PHPUnit_Db_DataSet_DbTableDataSet</code>,
+            que toma cualquier instancia de <code class="classname">Zend_Db_Table_Abstract</code>
+            y la añade al dataset con su nombre de tabla, en este ejemplo "zfbugs". Podría
+            añadir varias tablas más si quisiera usando el método
+            <code class="methodname">addTable()</code>, en caso de querer comprobar el estado esperado de la base de datos
+            en más de una tabla.
+        </p>
+<p>
+            Aquí solo tenemos una tabla y comprobamos frente a un estado esperado de la base de datos en
+            "bugsDeleteAssertion.xml", que es el dataset semilla original sin la fila con id
+            4.
+        </p>
+<p>
+            Dado que en los ejemplos anteriores solo hemos comprobado que dos tablas específicas (no datasets) son iguales,
+            también deberíamos ver cómo afirmar que dos tablas son iguales.
+            Por ello, añadiremos otra prueba a nuestro TestCase que verifique el comportamiento de actualización
+            de un dataset.
+        </p>
+<pre class="programlisting">
+class BugsTest extends Zend_Test_PHPUnit_DatabaseTestCase
+{
+    public function testBugUpdate()
+    {
+        $bugsTable = new Bugs();
+
+        $data = array(
+            'updated_on'      =&gt; '2007-05-23',
+            'bug_status'      =&gt; 'FIXED'
+        );
+
+        $where = $bugsTable-&gt;getAdapter()-&gt;quoteInto('bug_id = ?', 1);
+
+        $bugsTable-&gt;update($data, $where);
+
+        $rowset = $bugsTable-&gt;fetchAll();
+
+        $ds        = new Zend_Test_PHPUnit_Db_DataSet_DbRowset($rowset);
+        $assertion = $this-&gt;createFlatXmlDataSet(
+            dirname(__FILE__) . '/_files/bugsUpdateAssertion.xml'
+        );
+        $expectedRowsets = $assertion-&gt;getTable('zfbugs');
+
+        $this-&gt;assertTablesEqual(
+            $expectedRowsets, $ds
+        );
+    }
+}
+</pre>
+<p>
+            Aquí creamos el estado actual de la base de datos a partir de una
+            instancia de <code class="classname">Zend_Db_Table_Rowset_Abstract</code> junto con
+            la instancia <code class="methodname">Zend_Test_PHPUnit_Db_DataSet_DbRowset($rowset)</code>,
+            que crea una representación interna de datos del rowset. Esto se puede comparar de nuevo
+            con otra tabla de datos usando la aserción
+            <code class="methodname">$this-&gt;assertTablesEqual()</code>.
+        </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.test.phpunit.db.testing"></a>68.3.2. Uso, API y puntos de extensión</h3></div></div></div>
+<p>
+        El inicio rápido ya ha proporcionado una buena introducción a cómo se pueden realizar pruebas de base de datos usando
+        PHPUnit y Zend Framework. Esta sección ofrece una visión general de la
+        <acronym class="acronym">API</acronym> que incluye el componente <code class="classname">Zend_Test_PHPUnit_Db</code>
+        y de su funcionamiento interno.
+    </p>
+<div class="note"><table border="0" summary="Note: Some Remarks on Database Testing">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Algunas observaciones sobre las pruebas de base de datos</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Al igual que el Controller TestCase prueba una aplicación a nivel de integración, el
+            Database TestCase es un método de prueba de integración. Utiliza varias capas
+            distintas de la aplicación con fines de prueba y, por lo tanto, debe usarse con precaución.
+        </p>
+<p>
+            Cabe destacar que probar el dominio y la lógica de negocio con pruebas de integración como
+            los TestCases de Controller y Database de Zend Framework es una mala práctica. El propósito de
+            una prueba de integración es comprobar que varias partes de una aplicación funcionan bien cuando
+            se conectan entre sí. Estas pruebas de integración no sustituyen la necesidad de un conjunto de pruebas unitarias
+            que comprueben el dominio y la lógica de negocio a un nivel mucho más pequeño, la clase aislada.
+        </p>
+</td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.test.phpunit.db.testing.testcase"></a>68.3.2.1. La clase Zend_Test_PHPUnit_DatabaseTestCase</h4></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Test_PHPUnit_DatabaseTestCase</code> deriva de
+            <code class="classname">PHPUnit_Extensions_Database_TestCase</code>, que permite configurar pruebas
+            con un fixture de base de datos nuevo en cada ejecución de forma sencilla. La implementación de Zend ofrece algunas
+            funciones adicionales de conveniencia respecto a la extensión Database de PHPUnit a la hora de
+            usar recursos de <code class="classname">Zend_Db</code> dentro de las pruebas. El flujo de trabajo de un
+            testcase de base de datos puede describirse de la siguiente manera.
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+                    Para cada prueba, PHPUnit crea una nueva instancia del TestCase y llama al
+                    método <code class="methodname">setUp()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    El Database TestCase crea una instancia de un Database Tester que se encarga de
+                    preparar y limpiar la base de datos.
+                </p></li>
+<li class="listitem"><p>
+                    El database tester recopila la información sobre la conexión a la base de datos y el
+                    dataset inicial a partir de <code class="methodname">getConnection()</code> y
+                    <code class="methodname">getDataSet()</code>, que son ambos métodos abstractos y deben
+                    ser implementados por cualquier Database Testcase.
+                </p></li>
+<li class="listitem"><p>
+                    Por defecto, el database tester trunca las tablas especificadas en el dataset
+                    indicado y a continuación inserta los datos proporcionados como fixture inicial.
+                </p></li>
+<li class="listitem"><p>
+                    Cuando el database tester termina de preparar la base de datos, PHPUnit ejecuta la
+                    prueba.
+                </p></li>
+<li class="listitem"><p>
+                    Después de ejecutar la prueba, se llama a <code class="methodname">tearDown()</code>. Dado que
+                    la base de datos se vacía en <code class="methodname">setUp()</code> antes de insertar el
+                    fixture inicial necesario, el database tester no ejecuta ninguna acción en esta
+                    etapa.
+                </p></li>
+</ol></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El Database TestCase espera que el esquema de la base de datos y las tablas estén configurados correctamente
+                para ejecutar las pruebas. No existe ningún mecanismo para crear ni eliminar tablas de base de datos.
+            </p></td></tr>
+</table></div>
+<p>
+            La clase <code class="classname">Zend_Test_PHPUnit_DatabaseTestCase</code> dispone de algunas funciones
+            de conveniencia que pueden ayudar a escribir pruebas que interactúan con la base de datos y con la extensión
+            de pruebas de base de datos.
+        </p>
+<p>
+            La siguiente tabla enumera únicamente los métodos nuevos en comparación con
+            <code class="classname">PHPUnit_Extensions_Database_TestCase</code>, cuya <a class="ulink" href="http://www.phpunit.de/manual/current/en/database.html" target="_top">API está documentada en
+            la documentación de PHPUnit</a>.
+        </p>
+<div class="table">
+<a name="zend.test.phpunit.db.testing.testcase.api-methods"></a><p class="title"><b>Tabla 68.1. Métodos de la API de Zend_Test_PHPUnit_DatabaseTestCase</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Test_PHPUnit_DatabaseTestCase API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                            <code class="methodname">createZendDbConnection(Zend_Db_Adapter_Abstract $connection,
+                                $schema)</code>
+                        </td>
+<td>
+                            Crea una instancia de conexión compatible con la extensión Database de PHPUnit a partir de
+                            una instancia de <code class="classname">Zend_Db_Adapter_Abstract</code>. Este método
+                            debería usarse en la configuración del testcase al implementar el método abstracto
+                            <code class="methodname">getConnection()</code> del testcase de base de datos.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getAdapter()</code></td>
+<td>
+                            Método de conveniencia para acceder a la instancia subyacente de
+                            <code class="classname">Zend_Db_Adapter_Abstract</code> que se encuentra anidada
+                            dentro de la conexión de base de datos de PHPUnit creada con
+                            <code class="methodname">getConnection()</code>.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <code class="methodname">createDbRowset(Zend_Db_Table_Rowset_Abstract $rowset,
+                                $tableName = null)</code>
+                        </td>
+<td>
+                            Crea un objeto DataTable relleno con los datos de una instancia dada de
+                            <code class="classname">Zend_Db_Table_Rowset_Abstract</code>. La tabla a la
+                            que está conectado el rowset se elige cuando <code class="varname">$tableName</code>
+                            es <code class="constant">NULL</code>.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <code class="methodname">createDbTable(Zend_Db_Table_Abstract $table, $where = null,
+                                $order = null, $count = null, $offset = null)</code>
+                        </td>
+<td>
+                            Crea un objeto DataTable que representa los datos contenidos en una
+                            instancia de <code class="classname">Zend_Db_Table_Abstract</code>. Para obtener
+                            los datos se utiliza <code class="methodname">fetchAll()</code>, donde los parámetros opcionales
+                            pueden usarse para restringir la tabla de datos a un determinado subconjunto.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <code class="methodname">createDbTableDataSet(array $tables=array())</code>
+                        </td>
+<td>
+                            Crea un DataSet que contiene las <code class="varname">$tables</code> indicadas, un
+                            array de instancias de <code class="classname">Zend_Db_Table_Abstract</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.test.phpunit.db.testing.controllerintegration"></a>68.3.2.2. Integrar las pruebas de base de datos con ControllerTestCase</h4></div></div></div>
+<p>
+            Dado que <acronym class="acronym">PHP</acronym> no admite herencia múltiple, no es posible
+            usar los testcases de Controller y de Database de forma conjunta. Sin embargo, puede usar el
+            database tester <code class="classname">Zend_Test_PHPUnit_Db_SimpleTester</code> en su
+            testcase de controlador para configurar un fixture del entorno de base de datos en cada nueva prueba
+            de controlador. El Database TestCase en general no es más que un conjunto de funciones de conveniencia a las que
+            también se puede acceder y utilizar sin el testcase.
+        </p>
+<div class="example">
+<a name="zend.test.phpunit.db.testing.controllerintegration.example"></a><p class="title"><b>Ejemplo 68.3. Ejemplo de integración con la base de datos</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo extiende la prueba User Controller Test de la documentación de
+                <code class="classname">Zend_Test_PHPUnit_ControllerTestCase</code> para incluir
+                una configuración de base de datos.
+            </p>
+<pre class="programlisting">
+class UserControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
+{
+    public function setUp()
+    {
+        $this-&gt;setupDatabase();
+        $this-&gt;bootstrap = array($this, 'appBootstrap');
+        parent::setUp();
+    }
+
+    public function setupDatabase()
+    {
+        $db = Zend_Db::factory(...);
+        $connection = new Zend_Test_PHPUnit_Db_Connection($db,
+                                                      'database_schema_name');
+        $databaseTester = new Zend_Test_PHPUnit_Db_SimpleTester($connection);
+
+        $databaseFixture =
+                    new PHPUnit_Extensions_Database_DataSet_FlatXmlDataSet(
+                        dirname(__FILE__) . '/_files/initialUserFixture.xml'
+                    );
+
+        $databaseTester-&gt;setupDatabase($databaseFixture);
+    }
+}
+</pre>
+<p>
+                Ahora se utiliza el dataset Flat <acronym class="acronym">XML</acronym> "initialUserFixture.xml" para poner
+                la base de datos en un estado inicial antes de cada prueba, exactamente igual a como funciona internamente
+                el DatabaseTestCase.
+            </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.test.phpunit.db.adapter"></a>68.3.3. Uso del adaptador de pruebas de base de datos</h3></div></div></div>
+<p>
+        Hay ocasiones en las que no se desea probar partes de la aplicación con una base de datos real,
+        pero se ve obligado a ello debido al acoplamiento. <code class="classname">Zend_Test_DbAdapter</code> ofrece
+        una forma cómoda de usar una implementación de <code class="classname">Zend_Db_Adapter_Abstract</code>
+        sin necesidad de abrir una conexión a la base de datos. Además, este Adapter es muy fácil de simular (mock)
+        dentro de su conjunto de pruebas de PHPUnit, ya que no requiere argumentos en el constructor.
+    </p>
+<p>
+        El Test Adapter actúa como una pila de diversos resultados de base de datos. El orden de los resultados debe
+        ser implementado por el usuario, lo cual puede ser una tarea tediosa en pruebas que invocan muchas consultas
+        de base de datos distintas, pero es justo el ayudante adecuado para pruebas en las que solo se ejecutan un puñado
+        de consultas y se conoce el orden exacto de los resultados que deben devolverse al
+        código del usuario.
+    </p>
+<pre class="programlisting">
+$adapter   = new Zend_Test_DbAdapter();
+$stmt1Rows = array(array('foo' =&gt; 'bar'), array('foo' =&gt; 'baz'));
+$stmt1     = Zend_Test_DbStatement::createSelectStatement($stmt1Rows);
+$adapter-&gt;appendStatementToStack($stmt1);
+
+$stmt2Rows = array(array('foo' =&gt; 'bar'), array('foo' =&gt; 'baz'));
+$stmt2     = Zend_Test_DbStatement::createSelectStatement($stmt2Rows);
+$adapter-&gt;appendStatementToStack($stmt2);
+
+$rs = $adapter-&gt;query('SELECT ...'); // Returns Statement 2
+while ($row = $rs-&gt;fetch()) {
+    echo $rs['foo']; // Prints "Bar", "Baz"
+}
+$rs = $adapter-&gt;query('SELECT ...'); // Returns Statement 1
+</pre>
+<p>
+        El comportamiento de cualquier adaptador de base de datos real se simula en la mayor medida posible, de modo que métodos
+        como <code class="methodname">fetchAll()</code>, <code class="methodname">fetchObject()</code>,
+        <code class="methodname">fetchColumn</code> y otros funcionan con el test adapter.
+    </p>
+<p>
+        También puede colocar sentencias INSERT, UPDATE y DELETE en la pila de resultados; sin embargo, estas
+        solo devuelven una sentencia que permite especificar el resultado de
+        <code class="methodname">$stmt-&gt;rowCount()</code>.
+    </p>
+<pre class="programlisting">
+$adapter = new Zend_Test_DbAdapter();
+$adapter-&gt;appendStatementToStack(
+    Zend_Test_DbStatement::createInsertStatement(1)
+);
+$adapter-&gt;appendStatementToStack(
+    Zend_Test_DbStatement::createUpdateStatement(2)
+);
+$adapter-&gt;appendStatementToStack(
+    Zend_Test_DbStatement::createDeleteStatement(10
+));
+</pre>
+<p>
+        Por defecto, el generador de perfiles (profiler) de consultas está activado, de modo que se pueden obtener las
+        sentencias SQL ejecutadas y sus parámetros asociados para comprobar la corrección de la ejecución.
+    </p>
+<pre class="programlisting">
+$adapter = new Zend_Test_DbAdapter();
+$stmt = $adapter-&gt;query("SELECT * FROM bugs");
+
+$qp = $adapter-&gt;getProfiler()-&gt;getLastQueryProfile();
+
+echo $qp-&gt;getQuerY(); // SELECT * FROM bugs
+</pre>
+<p>
+        El test adapter nunca comprueba si la consulta especificada es realmente del tipo SELECT, DELETE,
+        INSERT o UPDATE que se devuelve a continuación desde la pila. El orden correcto de devolución de
+        los datos debe ser implementado por el usuario del test adapter.
+    </p>
+<p>
+        El Test adapter también especifica métodos para simular el uso de los métodos
+        <code class="methodname">listTables()</code>, <code class="methodname">describeTables()</code> y
+        <code class="methodname">lastInsertId()</code>. Además, usando
+        <code class="methodname">setQuoteIdentifierSymbol()</code> puede especificar qué
+        símbolo debe usarse para el entrecomillado; por defecto no se utiliza ninguno.
+    </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.test.phpunit.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.test.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.text.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">68.2. Zend_Test_PHPUnit </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 69. Zend_Text</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

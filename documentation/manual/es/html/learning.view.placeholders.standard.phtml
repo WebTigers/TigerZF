@@ -1,0 +1,418 @@
+<?php $title = '7.3. Placeholders estándar'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">7.3. Placeholders estándar</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.view.placeholders.basics.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 7. Primeros pasos con los placeholders de Zend_View</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.view.placeholders.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.view.placeholders.standard"></a>7.3. Placeholders estándar</h2></div></div></div>
+<p>
+        En la <a class="link" href="learning.view.placeholders.basics.phtml" title="7.2. Basic Placeholder Usage">sección anterior</a>, aprendimos
+        sobre el helper de vista <code class="methodname">placeholder()</code>, y cómo puede usarse
+        para agregar contenido personalizado. En esta sección, veremos algunos de los placeholders
+        concretos incluidos con Zend Framework, y cómo puede usarlos en su beneficio al crear
+        layouts compuestos complejos.
+    </p>
+<p>
+        La mayoría de los placeholders incluidos sirven para generar contenido para la sección
+        <span class="emphasis"><em>&lt;head&gt;</em></span> de su contenido de layout -- un área que normalmente
+        no puede manipular directamente a través de sus scripts de vista de la aplicación, pero
+        sobre la que puede querer influir. Como ejemplos: puede querer que su título contenga
+        cierto contenido en cada página, pero contenido específico según el controlador y/o la
+        acción; puede querer especificar archivos <acronym class="acronym">CSS</acronym> a cargar
+        según en qué sección de la aplicación se encuentre; puede necesitar scripts JavaScript
+        específicos cargados en diferentes momentos; o puede querer establecer la declaración de
+        <span class="emphasis"><em>DocType</em></span>.
+    </p>
+<p>
+        Zend Framework incluye implementaciones de placeholder para cada una de estas situaciones,
+        y varias más.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.view.placeholders.standard.doctype"></a>7.3.1. Estableciendo el DocType</h3></div></div></div>
+<p>
+            Las declaraciones de <span class="emphasis"><em>DocType</em></span> son difíciles de memorizar, y a
+            menudo esenciales de incluir en su documento para asegurar que el navegador renderice
+            correctamente su contenido. El helper de vista <code class="methodname">doctype()</code>
+            le permite usar mnemónicos de cadena simples para especificar el
+            <span class="emphasis"><em>DocType</em></span> deseado; adicionalmente, otros helpers
+            consultarán al helper <code class="methodname">doctype()</code> para asegurar que la
+            salida generada cumpla con el <span class="emphasis"><em>DocType</em></span> solicitado.
+        </p>
+<p>
+            Como ejemplo, si desea usar el <acronym class="acronym">DTD</acronym> Strict de
+            <acronym class="acronym">XHTML1</acronym>, simplemente puede especificar:
+        </p>
+<pre class="programlisting">
+$this-&gt;doctype('XHTML1_STRICT');
+</pre>
+<p>
+            Entre los demás mnemónicos disponibles, encontrará estos tipos comunes:
+        </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">XHTML1_STRICT</span></dt>
+<dd><p>
+                        <acronym class="acronym">XHTML</acronym> 1.0 Strict
+                    </p></dd>
+<dt><span class="term">XHTML1_TRANSITIONAL</span></dt>
+<dd><p>
+                        <acronym class="acronym">XHTML</acronym> 1.0 Transitional
+                    </p></dd>
+<dt><span class="term">HTML4_STRICT</span></dt>
+<dd><p>
+                        <acronym class="acronym">HTML</acronym> 4.01 Strict
+                    </p></dd>
+<dt><span class="term">HTML4_Loose</span></dt>
+<dd><p>
+                        <acronym class="acronym">HTML</acronym> 4.01 Loose
+                    </p></dd>
+<dt><span class="term">HTML5</span></dt>
+<dd><p>
+                        <acronym class="acronym">HTML</acronym> 5
+                    </p></dd>
+</dl></div>
+<p>
+            Puede asignar el tipo y renderizar la declaración en una sola llamada:
+        </p>
+<pre class="programlisting">
+echo $this-&gt;doctype('XHTML1_STRICT');
+</pre>
+<p>
+            Sin embargo, el mejor enfoque es asignar el tipo en su bootstrap, y luego renderizarlo
+            en su layout. Intente añadir lo siguiente a su clase bootstrap:
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected function _initDocType()
+    {
+        $this-&gt;bootstrap('View');
+        $view = $this-&gt;getResource('View');
+        $view-&gt;doctype('XHTML1_STRICT');
+    }
+}
+</pre>
+<p>
+            Luego, en su script de layout, simplemente haga <code class="methodname">echo()</code>
+            del helper en la parte superior del archivo:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;doctype() ?&gt;
+&lt;html&gt;
+    &lt;!-- ... --&gt;
+</pre>
+<p>
+            Esto asegurará que sus helpers de vista sensibles al DocType rendericen el marcado
+            apropiado, que el tipo se establezca mucho antes de que se renderice el layout, y que
+            se disponga de una única ubicación para cambiar el DocType.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.view.placeholders.standard.head-title"></a>7.3.2. Especificando el título de la página</h3></div></div></div>
+<p>
+            A menudo, un sitio incluirá el nombre del sitio o negocio como parte del título de la
+            página, y luego añadirá información adicional según la ubicación dentro del sitio.
+            Como ejemplo, el sitio web <code class="filename">zend.com</code> incluye la cadena
+            "<code class="filename">Zend.com</code>" en todas las páginas, y antepone información
+            según la página: "Zend Server - <code class="filename">Zend.com</code>". Dentro de
+            Zend Framework, el helper de vista <code class="methodname">headTitle()</code> puede
+            ayudar a simplificar esta tarea.
+        </p>
+<p>
+            En su forma más simple, el helper <code class="methodname">headTitle()</code> le permite
+            agregar contenido para la etiqueta <span class="emphasis"><em>&lt;title&gt;</em></span>; cuando
+            lo imprime con echo, ensambla el contenido según el orden en que se añaden los
+            segmentos. Puede controlar el orden usando <code class="methodname">prepend()</code> y
+            <code class="methodname">append()</code>, y proporcionar un separador a usar entre
+            segmentos mediante el método <code class="methodname">setSeparator()</code>.
+        </p>
+<p>
+            Normalmente, debería especificar en su bootstrap cualquier segmento común a todas las
+            páginas, de forma similar a como definimos el doctype. En este caso, definiremos un
+            método <code class="methodname">_initPlaceholders()</code> para operar sobre los
+            distintos placeholders, y especificaremos un título inicial así como un separador.
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    // ...
+
+    protected function _initPlaceholders()
+    {
+        $this-&gt;bootstrap('View');
+        $view = $this-&gt;getResource('View');
+        $view-&gt;doctype('XHTML1_STRICT');
+
+        // Set the initial title and separator:
+        $view-&gt;headTitle('My Site')
+             -&gt;setSeparator(' :: ');
+    }
+
+    // ...
+}
+</pre>
+<p>
+            Dentro de un script de vista, podríamos querer añadir otro segmento:
+        </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;headTitle()-&gt;append('Some Page'); // place after other segments ?&gt;
+&lt;?php $this-&gt;headTitle()-&gt;prepend('Some Page'); // place before ?&gt;
+</pre>
+<p>
+            En nuestro layout, simplemente haremos echo del helper <code class="methodname">headTitle()</code>:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;doctype() ?&gt;
+&lt;html&gt;
+    &lt;?php echo $this-&gt;headTitle() ?&gt;
+    &lt;!-- ... --&gt;
+</pre>
+<p>
+            Esto generará la siguiente salida:
+        </p>
+<pre class="programlisting">
+&lt;!-- If append() was used: --&gt;
+&lt;title&gt;My Site :: Some Page&lt;/title&gt;
+
+&lt;!-- If prepend() was used: --&gt;
+&lt;title&gt;Some Page :: My Site&lt;/title&gt;
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.view.placeholders.standard.head-link"></a>7.3.3. Especificando hojas de estilo con HeadLink</h3></div></div></div>
+<p>
+            Los buenos desarrolladores de <acronym class="acronym">CSS</acronym> a menudo crearán una
+            hoja de estilo general para los estilos de todo el sitio, y hojas de estilo
+            individuales para secciones o páginas específicas del sitio web, y cargarán estas
+            últimas condicionalmente para reducir la cantidad de datos que necesitan transferirse
+            en cada petición. El placeholder <code class="methodname">headLink()</code> hace que
+            esta agregación condicional de hojas de estilo sea trivial dentro de su aplicación.
+        </p>
+<p>
+            Para lograr esto, <code class="methodname">headLink()</code> define una serie de métodos
+            "virtuales" (mediante overloading) para hacer trivial el proceso. Los que nos
+            interesan son <code class="methodname">appendStylesheet()</code> y
+            <code class="methodname">prependStylesheet()</code>. Cada uno acepta hasta cuatro
+            argumentos, <code class="varname">$href</code> (la ruta relativa a la hoja de estilo),
+            <code class="varname">$media</code> (el tipo <acronym class="acronym">MIME</acronym>, que
+            por defecto es "text/css"), <code class="varname">$conditionalStylesheet</code> (que
+            puede usarse para especificar una "condición" bajo la cual se evaluará la hoja de
+            estilo), y <code class="varname">$extras</code> (un array asociativo de pares clave y
+            valor, comúnmente usado para especificar una clave para "media"). En la mayoría de los
+            casos, solo necesitará especificar el primer argumento, la ruta relativa a la hoja de
+            estilo.
+        </p>
+<p>
+            En nuestro ejemplo, asumiremos que todas las páginas necesitan cargar la hoja de
+            estilo ubicada en "<code class="filename">/styles/site.css</code>" (relativa a la raíz
+            del documento); especificaremos esto en nuestro método bootstrap
+            <code class="methodname">_initPlaceholders()</code>.
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    // ...
+
+    protected function _initPlaceholders()
+    {
+        $this-&gt;bootstrap('View');
+        $view = $this-&gt;getResource('View');
+        $view-&gt;doctype('XHTML1_STRICT');
+
+        // Set the initial title and separator:
+        $view-&gt;headTitle('My Site')
+             -&gt;setSeparator(' :: ');
+
+        // Set the initial stylesheet:
+        $view-&gt;headLink()-&gt;prependStylesheet('/styles/site.css');
+    }
+
+    // ...
+}
+</pre>
+<p>
+            Más adelante, en un controlador o en un script de vista específico de una acción,
+            podemos añadir más hojas de estilo:
+        </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;headLink()-&gt;appendStylesheet('/styles/user-list.css') ?&gt;
+</pre>
+<p>
+            Dentro de nuestro script de vista de layout, una vez más, simplemente hacemos echo
+            del placeholder:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;doctype() ?&gt;
+&lt;html&gt;
+    &lt;?php echo $this-&gt;headTitle() ?&gt;
+    &lt;?php echo $this-&gt;headLink() ?&gt;
+    &lt;!-- ... --&gt;
+</pre>
+<p>
+            Esto generará la siguiente salida:
+        </p>
+<pre class="programlisting">
+&lt;link rel="stylesheet" type="text/css" href="/styles/site.css" /&gt;
+&lt;link rel="stylesheet" type="text/css" href="/styles/user-list.css" /&gt;
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.view.placeholders.standard.head-script"></a>7.3.4. Agregando scripts usando HeadScript</h3></div></div></div>
+<p>
+            Otra táctica común para evitar tiempos de carga de página largos es cargar JavaScript
+            solo cuando sea necesario. Dicho esto, puede necesitar varias capas de scripts: quizás
+            una para mejorar progresivamente los menús del sitio, y otra para contenido específico
+            de la página. En estas situaciones, el helper <code class="methodname">headScript()</code>
+            presenta una solución.
+        </p>
+<p>
+            De forma similar al helper <code class="methodname">headLink()</code>,
+            <code class="methodname">headScript()</code> ofrece la capacidad de añadir al final o
+            al principio scripts a la colección, y luego imprimir con echo todo el conjunto.
+            Proporciona la flexibilidad de especificar tanto los propios archivos de script a
+            cargar, como JavaScript explícito. También tiene la opción de capturar JavaScript
+            mediante <code class="methodname">captureStart()</code>/<code class="methodname">captureEnd()</code>,
+            lo que le permite simplemente incluir en línea el JavaScript en lugar de requerir una
+            llamada adicional a su servidor.
+        </p>
+<p>
+            También como <code class="methodname">headLink()</code>, <code class="methodname">headScript()</code>
+            proporciona métodos "virtuales" mediante overloading como conveniencia al especificar
+            elementos a agregar; los métodos comunes incluyen <code class="methodname">prependFile()</code>,
+            <code class="methodname">appendFile()</code>, <code class="methodname">prependScript()</code>, y
+            <code class="methodname">appendScript()</code>. Los dos primeros le permiten especificar
+            archivos que se referenciarán en el atributo <code class="varname">$src</code> de una
+            etiqueta <span class="emphasis"><em>&lt;script&gt;</em></span>; los dos últimos tomarán el
+            contenido proporcionado y lo renderizarán como JavaScript literal dentro de una
+            etiqueta <span class="emphasis"><em>&lt;script&gt;</em></span>.
+        </p>
+<p>
+            En este ejemplo, especificaremos que un script, "<code class="filename">/js/site.js</code>"
+            necesita cargarse en cada página; actualizaremos nuestro método bootstrap
+            <code class="methodname">_initPlaceholders()</code> para hacer esto.
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    // ...
+
+    protected function _initPlaceholders()
+    {
+        $this-&gt;bootstrap('View');
+        $view = $this-&gt;getResource('View');
+        $view-&gt;doctype('XHTML1_STRICT');
+
+        // Set the initial title and separator:
+        $view-&gt;headTitle('My Site')
+             -&gt;setSeparator(' :: ');
+
+        // Set the initial stylesheet:
+        $view-&gt;headLink()-&gt;prependStylesheet('/styles/site.css');
+
+        // Set the initial JS to load:
+        $view-&gt;headScript()-&gt;prependFile('/js/site.js');
+    }
+
+    // ...
+}
+</pre>
+<p>
+            Dentro de un script de vista, podríamos entonces añadir un archivo de script extra
+            como fuente, o capturar algo de JavaScript para incluir en nuestro documento.
+        </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;headScript()-&gt;appendFile('/js/user-list.js') ?&gt;
+&lt;?php $this-&gt;headScript()-&gt;captureStart() ?&gt;
+site = {
+    baseUrl: "&lt;?php echo $this-&gt;baseUrl() ?&gt;"
+};
+&lt;?php $this-&gt;headScript()-&gt;captureEnd() ?&gt;
+</pre>
+<p>
+            Dentro de nuestro script de layout, simplemente hacemos echo del placeholder, tal
+            como con todos los demás:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;doctype() ?&gt;
+&lt;html&gt;
+    &lt;?php echo $this-&gt;headTitle() ?&gt;
+    &lt;?php echo $this-&gt;headLink() ?&gt;
+    &lt;?php echo $this-&gt;headScript() ?&gt;
+    &lt;!-- ... --&gt;
+</pre>
+<p>
+            Esto generará la siguiente salida:
+        </p>
+<pre class="programlisting">
+&lt;script type="text/javascript" src="/js/site.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="/js/user-list.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+site = {
+    baseUrl: "&lt;?php echo $this-&gt;baseUrl() ?&gt;"
+};
+&lt;/script&gt;
+</pre>
+<div class="note"><table border="0" summary="Note: InlineScript Variant">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Variante InlineScript</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Muchos navegadores a menudo bloquean la visualización de una página hasta que
+                todos los scripts y hojas de estilo referenciados en la sección
+                <span class="emphasis"><em>&lt;head&gt;</em></span> se hayan cargado. Si tiene varias
+                directivas de este tipo, esto puede afectar cuán pronto alguien puede empezar a
+                ver realmente la página.
+            </p>
+<p>
+                Una forma de evitar esto es emitir sus etiquetas <span class="emphasis"><em>&lt;script&gt;</em></span>
+                justo antes de cerrar el <span class="emphasis"><em>&lt;body&gt;</em></span> de su documento.
+                (Esta es una práctica recomendada específicamente por el
+                <a class="ulink" href="http://developer.yahoo.com/yslow/" target="_top">proyecto Y! Slow</a>.)
+            </p>
+<p>
+                Zend Framework soporta esto de dos formas diferentes:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Puede renderizar su etiqueta <code class="methodname">headScript()</code>
+                        donde quiera en su script de layout; solo porque el nombre haga referencia
+                        a "head" no significa que deba renderizarse en esa ubicación.
+                    </p></li>
+<li class="listitem"><p>
+                        Alternativamente, puede usar el helper <code class="methodname">inlineScript()</code>,
+                        que es simplemente una variante de <code class="methodname">headScript()</code>,
+                        y mantiene el mismo comportamiento, pero usa un registro separado.
+                    </p></li>
+</ul></div>
+</td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.view.placeholders.basics.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.view.placeholders.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.view.placeholders.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">7.2. Uso básico de placeholders </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 7.4. Placeholders de vista: Conclusión</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

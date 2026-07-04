@@ -1,0 +1,272 @@
+<?php $title = '72.2. Uso de la herramienta CLI'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">72.2. Uso de la herramienta CLI</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tool.framework.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 72. Zend_Tool_Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.tool.framework.architecture.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.tool.framework.clitool"></a>72.2. Uso de la herramienta CLI</h2></div></div></div>
+<p>
+        La <acronym class="acronym">CLI</acronym>, o herramienta de línea de comandos (conocida internamente como la herramienta de consola),
+        es actualmente la interfaz principal para enviar peticiones de <code class="classname">Zend_Tool</code>.
+        Con la herramienta <acronym class="acronym">CLI</acronym>, los desarrolladores pueden realizar peticiones a las herramientas
+        dentro de la "ventana de línea de comandos", también conocida comúnmente como una ventana de
+        "terminal". Este entorno predomina en los sistemas *nix, pero
+        también tiene una implementación habitual en Windows con
+        <code class="filename">cmd.exe</code>, console2 y también con el proyecto Cygwin.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.clitool.setup-general"></a>72.2.1. Configuración de la herramienta CLI</h3></div></div></div>
+<p>
+            Para realizar peticiones a las herramientas a través de la línea de comandos, primero
+            necesita configurar el cliente para que su sistema pueda manejar el comando "zf".
+            El cliente de línea de comandos, a todos los efectos, es
+            el archivo <code class="filename">.sh</code> o <code class="filename">.bat</code> proporcionado con
+            su distribución de Zend Framework. En trunk, se puede encontrar aquí:
+            <a class="ulink" href="http://framework.zend.com/svn/framework/standard/trunk/bin/" target="_top">http://framework.zend.com/svn/framework/standard/trunk/bin/</a>.
+        </p>
+<p>
+            Como puede ver, hay 3 archivos en el directorio <code class="filename">/bin/</code>:
+            un <code class="filename">zf.php</code>, <code class="filename">zf.sh</code>, y
+            <code class="filename">zf.bat</code>. <code class="filename">zf.sh</code> y
+            <code class="filename">zf.bat</code> son los envoltorios de cliente específicos del sistema
+            operativo: <code class="filename">zf.sh</code> para el entorno *nix, y
+            <code class="filename">zf.bat</code> para el entorno Win32. Estos envoltorios de cliente son
+            responsables de localizar el <code class="filename">php.exe</code> adecuado, localizar el
+            <code class="filename">zf.php</code>, y transmitir la petición del cliente. El
+            <code class="filename">zf.php</code> es el responsable de comprender
+            su entorno, construir el include_path adecuado, y transmitir
+            lo que se proporciona en la línea de comandos al componente de biblioteca
+            adecuado para su despacho.
+        </p>
+<p>
+            En definitiva, quiere asegurarse de dos cosas para que todo funcione
+            sin importar el sistema operativo en el que se encuentre:
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+                    <code class="filename">zf.sh/zf.bat</code> es accesible desde el
+                    path de su sistema. Esto es la capacidad de invocar <span class="command"><strong>zf</strong></span> desde
+                    cualquier lugar en su línea de comandos, sin importar cuál sea su
+                    directorio de trabajo actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="filename">ZendFramework/library</code> está en su
+                    <span class="property">include_path</span>.
+                </p></li>
+</ol></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Nota: aunque lo anterior son los requisitos más ideales,
+                simplemente puede descargar Zend Framework y esperar que
+                funcione como algún comando <code class="filename">./path/to/zf.php</code>.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.clitool.setup-starnix"></a>72.2.2. Configuración de la herramienta CLI en sistemas tipo Unix</h3></div></div></div>
+<p>
+            La configuración más común en el entorno *nix es copiar
+            <code class="filename">zf.sh</code> y <code class="filename">zf.php</code> en el mismo directorio
+            que su binario de <acronym class="acronym">PHP</acronym>. Este se puede encontrar generalmente en uno de los
+            siguientes lugares:
+        </p>
+<pre class="programlisting">
+/usr/bin
+/usr/local/bin
+/usr/local/ZendServer/bin/
+/Applications/ZendServer/bin/
+</pre>
+<p>
+            Para averiguar la ubicación de su binario de <acronym class="acronym">PHP</acronym>, puede ejecutar 'which
+            php' en la línea de comandos. Esto devolverá la ubicación del binario de
+            <acronym class="acronym">PHP</acronym> que utilizará para ejecutar los scripts de <acronym class="acronym">PHP</acronym> en este entorno.
+        </p>
+<p>
+            El siguiente paso es asegurarse de que la biblioteca de Zend Framework
+            esté configurada correctamente dentro del <span class="property">include_path</span> del
+            <acronym class="acronym">PHP</acronym> del sistema. Para averiguar dónde se encuentra su
+            <span class="property">include_path</span>, puede ejecutar <span class="command"><strong>php -i</strong></span>
+            y buscar la variable <span class="property">include_path</span>, o de forma más concisa,
+            ejecutar <span class="command"><strong>php -i | grep include_path</strong></span>. Una vez que haya encontrado dónde
+            se encuentra su <span class="property">include_path</span> (generalmente será
+            algo como <code class="filename">/usr/lib/php</code>, <code class="filename">/usr/share/php</code>,
+            <code class="filename">/usr/local/lib/php</code>, o similar), asegúrese de que el contenido del
+            directorio <code class="filename">/library/</code> se coloque
+            dentro del directorio especificado en su <span class="property">include_path</span>.
+        </p>
+<p>
+            Una vez que haya hecho esas dos cosas, debería poder ejecutar un
+            comando y obtener la respuesta adecuada como esta:
+        </p>
+<p>
+            <img src="figures/zend.tool.framework.cliversionunix.png" align="middle">
+        </p>
+<p>
+            Si no ve este tipo de salida, vuelva a comprobar su configuración
+            para asegurarse de que tiene todas las piezas necesarias en el lugar adecuado.
+        </p>
+<p>
+            Hay un par de configuraciones alternativas que podría querer emplear
+            dependiendo de la configuración de su servidor, su nivel de acceso, o
+            por otras razones.
+        </p>
+<p>
+            La <span class="emphasis"><em>configuración alternativa</em></span> implica mantener la descarga de
+            Zend Framework junta tal cual, y crear un enlace desde una ubicación
+            de <code class="constant">PATH</code> hacia <code class="filename">zf.sh</code>. Esto significa que puede
+            colocar el contenido de la descarga de ZendFramework en una ubicación
+            como <code class="filename">/usr/local/share/ZendFramework</code>, o de forma más local
+            como <code class="filename">/home/username/lib/ZendFramework</code>, y crear un
+            enlace simbólico hacia <code class="filename">zf.sh</code>.
+        </p>
+<p>
+            Suponiendo que desea colocar el enlace dentro de <code class="filename">/usr/local/bin</code>
+            (esto también podría funcionar para colocar el enlace dentro de
+            <code class="filename">/home/username/bin/</code> por ejemplo) ejecutaría un
+            comando similar a este:
+        </p>
+<pre class="programlisting">
+ln -s /usr/local/share/ZendFramework/bin/zf.sh /usr/local/bin/zf
+
+# OR (for example)
+ln -s /home/username/lib/ZendFramework/bin/zf.sh /home/username/bin/zf
+</pre>
+<p>
+            Esto creará un enlace al que debería poder acceder globalmente
+            en la línea de comandos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.clitool.setup-windows"></a>72.2.3. Configuración de la herramienta CLI en Windows</h3></div></div></div>
+<p>
+            La configuración más común en el entorno Windows Win32 es copiar
+            <code class="filename">zf.bat</code> y <code class="filename">zf.php</code> en el mismo
+            directorio que su binario de <acronym class="acronym">PHP</acronym>. Este se puede encontrar generalmente en
+            uno de los siguientes lugares:
+        </p>
+<pre class="programlisting">
+C:\PHP
+C:\Program Files\ZendServer\bin\
+C:\WAMP\PHP\bin
+</pre>
+<p>
+            Debería poder ejecutar <code class="filename">php.exe</code> en la línea de comandos.
+            Si no puede, primero consulte la documentación que vino con
+            su distribución de <acronym class="acronym">PHP</acronym>, o asegúrese de que la ruta a
+            <code class="filename">php.exe</code> esté en su
+            variable de entorno <code class="constant">PATH</code> de Windows.
+        </p>
+<p>
+            El siguiente paso es asegurarse de que la biblioteca de Zend Framework
+            esté configurada correctamente dentro del <span class="property">include_path</span> del
+            <acronym class="acronym">PHP</acronym> del sistema. Para averiguar dónde se encuentra su
+            <span class="property">include_path</span>, puede escribir <span class="command"><strong>php -i</strong></span> y
+            buscar la variable <span class="property">include_path</span>, o de forma más concisa
+            ejecutar <span class="command"><strong>php -i | grep include_path</strong></span> si tiene Cygwin configurado con
+            grep disponible. Una vez que haya encontrado dónde se encuentra su
+            <span class="property">include_path</span> (generalmente será
+            algo como <code class="filename">C:\PHP\pear</code>, <code class="filename">C:\PHP\share</code>,
+            <code class="filename">C:\Program%20Files\ZendServer\share</code> o similar), asegúrese
+            de que el contenido del directorio library/ se coloque dentro de su
+            directorio especificado en <span class="property">include_path</span>.
+        </p>
+<p>
+            Una vez que haya hecho esas dos cosas, debería poder ejecutar un
+            comando y obtener la respuesta adecuada como esta:
+        </p>
+<p>
+            <img src="figures/zend.tool.framework.cliversionwin32.png" align="middle">
+        </p>
+<p>
+            Si no ve este tipo de salida, vuelva a comprobar su configuración
+            para asegurarse de que tiene todas las piezas necesarias en el lugar adecuado.
+        </p>
+<p>
+            Hay un par de configuraciones alternativas que podría querer emplear
+            dependiendo de la configuración de su servidor, su nivel de acceso, o
+            por otras razones.
+        </p>
+<p>
+            La <span class="emphasis"><em>configuración alternativa</em></span> implica mantener la descarga de
+            Zend Framework junta tal cual, y modificar tanto su
+            <code class="constant">PATH</code> del sistema como el archivo <code class="filename">php.ini</code>.
+            En el entorno de su usuario, asegúrese de añadir
+            <code class="filename">C:\Path\To\ZendFramework\bin</code>, para que su
+            archivo <code class="filename">zf.bat</code> sea ejecutable. Además, modifique el
+            archivo <code class="filename">php.ini</code> para asegurarse de que
+            <code class="filename">C:\Path\To\ZendFramework\library</code> esté en su
+            <span class="property">include_path</span>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.clitool.setup-othernotes"></a>72.2.4. Otras consideraciones de configuración</h3></div></div></div>
+<p>
+            Si por alguna razón no desea tener la biblioteca de Zend Framework dentro
+            de su <span class="property">include_path</span>, hay otra opción. Hay
+            dos variables de entorno especiales que <code class="filename">zf.php</code>
+            utilizará para determinar la ubicación de su instalación
+            de Zend Framework.
+        </p>
+<p>
+            La primera es <code class="constant">ZEND_TOOL_INCLUDE_PATH_PREPEND</code>, que
+            antepondrá el valor de esta variable de entorno al
+            <span class="property">include_path</span> del sistema (<code class="filename">php.ini</code>) antes de cargar
+            el cliente.
+        </p>
+<p>
+            Alternativamente, podría querer usar
+            <code class="constant">ZEND_TOOL_INCLUDE_PATH</code> para
+            <span class="emphasis"><em>reemplazar</em></span> completamente el <span class="property">include_path</span> del sistema
+            por uno que tenga sentido específicamente para la herramienta de línea de comandos
+            <span class="command"><strong>zf</strong></span>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.clitool.continuing"></a>72.2.5. ¿Hacia dónde ir ahora?</h3></div></div></div>
+<p>
+            En este punto, ya debería estar preparado para comenzar a iniciar algunos comandos más
+            "interesantes". Para empezar, puede ejecutar el
+            comando <span class="command"><strong>zf --help</strong></span> para ver qué tiene disponible.
+        </p>
+<p>
+            <img src="figures/zend.tool.framework.clihelp.png" align="middle">
+        </p>
+<p>
+            Continúe en la sección "Crear proyecto" de
+            <code class="classname">Zend_Tool_Project</code> para entender cómo utilizar el script
+            <span class="command"><strong>zf</strong></span> para la creación de proyectos.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tool.framework.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.tool.framework.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.tool.framework.architecture.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 72. Zend_Tool_Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 72.3. Arquitectura</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,192 @@
+<?php $title = '9.3. Autenticación de usuarios en Zend Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">9.3. Autenticación de usuarios en Zend Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.multiuser.sessions.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.multiuser.authorization.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.multiuser.authentication"></a>9.3. Autenticación de usuarios en Zend Framework</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.authentication.intro"></a>9.3.1. Introducción a la autenticación</h3></div></div></div>
+<p>
+            Una vez que una aplicación web ha sido capaz de distinguir a un usuario de otro estableciendo
+            una sesión, las aplicaciones web normalmente desean validar la identidad
+            de un usuario. El proceso de validar que un consumidor es auténtico es la "autenticación".
+            La autenticación se compone de dos partes distintivas: una identidad y un conjunto de
+            credenciales. Se necesita alguna variación de ambas presentadas a la aplicación para
+            que esta pueda procesarlas y así autenticar a un usuario.
+        </p>
+<p>
+            Si bien el patrón más común de autenticación gira en torno a nombres de usuario y
+            contraseñas, cabe destacar que este no es siempre el caso. Las identidades no
+            se limitan a los nombres de usuario. De hecho, se puede usar cualquier identificador público: un número
+            asignado, un número de seguro social o una dirección de residencia. Del mismo modo, las credenciales no
+            se limitan a las contraseñas. Las credenciales pueden presentarse en forma de información privada
+            protegida: huella dactilar, escaneo de retina, frase de contraseña, o cualquier otra información
+            personal poco habitual.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.authentication.basic-usage"></a>9.3.2. Uso básico de Zend_Auth</h3></div></div></div>
+<p>
+            En el siguiente ejemplo, usaremos <code class="classname">Zend_Auth</code> para
+            completar lo que probablemente sea la forma más habitual de autenticación: nombre de usuario y
+            contraseña a partir de una tabla de base de datos. Este ejemplo asume que ya ha configurado su
+            aplicación usando <code class="classname">Zend_Application</code>, y que dentro de esa
+            aplicación ha configurado una conexión de base de datos.
+        </p>
+<p>
+            La función de la clase <code class="classname">Zend_Auth</code> es doble. Primero, debe
+            poder aceptar un adaptador de autenticación para usarlo al autenticar a un usuario. En segundo lugar,
+            tras una autenticación exitosa de un usuario, debe persistir a lo largo de cada
+            petición que pueda necesitar saber si el usuario actual ha sido efectivamente
+            autenticado. Para persistir estos datos, <code class="classname">Zend_Auth</code> utiliza
+            <code class="classname">Zend_Session_Namespace</code>, pero generalmente nunca necesitará
+            interactuar con este objeto de sesión.
+        </p>
+<p>
+            Supongamos que tenemos la siguiente tabla de base de datos configurada:
+        </p>
+<pre class="programlisting">
+CREATE TABLE users (
+    id INTEGER  NOT NULL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(32) NULL,
+    password_salt VARCHAR(32) NULL,
+    real_name VARCHAR(150) NULL
+)
+</pre>
+<p>
+            Lo anterior muestra una tabla de usuarios que incluye un nombre de usuario, una contraseña y también una
+            columna de salt de contraseña. Esta columna de salt se usa como parte de una técnica llamada "salting"
+            que mejoraría la seguridad de su base de datos de información frente a ataques de fuerza bruta
+            dirigidos al algoritmo de su hash de contraseñas. <a class="ulink" href="http://en.wikipedia.org/wiki/Salting_%28cryptography%29" target="_top">Más
+                información</a> sobre el salting.
+        </p>
+<p>
+            Para esta implementación, primero debemos crear un formulario simple que podamos utilizar como
+            el "formulario de inicio de sesión". Usaremos <code class="classname">Zend_Form</code> para lograrlo.
+        </p>
+<pre class="programlisting">
+// located at application/forms/Auth/Login.php
+
+class Default_Form_Auth_Login extends Zend_Form
+{
+    public function init()
+    {
+        $this-&gt;setMethod('post');
+
+        $this-&gt;addElement(
+            'text', 'username', array(
+                'label' =&gt; 'Username:',
+                'required' =&gt; true,
+                'filters'    =&gt; array('StringTrim'),
+            ));
+
+        $this-&gt;addElement('password', 'password', array(
+            'label' =&gt; 'Password:',
+            'required' =&gt; true,
+            ));
+
+        $this-&gt;addElement('submit', 'submit', array(
+            'ignore'   =&gt; true,
+            'label'    =&gt; 'Login',
+            ));
+
+    }
+}
+</pre>
+<p>
+            Con el formulario anterior, ya podemos crear nuestra acción de inicio de sesión para
+            nuestro controlador de autenticación. Este controlador se llamará
+            "<code class="classname">AuthController</code>", y estará ubicado en
+            <code class="filename">application/controllers/AuthController.php</code>. Tendrá un
+            único método llamado "<code class="methodname">loginAction()</code>" que servirá como la
+            acción autopublicante. En otras palabras, independientemente de si la url se solicitó mediante POST o GET,
+            este método manejará la lógica.
+        </p>
+<p>
+            El siguiente código demostrará cómo construir el adaptador adecuado e integrarlo
+            con el formulario:
+        </p>
+<pre class="programlisting">
+class AuthController extends Zend_Controller_Action
+{
+
+    public function loginAction()
+    {
+        $db = $this-&gt;_getParam('db');
+
+        $loginForm = new Default_Form_Auth_Login();
+
+        if ($loginForm-&gt;isValid($_POST)) {
+
+            $adapter = new Zend_Auth_Adapter_DbTable(
+                $db,
+                'users',
+                'username',
+                'password',
+                'MD5(CONCAT(?, password_salt))'
+                );
+
+            $adapter-&gt;setIdentity($loginForm-&gt;getValue('username'));
+            $adapter-&gt;setCredential($loginForm-&gt;getValue('password'));
+
+            $auth   = Zend_Auth::getInstance();
+            $result = $auth-&gt;authenticate($adapter);
+
+            if ($result-&gt;isValid()) {
+                $this-&gt;_helper-&gt;FlashMessenger('Successful Login');
+                $this-&gt;_redirect('/');
+                return;
+            }
+
+        }
+
+        $this-&gt;view-&gt;loginForm = $loginForm;
+
+    }
+
+}
+</pre>
+<p>
+            El script de vista correspondiente es bastante sencillo para esta acción. Establecerá la url
+            actual, ya que este formulario se autoprocesa, y mostrará el formulario. Este script de vista
+            se encuentra en <code class="filename">application/views/scripts/auth/login.phtml</code>:
+        </p>
+<pre class="programlisting">
+$this-&gt;form-&gt;setAction($this-&gt;url());
+echo $this-&gt;form;
+</pre>
+<p>
+            Y eso es todo. Con estos conceptos básicos puede ampliar las ideas generales para incluir
+            escenarios de autenticación más complejos. Para más información sobre otros
+            adaptadores de <code class="classname">Zend_Auth</code>, consulte
+            <a class="link" href="zend.auth.phtml" title="Chapter 15. Zend_Auth">la guía de referencia</a>.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.multiuser.sessions.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.multiuser.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.multiuser.authorization.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">9.2. Gestión de sesiones de usuario en ZF </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 9.4. Construcción de un sistema de autorización en Zend Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

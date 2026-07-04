@@ -1,0 +1,184 @@
+<?php $title = '26.3. Métodos básicos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">26.3. Métodos básicos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.date.definition.theory.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 26. Zend_Date</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.date.overview.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.date.basic"></a>26.3. Métodos básicos</h2></div></div></div>
+<p>
+        Las siguientes secciones muestran el uso básico de <code class="classname">Zend_Date</code> principalmente
+        mediante ejemplos. En este manual, "fechas" siempre implica una fecha de calendario con una hora, incluso cuando
+        no se mencione explícitamente, y viceversa. La parte no especificada toma por defecto una representación interna
+        de "cero". Así, sumar una fecha que no tiene fecha de calendario y un valor de hora de 12
+        horas a otra fecha que consiste solo en una fecha de calendario resultaría en una fecha con esa
+        fecha de calendario y una hora de "mediodía".
+    </p>
+<p>
+        Establecer solo una fecha específica, sin parte de hora, implica una hora fijada a 00:00:00. A la inversa,
+        establecer solo una hora específica implica una fecha fijada internamente al 01.01.1970 más el número de
+        segundos igual a las horas, minutos y segundos transcurridos identificados por la hora. Normalmente,
+        las personas miden las cosas desde un punto de partida, como el año 0 d.C. Sin embargo, muchos sistemas
+        de software usan el primer segundo del año 1970 como punto de partida, y denotan las horas como un
+        desplazamiento de marca de tiempo que cuenta el número de segundos transcurridos desde este punto de partida.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.basic.creation"></a>26.3.1. Fecha actual</h3></div></div></div>
+<p>
+            Sin ningún argumento, construir una instancia devuelve un objeto en la configuración regional (locale) por defecto
+            con la fecha local actual, usando la función <code class="methodname">time()</code> de <acronym class="acronym">PHP</acronym>
+            para obtener la <a class="ulink" href="http://en.wikipedia.org/wiki/Unix_Time" target="_top">marca de tiempo UNIX</a>
+            del objeto. Asegúrese de que su entorno <acronym class="acronym">PHP</acronym> tenga configurada la
+            <a class="link" href="zend.date.phtml#zend.date.setdefaulttimezone" title="26.1.1. Always Set a Default Timezone">zona horaria por defecto</a> correcta.
+        </p>
+<div class="example">
+<a name="zend.date.basic.creation.example-1"></a><p class="title"><b>Ejemplo 26.2. Creando la fecha actual</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// Output of the current timestamp
+print $date;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.basic.functions"></a>26.3.2. Zend_Date mediante ejemplos</h3></div></div></div>
+<p>
+            Revisar los métodos básicos de <code class="classname">Zend_Date</code> es un buen punto de partida para
+            quienes no están familiarizados con los objetos de fecha en otros lenguajes o frameworks. Se
+            proporcionará un pequeño ejemplo para cada método a continuación.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.date.simple.functions.get"></a>26.3.2.1. Mostrar una fecha</h4></div></div></div>
+<p>
+                La fecha en un objeto <code class="classname">Zend_Date</code> puede obtenerse como un
+                entero o cadena localizados usando el método <code class="methodname">get()</code>. Hay muchas
+                opciones disponibles, que se explicarán en secciones posteriores.
+            </p>
+<div class="example">
+<a name="zend.date.simple.functions.get.example-1"></a><p class="title"><b>Ejemplo 26.3. get() - Mostrar una fecha</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// Output of the desired date
+print $date-&gt;get();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.date.simple.functions.set"></a>26.3.2.2. Estableciendo una fecha</h4></div></div></div>
+<p>
+                El método <code class="methodname">set()</code> modifica la fecha almacenada en el objeto, y
+                devuelve el valor final de la fecha como una marca de tiempo (no como un objeto). De nuevo, hay muchas
+                opciones que se explorarán en secciones posteriores.
+            </p>
+<div class="example">
+<a name="zend.date.simple.functions.set.example-1"></a><p class="title"><b>Ejemplo 26.4. set() - Establecer una fecha</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// Setting of a new time
+$date-&gt;set('13:00:00',Zend_Date::TIMES);
+print $date-&gt;get(Zend_Date::W3C);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.date.simple.functions.add"></a>26.3.2.3. Sumando y restando fechas</h4></div></div></div>
+<p>
+                Sumar dos fechas con <code class="methodname">add()</code> normalmente implica sumar una
+                fecha real en el tiempo con una marca de tiempo artificial que representa una parte de la fecha, como 12
+                horas, como se muestra en el ejemplo a continuación. Tanto <code class="methodname">add()</code> como
+                <code class="methodname">sub()</code> utilizan el mismo conjunto de opciones que
+                <code class="methodname">set()</code>, que se explicará más adelante.
+            </p>
+<div class="example">
+<a name="zend.date.simple.functions.add.example-1"></a><p class="title"><b>Ejemplo 26.5. add() - Sumando fechas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// changes $date by adding 12 hours
+$date-&gt;add('12:00:00', Zend_Date::TIMES);
+
+echo "Date via get() = ", $date-&gt;get(Zend_Date::W3C), "\n";
+
+// use magic __toString() method to call Zend_Date's toString()
+echo "Date via toString() = ", $date, "\n";
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.date.simple.functions.compare"></a>26.3.2.4. Comparación de fechas</h4></div></div></div>
+<p>
+                Todos los métodos básicos de <code class="classname">Zend_Date</code> pueden operar sobre fechas completas
+                contenidas en los objetos, o pueden operar sobre partes de la fecha, como comparar el
+                valor de los minutos en una fecha con un valor absoluto. Por ejemplo, los minutos actuales de
+                la hora actual pueden compararse con un número específico de minutos usando
+                <code class="methodname">compare()</code>, como en el ejemplo siguiente.
+            </p>
+<div class="example">
+<a name="zend.date.simple.functions.compare.example-1"></a><p class="title"><b>Ejemplo 26.6. compare() - Comparar fechas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// Comparation of both times
+if ($date-&gt;compare(10, Zend_Date::MINUTE) == -1) {
+    print "This hour is less than 10 minutes old";
+} else {
+    print "This hour is at least 10 minutes old";
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Para comparaciones simples de igualdad, use <code class="methodname">equals()</code>, que
+                devuelve un booleano.
+            </p>
+<div class="example">
+<a name="zend.date.simple.functions.compare.example-2"></a><p class="title"><b>Ejemplo 26.7. equals() - Identificar una fecha o parte de fecha</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = new Zend_Date();
+
+// Comparation of the two dates
+if ($date-&gt;equals(10, Zend_Date::HOUR)) {
+    print "It's 10 o'clock. Time to get to work.";
+} else {
+    print "It is not 10 o'clock. You can keep sleeping.";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.date.definition.theory.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.date.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.date.overview.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">26.2. Teoría de funcionamiento </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 26.4. Resumen de la API de Zend_Date</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

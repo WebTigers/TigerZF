@@ -1,0 +1,91 @@
+<?php $title = '26.2. Teoría de funcionamiento'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">26.2. Teoría de funcionamiento</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.date.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 26. Zend_Date</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.date.basic.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.date.definition.theory"></a>26.2. Teoría de funcionamiento</h2></div></div></div>
+<p>
+        ¿Por qué hay solo una clase <code class="classname">Zend_Date</code> para manejar fechas y horas en
+        Zend Framework?
+    </p>
+<p>
+        Muchos lenguajes dividen el manejo de horas y fechas de calendario en dos clases. Sin embargo,
+        Zend Framework busca la máxima simplicidad, y obligar al desarrollador a gestionar diferentes
+        objetos con diferentes métodos para horas y fechas se convierte en una carga en muchas situaciones.
+        Dado que los métodos de <code class="classname">Zend_Date</code> permiten trabajar con fechas ambiguas
+        que podrían no incluir todas las partes (era, año, mes, día, hora, minuto, segundo, zona horaria),
+        los desarrolladores disfrutan de la flexibilidad y facilidad de usar la misma clase y los mismos métodos para
+        realizar las mismas manipulaciones (por ejemplo, suma, resta, comparación, combinación de partes de
+        la fecha, etc.). Dividir el manejo de estos fragmentos de fecha en varias clases
+        crearía complicaciones cuando se desea una interoperación fluida con una curva de aprendizaje reducida. Una
+        única clase reduce la duplicación de código para operaciones similares, sin necesidad de una compleja
+        jerarquía de herencia.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.theory.internals"></a>26.2.1. Detalles internos</h3></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Marca de tiempo <acronym class="acronym">UNIX</acronym>
+                </p>
+<p>
+                    Todas las fechas y horas, incluso las ambiguas (por ejemplo, sin año), se representan
+                    internamente como momentos absolutos en el tiempo, expresados como una marca de tiempo
+                    <acronym class="acronym">UNIX</acronym> que expresa la diferencia entre la hora deseada y el
+                    1 de enero de 1970 00:00:00 <acronym class="acronym">GMT</acronym>. Esto solo fue posible
+                    porque <code class="classname">Zend_Date</code> no está limitada a las marcas de tiempo
+                    <acronym class="acronym">UNIX</acronym> ni a valores enteros. Se requiere la extensión BCMath
+                    para soportar fechas extremadamente grandes fuera del rango
+                    vie, 13 dic 1901 20:45:54 <acronym class="acronym">GMT</acronym> a
+                    mar, 19 ene 2038 03:14:07 <acronym class="acronym">GMT</acronym>. Además, pueden surgir pequeños
+                    errores matemáticos debido a las limitaciones inherentes de los tipos de datos de punto flotante y
+                    el redondeo, a menos que se use la extensión BCMath.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Partes de la fecha como desplazamientos de la marca de tiempo
+                </p>
+<p>
+                    Así, un objeto instancia que representa tres horas se expresaría como
+                    tres horas después del 1 de enero de 1970 00:00:00 <acronym class="acronym">GMT</acronym>
+                    -es decir, 0 + 3 * 60 * 60 = 10800.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Funciones de <acronym class="acronym">PHP</acronym>
+                </p>
+<p>
+                    Cuando es posible, <code class="classname">Zend_Date</code> normalmente usa
+                    funciones de <acronym class="acronym">PHP</acronym> para mejorar el rendimiento.
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.date.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.date.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.date.basic.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 26. Zend_Date </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 26.3. Métodos básicos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

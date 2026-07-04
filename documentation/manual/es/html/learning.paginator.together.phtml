@@ -1,0 +1,95 @@
+<?php $title = '11.4. Poniéndolo todo junto'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">11.4. Poniéndolo todo junto</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.paginator.control.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 11. Primeros pasos con Zend_Paginator</th>
+<td width="20%" align="right"> <a accesskey="n" href="reference.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.paginator.together"></a>11.4. Poniéndolo todo junto</h2></div></div></div>
+<p>
+        Ha visto cómo crear un objeto Paginator, cómo renderizar los elementos de la página actual,
+        y cómo renderizar un elemento de navegación para recorrer sus páginas. En esta sección
+        verá cómo Paginator encaja con el resto de su aplicación MVC.
+    </p>
+<p>
+        En los siguientes ejemplos ignoraremos la implementación de buenas prácticas de usar una capa de
+        servicio (Service Layer) para mantener el ejemplo simple y más fácil de entender. Una vez que se familiarice
+        con el uso de capas de servicio, debería ser fácil ver cómo Paginator puede encajar con el enfoque de
+        buenas prácticas.
+    </p>
+<p>
+        Comencemos con el controlador. La aplicación de ejemplo es simple, y simplemente pondremos
+        todo en el IndexController y la IndexAction. Nuevamente, esto es solo con fines de
+        demostración. Una aplicación real no debería usar controladores de esta manera.
+    </p>
+<pre class="programlisting">
+class IndexController extends Zend_Controller_Action
+{
+    public function indexAction()
+    {
+        // Setup pagination control view script. See the pagation control tutorial page
+        // for more information about this view script.
+        Zend_View_Helper_PaginationControl::setDefaultViewPartial('controls.phtml');
+
+        // Fetch an already instantiated database connection from the registry
+        $db = Zend_Registry::get('db');
+
+        // Create a select object which fetches blog posts, sorted decending by date of creation
+        $select = $db-&gt;select()-&gt;from('posts')-&gt;sort('date_created DESC');
+
+        // Create a Paginator for the blog posts query
+        $paginator = Zend_Paginator::factory($select);
+
+        // Read the current page number from the request. Default to 1 if no explicit page number is provided.
+        $paginator-&gt;setCurrentPageNumber($this-&gt;_getParam('page', 1));
+
+        // Assign the Paginator object to the view
+        $this-&gt;view-&gt;paginator = $paginator;
+    }
+}
+</pre>
+<p>
+        El siguiente script de vista es el script de vista index.phtml para la indexAction del
+        IndexController. El script de vista puede mantenerse simple. Estamos asumiendo el uso del
+        ScrollingStyle por defecto.
+    </p>
+<pre class="programlisting">
+&lt;ul&gt;
+&lt;?php
+// Render each the title of each post for the current page in a list-item
+foreach ($this-&gt;paginator as $item) {
+    echo '&lt;li&gt;' . $item-&gt;title . '&lt;/li&gt;';
+}
+?&gt;
+&lt;/ul&gt;
+&lt;?php echo $this-&gt;paginator; ?&gt;
+</pre>
+<p>
+        Ahora navegue al índice de su proyecto y vea a Paginator en acción. Lo que hemos discutido
+        en este tutorial es solo la punta del iceberg. El manual de referencia y la
+        documentación de la <acronym class="acronym">API</acronym> pueden decirle más sobre lo que puede hacer con
+        <code class="classname">Zend_Paginator</code>.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.paginator.control.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.paginator.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="reference.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">11.3. Control de paginación y ScrollingStyles </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Parte III. Referencia de Zend Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

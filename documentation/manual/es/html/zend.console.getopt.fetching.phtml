@@ -1,0 +1,192 @@
+<?php $title = '23.3. Obtención de opciones y argumentos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">23.3. Obtención de opciones y argumentos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.console.getopt.rules.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 23. Zend_Console_Getopt</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.console.getopt.configuration.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.console.getopt.fetching"></a>23.3. Obtención de opciones y argumentos</h2></div></div></div>
+<p>
+        Después de haber declarado las opciones que el objeto
+        <code class="classname">Zend_Console_Getopt</code> debe reconocer, y de suministrar
+        los argumentos desde la línea de comandos o un array, puede
+        consultar el objeto para averiguar qué opciones especificó un usuario en
+        una invocación determinada de su programa desde la línea de comandos. La clase implementa
+        métodos mágicos para que pueda consultar las opciones por nombre.
+    </p>
+<p>
+        El análisis de los datos se retrasa hasta la primera consulta que realice
+        contra el objeto <code class="classname">Zend_Console_Getopt</code> para averiguar si se
+        indicó una opción; el objeto realiza entonces su análisis. Esto le permite
+        utilizar varias llamadas a métodos para configurar las opciones, argumentos, cadenas
+        de ayuda y opciones de configuración antes de que se realice el análisis.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.fetching.exceptions"></a>23.3.1. Manejo de excepciones de Getopt</h3></div></div></div>
+<p>
+            Si el usuario indicó alguna opción no válida en la línea de comandos,
+            la función de análisis lanza una <code class="classname">Zend_Console_Getopt_Exception</code>.
+            Debe capturar esta excepción en el código de su aplicación.
+            Puede usar el método <code class="methodname">parse()</code> para forzar al objeto
+            a analizar los argumentos. Esto es útil porque puede invocar
+            <code class="methodname">parse()</code> en un bloque <span class="emphasis"><em>try</em></span>. Si se ejecuta correctamente,
+            puede estar seguro de que el análisis no volverá a lanzar una excepción.
+            La excepción lanzada tiene un método personalizado <code class="methodname">getUsageMessage()</code>,
+            que devuelve como cadena el conjunto formateado de mensajes de uso de
+            todas las opciones declaradas.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.fetching.exceptions.example"></a><p class="title"><b>Ejemplo 23.3. Captura de excepciones de Getopt</b></p>
+<div class="example-contents"><pre class="programlisting">
+try {
+    $opts = new Zend_Console_Getopt('abp:');
+    $opts-&gt;parse();
+} catch (Zend_Console_Getopt_Exception $e) {
+    echo $e-&gt;getUsageMessage();
+    exit;
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Los casos en los que el análisis lanza una excepción incluyen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    La opción indicada no se reconoce.
+                </p></li>
+<li class="listitem"><p>
+                    La opción requiere un parámetro, pero no se proporcionó ninguno.
+                </p></li>
+<li class="listitem"><p>
+                    El parámetro de la opción es del tipo incorrecto.
+                    Por ejemplo, una cadena no numérica cuando se requería
+                    un entero.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.fetching.byname"></a>23.3.2. Obtención de opciones por nombre</h3></div></div></div>
+<p>
+            Puede usar el método <code class="methodname">getOption()</code> para consultar el valor
+            de una opción. Si la opción tenía un parámetro, este método devuelve
+            el valor del parámetro. Si la opción no tenía parámetro pero
+            el usuario sí la especificó en la línea de comandos, el método devuelve
+            <code class="constant">TRUE</code>. En caso contrario, el método devuelve <code class="constant">NULL</code>.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.fetching.byname.example.setoption"></a><p class="title"><b>Ejemplo 23.4. Uso de getOption()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$b = $opts-&gt;getOption('b');
+$p_parameter = $opts-&gt;getOption('p');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Alternativamente, puede usar la función mágica <code class="methodname">__get()</code>
+            para recuperar el valor de una opción como si fuera una variable
+            miembro de la clase. También se implementa el método mágico
+            <code class="methodname">__isset()</code>.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.fetching.byname.example.magic"></a><p class="title"><b>Ejemplo 23.5. Uso de los métodos mágicos __get() e __isset()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+if (isset($opts-&gt;b)) {
+    echo "I got the b option.\n";
+}
+$p_parameter = $opts-&gt;p; // null if not set
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Si sus opciones se declaran con alias, puede utilizar cualquiera de los
+            alias de una opción en los métodos anteriores.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.fetching.reporting"></a>23.3.3. Informe de opciones</h3></div></div></div>
+<p>
+            Existen varios métodos para informar del conjunto completo de
+            opciones indicadas por el usuario en la línea de comandos actual.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Como cadena: use el método <code class="methodname">toString()</code>. Las opciones
+                    se devuelven como una cadena de pares <span class="command"><strong>flag=value</strong></span>
+                    separados por espacios. El valor de una opción que no tiene un parámetro
+                    es la cadena literal "<code class="constant">TRUE</code>".
+                </p></li>
+<li class="listitem"><p>
+                    Como array: use el método <code class="methodname">toArray()</code>. Las opciones
+                    se devuelven en un array simple indexado por enteros de cadenas, las cadenas de
+                    la bandera seguidas de las cadenas de parámetros, si las hay.
+                </p></li>
+<li class="listitem"><p>
+                    Como cadena que contiene datos <acronym class="acronym">JSON</acronym>: use el
+                    método <code class="methodname">toJson()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Como cadena que contiene datos <acronym class="acronym">XML</acronym>: use el
+                    método <code class="methodname">toXml()</code>.
+                </p></li>
+</ul></div>
+<p>
+            En todos los métodos de volcado anteriores, la cadena de la bandera es la
+            primera cadena de la lista de alias correspondiente. Por ejemplo,
+            si los alias de la opción se declararon como <span class="command"><strong>verbose|v</strong></span>,
+            entonces la primera cadena, <span class="command"><strong>verbose</strong></span>, se utiliza como el
+            nombre canónico de la opción. El nombre de la bandera de opción no
+            incluye ningún guion precedente.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.fetching.remainingargs"></a>23.3.4. Obtención de argumentos que no son opciones</h3></div></div></div>
+<p>
+            Después de analizar las opciones y sus parámetros desde la línea de comandos, puede que queden
+            argumentos adicionales. Puede consultar estos argumentos usando el
+            método <code class="methodname">getRemainingArgs()</code>. Este método devuelve
+            un array con las cadenas que no formaban parte de ninguna opción.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.fetching.remainingargs.example"></a><p class="title"><b>Ejemplo 23.6. Uso de getRemainingArgs()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;setArguments(array('-p', 'p_parameter', 'filename'));
+$args = $opts-&gt;getRemainingArgs(); // returns array('filename')
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <code class="classname">Zend_Console_Getopt</code> admite la convención de
+            <acronym class="acronym">GNU</acronym> según la cual un argumento formado por un doble guion indica el fin de
+            las opciones. Cualquier argumento posterior a este indicador debe tratarse como
+            argumento que no es una opción. Esto es útil si tiene un argumento
+            que no es una opción y comienza con un guion.
+            Por ejemplo: "<span class="command"><strong>rm -- -filename-with-dash</strong></span>".
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.console.getopt.rules.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.console.getopt.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.console.getopt.configuration.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">23.2. Declaración de reglas de Getopt </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 23.4. Configuración de Zend_Console_Getopt</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,858 @@
+<?php $title = '17.4. Zend_Cache Backends'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">17.4. Zend_Cache Backends</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cache.frontends.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 17. Zend_Cache</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cache.cache.manager.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cache.backends"></a>17.4. Zend_Cache Backends</h2></div></div></div>
+<p>
+        Hay dos tipos de backends: estándar y extendidos. Por supuesto, los backends
+        extendidos ofrecen más funcionalidades.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.file"></a>17.4.1. Zend_Cache_Backend_File</h3></div></div></div>
+<p>
+            Este backend (extendido) almacena los registros de caché en archivos (en un directorio
+            elegido).
+        </p>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.file.table"></a><p class="title"><b>Tabla 17.6. Opciones del backend File</b></p>
+<div class="table-contents"><table class="table" summary="File Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>cache_dir</em></span></td>
+<td><span class="type">String</span></td>
+<td>[directorio temporal del sistema]</td>
+<td>Directorio donde almacenar los archivos de caché</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>file_locking</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            Activa o desactiva file_locking: puede evitar la corrupción de la
+                            caché en circunstancias adversas, pero no ayuda en servidores web
+                            multihilo o en sistemas de archivos <acronym class="acronym">NFS</acronym>...
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>read_control</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            Activa / desactiva el control de lectura: si está activado, se
+                            incrusta una clave de control en el archivo de caché y esta clave se
+                            compara con la calculada tras la lectura.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>read_control_type</em></span></td>
+<td><span class="type">String</span></td>
+<td>'crc32'</td>
+<td>
+                            Tipo de control de lectura (solo si el control de lectura está
+                            activado). Los valores disponibles son: 'md5' (el mejor pero el más
+                            lento), 'crc32' (ligeramente menos seguro pero más rápido, mejor
+                            opción), 'adler32' (nueva opción, más rápida que crc32),
+                            'strlen' para una prueba de solo longitud (el más rápido).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>hashed_directory_level</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Nivel de estructura de directorios con hash: 0 significa "sin
+                            estructura de directorios con hash", 1 significa "un nivel de
+                            directorio", 2 significa "dos niveles"... Esta opción puede acelerar
+                            la caché solo cuando se tienen muchos miles de archivos de caché.
+                            Solo pruebas específicas pueden ayudarle a elegir el valor perfecto
+                            para usted. Quizás, 1 o 2 sea un buen comienzo.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>hashed_directory_perm</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0700</td>
+<td>Permisos para la estructura de directorios con hash</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>file_name_prefix</em></span></td>
+<td><span class="type">String</span></td>
+<td>'zend_cache'</td>
+<td>
+                            prefijo para los archivos de caché; tenga mucho cuidado con esta
+                            opción porque un valor demasiado genérico en un directorio de caché
+                            del sistema (como <code class="filename">/tmp</code>) puede causar
+                            desastres al limpiar la caché
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_file_umask</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0600</td>
+<td>umask para los archivos de caché</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_file_perm</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0600</td>
+<td>Permisos para los archivos de caché</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>metatadatas_array_max_size</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>100</td>
+<td>
+                            tamaño máximo interno para el array de metadatos (no cambie este
+                            valor a menos que sepa lo que está haciendo)
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.sqlite"></a>17.4.2. Zend_Cache_Backend_Sqlite</h3></div></div></div>
+<p>
+            Este backend (extendido) almacena los registros de caché en una base de datos SQLite.
+        </p>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.sqlite.table"></a><p class="title"><b>Tabla 17.7. Opciones del backend Sqlite</b></p>
+<div class="table-contents"><table class="table" summary="Sqlite Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>cache_db_complete_path (obligatorio)</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            La ruta completa (incluido el nombre del archivo) de la base de
+                            datos SQLite
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>automatic_vacuum_factor</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>10</td>
+<td>
+                            Desactiva / ajusta el proceso de vacuum automático. El proceso de
+                            vacuum automático desfragmenta el archivo de la base de datos (y lo
+                            hace más pequeño) cuando se llama a <code class="methodname">clean()</code>
+                            o <code class="methodname">delete()</code>: 0 significa sin vacuum
+                            automático; 1 significa vacuum sistemático (cuando se llama a los
+                            métodos <code class="methodname">delete()</code> o
+                            <code class="methodname">clean()</code>); x (entero) &gt;
+                            1 =&gt; vacuum automático de forma aleatoria 1 vez de cada x
+                            llamadas a <code class="methodname">clean()</code> o
+                            <code class="methodname">delete()</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.memcached"></a>17.4.3. Zend_Cache_Backend_Memcached</h3></div></div></div>
+<p>
+            Este backend (extendido) almacena los registros de caché en un servidor memcached.
+            <a class="ulink" href="http://www.danga.com/memcached/" target="_top">memcached</a> es un
+            sistema de caché de objetos en memoria distribuido de alto rendimiento. Para usar este
+            backend, necesita un demonio memcached y <a class="ulink" href="http://pecl.php.net/package/memcache" target="_top">la extensión
+                <acronym class="acronym">PECL</acronym> memcache</a>.
+        </p>
+<p>
+            Tenga cuidado: con este backend, las "tags" no son compatibles por el momento, como
+            tampoco el argumento "doNotTestCacheValidity=true".
+        </p>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.memcached.table"></a><p class="title"><b>Tabla 17.8. Opciones del backend Memcached</b></p>
+<div class="table-contents"><table class="table" summary="Memcached Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>servers</em></span></td>
+<td><span class="type">Array</span></td>
+<td>
+                            <span class="command"><strong>array(array('host' =&gt; 'localhost', 'port' =&gt; 11211,
+                                'persistent' =&gt; true, 'weight' =&gt; 1, 'timeout' =&gt; 5,
+                                'retry_interval' =&gt; 15, 'status' =&gt; true,
+                                'failure_callback' =&gt; '' ))</strong></span>
+                        </td>
+<td>
+                            Un array de servidores memcached; cada servidor memcached se describe
+                            mediante un array asociativo: 'host' =&gt; (string): el nombre del
+                            servidor memcached, 'port' =&gt; (int): el puerto del servidor
+                            memcached, 'persistent' =&gt; (bool): usar o no conexiones persistentes
+                            a este servidor memcached, 'weight' =&gt; (int): el peso del servidor
+                            memcached, 'timeout' =&gt; (int): el tiempo de espera del servidor
+                            memcached, 'retry_interval' =&gt; (int): el intervalo de reintento del
+                            servidor memcached, 'status' =&gt; (bool): el estado del servidor
+                            memcached, 'failure_callback' =&gt; (callback): el failure_callback del
+                            servidor memcached
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>compression</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            <code class="constant">TRUE</code> si desea usar compresión al vuelo
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>compatibility</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            <code class="constant">TRUE</code> si desea usar este modo de compatibilidad
+                            con servidores o extensiones memcache antiguos
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.libmemcached"></a>17.4.4. Zend_Cache_Backend_Libmemcached</h3></div></div></div>
+<p>
+            Este backend (extendido) almacena los registros de caché en un servidor memcached.
+            <a class="ulink" href="http://www.danga.com/memcached/" target="_top">memcached</a> es un
+            sistema de caché de objetos en memoria distribuido de alto rendimiento. Para usar este
+            backend, necesita un demonio memcached y <a class="ulink" href="http://pecl.php.net/package/memcached" target="_top">la extensión
+                <acronym class="acronym">PECL</acronym> memcached</a>.
+        </p>
+<p>
+            Tenga cuidado: con este backend, las "tags" no son compatibles por el momento, como
+            tampoco el argumento "doNotTestCacheValidity=true".
+        </p>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.libmemcached.table"></a><p class="title"><b>Tabla 17.9. Opciones del backend Libmemcached</b></p>
+<div class="table-contents"><table class="table" summary="Libmemcached Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>servers</em></span></td>
+<td><span class="type">Array</span></td>
+<td>
+                            <span class="command"><strong>array(array('host' =&gt; 'localhost', 'port' =&gt; 11211,
+                            'weight' =&gt; 1))</strong></span>
+                        </td>
+<td>
+                            Un array de servidores memcached; cada servidor memcached se describe
+                            mediante un array asociativo:
+                            'host' =&gt; (string): el nombre del servidor memcached,
+                            'port' =&gt; (int): el puerto del servidor memcached,
+                            'weight' =&gt; (int): el peso del servidor memcached
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>client</em></span></td>
+<td><span class="type">Array</span></td>
+<td>
+                            <span class="command"><strong>array(
+                                Memcached::OPT_DISTRIBUTION =&gt; Memcached::DISTRIBUTION_CONSISTENT,
+                                Memcached::OPT_HASH =&gt; Memcached::HASH_MD5,
+                                Memcached::OPT_LIBKETAMA_COMPATIBLE =&gt; true
+                            )</strong></span>
+                        </td>
+<td>
+                            Un array asociativo de opciones del cliente memcached;
+                            la clave del array puede ser el nombre de la constante de opción
+                            memcached (sin 'OPT_') o su valor entero.
+                            Vea <a class="ulink" href="http://php.net/manual/memcached.constants.php" target="_top">
+                                las constantes de Memcached en el manual de <acronym class="acronym">PHP</acronym></a>
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.apc"></a>17.4.5. Zend_Cache_Backend_Apc</h3></div></div></div>
+<p>
+            Este backend (extendido) almacena los registros de caché en memoria compartida a través
+            de la extensión <a class="ulink" href="http://pecl.php.net/package/APC" target="_top">APC</a>
+            (Alternative <acronym class="acronym">PHP</acronym> Cache) (la cual es, por supuesto,
+            necesaria para usar este backend).
+        </p>
+<p>
+            Tenga cuidado: con este backend, las "tags" no son compatibles por el momento, como
+            tampoco el argumento "doNotTestCacheValidity=true".
+        </p>
+<p>
+            No hay opciones para este backend.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.xcache"></a>17.4.6. Zend_Cache_Backend_Xcache</h3></div></div></div>
+<p>
+            Este backend almacena los registros de caché en memoria compartida a través de la
+            extensión <a class="ulink" href="http://xcache.lighttpd.net/" target="_top">XCache</a>
+            (la cual es, por supuesto, necesaria para usar este backend).
+        </p>
+<p>
+            Tenga cuidado: con este backend, las "tags" no son compatibles por el momento, como
+            tampoco el argumento "doNotTestCacheValidity=true".
+        </p>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.xcache.table"></a><p class="title"><b>Tabla 17.10. Opciones del backend Xcache</b></p>
+<div class="table-contents"><table class="table" summary="Xcache Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>user</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            <code class="filename">xcache.admin.user</code>, necesario para el
+                            método <code class="methodname">clean()</code>
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>password</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            <code class="filename">xcache.admin.pass</code> (en texto claro, no
+                            <acronym class="acronym">MD5</acronym>), necesario para el
+                            método <code class="methodname">clean()</code>
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.platform"></a>17.4.7. Zend_Cache_Backend_ZendPlatform</h3></div></div></div>
+<p>
+            Este backend utiliza la <acronym class="acronym">API</acronym> de caché de contenido del
+            producto <a class="ulink" href="http://www.zend.com/en/products/platform/" target="_top">Zend Platform</a>.
+            Naturalmente, para usar este backend necesita tener instalado Zend Platform.
+        </p>
+<p>
+            Este backend admite tags, pero no admite el modo de limpieza
+            <code class="constant">CLEANING_MODE_NOT_MATCHING_TAG</code>.
+        </p>
+<p>
+            Especifique este backend usando un separador de palabras -- '-', '.', ' ', o '_'
+            -- entre las palabras 'Zend' y 'Platform' al usar el método
+            <code class="methodname">Zend_Cache::factory()</code>:
+        </p>
+<pre class="programlisting">
+$cache = Zend_Cache::factory('Core', 'Zend Platform');
+</pre>
+<p>
+            No hay opciones para este backend.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.twolevels"></a>17.4.8. Zend_Cache_Backend_TwoLevels</h3></div></div></div>
+<p>
+            Este backend (extendido) es un híbrido. Almacena los registros de caché en otros dos
+            backends: uno rápido (pero limitado) como Apc, Memcache... y uno "lento" como File,
+            Sqlite...
+        </p>
+<p>
+            Este backend utilizará el parámetro de prioridad (dado a nivel del frontend al
+            almacenar un registro) y el espacio restante en el backend rápido para optimizar el
+            uso de estos dos backends.
+        </p>
+<p>
+            Especifique este backend usando un separador de palabras -- '-', '.', ' ', o '_'
+            -- entre las palabras 'Two' y 'Levels' al usar el método
+            <code class="methodname">Zend_Cache::factory()</code>:
+        </p>
+<pre class="programlisting">
+$cache = Zend_Cache::factory('Core', 'Two Levels');
+</pre>
+<p>
+            Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.cache.backends.twolevels.table"></a><p class="title"><b>Tabla 17.11. Opciones del backend TwoLevels</b></p>
+<div class="table-contents"><table class="table" summary="TwoLevels Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>slow_backend</em></span></td>
+<td><span class="type">String</span></td>
+<td>File</td>
+<td>el nombre del backend "lento"</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>fast_backend</em></span></td>
+<td><span class="type">String</span></td>
+<td>Apc</td>
+<td>el nombre del backend "rápido"</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>slow_backend_options</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>las opciones del backend "lento"</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>fast_backend_options</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>las opciones del backend "rápido"</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>slow_backend_custom_naming</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            si es <code class="constant">TRUE</code>, el argumento slow_backend se usa como
+                            un nombre de clase completo; si es <code class="constant">FALSE</code>,
+                            el argumento del frontend se usa como el final del nombre de clase
+                            "<code class="classname">Zend_Cache_Backend_</code>[...]"
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>fast_backend_custom_naming</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            si es <code class="constant">TRUE</code>, el argumento fast_backend se usa como
+                            un nombre de clase completo; si es <code class="constant">FALSE</code>,
+                            el argumento del frontend se usa como el final del nombre de clase
+                            "<code class="classname">Zend_Cache_Backend_</code>[...]"
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>slow_backend_autoload</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            si es <code class="constant">TRUE</code>, no habrá require_once para el
+                            backend lento (útil solo para backends personalizados)
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>fast_backend_autoload</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            si es <code class="constant">TRUE</code>, no habrá require_once para el
+                            backend rápido (útil solo para backends personalizados)
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>auto_refresh_fast_cache</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            si es <code class="constant">TRUE</code>, refresca automáticamente la caché
+                            rápida cuando se acierta un registro de caché
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>stats_update_factor</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>10</td>
+<td>
+                            desactiva / ajusta el cálculo del porcentaje de llenado del backend
+                            rápido (al guardar un registro en caché, el cálculo del porcentaje de
+                            llenado del backend rápido se realiza de forma aleatoria 1 vez de
+                            cada x escrituras de caché)
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.zendserver"></a>17.4.9. Zend_Cache_Backend_ZendServer_Disk y Zend_Cache_Backend_ZendServer_ShMem</h3></div></div></div>
+<p>
+            Estos backends almacenan los registros de caché utilizando la funcionalidad de caché
+            de <a class="ulink" href="http://www.zend.com/en/products/server/downloads-all?zfs=zf_download" target="_top">Zend
+                Server</a>.
+        </p>
+<p>
+             Tenga cuidado: con estos backends, las "tags" no son compatibles por el momento, como
+             tampoco el argumento "doNotTestCacheValidity=true".
+        </p>
+<p>
+             Estos backends solo funcionan dentro del entorno de Zend Server para páginas
+             solicitadas a través de <acronym class="acronym">HTTP</acronym> o <acronym class="acronym">HTTPS</acronym>
+             y no funcionan para la ejecución de scripts en línea de comandos
+        </p>
+<p>
+            Especifique este backend usando el parámetro <span class="emphasis"><em>customBackendNaming</em></span>
+            como <code class="constant">TRUE</code> al usar el método
+            <code class="methodname">Zend_Cache::factory()</code>:
+        </p>
+<pre class="programlisting">
+$cache = Zend_Cache::factory('Core', 'Zend_Cache_Backend_ZendServer_Disk',
+                             $frontendOptions, $backendOptions, false, true);
+</pre>
+<p>
+            No hay opciones para este backend.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.backends.static"></a>17.4.10. Zend_Cache_Backend_Static</h3></div></div></div>
+<p>
+            Este backend funciona junto con <code class="classname">Zend_Cache_Frontend_Capture</code>
+            (los dos deben usarse conjuntamente) para guardar la salida de las peticiones como
+            archivos estáticos. Esto significa que los archivos estáticos se sirven directamente
+            en peticiones posteriores sin ninguna intervención de <acronym class="acronym">PHP</acronym>
+            o de Zend Framework.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    <code class="classname">Zend_Cache_Frontend_Capture</code> opera
+                    registrando una función de callback que se llama
+                    cuando se limpia el buffer de salida que utiliza. Para que esto funcione
+                    correctamente, debe ser el buffer de salida final de la petición. Para
+                    garantizar esto, el buffering de salida usado por el Dispatcher
+                    <span class="emphasis"><em>debe</em></span> desactivarse llamando al método
+                    <code class="methodname">setParam()</code> de <code class="classname">Zend_Controller_Front</code>,
+                    por ejemplo,
+                    <span class="command"><strong>$front-&gt;setParam('disableOutputBuffering', true);</strong></span> o
+                    añadiendo "resources.frontcontroller.params.disableOutputBuffering = true"
+                    a su archivo de configuración del bootstrap (asumiendo <acronym class="acronym">INI</acronym>)
+                    si utiliza <code class="classname">Zend_Application</code>.
+                </p></td></tr>
+</table></div>
+<p>
+            Los beneficios de esta caché incluyen un gran aumento del rendimiento, ya que
+            todas las peticiones posteriores devuelven el archivo estático y no necesitan
+            ningún procesamiento dinámico. Por supuesto, esto también tiene algunas
+            desventajas. La única forma de volver a intentar la petición dinámica es purgar
+            el archivo cacheado desde algún otro lugar de la aplicación (o mediante un
+            cronjob si está temporizado). También está restringido a aplicaciones de un
+            único servidor donde solo se usa un sistema de archivos. Sin embargo, puede ser
+            un medio poderoso para obtener más rendimiento sin incurrir en el coste de un
+            proxy en máquinas únicas.
+        </p>
+<p>
+            Antes de describir sus opciones, debe tener en cuenta que esto necesita algunos
+            cambios en el archivo <code class="filename">.htaccess</code> predeterminado para que
+            las peticiones se dirijan a los archivos estáticos si existen. Aquí tiene un
+            ejemplo de una aplicación sencilla que cachea contenido, incluyendo dos feeds
+            específicos que necesitan tratamiento adicional para servir una cabecera
+            Content-Type correcta:
+        </p>
+<pre class="programlisting">
+AddType application/rss+xml .xml
+AddType application/atom+xml .xml
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} feed/rss$
+RewriteCond %{DOCUMENT_ROOT}/cached/%{REQUEST_URI}.xml -f
+RewriteRule .* cached/%{REQUEST_URI}.xml [L,T=application/rss+xml]
+
+RewriteCond %{REQUEST_URI} feed/atom$
+RewriteCond %{DOCUMENT_ROOT}/cached/%{REQUEST_URI}.xml -f
+RewriteRule .* cached/%{REQUEST_URI}.xml [L,T=application/atom+xml]
+
+RewriteCond %{DOCUMENT_ROOT}/cached/index.html -f
+RewriteRule ^/*$ cached/index.html [L]
+RewriteCond %{DOCUMENT_ROOT}/cached/%{REQUEST_URI}.(html|xml|json|opml|svg) -f
+RewriteRule .* cached/%{REQUEST_URI}.%1 [L]
+
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+
+RewriteRule ^.*$ index.php [NC,L]
+</pre>
+<p>
+            Lo anterior asume que los archivos estáticos se cachean en el directorio
+            <code class="filename">./public/cached</code>. Cubriremos la opción que configura esta
+            ubicación, "public_dir", más adelante.
+        </p>
+<p>
+            Debido a la naturaleza del cacheo de archivos estáticos, la clase del backend
+            ofrece dos métodos adicionales: <code class="methodname">remove()</code> y
+            <code class="methodname">removeRecursively()</code>. Ambos aceptan una
+            <acronym class="acronym">URI</acronym> de petición que, cuando se mapea al "public_dir" donde se
+            cachean los archivos estáticos, y tiene añadida una extensión previamente
+            almacenada, proporciona el nombre de un archivo estático a eliminar, o una ruta
+            de directorio a eliminar recursivamente. Debido a las restricciones de
+            <code class="classname">Zend_Cache_Backend_Interface</code>, todos los demás métodos como
+            <code class="methodname">save()</code> aceptan un ID que se calcula aplicando
+            <code class="methodname">bin2hex()</code> a una <acronym class="acronym">URI</acronym> de petición.
+        </p>
+<p>
+            Dado el nivel en el que opera el cacheo estático, este se aborda para un uso más
+            sencillo con el helper de acción <code class="classname">Zend_Controller_Action_Helper_Cache</code>.
+            Este helper ayuda a establecer qué acciones de un controlador cachear, con qué
+            tags y con qué extensión. También ofrece métodos para purgar la caché por
+            <acronym class="acronym">URI</acronym> de petición o por tag. El cacheo de archivos estáticos también
+            se ve asistido por <code class="classname">Zend_Cache_Manager</code>, que incluye
+            plantillas de configuración preconfiguradas para una caché estática (como
+            <code class="constant">Zend_Cache_Manager::PAGECACHE</code> o "page"). Los valores
+            predeterminados de estas pueden configurarse según sea necesario para establecer
+            una ubicación "public_dir" para el cacheo, etc.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Debe tenerse en cuenta que la caché estática en realidad utiliza una caché
+                secundaria para almacenar los tags (obviamente no podemos almacenarlos en
+                otro lugar ya que una caché estática no invoca <acronym class="acronym">PHP</acronym> si
+                funciona correctamente). Esta es simplemente una caché Core estándar, y debería
+                usar un backend persistente como File o TwoLevels (para aprovechar el
+                almacenamiento en memoria sin sacrificar la persistencia permanente). El
+                backend incluye la opción "tag_cache" para configurar esto (es obligatoria), o
+                el método <code class="methodname">setInnerCache()</code>.
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.cache.backends.static.table"></a><p class="title"><b>Tabla 17.12. Opciones del backend Static</b></p>
+<div class="table-contents"><table class="table" summary="Static Backend Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>public_dir</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            Directorio donde almacenar los archivos estáticos. Este debe existir
+                            en su directorio público.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>file_locking</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            Activa o desactiva file_locking: puede evitar la corrupción de la
+                            caché en circunstancias adversas, pero no ayuda en servidores web
+                            multihilo o en sistemas de archivos <acronym class="acronym">NFS</acronym>...
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>read_control</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            Activa / desactiva el control de lectura: si está activado, se
+                            incrusta una clave de control en el archivo de caché y esta clave se
+                            compara con la calculada tras la lectura.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>read_control_type</em></span></td>
+<td><span class="type">String</span></td>
+<td>'crc32'</td>
+<td>
+                            Tipo de control de lectura (solo si el control de lectura está
+                            activado). Los valores disponibles son: 'md5' (el mejor pero el más
+                            lento), 'crc32' (ligeramente menos seguro pero más rápido, mejor
+                            opción), 'adler32' (nueva opción, más rápida que crc32),
+                            'strlen' para una prueba de solo longitud (el más rápido).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_file_umask</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0600</td>
+<td>umask para los archivos cacheados.</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cache_directory_umask</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0700</td>
+<td>Umask para los directorios creados dentro de public_dir.</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>file_extension</em></span></td>
+<td><span class="type">String</span></td>
+<td>'<code class="filename">.html</code>'</td>
+<td>
+                            Extensión de archivo predeterminada para los archivos estáticos
+                            creados. Esto se puede configurar sobre la marcha, vea
+                            <code class="methodname">Zend_Cache_Backend_Static::save()</code> aunque en
+                            general se recomienda confiar en
+                            <code class="classname">Zend_Controller_Action_Helper_Cache</code> al
+                            hacerlo, ya que es más sencillo así que manipular arrays o la
+                            serialización manualmente.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>index_filename</em></span></td>
+<td><span class="type">String</span></td>
+<td>'index'</td>
+<td>
+                            Si una <acronym class="acronym">URI</acronym> de petición no contiene información
+                            suficiente para construir un archivo estático (normalmente esto
+                            significa una llamada de índice, por ejemplo,
+                            <acronym class="acronym">URI</acronym> igual a '/'), se usa index_filename en su
+                            lugar. Así, '' o '/' se mapearía a
+                            '<code class="filename">index.html</code>' (asumiendo que la file_extension
+                            predeterminada es '<code class="filename">.html</code>').
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>tag_cache</em></span></td>
+<td><span class="type">Object</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                            Se usa para establecer una caché 'interna' utilizada para almacenar
+                            tags y extensiones de archivo asociadas a archivos estáticos.
+                            Esta <span class="emphasis"><em>debe</em></span> establecerse o la caché estática
+                            no podrá rastrearse y gestionarse.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>disable_caching</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                            Si se establece en <code class="constant">TRUE</code>, los archivos estáticos
+                            no se cachearán. Esto forzará que todas las peticiones sean
+                            dinámicas aunque estén marcadas para cachearse en los Controladores.
+                            Útil para depuración.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cache.frontends.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cache.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cache.cache.manager.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">17.3. Zend_Cache Frontends </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 17.5. The Cache Manager</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

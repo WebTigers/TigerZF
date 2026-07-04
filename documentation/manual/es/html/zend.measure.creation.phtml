@@ -1,0 +1,138 @@
+<?php $title = '47.2. Creación de medidas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">47.2. Creación de medidas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.measure.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 47. Zend_Measure</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.measure.output.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.measure.creation"></a>47.2. Creación de medidas</h2></div></div></div>
+<p>
+        Al crear un objeto de medida, los métodos <code class="classname">Zend_Measure_*</code> esperan el
+        valor del dato de medida de entrada/original como primer parámetro. Esto puede ser un
+        <a class="link" href="zend.measure.creation.phtml#zend.measure.creation.number" title="47.2.1. Creating measurements from integers and floats">argumento numérico</a>, una
+        <a class="link" href="zend.measure.creation.phtml#zend.measure.creation.string" title="47.2.2. Creating measurements from strings"><span class="type">String</span></a> sin unidades, o una
+        <a class="link" href="zend.measure.creation.phtml#zend.measure.creation.localized" title="47.2.3. Measurements from localized strings">cadena localizada con unidad(es)
+            especificada(s).</a> El segundo parámetro define el tipo de medida. Ambos
+        parámetros son obligatorios. El idioma puede especificarse opcionalmente como tercer parámetro.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.creation.number"></a>47.2.1. Creación de medidas a partir de enteros y flotantes</h3></div></div></div>
+<p>
+            Además de valores de datos enteros, se pueden usar tipos de punto flotante, pero
+            <a class="ulink" href="http://www.php.net/float" target="_top">"simple decimal fractions like 0.1 or 0.7 cannot
+                be converted into their internal binary counterparts without a little loss of
+                precision,"</a> a veces dando resultados sorprendentes. Además, no compare dos
+            números de tipo "float" por igualdad.
+        </p>
+<div class="example">
+<a name="zend.measure.creation.number.example-1"></a><p class="title"><b>Ejemplo 47.3. Creación usando valores enteros y de punto flotante</b></p>
+<div class="example-contents"><pre class="programlisting">
+$measurement = 1234.7;
+$unit = new Zend_Measure_Length((integer)$measurement,
+                                Zend_Measure_Length::STANDARD);
+echo $unit;
+// outputs '1234 m' (meters)
+
+$unit = new Zend_Measure_Length($measurement, Zend_Measure_Length::STANDARD);
+echo $unit;
+// outputs '1234.7 m' (meters)
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.creation.string"></a>47.2.2. Creación de medidas a partir de cadenas</h3></div></div></div>
+<p>
+            Muchas medidas recibidas como entrada en aplicaciones de Zend Framework solo pueden pasarse
+            a las clases <code class="classname">Zend_Measure_*</code> como cadenas, como números escritos
+            usando <a class="ulink" href="http://en.wikipedia.org/wiki/Roman_numerals" target="_top">números romanos</a>
+            o valores binarios extremadamente grandes que exceden la precisión de los tipos nativos
+            enteros y de punto flotante de <acronym class="acronym">PHP</acronym>. Dado que los enteros pueden expresarse
+            mediante cadenas, si existe algún riesgo de pérdida de precisión debido a las limitaciones de los tipos
+            nativos enteros y de punto flotante de <acronym class="acronym">PHP</acronym>, use cadenas en su lugar.
+            <code class="classname">Zend_Measure_Number</code> utiliza la extensión BCMath para admitir
+            precisión arbitraria, como se muestra en el ejemplo siguiente, para evitar limitaciones en muchas
+            funciones de <acronym class="acronym">PHP</acronym>, como <a class="ulink" href="http://php.net/bin2dec" target="_top"><code class="methodname">bin2dec()</code></a>.
+        </p>
+<div class="example">
+<a name="zend.measure.creation.string.example-1"></a><p class="title"><b>Ejemplo 47.4. Creación usando cadenas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$mystring = "10010100111010111010100001011011101010001";
+$unit = new Zend_Measure_Number($mystring, Zend_Measure_Number::BINARY);
+
+echo $unit;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.creation.localized"></a>47.2.3. Medidas a partir de cadenas localizadas</h3></div></div></div>
+<p>
+            Cuando se ingresa una cadena en una notación localizada, la interpretación correcta no puede
+            determinarse sin conocer el idioma o región previstos. La división de dígitos decimales con "."
+            y la agrupación de miles con "," es común en el idioma inglés, pero no en
+            otros idiomas. Por ejemplo, el número en inglés "1,234.50" se interpretaría como
+            "1.2345" en alemán. Para lidiar con estos problemas, la familia de clases
+            <code class="classname">Zend_Measure_*</code>, sensible al idioma, ofrece la posibilidad de especificar
+            un idioma o región para desambiguar los datos de entrada e interpretar correctamente el
+            valor semántico previsto.
+        </p>
+<div class="example">
+<a name="zend.measure.creation.localized.example-1"></a><p class="title"><b>Ejemplo 47.5. Cadena localizada</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de');
+$mystring = "1,234.50";
+$unit = new Zend_Measure_Length($mystring,
+                                Zend_Measure_Length::STANDARD,
+                                $locale);
+echo $unit; // outputs "1.234 m"
+
+$mystring = "1,234.50";
+$unit = new Zend_Measure_Length($mystring,
+                                Zend_Measure_Length::STANDARD,
+                                'en_US');
+echo $unit; // outputs "1234.50 m"
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Desde Zend Framework 1.7.0 <code class="classname">Zend_Measure</code> también admite el
+            uso de un idioma a nivel de aplicación. Simplemente puede establecer una
+            instancia de <code class="classname">Zend_Locale</code> en el registro como se muestra a continuación. Con esta
+            notación puede olvidarse de establecer el idioma manualmente en cada instancia cuando
+            desee usar el mismo idioma varias veces.
+        </p>
+<pre class="programlisting">
+// in your bootstrap file
+$locale = new Zend_Locale('de_AT');
+Zend_Registry::set('Zend_Locale', $locale);
+
+// somewhere in your application
+$length = new Zend_Measure_Length(Zend_Measure_Length::METER();
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.measure.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.measure.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.measure.output.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 47. Zend_Measure </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 47.3. Salida de medidas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

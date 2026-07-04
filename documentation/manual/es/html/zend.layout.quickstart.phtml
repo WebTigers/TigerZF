@@ -1,0 +1,267 @@
+<?php $title = '40.2. Inicio rápido de Zend_Layout'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">40.2. Inicio rápido de Zend_Layout</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.layout.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 40. Zend_Layout</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.layout.options.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.layout.quickstart"></a>40.2. Inicio rápido de Zend_Layout</h2></div></div></div>
+<p>
+        Hay dos casos de uso principales para <code class="classname">Zend_Layout</code>: con el
+        <acronym class="acronym">MVC</acronym> de Zend Framework, y sin él.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.layout.quickstart.layouts"></a>40.2.1. Scripts de diseño</h3></div></div></div>
+<p>
+            En ambos casos, sin embargo, necesitará crear un script de diseño. Los scripts de diseño
+            simplemente utilizan <code class="classname">Zend_View</code> (o cualquier implementación de vista
+            que esté usando). Las variables de diseño se registran con un <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.placeholder" title="78.4.1.6. Placeholder Helper">placeholder</a> de
+            <code class="classname">Zend_Layout</code>,
+            y se puede acceder a ellas a través del ayudante placeholder o obteniéndolas
+            como propiedades de objeto del objeto layout mediante el ayudante layout.
+        </p>
+<p>
+            Como ejemplo:
+        </p>
+<pre class="programlisting">
+&lt;!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
+    &lt;title&gt;My Site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    // fetch 'content' key using layout helper:
+    echo $this-&gt;layout()-&gt;content;
+
+    // fetch 'foo' key using placeholder helper:
+    echo $this-&gt;placeholder('Zend_Layout')-&gt;foo;
+
+    // fetch layout object and retrieve various keys from it:
+    $layout = $this-&gt;layout();
+    echo $layout-&gt;bar;
+    echo $layout-&gt;baz;
+?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+            Debido a que <code class="classname">Zend_Layout</code> utiliza <code class="classname">Zend_View</code> para
+            el renderizado, también puede usar cualquier ayudante de vista registrado, y también
+            tiene acceso a cualquier variable de vista asignada previamente. Son particularmente
+            útiles los diversos <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.placeholder" title="78.4.1.6. Placeholder Helper">ayudantes
+                placeholder</a>, ya que le permiten
+            recuperar contenido para áreas como la sección &lt;head&gt;,
+            la navegación, etc.:
+        </p>
+<pre class="programlisting">
+&lt;!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
+    &lt;?php echo $this-&gt;headTitle() ?&gt;
+    &lt;?php echo $this-&gt;headScript() ?&gt;
+    &lt;?php echo $this-&gt;headStyle() ?&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php echo $this-&gt;render('header.phtml') ?&gt;
+
+    &lt;div id="nav"&gt;&lt;?php echo $this-&gt;placeholder('nav') ?&gt;&lt;/div&gt;
+
+    &lt;div id="content"&gt;&lt;?php echo $this-&gt;layout()-&gt;content ?&gt;&lt;/div&gt;
+
+    &lt;?php echo $this-&gt;render('footer.phtml') ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.layout.quickstart.mvc"></a>40.2.2. Uso de Zend_Layout con el MVC de Zend Framework</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Controller</code> ofrece un rico conjunto de funcionalidades para
+            su extensión a través de sus <a class="link" href="zend.controller.plugins.phtml" title="24.10. Plugins">plugins del
+            controlador frontal</a> y <a class="link" href="zend.controller.actionhelpers.phtml" title="24.8. Action Helpers">ayudantes de
+            controlador de acción</a>. <code class="classname">Zend_View</code> también tiene <a class="link" href="zend.view.helpers.phtml" title="78.4. View Helpers">ayudantes</a>. <code class="classname">Zend_Layout</code>
+            aprovecha estos diversos puntos de extensión cuando se usa con los componentes
+            <acronym class="acronym">MVC</acronym>.
+        </p>
+<p>
+            <code class="methodname">Zend_Layout::startMvc()</code> crea una instancia de
+            <code class="classname">Zend_Layout</code> con cualquier configuración opcional que
+            proporcione. Luego registra un plugin de controlador frontal que renderiza el
+            diseño con cualquier contenido de la aplicación una vez que el bucle de dispatch ha
+            terminado, y registra un ayudante de acción para permitir el acceso al objeto layout
+            desde sus controladores de acción. Además, en cualquier momento puede obtener
+            la instancia de diseño desde dentro de un script de vista usando el
+            ayudante de vista <code class="classname">Layout</code>.
+        </p>
+<p>
+            Primero, veamos cómo inicializar <code class="classname">Zend_Layout</code> para usarlo con
+            el <acronym class="acronym">MVC</acronym>:
+        </p>
+<pre class="programlisting">
+// In your bootstrap:
+Zend_Layout::startMvc();
+</pre>
+<p>
+            <code class="methodname">startMvc()</code> puede recibir un array opcional de opciones o un
+            objeto <code class="classname">Zend_Config</code> para personalizar la instancia; estas
+            opciones se detallan en <a class="link" href="zend.layout.options.phtml" title="40.3. Zend_Layout Configuration Options">esta sección</a>.
+        </p>
+<p>
+            En un controlador de acción, puede entonces acceder a la instancia de layout como
+            un ayudante de acción:
+        </p>
+<pre class="programlisting">
+class FooController extends Zend_Controller_Action
+{
+    public function barAction()
+    {
+        // disable layouts for this action:
+        $this-&gt;_helper-&gt;layout-&gt;disableLayout();
+    }
+
+    public function bazAction()
+    {
+        // use different layout script with this action:
+        $this-&gt;_helper-&gt;layout-&gt;setLayout('foobaz');
+    };
+}
+</pre>
+<p>
+            En sus scripts de vista, puede entonces acceder al objeto layout a través del
+            ayudante de vista <code class="classname">Layout</code>. Este ayudante de vista es ligeramente
+            diferente de otros en que no toma argumentos, y devuelve un
+            objeto en lugar de un valor de tipo cadena. Esto le permite llamar
+            inmediatamente a métodos sobre el objeto layout:
+        </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;layout()-&gt;setLayout('foo'); // set alternate layout ?&gt;
+</pre>
+<p>
+            En cualquier momento, puede obtener la instancia de <code class="classname">Zend_Layout</code>
+            registrada con el <acronym class="acronym">MVC</acronym> mediante el método estático
+            <code class="methodname">getMvcInstance()</code>:
+        </p>
+<pre class="programlisting">
+// Returns null if startMvc() has not first been called
+$layout = Zend_Layout::getMvcInstance();
+</pre>
+<p>
+            Finalmente, el plugin de controlador frontal de <code class="classname">Zend_Layout</code> tiene una
+            característica importante además de renderizar el diseño: recupera
+            todos los segmentos con nombre del objeto respuesta y los asigna como
+            variables de layout, asignando el segmento 'default' a la variable
+            'content'. Esto le permite acceder al contenido de su aplicación y
+            renderizarlo en sus scripts de vista.
+        </p>
+<p>
+            Como ejemplo, supongamos que su código primero llega a
+            <code class="methodname">FooController::indexAction()</code>, que renderiza algo de
+            contenido al segmento de respuesta por defecto, y luego reenvía a
+            <code class="methodname">NavController::menuAction()</code>, que renderiza contenido al
+            segmento de respuesta 'nav'. Finalmente, reenvía a
+            <code class="methodname">CommentController::fetchAction()</code> y obtiene algunos
+            comentarios, pero los renderiza también al segmento de respuesta por defecto
+            (lo que añade contenido a ese segmento). Su script de vista podría entonces
+            renderizar cada uno por separado:
+        </p>
+<pre class="programlisting">
+&lt;body&gt;
+    &lt;!-- renders /nav/menu --&gt;
+    &lt;div id="nav"&gt;&lt;?php echo $this-&gt;layout()-&gt;nav ?&gt;&lt;/div&gt;
+
+    &lt;!-- renders /foo/index + /comment/fetch --&gt;
+    &lt;div id="content"&gt;&lt;?php echo $this-&gt;layout()-&gt;content ?&gt;&lt;/div&gt;
+&lt;/body&gt;
+</pre>
+<p>
+            Esta característica es particularmente útil cuando se usa en conjunto con
+            el ayudante de acción <a class="link" href="zend.controller.actionhelpers.phtml#zend.controller.actionhelpers.actionstack" title="24.8.4.1. ActionStack">ActionStack</a>
+            y el <a class="link" href="zend.controller.plugins.phtml#zend.controller.plugins.standard.actionstack" title="24.10.5.1. ActionStack">plugin</a>,
+            que puede usar para configurar una pila de acciones a través de las
+            cuales iterar, y así crear páginas basadas en widgets.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.layout.quickstart.standalone"></a>40.2.3. Uso de Zend_Layout como componente independiente</h3></div></div></div>
+<p>
+            Como componente independiente, <code class="classname">Zend_Layout</code> no ofrece tantas
+            características ni tanta comodidad como cuando se usa con el <acronym class="acronym">MVC</acronym>.
+            Sin embargo, todavía tiene dos beneficios principales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Ámbito de las variables de layout.</p></li>
+<li class="listitem"><p>Aislamiento del script de vista de layout respecto a otros scripts de vista.</p></li>
+</ul></div>
+<p>
+            Cuando se usa como componente independiente, simplemente instancie el objeto
+            layout, use los diversos accesores para establecer el estado, establezca variables como
+            propiedades del objeto, y renderice el layout:
+        </p>
+<pre class="programlisting">
+$layout = new Zend_Layout();
+
+// Set a layout script path:
+$layout-&gt;setLayoutPath('/path/to/layouts');
+
+// set some variables:
+$layout-&gt;content = $content;
+$layout-&gt;nav     = $nav;
+
+// choose a different layout script:
+$layout-&gt;setLayout('foo');
+
+// render final layout
+echo $layout-&gt;render();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.layout.quickstart.example"></a>40.2.4. Ejemplo de diseño</h3></div></div></div>
+<p>
+            A veces una imagen vale más que mil palabras. Lo siguiente es un
+            script de diseño de ejemplo que muestra cómo podría encajar todo.
+        </p>
+<p>
+            <img src="figures/zend.layout.quickstart.example.png" align="middle">
+        </p>
+<p>
+            El orden real de los elementos puede variar, dependiendo del <acronym class="acronym">CSS</acronym> que haya
+            configurado; por ejemplo, si está usando posicionamiento absoluto, puede
+            ser capaz de mostrar la navegación más adelante en el documento, pero
+            aun así aparecer en la parte superior; lo mismo podría decirse de la barra lateral o el
+            encabezado. Sin embargo, la mecánica real de obtener el contenido sigue siendo la misma.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.layout.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.layout.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.layout.options.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 40. Zend_Layout </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 40.3. Opciones de configuración de Zend_Layout</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

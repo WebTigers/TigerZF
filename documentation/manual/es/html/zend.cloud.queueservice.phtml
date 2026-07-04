@@ -1,0 +1,522 @@
+<?php $title = '19.2. Introducción a Queue Service'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">19.2. Introducción a Queue Service</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cloud.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 19. API SimpleCloud: Zend_Cloud</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cloud.storageservice.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cloud.queueservice"></a>19.2. Introducción a Queue Service</h2></div></div></div>
+<p>
+        QueueService implementa el acceso a colas de mensajes disponibles como servicios locales o remotos.
+        Las colas simples que soporta QueueService implementan un patrón de mensajería que permite que
+        diferentes procesos intercambien mensajes de forma fiable y escalable. Un caso de uso común
+        para dichas colas de mensajes es el despacho de trabajos, en el que un servidor web frontend añade un
+        trabajo complejo a una cola para que un worker backend realice el procesamiento costoso. El servidor
+        web frontend puede entonces devolver la página sin esperar a que se complete el trabajo.
+    </p>
+<p>
+        La interfaz <code class="classname">Zend_Cloud_QueueService_Adapter</code> define los métodos
+        que deben implementar los adaptadores concretos de servicios de cola. Los siguientes adaptadores se
+        distribuyen con la Simple Cloud API:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <a class="ulink" href="http://aws.amazon.com/sqs/" target="_top"><code class="classname">Zend_Cloud_QueueService_Adapter_Sqs</code></a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="ulink" href="http://msdn.microsoft.com/en-us/library/dd179363.aspx" target="_top"><code class="classname">Zend_Cloud_QueueService_Adapter_WindowsAzure</code></a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="ulink" href="http://aws.amazon.com/sqs/" target="_top"><code class="classname">Zend_Cloud_QueueService_Adapter_ZendQueue</code></a>
+            </p></li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.adapters"></a>19.2.1. Instanciar y configurar adaptadores de QueueService</h3></div></div></div>
+<p>
+            Para instanciar un adaptador de QueueService, use el método estático
+            <code class="methodname">Zend_Cloud_QueueService_Factory::getAdapter()</code>, que acepta
+            un array o un objeto <code class="classname">Zend_Config</code>. Tres parámetros se aplican
+            a todos los adaptadores, mientras que el resto de
+            parámetros son propiedades específicas del adaptador; estas propiedades específicas del adaptador a menudo
+            contienen detalles de acceso.
+        </p>
+<p>
+            Los parámetros generales son los siguientes:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="varname">queue_adapter</code> especifica la clase de adaptador concreta;</p></li>
+<li class="listitem"><p>
+                    <code class="varname">message_class</code> especifica la clase a usar para
+                    representar los mensajes de la cola; por defecto es
+                    <code class="classname">Zend_Cloud_QueueService_Message</code>; y
+                </p></li>
+<li class="listitem"><p>
+                    <code class="varname">messageset_class</code> especifica la clase a usar
+                    para representar colecciones de mensajes de la cola; por defecto es
+                    <code class="classname">Zend_Cloud_QueueService_MesageSet</code>.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.cloud.queueservice.factory.example"></a><p class="title"><b>Ejemplo 19.17. Instanciar un adaptador de Amazon SQS mediante la fábrica</b></p>
+<div class="example-contents"><pre class="programlisting">
+$queues = Zend_Cloud_QueueService_Factory::getAdapter(array(
+    Zend_Cloud_QueueService_Factory::QUEUE_ADAPTER_KEY  =&gt; 'Zend_Cloud_QueueService_Adapter_Sqs',
+    Zend_Cloud_QueueService_Adapter_Sqs::AWS_ACCESS_KEY =&gt; $amazonKey,
+    Zend_Cloud_QueueService_Adapter_Sqs::AWS_SECRET_KEY =&gt; $amazonSecret,
+));
+</pre></div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cloud.queueservice.adapters.options"></a>19.2.1.1. Opciones específicas del servicio</h4></div></div></div>
+<div class="table">
+<a name="zend.cloud.queueservice.adapters.options.sqs"></a><p class="title"><b>Tabla 19.4. Opciones de Zend_Cloud_QueueService_Adapter_Sqs</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_QueueService_Adapter_Sqs Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>aws_accesskey</td>
+<td>Su clave de acceso de Amazon AWS</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>aws_secretkey</td>
+<td>Su clave secreta de Amazon AWS</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>http_adapter</td>
+<td>Adaptador HTTP a usar en todas las operaciones de acceso</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="classname">Zend_Http_Client_Adapter_Socket</code></td>
+</tr>
+<tr>
+<td>http_adapter</td>
+<td>Adaptador HTTP a usar en todas las operaciones de acceso</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="classname">Zend_Http_Client_Adapter_Socket</code></td>
+</tr>
+<tr>
+<td>visibility_timeout</td>
+<td>Tiempo de espera de visibilidad del mensaje</td>
+<td><code class="methodname">receiveMessages()</code></td>
+<td>No</td>
+<td>60</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.cloud.queueservice.adapters.options.azure"></a><p class="title"><b>Tabla 19.5. Opciones de Zend_Cloud_QueueService_Adapter_WindowsAzure</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_QueueService_Adapter_WindowsAzure Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>storage_accountname</td>
+<td>Nombre de la cuenta de Windows Azure</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_accountkey</td>
+<td>Clave de la cuenta de Windows Azure</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_host</td>
+<td>Host de acceso de Windows Azure</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="varname">queue.core.windows.net</code></td>
+</tr>
+<tr>
+<td>storage_proxy_host</td>
+<td>Nombre de host del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_proxy_port</td>
+<td>Puerto del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>8080</td>
+</tr>
+<tr>
+<td>storage_proxy_credentials</td>
+<td>Credenciales del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>http_adapter</td>
+<td>Adaptador HTTP a usar en todas las operaciones de acceso</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="classname">Zend_Http_Client_Adapter_Socket</code></td>
+</tr>
+<tr>
+<td>visibility_timeout</td>
+<td>Tiempo de espera de visibilidad del mensaje</td>
+<td><code class="methodname">receiveMessages()</code></td>
+<td>No</td>
+<td>60</td>
+</tr>
+<tr>
+<td>prefix</td>
+<td>
+                                Filtra los resultados para incluir solo los nombres de cola que comiencen con el prefijo dado
+                            </td>
+<td><code class="methodname">listQueues()</code></td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>max_results</td>
+<td>Limita la lista de colas a un cierto número de resultados</td>
+<td><code class="methodname">listQueues()</code></td>
+<td>No</td>
+<td>5.000</td>
+</tr>
+<tr>
+<td>ttl</td>
+<td>Establece el tiempo de vida (time-to-live) del mensaje</td>
+<td><code class="methodname">sendMessage()</code></td>
+<td>No</td>
+<td>7 días</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.cloud.queueservice.adapters.options.zend-queue"></a><p class="title"><b>Tabla 19.6. Opciones de Zend_Cloud_QueueService_Adapter_ZendQueue</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_QueueService_Adapter_ZendQueue Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>adapter</td>
+<td>
+                                Adaptador concreto de <code class="classname">Zend_Queue</code> a usar. Vea la
+                                documentación de <a class="link" href="zend.queue.phtml" title="Chapter 57. Zend_Queue">Zend_Queue</a> para conocer los
+                                adaptadores soportados y sus opciones.</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Filesystem</td>
+</tr>
+<tr>
+<td>timeout</td>
+<td>Tiempo de espera de visibilidad para los mensajes</td>
+<td>
+                                <code class="methodname">createQueue()</code>,
+                                <code class="methodname">receiveMessages()</code>
+                            </td>
+<td>No</td>
+<td>30</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.concepts"></a>19.2.2. Conceptos básicos</h3></div></div></div>
+<p>
+            Cada servicio de colas normalmente ofrece una o más <span class="emphasis"><em>colas</em></span>. Cada cola
+            puede almacenar cero o más <span class="emphasis"><em>mensajes</em></span>. Un proceso puede enviar un mensaje a una
+            cola, y otro proceso puede eliminarlo. Habitualmente los procesos eliminan el mensaje más antiguo de
+            la cola, siguiendo una interfaz de cola de tipo primero en entrar, primero en salir (FIFO).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.exceptions"></a>19.2.3. Excepciones</h3></div></div></div>
+<p>
+            Si ocurre algún error dentro del servicio de almacenamiento, se lanza una
+            <code class="classname">Zend_Cloud_QueueService_Exception</code>. Si la excepción fue
+            causada por el driver del servicio subyacente, puede usar el método
+            <code class="methodname">getClientException()</code> para recuperar la excepción original.
+        </p>
+<p>
+            Dado que los distintos proveedores de nube implementan diferentes conjuntos de servicios, algunos adaptadores
+            no implementan ciertas funcionalidades. En este caso, se lanza la excepción
+            <code class="classname">Zend_Cloud_OperationNotAvailableException</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.create-queue"></a>19.2.4. Crear una cola</h3></div></div></div>
+<p>
+            El método <code class="methodname">createQueue()</code> crea una cola de mensajes con el nombre
+            indicado. Devuelve un identificador de cola, cuyo formato depende del servicio. Algunos
+            servicios devuelven una URL como identificador de cola, mientras que otros devuelven un GUID a usar en
+            operaciones futuras.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.create-queue.example"></a><p class="title"><b>Ejemplo 19.18. Crear una cola</b></p>
+<div class="example-contents"><pre class="programlisting">
+$queueId = $queues-&gt;createQueue('my-queue');
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.delete-queue"></a>19.2.5. Eliminar una cola</h3></div></div></div>
+<p>
+            El método <code class="methodname">deleteQueue()</code> elimina la cola del servicio.
+            Debe usar el identificador recibido de <code class="methodname">createQueue()</code> al
+            llamar a <code class="methodname">deleteQueue()</code>.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.delete-queue.example"></a><p class="title"><b>Ejemplo 19.19. Eliminar una cola</b></p>
+<div class="example-contents"><pre class="programlisting">
+$queueId = $queues-&gt;createQueue('my-queue');
+
+// ... haga otras cosas ...
+
+$queues-&gt;deleteQueue($queueId);
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Eliminar una cola puede tardar bastante tiempo en algunos servicios. Normalmente, no puede
+                volver a crear una cola con el mismo nombre hasta que la cola original se haya eliminado por completo.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.list"></a>19.2.6. Listar colas</h3></div></div></div>
+<p>
+            Para recuperar la lista de todas las colas del sistema, use el método
+            <code class="methodname">listQueues()</code>.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.list.example"></a><p class="title"><b>Ejemplo 19.20. Listar colas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$names = $queues-&gt;listQueues();
+foreach ($names as $name) {
+    echo "Found queue $name\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.store-metadata"></a>19.2.7. Establecer metadatos de la cola</h3></div></div></div>
+<p>
+            En algunos servicios, puede asociar un conjunto de pares clave-valor a la cola como
+            metadatos de la cola. Para establecer los metadatos de la cola, use el método
+            <code class="methodname">storeQueueMetadata()</code>:
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.store-metadata.example"></a><p class="title"><b>Ejemplo 19.21. Establecer metadatos de la cola</b></p>
+<div class="example-contents"><pre class="programlisting">
+$queues-&gt;storeQueueMetadata($queueId, array(
+    'purpose'       =&gt; 'Operations',
+    'administrator' =&gt; 'joe@example.com',
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.fetch-metadata"></a>19.2.8. Obtener metadatos de la cola</h3></div></div></div>
+<p>
+            Para recuperar los metadatos de la cola, use el método <code class="methodname">fetchQueueMetadata()</code>.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.fetch-metadata.example"></a><p class="title"><b>Ejemplo 19.22. Obtener metadatos de la cola</b></p>
+<div class="example-contents"><pre class="programlisting">
+$metadata = $queues-&gt;fetchQueueMetadata($queueId);
+foreac h($metadata as $key =&gt; $value) {
+    echo "Metadata $key: $value\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.send"></a>19.2.9. Enviar un mensaje</h3></div></div></div>
+<p>
+            Para añadir un mensaje a una cola, use el método <code class="methodname">sendMessage()</code>. El
+            mensaje se pasa como una cadena sin estructurar.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.send.example"></a><p class="title"><b>Ejemplo 19.23. Enviar un mensaje</b></p>
+<div class="example-contents"><pre class="programlisting">
+$queues-&gt;sendMessage($queueId, "Hello world!");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.receive"></a>19.2.10. Recibir un mensaje</h3></div></div></div>
+<p>
+            Para recibir uno o más mensajes de la cola, use el método
+            <code class="methodname">receiveMessages()</code>. Este método devuelve por defecto una instancia de
+            <code class="classname">Zend_Cloud_QueueService_MessageSet</code>, a menos que se
+            configure de otra forma. Cada elemento del MessageSet es, por defecto, una instancia de
+            <code class="classname">Zend_Cloud_QueueService_Message</code>, a menos que se configure
+            de otra forma.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.receive.example"></a><p class="title"><b>Ejemplo 19.24. Recibir un mensaje</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Get the first message
+$messages = $queues-&gt;receiveMessages($queueId);
+if (count($messages)) {
+    foreach ($messages as $message) {
+        echo "Message: " . $message-&gt;getBody();
+        break;
+    }
+}
+
+// Get two messages
+$messages = $queues-&gt;receiveMessages($queueId, 2);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Cuando se recibe un mensaje, no es visible para otros clientes. Sin embargo, no se elimina de
+            la cola hasta que el cliente que ha recibido el mensaje llama al método
+            <code class="methodname">deleteMessage()</code>. Si no se elimina durante el
+            tiempo de espera de visibilidad especificado, volverá a ser visible para el resto de clientes. En otras
+            palabras, todos los clientes podrán recuperar el mensaje con el método
+            <code class="methodname">receiveMessages()</code> si se supera el tiempo de espera de visibilidad.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.delete"></a>19.2.11. Eliminar un mensaje</h3></div></div></div>
+<p>
+            Para eliminar el mensaje de la cola, use el método
+            <code class="methodname">deleteMessage()</code>. Este método elimina el mensaje
+            especificado.
+        </p>
+<div class="example">
+<a name="zend.cloud.queueservice.delete.example"></a><p class="title"><b>Ejemplo 19.25. Eliminar un mensaje</b></p>
+<div class="example-contents"><pre class="programlisting">
+// process and delete $max messages
+$messages = $queues-&gt;receiveMessages($queueId, $max);
+if (count($messages)) {
+    foreach ($messages as $message) {
+        process($message);
+        $queues-&gt;deleteMessage($queueId, $message);
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.queueservice.concreteadapters"></a>19.2.12. Acceder a los adaptadores concretos</h3></div></div></div>
+<p>
+            En ocasiones es necesario recuperar el adaptador concreto del servicio con el que
+            trabaja la Queue API. Esto se puede lograr usando el método
+            <code class="methodname">getAdapter()</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Acceder al adaptador subyacente rompe la portabilidad entre servicios, por lo que debería
+                reservarse únicamente para circunstancias excepcionales.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.cloud.queueservice.concreteadapters.example"></a><p class="title"><b>Ejemplo 19.26. Usar un adaptador concreto</b></p>
+<div class="example-contents"><pre class="programlisting">
+// send the message directly with the SQS client library
+$sqs = $queues-&gt;getAdapter();
+$sqs-&gt;sendMessage("myQueue", "hello!");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cloud.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cloud.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cloud.storageservice.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 19. API SimpleCloud: Zend_Cloud </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 19.3. Introducción a StorageService</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

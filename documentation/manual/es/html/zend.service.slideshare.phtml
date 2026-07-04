@@ -1,0 +1,364 @@
+<?php $title = '64.28. Zend_Service_SlideShare'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.28. Zend_Service_SlideShare</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.short-url.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.strikeiron.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.slideshare"></a>64.28. Zend_Service_SlideShare</h2></div></div></div>
+<p>
+        El componente <code class="classname">Zend_Service_SlideShare</code> se usa para interactuar con los
+        servicios web de <a class="ulink" href="http://www.slideshare.net/" target="_top">slideshare.net</a> para alojar
+        presentaciones de diapositivas en línea. Con este componente, puede incrustar presentaciones de diapositivas alojadas en este
+        sitio web dentro de un sitio web e incluso subir nuevas presentaciones a su cuenta.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.basicusage"></a>64.28.1. Primeros pasos con Zend_Service_SlideShare</h3></div></div></div>
+<p>
+            Para poder usar el componente <code class="classname">Zend_Service_SlideShare</code> primero debe
+            crear una cuenta en los servidores de slideshare.net (puede encontrar más información
+            <a class="ulink" href="http://www.slideshare.net/developers/" target="_top">aquí</a>) con el fin de recibir una
+            clave de <acronym class="acronym">API</acronym>, nombre de usuario, contraseña y un valor de secreto compartido, todo lo cual
+            se necesita para usar el componente <code class="classname">Zend_Service_SlideShare</code>.
+        </p>
+<p>
+            Una vez que haya configurado una cuenta, puede comenzar a usar el componente
+            <code class="classname">Zend_Service_SlideShare</code> creando una nueva instancia del
+            objeto <code class="classname">Zend_Service_SlideShare</code> y proporcionando estos valores como
+            se muestra a continuación:
+        </p>
+<pre class="programlisting">
+// Create a new instance of the component
+$ss = new Zend_Service_SlideShare('APIKEY',
+                                  'SHAREDSECRET',
+                                  'USERNAME',
+                                  'PASSWORD');
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.slideshowobj"></a>64.28.2. El objeto SlideShow</h3></div></div></div>
+<p>
+            Todas las presentaciones de diapositivas en el componente <code class="classname">Zend_Service_SlideShare</code> se
+            representan usando el objeto <code class="classname">Zend_Service_SlideShare_SlideShow</code>
+            (tanto al recuperar como al subir nuevas presentaciones de diapositivas). Como referencia se proporciona a continuación una
+            versión en pseudocódigo de esta clase.
+        </p>
+<pre class="programlisting">
+class Zend_Service_SlideShare_SlideShow {
+
+    /**
+     * Retrieves the location of the slide show
+     */
+    public function getLocation() {
+        return $this-&gt;_location;
+    }
+
+    /**
+     * Gets the transcript for this slide show
+     */
+    public function getTranscript() {
+        return $this-&gt;_transcript;
+    }
+
+    /**
+     * Adds a tag to the slide show
+     */
+    public function addTag($tag) {
+        $this-&gt;_tags[] = (string)$tag;
+        return $this;
+    }
+
+    /**
+     * Sets the tags for the slide show
+     */
+    public function setTags(Array $tags) {
+        $this-&gt;_tags = $tags;
+        return $this;
+    }
+
+    /**
+     * Gets all of the tags associated with the slide show
+     */
+    public function getTags() {
+        return $this-&gt;_tags;
+    }
+
+    /**
+     * Sets the filename on the local filesystem of the slide show
+     * (for uploading a new slide show)
+     */
+    public function setFilename($file) {
+        $this-&gt;_slideShowFilename = (string)$file;
+        return $this;
+    }
+
+    /**
+     * Retrieves the filename on the local filesystem of the slide show
+     * which will be uploaded
+     */
+    public function getFilename() {
+        return $this-&gt;_slideShowFilename;
+    }
+
+    /**
+     * Gets the ID for the slide show
+     */
+    public function getId() {
+        return $this-&gt;_slideShowId;
+    }
+
+    /**
+     * Retrieves the HTML embed code for the slide show
+     */
+    public function getEmbedCode() {
+        return $this-&gt;_embedCode;
+    }
+
+    /**
+     * Retrieves the Thumbnail URi for the slide show
+     */
+    public function getThumbnailUrl() {
+        return $this-&gt;_thumbnailUrl;
+    }
+
+    /**
+     * Sets the title for the Slide show
+     */
+    public function setTitle($title) {
+        $this-&gt;_title = (string)$title;
+        return $this;
+    }
+
+    /**
+     * Retrieves the Slide show title
+     */
+    public function getTitle() {
+        return $this-&gt;_title;
+    }
+
+    /**
+     * Sets the description for the Slide show
+     */
+    public function setDescription($desc) {
+        $this-&gt;_description = (string)$desc;
+        return $this;
+    }
+
+    /**
+     * Gets the description of the slide show
+     */
+    public function getDescription() {
+        return $this-&gt;_description;
+    }
+
+    /**
+     * Gets the numeric status of the slide show on the server
+     */
+    public function getStatus() {
+        return $this-&gt;_status;
+    }
+
+    /**
+     * Gets the textual description of the status of the slide show on
+     * the server
+     */
+    public function getStatusDescription() {
+        return $this-&gt;_statusDescription;
+    }
+
+    /**
+     * Gets the permanent link of the slide show
+     */
+    public function getPermaLink() {
+        return $this-&gt;_permalink;
+    }
+
+    /**
+     * Gets the number of views the slide show has received
+     */
+    public function getNumViews() {
+        return $this-&gt;_numViews;
+    }
+}
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                La pseudo-clase anterior solo muestra los métodos que deberían usar los desarrolladores
+                finales. Los demás métodos disponibles son internos al componente.
+            </p></td></tr>
+</table></div>
+<p>
+            Al usar el componente <code class="classname">Zend_Service_SlideShare</code>, esta clase de datos
+            se usará con frecuencia para explorar o añadir nuevas presentaciones de diapositivas hacia o desde el servicio web.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.getslideshow"></a>64.28.3. Recuperar una única presentación de diapositivas</h3></div></div></div>
+<p>
+            El uso más sencillo del componente <code class="classname">Zend_Service_SlideShare</code> es
+            la recuperación de una única presentación de diapositivas mediante el ID de presentación proporcionado por la aplicación
+            slideshare.net, y se realiza llamando al método <code class="methodname">getSlideShow()</code> de
+            un objeto <code class="classname">Zend_Service_SlideShare</code> y usando el objeto
+            <code class="classname">Zend_Service_SlideShare_SlideShow</code> resultante como se muestra.
+        </p>
+<pre class="programlisting">
+// Create a new instance of the component
+$ss = new Zend_Service_SlideShare('APIKEY',
+                                  'SHAREDSECRET',
+                                  'USERNAME',
+                                  'PASSWORD');
+
+$slideshow = $ss-&gt;getSlideShow(123456);
+
+print "Slide Show Title: {$slideshow-&gt;getTitle()}&lt;br/&gt;\n";
+print "Number of views: {$slideshow-&gt;getNumViews()}&lt;br/&gt;\n";
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.getslideshowlist"></a>64.28.4. Recuperar grupos de presentaciones de diapositivas</h3></div></div></div>
+<p>
+            Si no conoce el ID específico de una presentación de diapositivas que le interesa recuperar,
+            puede recuperar grupos de presentaciones de diapositivas usando uno de tres métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Presentaciones de diapositivas de una cuenta específica</em></span>
+                </p>
+<p>
+                    Puede recuperar presentaciones de diapositivas de una cuenta específica usando el
+                    método <code class="methodname">getSlideShowsByUsername()</code> y proporcionando el
+                    nombre de usuario del cual deben recuperarse las presentaciones
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Presentaciones de diapositivas que contienen etiquetas específicas</em></span>
+                </p>
+<p>
+                    Puede recuperar presentaciones de diapositivas que contengan una o más etiquetas específicas usando
+                    el método <code class="methodname">getSlideShowsByTag()</code> y proporcionando una o
+                    más etiquetas que la presentación de diapositivas debe tener asignadas para poder ser recuperada
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Presentaciones de diapositivas por grupo</em></span>
+                </p>
+<p>
+                    Puede recuperar presentaciones de diapositivas que sean miembros de un grupo específico usando el
+                    método <code class="methodname">getSlideShowsByGroup()</code> y proporcionando el nombre del
+                    grupo al que la presentación de diapositivas debe pertenecer para poder ser recuperada
+                </p>
+</li>
+</ul></div>
+<p>
+            Para cada uno de los métodos anteriores de recuperación de múltiples presentaciones de diapositivas se usa un enfoque
+            similar. A continuación se muestra un ejemplo del uso de cada método:
+        </p>
+<pre class="programlisting">
+// Create a new instance of the component
+$ss = new Zend_Service_SlideShare('APIKEY',
+                                  'SHAREDSECRET',
+                                  'USERNAME',
+                                  'PASSWORD');
+
+$starting_offset = 0;
+$limit = 10;
+
+// Retrieve the first 10 of each type
+$ss_user = $ss-&gt;getSlideShowsByUser('username', $starting_offset, $limit);
+$ss_tags = $ss-&gt;getSlideShowsByTag('zend', $starting_offset, $limit);
+$ss_group = $ss-&gt;getSlideShowsByGroup('mygroup', $starting_offset, $limit);
+
+// Iterate over the slide shows
+foreach($ss_user as $slideshow) {
+   print "Slide Show Title: {$slideshow-&gt;getTitle}&lt;br/&gt;\n";
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.caching"></a>64.28.5. Políticas de caché de Zend_Service_SlideShare</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Service_SlideShare</code> almacenará en caché automáticamente
+            en el sistema de archivos (ruta por defecto
+            <code class="filename">/tmp</code>) cualquier solicitud realizada al servicio web durante 12 horas. Si desea cambiar este comportamiento, debe
+            proporcionar su propio objeto <a class="link" href="zend.cache.phtml" title="Chapter 17. Zend_Cache">Zend_Cache</a> usando el
+            método <code class="methodname">setCacheObject()</code> como se muestra:
+        </p>
+<pre class="programlisting">
+$frontendOptions = array(
+                        'lifetime' =&gt; 7200,
+                        'automatic_serialization' =&gt; true);
+$backendOptions  = array(
+                        'cache_dir' =&gt; '/webtmp/');
+
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+
+$ss = new Zend_Service_SlideShare('APIKEY',
+                                  'SHAREDSECRET',
+                                  'USERNAME',
+                                  'PASSWORD');
+$ss-&gt;setCacheObject($cache);
+
+$ss_user = $ss-&gt;getSlideShowsByUser('username', $starting_offset, $limit);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.slideshare.httpclient"></a>64.28.6. Cambiar el comportamiento del cliente HTTP</h3></div></div></div>
+<p>
+            Si por cualquier motivo desea cambiar el comportamiento del
+            cliente <acronym class="acronym">HTTP</acronym> al realizar la solicitud al servicio web, puede hacerlo
+            creando su propia instancia del objeto <code class="classname">Zend_Http_Client</code> (ver
+            <a class="link" href="zend.http.phtml" title="Chapter 38. Zend_Http">Zend_Http</a>). Esto es útil, por ejemplo, cuando es
+            deseable establecer el tiempo de espera de la conexión a un valor distinto del predeterminado, como se
+            muestra:
+        </p>
+<pre class="programlisting">
+$client = new Zend_Http_Client();
+$client-&gt;setConfig(array('timeout' =&gt; 5));
+
+$ss = new Zend_Service_SlideShare('APIKEY',
+                                  'SHAREDSECRET',
+                                  'USERNAME',
+                                  'PASSWORD');
+$ss-&gt;setHttpClient($client);
+$ss_user = $ss-&gt;getSlideShowsByUser('username', $starting_offset, $limit);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.short-url.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.strikeiron.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.27. Zend_Service_ShortUrl </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.29. Zend_Service_StrikeIron</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

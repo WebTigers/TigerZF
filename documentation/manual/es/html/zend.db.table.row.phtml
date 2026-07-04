@@ -1,0 +1,607 @@
+<?php $title = '27.6. Zend_Db_Table_Row'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">27.6. Zend_Db_Table_Row</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.db.table.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 27. Zend_Db</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.table.rowset.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.db.table.row"></a>27.6. Zend_Db_Table_Row</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.row.introduction"></a>27.6.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Db_Table_Row</code> es una clase que contiene una fila individual de un
+            objeto <code class="classname">Zend_Db_Table</code>. Cuando se ejecuta una consulta contra una clase Table,
+            el resultado se devuelve en un conjunto de objetos <code class="classname">Zend_Db_Table_Row</code>. También
+            puede usar este objeto para crear nuevas filas y añadirlas a la tabla de la base de datos.
+        </p>
+<p>
+            <code class="classname">Zend_Db_Table_Row</code> es una implementación del patrón <a class="ulink" href="http://www.martinfowler.com/eaaCatalog/rowDataGateway.html" target="_top">Row Data
+                Gateway</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.row.read"></a>27.6.2. Obteniendo una fila</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Db_Table_Abstract</code> proporciona los métodos
+            <code class="methodname">find()</code> y <code class="methodname">fetchAll()</code>, que cada uno
+            devuelve un objeto de tipo <code class="classname">Zend_Db_Table_Rowset</code>, y el método
+            <code class="methodname">fetchRow()</code>, que devuelve un objeto de tipo
+            <code class="classname">Zend_Db_Table_Row</code>.
+        </p>
+<div class="example">
+<a name="zend.db.table.row.read.example"></a><p class="title"><b>Ejemplo 27.117. Ejemplo de obtención de una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow($bugs-&gt;select()-&gt;where('bug_id = ?', 1));
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Un objeto <code class="classname">Zend_Db_Table_Rowset</code> contiene una colección de
+            objetos <code class="classname">Zend_Db_Table_Row</code>. Consulte el capítulo sobre <a class="link" href="zend.db.table.rowset.phtml" title="27.7. Zend_Db_Table_Rowset">table rowset</a> para más detalles.
+        </p>
+<div class="example">
+<a name="zend.db.table.row.read.example-rowset"></a><p class="title"><b>Ejemplo 27.118. Ejemplo de lectura de una fila en un rowset</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$rowset = $bugs-&gt;fetchAll($bugs-&gt;select()-&gt;where('bug_status = ?', 1));
+$row = $rowset-&gt;current();
+</pre></div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.read.get"></a>27.6.2.1. Lectura de valores de columna desde una fila</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Db_Table_Row_Abstract</code> proporciona métodos de acceso para que
+                pueda referenciar las columnas de la fila como propiedades del objeto.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.read.get.example"></a><p class="title"><b>Ejemplo 27.119. Ejemplo de lectura de una columna en una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow($bugs-&gt;select()-&gt;where('bug_id = ?', 1));
+
+// Echo the value of the bug_description column
+echo $row-&gt;bug_description;
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Versiones anteriores de <code class="classname">Zend_Db_Table_Row</code> mapeaban estos accesores de
+                    columna a los nombres de las columnas de la base de datos mediante una transformación de cadenas denominada
+                    <span class="emphasis"><em>inflexión</em></span>.
+                </p>
+<p>
+                    Actualmente, <code class="classname">Zend_Db_Table_Row</code> no implementa
+                    la inflexión. Los nombres de las propiedades a las que se accede deben coincidir con la escritura de los nombres
+                    de las columnas tal como aparecen en su base de datos.
+                </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.read.to-array"></a>27.6.2.2. Recuperando los datos de la fila como un array</h4></div></div></div>
+<p>
+                Puede acceder a los datos de la fila como un array usando el
+                método <code class="methodname">toArray()</code> del objeto Row. Esto devuelve un
+                array asociativo de los nombres de las columnas a los valores de las columnas.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.read.to-array.example"></a><p class="title"><b>Ejemplo 27.120. Ejemplo del uso del método toArray()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow($bugs-&gt;select()-&gt;where('bug_id = ?', 1));
+
+// Get the column/value associative array from the Row object
+$rowArray = $row-&gt;toArray();
+
+// Now use it as a normal array
+foreach ($rowArray as $column =&gt; $value) {
+    echo "Column: $column\n";
+    echo "Value:  $value\n";
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                El array devuelto por <code class="methodname">toArray()</code> no es actualizable. Puede
+                modificar los valores del array como con cualquier array, pero no puede guardar
+                los cambios de este array en la base de datos directamente.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.read.relationships"></a>27.6.2.3. Obtención de datos de tablas relacionadas</h4></div></div></div>
+<p>
+                La clase <code class="classname">Zend_Db_Table_Row_Abstract</code> proporciona métodos para
+                obtener filas y rowsets de tablas relacionadas. Consulte el <a class="link" href="zend.db.table.relationships.phtml" title="27.8. Zend_Db_Table Relationships">capítulo de relaciones</a> para
+                más información sobre las relaciones entre tablas.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.row.write"></a>27.6.3. Escribiendo filas en la base de datos</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.write.set"></a>27.6.3.1. Cambiando valores de columna en una fila</h4></div></div></div>
+<p>
+                Puede establecer valores de columna individuales usando los accesores de columna, de forma
+                similar a cómo se leen las columnas como propiedades del objeto en el ejemplo anterior.
+            </p>
+<p>
+                Usar un accesor de columna para establecer un valor cambia el valor de la columna del objeto fila
+                en su aplicación, pero no confirma el cambio en la base de datos todavía. Puede
+                hacerlo con el método <code class="methodname">save()</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.write.set.example"></a><p class="title"><b>Ejemplo 27.121. Ejemplo de cambio de una columna en una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow($bugs-&gt;select()-&gt;where('bug_id = ?', 1));
+
+// Change the value of one or more columns
+$row-&gt;bug_status = 'FIXED';
+
+// UPDATE the row in the database with new values
+$row-&gt;save();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.write.insert"></a>27.6.3.2. Insertando una nueva fila</h4></div></div></div>
+<p>
+                Puede crear una nueva fila para una tabla dada con el
+                método <code class="methodname">createRow()</code> de la clase Table. Puede acceder a
+                los campos de esta fila con la interfaz orientada a objetos, pero la fila no se almacena en
+                la base de datos hasta que llame al método <code class="methodname">save()</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.write.insert.example"></a><p class="title"><b>Ejemplo 27.122. Ejemplo de creación de una nueva fila para una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$newRow = $bugs-&gt;createRow();
+
+// Set column values as appropriate for your application
+$newRow-&gt;bug_description = '...description...';
+$newRow-&gt;bug_status = 'NEW';
+
+// INSERT the new row to the database
+$newRow-&gt;save();
+</pre></div>
+</div>
+<br class="example-break"><p>
+                El argumento opcional del método <code class="methodname">createRow()</code> es un
+                array asociativo, con el que puede rellenar los campos de la nueva fila.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.write.insert.example2"></a><p class="title"><b>Ejemplo 27.123. Ejemplo de rellenado de una nueva fila para una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'bug_description' =&gt; '...description...',
+    'bug_status'      =&gt; 'NEW'
+);
+
+$bugs = new Bugs();
+$newRow = $bugs-&gt;createRow($data);
+
+// INSERT the new row to the database
+$newRow-&gt;save();
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    El método <code class="methodname">createRow()</code> se llamaba
+                    <code class="methodname">fetchNew()</code> en versiones anteriores de
+                    <code class="classname">Zend_Db_Table</code>. Se recomienda usar el nuevo nombre de método,
+                    aunque el nombre antiguo sigue funcionando por motivos de compatibilidad
+                    con versiones anteriores.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.write.set-from-array"></a>27.6.3.3. Cambiando valores en varias columnas</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Db_Table_Row_Abstract</code> proporciona el
+                método <code class="methodname">setFromArray()</code> para permitirle establecer varias columnas
+                en una sola fila a la vez, especificadas en un array asociativo que asigna los nombres
+                de columna a los valores. Puede encontrar este método conveniente para establecer valores tanto para
+                filas nuevas como para filas que necesite actualizar.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.write.set-from-array.example"></a><p class="title"><b>Ejemplo 27.124. Ejemplo del uso de setFromArray() para establecer valores en una nueva fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$newRow = $bugs-&gt;createRow();
+
+// Data are arranged in an associative array
+$data = array(
+    'bug_description' =&gt; '...description...',
+    'bug_status'      =&gt; 'NEW'
+);
+
+// Set all the column values at once
+$newRow-&gt;setFromArray($data);
+
+// INSERT the new row to the database
+$newRow-&gt;save();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.write.delete"></a>27.6.3.4. Eliminando una fila</h4></div></div></div>
+<p>
+                Puede llamar al método <code class="methodname">delete()</code> en un objeto Row. Esto
+                elimina las filas en la base de datos que coinciden con la clave primaria del objeto Row.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.write.delete.example"></a><p class="title"><b>Ejemplo 27.125. Ejemplo de eliminación de una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow('bug_id = 1');
+
+// DELETE this row
+$row-&gt;delete();
+</pre></div>
+</div>
+<br class="example-break"><p>
+                No es necesario llamar a <code class="methodname">save()</code> para aplicar la eliminación; se
+                ejecuta contra la base de datos inmediatamente.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.row.serialize"></a>27.6.4. Serializando y deserializando filas</h3></div></div></div>
+<p>
+            A menudo resulta conveniente guardar el contenido de una fila de la base de datos para usarlo más adelante.
+            <span class="emphasis"><em>Serialización</em></span> es el nombre de la operación que convierte un
+            objeto en una forma fácil de guardar en almacenamiento fuera de línea (por ejemplo, un archivo).
+            Los objetos de tipo <code class="classname">Zend_Db_Table_Row_Abstract</code> son serializables.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.serialize.serializing"></a>27.6.4.1. Serializando una fila</h4></div></div></div>
+<p>
+                Simplemente use la función <code class="methodname">serialize()</code> de <acronym class="acronym">PHP</acronym> para
+                crear una cadena que contenga una representación en secuencia de bytes del objeto Row.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.serialize.serializing.example"></a><p class="title"><b>Ejemplo 27.126. Ejemplo de serialización de una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchRow('bug_id = 1');
+
+// Convert object to serialized form
+$serializedRow = serialize($row);
+
+// Now you can write $serializedRow to a file, etc.
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.serialize.unserializing"></a>27.6.4.2. Deserializando datos de fila</h4></div></div></div>
+<p>
+                Use la función <code class="methodname">unserialize()</code> de <acronym class="acronym">PHP</acronym> para
+                restaurar una cadena que contenga una representación en secuencia de bytes de un objeto. La función
+                devuelve el objeto original.
+            </p>
+<p>
+                Tenga en cuenta que el objeto Row devuelto está en un estado <span class="emphasis"><em>desconectado</em></span>.
+                Puede leer el objeto Row y sus propiedades, pero no puede cambiar valores en la
+                fila ni ejecutar otros métodos que requieran una conexión a la base de datos (por ejemplo,
+                consultas contra tablas relacionadas).
+            </p>
+<div class="example">
+<a name="zend.db.table.row.serialize.unserializing.example"></a><p class="title"><b>Ejemplo 27.127. Ejemplo de deserialización de una fila serializada</b></p>
+<div class="example-contents"><pre class="programlisting">
+$rowClone = unserialize($serializedRow);
+
+// Now you can use object properties, but read-only
+echo $rowClone-&gt;bug_description;
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Why do Rows unserialize in a disconnected state?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Por qué las filas se deserializan en un estado desconectado?</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Un objeto serializado es una cadena que es legible por cualquiera que la posea. Podría
+                    ser un riesgo de seguridad almacenar parámetros como la cuenta de la base de datos y
+                    la contraseña en texto plano sin cifrar dentro de la cadena serializada. No querría
+                    almacenar tales datos en un archivo de texto que no esté protegido, ni enviarlos en un
+                    correo electrónico u otro medio fácilmente legible por posibles atacantes. El lector de
+                    el objeto serializado no debería poder usarlo para obtener acceso a su
+                    base de datos sin conocer credenciales válidas.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.serialize.set-table"></a>27.6.4.3. Reactivando una fila como datos activos</h4></div></div></div>
+<p>
+                Puede reactivar una fila desconectada usando el método <code class="methodname">setTable()</code>.
+                El argumento de este método es un objeto válido de tipo
+                <code class="classname">Zend_Db_Table_Abstract</code>, que usted crea. Crear un objeto Table
+                requiere una conexión activa a la base de datos, de modo que al reasociar la Table
+                con la Row, la Row obtiene acceso a la base de datos. Posteriormente, puede cambiar
+                los valores del objeto Row y guardar los cambios en la base de datos.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.serialize.set-table.example"></a><p class="title"><b>Ejemplo 27.128. Ejemplo de reactivación de una fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$rowClone = unserialize($serializedRow);
+
+$bugs = new Bugs();
+
+// Reconnect the row to a table, and
+// thus to a live database connection
+$rowClone-&gt;setTable($bugs);
+
+// Now you can make changes to the row and save them
+$rowClone-&gt;bug_status = 'FIXED';
+$rowClone-&gt;save();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.row.extending"></a>27.6.5. Extendiendo la clase Row</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Db_Table_Row</code> es la clase concreta predeterminada que extiende
+            <code class="classname">Zend_Db_Table_Row_Abstract</code>. Puede definir su propia clase
+            concreta para instancias de Row extendiendo
+            <code class="classname">Zend_Db_Table_Row_Abstract</code>. Para usar su nueva clase Row para almacenar
+            resultados de las consultas de Table, especifique la clase Row personalizada por su nombre ya sea en el
+            miembro protegido <code class="varname">$_rowClass</code> de una clase Table, o en el array
+            del argumento del constructor de un objeto Table.
+        </p>
+<div class="example">
+<a name="zend.db.table.row.extending.example"></a><p class="title"><b>Ejemplo 27.129. Especificación de una clase Row personalizada</b></p>
+<div class="example-contents"><pre class="programlisting">
+class MyRow extends Zend_Db_Table_Row_Abstract
+{
+    // ...customizations
+}
+
+// Specify a custom Row to be used by default
+// in all instances of a Table class.
+class Products extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'products';
+    protected $_rowClass = 'MyRow';
+}
+
+// Or specify a custom Row to be used in one
+// instance of a Table class.
+$bugs = new Bugs(array('rowClass' =&gt; 'MyRow'));
+</pre></div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.extending.overriding"></a>27.6.5.1. Inicialización de la fila</h4></div></div></div>
+<p>
+                Si se necesita inicializar lógica específica de la aplicación cuando se construye una fila,
+                puede optar por trasladar sus tareas al método <code class="methodname">init()</code>,
+                que se llama después de que se hayan procesado todos los metadatos de la fila. Esto se recomienda por encima
+                del método <code class="methodname">__construct()</code> si no necesita alterar los
+                metadatos de forma programática.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.init.usage.example"></a><p class="title"><b>Ejemplo 27.130. Ejemplo de uso del método init()</b></p>
+<div class="example-contents"><pre class="programlisting">
+class MyApplicationRow extends Zend_Db_Table_Row_Abstract
+{
+    protected $_role;
+
+    public function init()
+    {
+        $this-&gt;_role = new MyRoleClass();
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.extending.insert-update"></a>27.6.5.2. Definiendo lógica personalizada para Insert, Update y Delete en Zend_Db_Table_Row</h4></div></div></div>
+<p>
+                La clase Row llama a los métodos protegidos <code class="methodname">_insert()</code>,
+                <code class="methodname">_update()</code>, y <code class="methodname">_delete()</code> antes de
+                realizar las operaciones correspondientes <code class="constant">INSERT</code>,
+                <code class="constant">UPDATE</code>, y <code class="constant">DELETE</code>. Puede añadir lógica a
+                estos métodos en su subclase Row personalizada.
+            </p>
+<p>
+                Si necesita hacer lógica personalizada en una tabla específica, y la lógica personalizada debe ocurrir
+                en cada operación sobre esa tabla, puede tener más sentido implementar su código
+                personalizado en los métodos <code class="methodname">insert()</code>, <code class="methodname">update()</code> y
+                <code class="methodname">delete()</code> de su clase Table. Sin embargo, a veces
+                puede ser necesario realizar lógica personalizada en la clase Row.
+            </p>
+<p>
+                A continuación se muestran algunos casos de ejemplo en los que podría tener sentido implementar lógica personalizada en
+                una clase Row en lugar de en la clase Table:
+            </p>
+<div class="example">
+<a name="zend.db.table.row.extending.overriding-example1"></a><p class="title"><b>Ejemplo 27.131. Ejemplo de lógica personalizada en una clase Row</b></p>
+<div class="example-contents">
+<p>
+                    La lógica personalizada puede no aplicarse en todos los casos de operaciones sobre la Table
+                    respectiva. Puede proporcionar lógica personalizada bajo demanda implementándola en una clase Row
+                    y creando una instancia de la clase Table con esa clase Row personalizada
+                    especificada. De lo contrario, la Table usa la clase Row predeterminada.
+                </p>
+<p>
+                    Necesita que las operaciones de datos en esta tabla registren la operación en un
+                    objeto <code class="classname">Zend_Log</code>, pero solo si la configuración de la
+                    aplicación ha habilitado este comportamiento.
+                </p>
+<pre class="programlisting">
+class MyLoggingRow extends Zend_Db_Table_Row_Abstract
+{
+    protected function _insert()
+    {
+        $log = Zend_Registry::get('database_log');
+        $log-&gt;info(Zend_Debug::dump($this-&gt;_data,
+                                    "INSERT: $this-&gt;_tableClass",
+                                    false)
+                  );
+    }
+}
+
+// $loggingEnabled is an example property that depends
+// on your application configuration
+if ($loggingEnabled) {
+    $bugs = new Bugs(array('rowClass' =&gt; 'MyLoggingRow'));
+} else {
+    $bugs = new Bugs();
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.table.row.extending.overriding-example2"></a><p class="title"><b>Ejemplo 27.132. Ejemplo de una clase Row que registra datos de inserción para varias tablas</b></p>
+<div class="example-contents">
+<p>
+                    La lógica personalizada puede ser común a varias tablas. En lugar de implementar la
+                    misma lógica personalizada en cada una de sus clases Table, puede implementar el
+                    código para dichas acciones en la definición de una clase Row, y usar esta Row en
+                    cada una de sus clases Table.
+                </p>
+<p>
+                    En este ejemplo, el código de registro es idéntico en todas las clases de tabla.
+                </p>
+<pre class="programlisting">
+class MyLoggingRow extends Zend_Db_Table_Row_Abstract
+{
+    protected function _insert()
+    {
+        $log = Zend_Registry::get('database_log');
+        $log-&gt;info(Zend_Debug::dump($this-&gt;_data,
+                                    "INSERT: $this-&gt;_tableClass",
+                                    false)
+                  );
+    }
+}
+
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+    protected $_rowClass = 'MyLoggingRow';
+}
+
+class Products extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'products';
+    protected $_rowClass = 'MyLoggingRow';
+}
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.row.extending.inflection"></a>27.6.5.3. Definir la inflexión en Zend_Db_Table_Row</h4></div></div></div>
+<p>
+                Algunas personas prefieren que el nombre de la clase Table coincida con un nombre de tabla en el
+                <acronym class="acronym">RDBMS</acronym> mediante una transformación de cadenas denominada
+                <span class="emphasis"><em>inflexión</em></span>.
+            </p>
+<p>
+                Las clases <code class="classname">Zend_Db</code> no implementan la inflexión de forma predeterminada. Consulte
+                el capítulo sobre <a class="link" href="zend.db.table.phtml#zend.db.table.extending.inflection" title="27.5.13.4. Define Inflection in Zend_Db_Table">inflexión
+                    de extensión</a> para una explicación de esta política.
+            </p>
+<p>
+                Si prefiere usar la inflexión, debe implementar la transformación
+                usted mismo, sobrescribiendo el método <code class="methodname">_transformColumn()</code> en una
+                clase Row personalizada, y usando esa clase Row personalizada cuando realice consultas contra
+                su clase Table.
+            </p>
+<div class="example">
+<a name="zend.db.table.row.extending.inflection.example"></a><p class="title"><b>Ejemplo 27.133. Ejemplo de definición de una transformación de inflexión</b></p>
+<div class="example-contents">
+<p>
+                    Esto le permite usar una versión inflexionada del nombre de columna en los
+                    accesores. La clase Row usa el método <code class="methodname">_transformColumn()</code>
+                    para cambiar el nombre que usa por el nombre nativo de la columna en la tabla
+                    de la base de datos.
+                </p>
+<pre class="programlisting">
+class MyInflectedRow extends Zend_Db_Table_Row_Abstract
+{
+    protected function _transformColumn($columnName)
+    {
+        $nativeColumnName = myCustomInflector($columnName);
+        return $nativeColumnName;
+    }
+}
+
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+    protected $_rowClass = 'MyInflectedRow';
+}
+
+$bugs = new Bugs();
+$row = $bugs-&gt;fetchNew();
+
+// Use camelcase column names, and rely on the
+// transformation function to change it into the
+// native representation.
+$row-&gt;bugDescription = 'New description';
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+                Usted es responsable de escribir las funciones para realizar la transformación de inflexión.
+                Zend Framework no proporciona tal función.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.db.table.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.db.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.table.rowset.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">27.5. Zend_Db_Table </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 27.7. Zend_Db_Table_Rowset</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

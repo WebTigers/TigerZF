@@ -1,0 +1,386 @@
+<?php $title = '62.2. Zend_Serializer_Adapter'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">62.2. Zend_Serializer_Adapter</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.serializer.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 62. Zend_Serializer</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.server.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.serializer.adapter"></a>62.2. Zend_Serializer_Adapter</h2></div></div></div>
+<p>
+        Los adaptadores de <code class="classname">Zend_Serializer</code> crean un puente para diferentes métodos de
+        serialización con muy poco esfuerzo.
+    </p>
+<p>
+        Cada adaptador tiene diferentes pros y contras. En algunos casos, no todos los tipos de datos de <acronym class="acronym">PHP</acronym>
+        (por ejemplo, los objetos) pueden convertirse a una representación en cadena. En la mayoría de estos casos,
+        el tipo se convertirá a un tipo similar que sea serializable; por ejemplo,
+        los objetos de <acronym class="acronym">PHP</acronym> a menudo se convertirán a arrays. Si esto falla, se lanzará una
+        <code class="classname">Zend_Serializer_Exception</code>.
+    </p>
+<p>
+        A continuación se muestra una lista de los adaptadores disponibles.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.phpserialize"></a>62.2.1. Zend_Serializer_Adapter_PhpSerialize</h3></div></div></div>
+<p>
+            Este adaptador usa las funciones integradas <code class="methodname">un/serialize</code>
+            de <acronym class="acronym">PHP</acronym>, y es una buena opción de adaptador predeterminado.
+        </p>
+<p>
+            No hay opciones configurables para este adaptador.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.igbinary"></a>62.2.2. Zend_Serializer_Adapter_Igbinary</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://opensource.dynamoid.com" target="_top">Igbinary</a> es software de código abierto
+            publicado por Sulake Dynamoid Oy. Es un reemplazo directo del serializador estándar
+            de <acronym class="acronym">PHP</acronym>. En lugar de una representación textual que consume tiempo y espacio,
+            igbinary almacena las estructuras de datos de <acronym class="acronym">PHP</acronym> en una forma binaria compacta.
+            El ahorro es significativo cuando se usa memcached o almacenamientos similares basados en memoria
+            para datos serializados.
+        </p>
+<p>
+            Necesita tener instalada en su sistema la extensión de <acronym class="acronym">PHP</acronym> igbinary para
+            poder usar este adaptador.
+        </p>
+<p>
+            Este adaptador no acepta opciones de configuración.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.wddx"></a>62.2.3. Zend_Serializer_Adapter_Wddx</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://wikipedia.org/wiki/WDDX" target="_top">WDDX</a> (Web Distributed Data eXchange)
+            es un mecanismo de intercambio de datos neutral en cuanto a lenguaje de programación, plataforma y transporte
+            para pasar datos entre diferentes entornos y diferentes equipos.
+        </p>
+<p>
+            El adaptador simplemente usa las funciones de <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://php.net/manual/book.wddx.php" target="_top">wddx_*()</a>.
+            Por favor, lea el manual de <acronym class="acronym">PHP</acronym> para determinar cómo puede habilitarlas
+            en su instalación de <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Además, se usa la extensión de <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://php.net/manual/book.simplexml.php" target="_top">SimpleXML</a>
+            para comprobar si un valor <code class="constant">NULL</code> devuelto por
+            <code class="methodname">wddx_unserialize()</code> se basa
+            en un <code class="constant">NULL</code> serializado o en datos no válidos.
+        </p>
+<p>
+            Las opciones disponibles incluyen:
+        </p>
+<div class="table">
+<a name="zend.serializer.adapter.wddx.table.options"></a><p class="title"><b>Tabla 62.1. Opciones de Zend_Serializer_Adapter_Wddx</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Serializer_Adapter_Wddx Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td><span class="emphasis"><em>comment</em></span></td>
+<td><span class="type">string</span></td>
+<td> </td>
+<td>Un comentario opcional que aparece en la cabecera del paquete.</td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.json"></a>62.2.4. Zend_Serializer_Adapter_Json</h3></div></div></div>
+<p>
+            El adaptador <acronym class="acronym">JSON</acronym> proporciona un puente hacia el
+            componente <code class="classname">Zend_Json</code> y/o ext/json. Por favor, lea la <a class="link" href="zend.json.phtml#zend.json.introduction" title="39.1. Introduction">documentación de Zend_Json</a> para más
+            información.
+        </p>
+<p>
+            Las opciones disponibles incluyen:
+        </p>
+<div class="table">
+<a name="zend.serializer.adapter.json.table.options"></a><p class="title"><b>Tabla 62.2. Opciones de Zend_Serializer_Adapter_Json</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Serializer_Adapter_Json Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>cycleCheck</em></span></td>
+<td><span class="type">boolean</span></td>
+<td>false</td>
+<td>
+                              Vea <a class="link" href="zend.json.advanced.phtml#zend.json.advanced.objects1" title="39.3.1. JSON Objects">esta sección</a>
+                          </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>objectDecodeType</em></span></td>
+<td><span class="type">Zend_Json::TYPE_*</span></td>
+<td>Zend_Json::TYPE_ARRAY</td>
+<td>
+                              Vea <a class="link" href="zend.json.advanced.phtml#zend.json.advanced.objects1" title="39.3.1. JSON Objects">esta sección</a>
+                          </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>enableJsonExprFinder</em></span></td>
+<td><span class="type">boolean</span></td>
+<td>false</td>
+<td>
+                              Vea <a class="link" href="zend.json.advanced.phtml#zend.json.advanced.expr" title="39.3.4. JSON Expressions">esta sección</a>
+                          </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.amf03"></a>62.2.5. Zend_Serializer_Adapter_Amf 0 y 3</h3></div></div></div>
+<p>
+            Los adaptadores <acronym class="acronym">AMF</acronym>, <code class="classname">Zend_Serializer_Adapter_Amf0</code>
+            y <code class="classname">Zend_Serializer_Adapter_Amf3</code>, proporcionan un puente hacia el
+            serializador del componente <code class="classname">Zend_Amf</code>. Por favor, lea la <a class="link" href="zend.amf.phtml#zend.amf.introduction" title="13.1. Introduction">documentación de Zend_Amf</a> para más
+            información.
+        </p>
+<p>
+            No hay opciones para estos adaptadores.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.pythonpickle"></a>62.2.6. Zend_Serializer_Adapter_PythonPickle</h3></div></div></div>
+<p>
+            Este adaptador convierte tipos de <acronym class="acronym">PHP</acronym> a una representación en cadena de <a class="ulink" href="http://docs.python.org/library/pickle.html" target="_top">Python Pickle</a>.
+            Con él, puede leer los datos serializados con Python y leer datos en formato Pickle
+            de Python con <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Las opciones disponibles incluyen:
+        </p>
+<div class="table">
+<a name="zend.serializer.adapter.pythonpickle.table.options"></a><p class="title"><b>Tabla 62.3. Opciones de Zend_Serializer_Adapter_PythonPickle</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Serializer_Adapter_PythonPickle Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td><span class="emphasis"><em>protocol</em></span></td>
+<td>
+<span class="type">integer</span> (0 | 1 | 2 | 3)</td>
+<td>0</td>
+<td>
+                               La versión del protocolo Pickle usada al
+                               <code class="methodname">serialize</code>
+                          </td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            La correspondencia de tipos de datos (de PHP a Python) ocurre de la siguiente manera:
+        </p>
+<div class="table">
+<a name="zend.serializer.adapter.pythonpickle.table.php2python"></a><p class="title"><b>Tabla 62.4. Correspondencia de tipos de datos (PHP a Python)</b></p>
+<div class="table-contents"><table class="table" summary="Datatype merging (PHP to Python)" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Tipo PHP</th>
+<th>Tipo Python</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="type">NULL</span></td>
+<td><span class="type">None</span></td>
+</tr>
+<tr>
+<td><span class="type">boolean</span></td>
+<td><span class="type">boolean</span></td>
+</tr>
+<tr>
+<td><span class="type">integer</span></td>
+<td><span class="type">integer</span></td>
+</tr>
+<tr>
+<td><span class="type">float</span></td>
+<td><span class="type">float</span></td>
+</tr>
+<tr>
+<td><span class="type">string</span></td>
+<td><span class="type">string</span></td>
+</tr>
+<tr>
+<td><span class="type">array</span></td>
+<td><span class="type">list</span></td>
+</tr>
+<tr>
+<td><span class="type">associative array</span></td>
+<td><span class="type">dictionary</span></td>
+</tr>
+<tr>
+<td><span class="type">object</span></td>
+<td><span class="type">dictionary</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            La correspondencia de tipos de datos (de Python a <acronym class="acronym">PHP</acronym>) ocurre según lo siguiente:
+        </p>
+<div class="table">
+<a name="zend.serializer.adapter.pythonpickle.table.python2php"></a><p class="title"><b>Tabla 62.5. Correspondencia de tipos de datos (Python a PHP)</b></p>
+<div class="table-contents"><table class="table" summary="Datatype merging (Python to PHP)" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Tipo Python</th>
+<th>Tipo PHP</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="type">None</span></td>
+<td><span class="type">NULL</span></td>
+</tr>
+<tr>
+<td><span class="type">boolean</span></td>
+<td><span class="type">boolean</span></td>
+</tr>
+<tr>
+<td><span class="type">integer</span></td>
+<td><span class="type">integer</span></td>
+</tr>
+<tr>
+<td><span class="type">long</span></td>
+<td>
+                              <span class="type">integer</span> | <span class="type">float</span> | <span class="type">string</span>
+                              | <code class="classname">Zend_Serializer_Exception</code>
+                          </td>
+</tr>
+<tr>
+<td><span class="type">float</span></td>
+<td><span class="type">float</span></td>
+</tr>
+<tr>
+<td><span class="type">string</span></td>
+<td><span class="type">string</span></td>
+</tr>
+<tr>
+<td><span class="type">bytes</span></td>
+<td><span class="type">string</span></td>
+</tr>
+<tr>
+<td><span class="type">Unicode string</span></td>
+<td><span class="type">UTF-8 string</span></td>
+</tr>
+<tr>
+<td><span class="type">list</span></td>
+<td><span class="type">array</span></td>
+</tr>
+<tr>
+<td><span class="type">tuple</span></td>
+<td><span class="type">array</span></td>
+</tr>
+<tr>
+<td><span class="type">dictionary</span></td>
+<td><span class="type">associative array</span></td>
+</tr>
+<tr>
+<td>Todos los demás tipos</td>
+<td><code class="classname">Zend_Serializer_Exception</code></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.serializer.adapter.phpcode"></a>62.2.7. Zend_Serializer_Adapter_PhpCode</h3></div></div></div>
+<p>
+            Este adaptador genera una representación de código <acronym class="acronym">PHP</acronym> analizable usando
+            <a class="ulink" href="http://php.net/manual/function.var-export.php" target="_top">var_export()</a>. Al
+            restaurar, los datos se ejecutarán usando <a class="ulink" href="http://php.net/manual/function.eval.php" target="_top">eval</a>.
+        </p>
+<p>
+            No hay opciones de configuración para este adaptador.
+        </p>
+<div class="warning"><table border="0" summary="Warning: Unserializing objects">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Deserialización de objetos</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los objetos se serializarán usando el método mágico <a class="ulink" href="http://php.net/manual/language.oop5.magic.php#language.oop5.magic.set-state" target="_top">__set_state</a>.
+                Si la clase no implementa este método, se producirá un error fatal
+                durante la ejecución.
+            </p></td></tr>
+</table></div>
+<div class="warning"><table border="0" summary="Warning: Uses eval()">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Usa eval()</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El adaptador <code class="classname">PhpCode</code> utiliza <code class="methodname">eval()</code>
+                para deserializar. Esto introduce tanto un problema de rendimiento como uno potencial de
+                seguridad, ya que se ejecutará un nuevo proceso. Normalmente, debería usar el
+                adaptador <code class="methodname">PhpSerialize</code> a menos que necesite legibilidad
+                humana de los datos serializados.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.serializer.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.serializer.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.server.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 62. Zend_Serializer </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 63. Zend_Server</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

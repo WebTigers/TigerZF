@@ -1,0 +1,121 @@
+<?php $title = '10.2. Estructura del índice de Lucene'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">10.2. Estructura del índice de Lucene</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.lucene.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 10. Primeros pasos con Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.lucene.index-opening.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.lucene.index-structure"></a>10.2. Estructura del índice de Lucene</h2></div></div></div>
+<p>
+        Para aprovechar al máximo las capacidades de <code class="classname">Zend_Search_Lucene</code> con
+        el mejor rendimiento, es necesario comprender su estructura interna de índice.
+    </p>
+<p>
+        Un <span class="emphasis"><em>índice</em></span> se almacena como un conjunto de archivos dentro de un único directorio.
+    </p>
+<p>
+        Un <span class="emphasis"><em>índice</em></span> consiste en cualquier número de
+        <span class="emphasis"><em>segmentos</em></span> independientes que almacenan información sobre un subconjunto de documentos indexados.
+        Cada <span class="emphasis"><em>segmento</em></span> tiene su propio <span class="emphasis"><em>diccionario de términos</em></span>, índice del diccionario
+        de términos, y almacenamiento de documentos (valores de campos almacenados) <a href="#ftn.id3318" class="footnote" name="id3318"><sup class="footnote">[3]</sup></a>. Todos los datos del segmento se almacenan en
+        archivos <code class="filename">_xxxxx.cfs</code>, donde <span class="emphasis"><em>xxxxx</em></span> es el nombre de un segmento.
+    </p>
+<p>
+        Una vez creado un archivo de segmento de índice, no se puede actualizar. Los nuevos documentos se añaden a nuevos
+        segmentos. Los documentos eliminados solo se marcan como eliminados en un archivo opcional
+        <code class="filename">&lt;segmentname&gt;.del</code>.
+    </p>
+<p>
+        La actualización de documentos se realiza como operaciones independientes de eliminación y adición, aunque se haga
+        mediante una llamada <acronym class="acronym">API</acronym> <code class="methodname">update()</code>
+        <a href="#ftn.id3328" class="footnote" name="id3328"><sup class="footnote">[4]</sup></a>.
+        Esto simplifica la adición de nuevos documentos, y permite actualizar simultáneamente con las operaciones
+        de búsqueda.
+    </p>
+<p>
+        Por otro lado, el uso de varios segmentos (un documento por segmento como caso límite)
+        aumenta el tiempo de búsqueda:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                la recuperación de un término de un diccionario se realiza para cada segmento;
+            </p></li>
+<li class="listitem"><p>
+                el índice del diccionario de términos se precarga para cada segmento (este proceso ocupa la
+                mayor parte del tiempo de búsqueda en consultas simples, y también requiere memoria adicional).
+            </p></li>
+</ul></div>
+<p>
+        Si el diccionario de términos alcanza un punto de saturación, entonces la búsqueda a través de un segmento es
+        <span class="emphasis"><em>N</em></span> veces más rápida que la búsqueda a través de <span class="emphasis"><em>N</em></span> segmentos
+        en la mayoría de los casos.
+    </p>
+<p>
+        La <span class="emphasis"><em>optimización del índice</em></span> combina dos o más segmentos en un único segmento nuevo. Un
+        nuevo segmento se añade a la lista de segmentos del índice, y los segmentos antiguos se excluyen.
+    </p>
+<p>
+        Las actualizaciones de la lista de segmentos se realizan como una operación atómica. Esto proporciona la capacidad de
+        añadir nuevos documentos, realizar la optimización del índice y buscar en el
+        índice de forma simultánea.
+    </p>
+<p>
+        La optimización automática del índice se realiza después de cada nueva generación de segmentos. Combina los conjuntos de
+        los segmentos más pequeños en segmentos más grandes, y los segmentos más grandes en segmentos aún más grandes,
+        si hay suficientes segmentos para combinar.
+    </p>
+<p>
+        La optimización automática del índice se controla mediante tres opciones:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em>MaxBufferedDocs</em></span> (el número mínimo de documentos necesario
+                antes de que los documentos almacenados en memoria intermedia se escriban en un nuevo segmento);
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>MaxMergeDocs</em></span> (el mayor número de documentos que se combinan nunca
+                en una operación de optimización); y
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>MergeFactor</em></span> (que determina con qué frecuencia se combinan los índices de segmentos
+                mediante operaciones de optimización automática).
+            </p></li>
+</ul></div>
+<p>
+        Si añadimos un documento por ejecución de script, entonces <span class="emphasis"><em>MaxBufferedDocs</em></span>
+        realmente no se utiliza (solo se crea un nuevo segmento con un único documento al final de
+        la ejecución del script, momento en el que se inicia el proceso de optimización automática).
+    </p>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id3318" class="footnote"><p><a href="#id3318" class="para"><sup class="para">[3] </sup></a>A partir de
+                Lucene 2.3, los archivos de almacenamiento de documentos pueden compartirse entre segmentos; sin embargo,
+                <code class="classname">Zend_Search_Lucene</code> no utiliza esta
+                capacidad</p></div>
+<div id="ftn.id3328" class="footnote"><p><a href="#id3328" class="para"><sup class="para">[4] </sup></a>Esta llamada actualmente solo la proporciona Java Lucene, pero está previsto extender
+            la <acronym class="acronym">API</acronym> de <code class="classname">Zend_Search_Lucene</code> con una funcionalidad
+            similar</p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.lucene.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.lucene.index-opening.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 10. Primeros pasos con Zend_Search_Lucene </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 10.3. Apertura y creación del índice</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

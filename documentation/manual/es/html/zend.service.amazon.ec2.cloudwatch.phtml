@@ -1,0 +1,145 @@
+<?php $title = '64.8. Zend_Service_Amazon_Ec2: Monitorización CloudWatch'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.8. Zend_Service_Amazon_Ec2: Monitorización CloudWatch</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.reserved.instance.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.images.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.cloudwatch"></a>64.8. Zend_Service_Amazon_Ec2: Monitorización CloudWatch</h2></div></div></div>
+<p>
+        Amazon CloudWatch es un servicio web fácil de usar que proporciona
+        monitorización completa para Amazon Elastic Compute Cloud (Amazon
+        <acronym class="acronym">EC2</acronym>) y Elastic Load Balancing. Para obtener más información
+        consulte la <a class="ulink" href="http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/Welcome.html" target="_top">
+            Guía del desarrollador de Amazon CloudWatch</a>
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.cloudwatch.usage"></a>64.8.1. Uso de CloudWatch</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.cloudwatch.usage.list"></a><p class="title"><b>Ejemplo 64.28. Listado de métricas disponibles</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">listMetrics()</code> devuelve una lista de hasta 500 métricas válidas para
+                las cuales hay datos registrados disponibles para usted, y una cadena NextToken
+                que se puede usar para consultar el siguiente conjunto de resultados.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_CloudWatch('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;listMetrics();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.cloudwatch.usage.getmetricstatistics"></a><p class="title"><b>Ejemplo 64.29. Devolución de estadísticas para una métrica dada</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">getMetricStatistics()</code> Devuelve datos de una o más
+                estadísticas de una métrica dada.
+            </p>
+<p>
+                </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                        El número máximo de puntos de datos que el servicio Amazon CloudWatch
+                        devolverá en una única solicitud GetMetricStatistics es 1.440. Si se
+                        realiza una solicitud que generaría más puntos de datos que esta cantidad,
+                        Amazon CloudWatch devolverá un error. Puede modificar su solicitud reduciendo
+                        el rango de tiempo (StartTime, EndTime) o aumentando el Period en su única
+                        solicitud. También puede obtener todos los datos con la granularidad que
+                        solicitó originalmente realizando varias solicitudes con rangos de tiempo
+                        adyacentes.
+                    </p></td></tr>
+</table></div>
+<p>
+            </p>
+<p>
+                <code class="methodname">getMetricStatistics()</code> solo requiere dos parámetros, pero
+                también tiene cuatro parámetros adicionales que son opcionales.
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="emphasis"><em>Obligatorio:</em></span></p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>MeasureName</em></span> El nombre de la medida que corresponde a
+                        la medida de la métrica recopilada. Los valores válidos de <acronym class="acronym">EC2</acronym> son
+                        <acronym class="acronym">CPU</acronym>Utilization, NetworkIn, NetworkOut, DiskWriteOps
+                        DiskReadBytes, DiskReadOps, DiskWriteBytes. Las métricas válidas de Elastic
+                        Load Balancing son Latency, RequestCount, HealthyHostCount
+                        UnHealthyHostCount. <a class="ulink" href="http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/CW_Support_For_AWS.html#ec2-metricscollected" target="_top">Para
+                            más información haga clic aquí</a>
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Statistics</em></span> Las estadísticas que se devolverán para la
+                        métrica dada. Los valores válidos son Average, Maximum, Minimum, Samples, Sum. Puede
+                        especificarlo como una cadena o como un array de valores. Si no especifica ninguno,
+                        se usará Average por defecto en lugar de fallar. Si especifica una
+                        opción incorrecta, simplemente se omitirá. <a class="ulink" href="http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/US_GetStatistics.html" target="_top">Para
+                            más información haga clic aquí</a>
+                    </p></li>
+<li class="listitem"><p><span class="emphasis"><em>Opcional:</em></span></p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Dimensions</em></span> Amazon CloudWatch permite especificar una
+                        Dimension para filtrar aún más los datos de la métrica. Si no especifica una
+                        dimensión, el servicio devuelve el agregado de todas las medidas con el
+                        nombre de medida y el rango de tiempo dados.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Unit</em></span> La unidad estándar de medida para una
+                        Measure dada. Valores válidos: Seconds, Percent, Bytes, Bits, Count, Bytes/Second,
+                        Bits/Second, Count/Second y None. Restricciones: Al usar count/second
+                        como unidad, debe usar Sum como estadística en lugar de Average.
+                        De lo contrario, la muestra se devuelve igual al número de solicitudes
+                        en lugar del número de intervalos de 60 segundos. Esto hará que el Average
+                        sea siempre igual a uno cuando la unidad sea count/second.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>StartTime</em></span> La marca de tiempo del primer punto de datos
+                        a devolver, inclusive. Por ejemplo, 2008-02-26T19:00:00+00:00. Su
+                        valor se redondea hacia abajo al minuto más cercano. Puede establecer su hora de inicio para más de
+                        dos semanas en el pasado. Sin embargo, solo obtendrá datos de las últimas dos
+                        semanas. (en formato <acronym class="acronym">ISO</acronym> 8601). Restricciones: Debe ser anterior a
+                        EndTime.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>EndTime</em></span> La marca de tiempo utilizada para determinar el último
+                        punto de datos a devolver. Este es el último punto de datos a obtener, exclusive. Por
+                        ejemplo, 2008-02-26T20:00:00+00:00 (en formato <acronym class="acronym">ISO</acronym> 8601).
+                    </p></li>
+</ul></div>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_CloudWatch('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;getMetricStatistics(
+                                     array('MeasureName' =&gt; 'NetworkIn',
+                                           'Statistics' =&gt; array('Average')));
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.reserved.instance.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.images.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.7. Zend_Service_Amazon_Ec2: Instancias reservadas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.9. Zend_Service_Amazon_Ec2: Amazon Machine Images (AMI)</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

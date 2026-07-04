@@ -1,0 +1,177 @@
+<?php $title = '21.3. Zend_Config_Ini'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">21.3. Zend_Config_Ini</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.config.theory_of_operation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 21. Zend_Config</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.adapters.json.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.config.adapters.ini"></a>21.3. Zend_Config_Ini</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Config_Ini</code> permite a los desarrolladores almacenar datos de configuración en un
+        formato <acronym class="acronym">INI</acronym> familiar y leerlos en la aplicación usando la sintaxis anidada
+        de propiedades de objeto. El formato <acronym class="acronym">INI</acronym> está especializado para proporcionar tanto
+        la capacidad de tener una jerarquía de claves de datos de configuración como herencia entre
+        secciones de datos de configuración. Las jerarquías de datos de configuración se admiten separando las
+        claves con el carácter de punto ("<span class="emphasis"><em>.</em></span>"). Una sección puede extender o
+        heredar de otra sección siguiendo el nombre de la sección con un carácter de dos puntos
+        ("<span class="emphasis"><em>:</em></span>) y el nombre de la sección de la que se heredarán los datos.
+    </p>
+<div class="note"><table border="0" summary="Note: Parsing the INI File">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Analizando el archivo INI</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Config_Ini</code> utiliza la función <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://php.net/parse_ini_file" target="_top"><code class="methodname">parse_ini_file()</code></a>.
+            Por favor revise esta documentación para estar al tanto de sus
+            comportamientos específicos, que se propagan a <code class="classname">Zend_Config_Ini</code>, como
+            la forma en que se manejan los valores especiales de "<code class="constant">TRUE</code>", "<code class="constant">FALSE</code>",
+            "yes", "no", y "<code class="constant">NULL</code>".
+        </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Key Separator">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Separador de claves</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Por defecto, el carácter separador de claves es el carácter de punto
+            ("<span class="emphasis"><em>.</em></span>"). Sin embargo, esto se puede cambiar modificando la
+            clave <span class="property">nestSeparator</span> de <code class="varname">$options</code> al construir
+            el objeto <code class="classname">Zend_Config_Ini</code>. Por ejemplo:
+        </p>
+<pre class="programlisting">
+$options['nestSeparator'] = ':';
+$config = new Zend_Config_Ini('/path/to/config.ini',
+                              'staging',
+                              $options);
+</pre>
+</td></tr>
+</table></div>
+<div class="example">
+<a name="zend.config.adapters.ini.example.using"></a><p class="title"><b>Ejemplo 21.3. Uso de Zend_Config_Ini</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo ilustra un uso básico de <code class="classname">Zend_Config_Ini</code> para
+            cargar datos de configuración desde un archivo <acronym class="acronym">INI</acronym>. En este ejemplo hay
+            datos de configuración tanto para un sistema de producción como para un sistema de staging. Debido a
+            que los datos de configuración del sistema de staging son muy similares a los de producción, la
+            sección de staging hereda de la sección de producción. En este caso, la decisión es
+            arbitraria y podría haberse escrito al revés, con la sección de producción
+            heredando de la sección de staging, aunque esto podría no ser el caso en situaciones
+            más complejas. Suponga, entonces, que los siguientes datos de configuración están contenidos en
+            <code class="filename">/path/to/config.ini</code>:
+        </p>
+<pre class="programlisting">
+; Production site configuration data
+[production]
+webhost                  = www.example.com
+database.adapter         = pdo_mysql
+database.params.host     = db.example.com
+database.params.username = dbuser
+database.params.password = secret
+database.params.dbname   = dbname
+
+; Staging site configuration data inherits from production and
+; overrides values as necessary
+[staging : production]
+database.params.host     = dev.example.com
+database.params.username = devuser
+database.params.password = devsecret
+</pre>
+<p>
+            A continuación, suponga que el desarrollador de la aplicación necesita los datos de configuración de staging
+            del archivo <acronym class="acronym">INI</acronym>. Es sencillo cargar estos datos especificando
+            el archivo <acronym class="acronym">INI</acronym> y la sección de staging:
+        </p>
+<pre class="programlisting">
+$config = new Zend_Config_Ini('/path/to/config.ini', 'staging');
+
+echo $config-&gt;database-&gt;params-&gt;host;   // prints "dev.example.com"
+echo $config-&gt;database-&gt;params-&gt;dbname; // prints "dbname"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<div class="table">
+<a name="zend.config.adapters.ini.table"></a><p class="title"><b>Tabla 21.1. Parámetros del constructor de Zend_Config_Ini</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Config_Ini Constructor Parameters" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Parámetro</th>
+<th>Notas</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="varname">$filename</code></td>
+<td>El archivo <acronym class="acronym">INI</acronym> a cargar.</td>
+</tr>
+<tr>
+<td><code class="varname">$section</code></td>
+<td>
+                            La [sección] dentro del archivo <acronym class="acronym">INI</acronym> que se va a
+                            cargar. Establecer este parámetro en <code class="constant">NULL</code> cargará
+                            todas las secciones. Alternativamente, se puede proporcionar un array de nombres de sección
+                            para cargar múltiples secciones.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <code class="varname">$options</code> (por defecto <code class="constant">FALSE</code>)
+                        </td>
+<td>
+                            Array de opciones. Se admiten las siguientes claves:
+
+                            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                        <span class="emphasis"><em><span class="property">allowModifications</span></em></span>:
+                                        Establezca en <code class="constant">TRUE</code> para permitir la
+                                        modificación posterior de los datos de configuración cargados en memoria.
+                                        Por defecto es <code class="constant">NULL</code>
+                                    </p></li>
+<li class="listitem"><p>
+                                        <span class="emphasis"><em><span class="property">nestSeparator</span></em></span>: Establezca
+                                        el carácter que se usará como separador de anidamiento. Por defecto
+                                        es "."
+                                    </p></li>
+</ul></div>
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.config.theory_of_operation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.config.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.adapters.json.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">21.2. Teoría de funcionamiento </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 21.4. Zend_Config_Json</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,384 @@
+<?php $title = 'B.2. Zend Framework 1.10'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">B.2. Zend Framework 1.10</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="migration.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice B. Notas de migración de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="migration.19.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="migration.110"></a>B.2. Zend Framework 1.10</h2></div></div></div>
+<p>
+        Al actualizar desde una versión anterior a Zend Framework 1.10 o superior debe
+        tener en cuenta las siguientes notas de migración.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.controller.front"></a>B.2.1. Zend_Controller_Front</h3></div></div></div>
+<p>
+            Se corrigió un comportamiento incorrecto que se producía cuando no había ninguna ruta de módulo
+            ni ninguna ruta que coincidiera con la petición dada. Anteriormente, el enrutador devolvía un
+            objeto de petición sin modificar, por lo que el controlador frontal simplemente mostraba el
+            controlador y la acción por defecto. A partir de Zend Framework 1.10, el enrutador lanzará
+            correctamente una excepción si ninguna ruta coincide, tal y como se indica en la interfaz del
+            enrutador. El plugin de errores capturará entonces dicha excepción y redirigirá al controlador
+            de errores. Puede entonces comprobar ese error específico con la constante
+            <code class="constant">Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE</code>:
+        </p>
+<pre class="programlisting">
+/**
+ * Before 1.10
+ */
+    public function errorAction()
+    {
+        $errors = $this-&gt;_getParam('error_handler');
+
+        switch ($errors-&gt;type) {
+            case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_CONTROLLER:
+            case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ACTION:
+    // ...
+
+/**
+ * With 1.10
+ */
+    public function errorAction()
+    {
+        $errors = $this-&gt;_getParam('error_handler');
+
+        switch ($errors-&gt;type) {
+            case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE:
+            case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_CONTROLLER:
+            case Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ACTION:
+    // ...
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.feed.reader"></a>B.2.2. Zend_Feed_Reader</h3></div></div></div>
+<p>
+            Con la introducción de Zend Framework 1.10, la forma en que <code class="classname">Zend_Feed_Reader</code>
+            gestiona la recuperación de Autores y Colaboradores cambió, introduciendo
+            una ruptura en la compatibilidad hacia atrás. Este cambio fue un esfuerzo por armonizar
+            el tratamiento de dichos datos entre las clases RSS y Atom del componente
+            y permitir la devolución de datos de Autor y Colaborador en una forma más accesible,
+            usable y detallada. También corrige un error, ya que se asumía que
+            cualquier elemento de autor hacía referencia a un nombre. En RSS esto es incorrecto, ya que un
+            elemento de autor en realidad solo debe proporcionar una dirección de correo electrónico.
+            Además, la implementación original aplicaba sus límites de RSS a los feeds
+            Atom, reduciendo considerablemente la utilidad del parser con ese formato.
+        </p>
+<p>
+            Este cambio significa que métodos como <code class="methodname">getAuthors()</code>
+            y <code class="methodname">getContributors</code> ya no devuelven un simple array
+            de cadenas extraídas de los elementos RSS y Atom correspondientes. En su lugar, el valor
+            devuelto es una subclase de <code class="classname">ArrayObject</code> llamada
+            <code class="classname">Zend_Feed_Reader_Collection_Author</code> que simula
+            un array multidimensional iterable de Autores. Cada miembro de este objeto
+            será un simple array con tres posibles claves (según lo permitan los datos de origen).
+            Estas incluyen: name, email y uri.
+        </p>
+<p>
+            El comportamiento original de estos métodos habría devuelto un simple
+            array de cadenas, cada una intentando representar un único nombre, pero
+            en realidad esto no era fiable, ya que no existe ninguna norma que rija el formato
+            de las cadenas de Autor de RSS.
+        </p>
+<p>
+            El método más simple para simular el comportamiento original de estos
+            métodos es usar <code class="methodname">getValues()</code> de
+            <code class="classname">Zend_Feed_Reader_Collection_Author</code>, que también devuelve un simple array de cadenas
+            que representan los "datos más relevantes", presumiendo que para los autores serán su nombre.
+            Cada valor del array resultante se deriva del valor "name"
+            asociado a cada Autor (si está presente). En la mayoría de los casos este simple cambio es
+            fácil de aplicar, tal y como se muestra a continuación.
+        </p>
+<pre class="programlisting">
+/**
+ * Before 1.10
+ */
+$feed = Zend_Feed_Reader::import('http://example.com/feed');
+$authors = $feed-&gt;getAuthors();
+
+/**
+ * With 1.10
+ */
+$feed = Zend_Feed_Reader::import('http://example.com/feed');
+$authors = $feed-&gt;getAuthors()-&gt;getValues();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.file.transfer"></a>B.2.3. Zend_File_Transfer</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.file.transfer.files"></a>B.2.3.1. Cambio de seguridad</h4></div></div></div>
+<p>
+                Por motivos de seguridad, <code class="classname">Zend_File_Transfer</code> ya no almacena
+                en su almacenamiento interno el tipo MIME y el tamaño de archivo originales proporcionados por el
+                cliente que realiza la petición. En su lugar, los valores reales se detectarán en la inicialización.
+            </p>
+<p>
+                Además, los valores originales dentro de <code class="varname">$_FILES</code> se
+                sobrescribirán con los valores reales en la inicialización. Esto hace también que
+                <code class="varname">$_FILES</code> sea seguro.
+            </p>
+<p>
+                Cuando necesite los valores originales, puede almacenarlos antes de
+                inicializar <code class="classname">Zend_File_Transfer</code> o usar la opción
+                <span class="property">disableInfos</span> en la inicialización. Tenga en cuenta que esta opción es
+                inútil si se proporciona después de la inicialización.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.file.transfer.count"></a>B.2.3.2. Validación de conteo</h4></div></div></div>
+<p>
+                Antes de la versión 1.10, el validador <code class="classname">MimeType</code> usaba una
+                nomenclatura incorrecta. Por coherencia, se han cambiado las siguientes constantes:
+            </p>
+<div class="table">
+<a name="migration.110.zend.file.transfer.count.table"></a><p class="title"><b>Tabla B.1. Mensajes de validación modificados</b></p>
+<div class="table-contents"><table class="table" summary="Changed Validation Messages" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Antigua</th>
+<th>Nueva</th>
+<th>Valor</th>
+<td class="auto-generated"> </td>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="constant">TOO_MUCH</code></td>
+<td><code class="constant">TOO_MANY</code></td>
+<td>
+                                Too many files, maximum '%max%' are allowed but '%count%' are given
+                            </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td><code class="constant">TOO_LESS</code></td>
+<td><code class="constant">TOO_FEW</code></td>
+<td>
+                                Too few files, minimum '%min%' are expected but '%count%' are given
+                            </td>
+<td class="auto-generated"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+                Cuando traduzca estos mensajes en su código, use las nuevas constantes.
+                Como beneficio, ya no necesita traducir la cadena original para obtener una ortografía
+                correcta.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.filter.html-entities"></a>B.2.4. Zend_Filter_HtmlEntities</h3></div></div></div>
+<p>
+            Para usar por defecto una codificación de caracteres más segura,
+            <code class="classname">Zend_Filter_HtmlEntities</code> ahora utiliza por defecto <acronym class="acronym">UTF-8</acronym>
+            en lugar de <acronym class="acronym">ISO-8859-1</acronym>.
+        </p>
+<p>
+            Además, dado que el mecanismo real trata con codificaciones de caracteres y no
+            con conjuntos de caracteres, se han añadido dos nuevos métodos, <code class="methodname">setEncoding()</code>
+            y <code class="methodname">getEncoding()</code>. Los métodos anteriores
+            <code class="methodname">setCharSet()</code> y <code class="methodname">setCharSet()</code> ahora están
+            obsoletos y delegan en los nuevos métodos. Por último, en lugar de usar directamente los miembros
+            protegidos dentro del método <code class="methodname">filter()</code>, estos miembros se
+            recuperan a través de sus accesores explícitos. Si estaba extendiendo el filtro anteriormente,
+            revise su código y sus pruebas unitarias para asegurarse de que todo sigue funcionando.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.filter.strip-tags"></a>B.2.5. Zend_Filter_StripTags</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Filter_StripTags</code> contiene un indicador,
+            <code class="varname">commentsAllowed</code>, que, en versiones anteriores, permitía
+            incluir opcionalmente en una lista blanca los comentarios <acronym class="acronym">HTML</acronym> en el texto
+            <acronym class="acronym">HTML</acronym> filtrado por la clase. Sin embargo, esto expone el código que habilita el indicador a
+            ataques de <acronym class="acronym">XSS</acronym>, particularmente en Internet Explorer (que permite
+            especificar funcionalidad condicional mediante comentarios <acronym class="acronym">HTML</acronym>). A partir
+            de la versión 1.9.7 (y retroportado a las versiones 1.8.5 y 1.7.9), el
+            indicador <code class="varname">commentsAllowed</code> ya no tiene ningún efecto, y todos
+            los comentarios <acronym class="acronym">HTML</acronym>, incluidos los que contienen otras
+            etiquetas <acronym class="acronym">HTML</acronym> o comentarios anidados, se eliminarán del resultado final
+            del filtro.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.translate"></a>B.2.6. Zend_Translate</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.translate.xliff"></a>B.2.6.1. Adaptador Xliff</h4></div></div></div>
+<p>
+                Anteriormente el adaptador Xliff usaba la cadena de origen como Id de mensaje. Según el
+                estándar Xliff, se debería usar el Id de trans-unit. Este comportamiento se corrigió con
+                Zend Framework 1.10. Ahora el Id de trans-unit se usa como Id de mensaje por defecto.
+            </p>
+<p>
+                Pero todavía puede obtener el comportamiento antiguo e incorrecto estableciendo la
+                opción <span class="property">useId</span> a <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$trans = new Zend_Translate(
+    'xliff', '/path/to/source', $locale, array('useId' =&gt; false)
+);
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.110.zend.validate"></a>B.2.7. Zend_Validate</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.validate.selfwritten"></a>B.2.7.1. Validadores escritos por el usuario</h4></div></div></div>
+<p>
+                Al establecer y devolver un error desde un validador escrito por el usuario, debe
+                llamar al método <code class="methodname">_error()</code>. Antes de Zend Framework 1.10
+                podía llamar a este método sin proporcionar ningún parámetro. En ese caso se usaba la primera
+                plantilla de mensaje encontrada.
+            </p>
+<p>
+                Este comportamiento es problemático cuando tiene validadores con más de un mensaje
+                distinto que devolver. También al extender un validador existente puede obtener
+                resultados inesperados. Esto podría llevar al problema de que su usuario no reciba el
+                mensaje que usted esperaba.
+            </p>
+<pre class="programlisting">
+My_Validator extends Zend_Validate_Abstract
+{
+    public isValid($value)
+    {
+        ...
+        $this-&gt;_error(); // unexpected results between different OS
+        ...
+    }
+}
+</pre>
+<p>
+                Para evitar este problema, ya no se permite llamar al método
+                <code class="methodname">_error()</code> sin proporcionar un parámetro.
+            </p>
+<pre class="programlisting">
+My_Validator extends Zend_Validate_Abstract
+{
+    public isValid($value)
+    {
+        ...
+        $this-&gt;_error(self::MY_ERROR); // defined error, no unexpected results
+        ...
+    }
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.validate.datevalidator"></a>B.2.7.2. Simplificación en el validador de fechas</h4></div></div></div>
+<p>
+                Antes de Zend Framework 1.10 se lanzaban 2 mensajes idénticos dentro del validador
+                de fechas. Estos eran <code class="constant">NOT_YYYY_MM_DD</code> y
+                <code class="constant">FALSEFORMAT</code>. A partir de Zend Framework 1.10 solo se
+                devolverá el mensaje <code class="constant">FALSEFORMAT</code> cuando la fecha dada
+                no coincida con el formato establecido.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.110.zend.validate.barcodevalidator"></a>B.2.7.3. Correcciones en los validadores Alpha, Alnum y Barcode</h4></div></div></div>
+<p>
+                Antes de Zend Framework 1.10, los mensajes de los 2 adaptadores de código de barras, el Alpha
+                y el validador Alnum eran idénticos. Esto introducía problemas al usar mensajes
+                personalizados, traducciones o múltiples instancias de estos validadores.
+            </p>
+<p>
+                A partir de Zend Framework 1.10, los valores de las constantes se cambiaron para
+                que fueran únicos. Si usó las constantes tal como se propone en el manual, no hay
+                ningún cambio para usted. Pero si usó el contenido de las constantes en su código,
+                deberá cambiarlos. La siguiente tabla muestra los valores modificados:
+            </p>
+<div class="table">
+<a name="migration.110.zend.validate.barcodevalidator.table"></a><p class="title"><b>Tabla B.2. Mensajes de validación disponibles</b></p>
+<div class="table-contents"><table class="table" summary="Available Validation Messages" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Validador</th>
+<th>Constante</th>
+<th>Valor</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="classname">Alnum</code></td>
+<td><code class="constant">STRING_EMPTY</code></td>
+<td>alnumStringEmpty</td>
+</tr>
+<tr>
+<td><code class="classname">Alpha</code></td>
+<td><code class="constant">STRING_EMPTY</code></td>
+<td>alphaStringEmpty</td>
+</tr>
+<tr>
+<td><code class="classname">Barcode_Ean13</code></td>
+<td><code class="constant">INVALID</code></td>
+<td>ean13Invalid</td>
+</tr>
+<tr>
+<td><code class="classname">Barcode_Ean13</code></td>
+<td><code class="constant">INVALID_LENGTH</code></td>
+<td>ean13InvalidLength</td>
+</tr>
+<tr>
+<td><code class="classname">Barcode_UpcA</code></td>
+<td><code class="constant">INVALID</code></td>
+<td>upcaInvalid</td>
+</tr>
+<tr>
+<td><code class="classname">Barcode_UpcA</code></td>
+<td><code class="constant">INVALID_LENGTH</code></td>
+<td>upcaInvalidLength</td>
+</tr>
+<tr>
+<td><code class="classname">Digits</code></td>
+<td><code class="constant">STRING_EMPTY</code></td>
+<td>digitsStringEmpty</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="migration.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="migration.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="migration.19.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Apéndice B. Notas de migración de Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> B.3. Zend Framework 1.9</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

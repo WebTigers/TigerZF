@@ -1,0 +1,1512 @@
+<?php $title = '27.5. Zend_Db_Table'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">27.5. Zend_Db_Table</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.db.select.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 27. Zend_Db</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.table.row.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.db.table"></a>27.5. Zend_Db_Table</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.introduction"></a>27.5.1. Introducción</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Db_Table</code> es una interfaz orientada a objetos para
+            tablas de bases de datos. Proporciona métodos para muchas operaciones comunes sobre tablas. La clase
+            base es extensible, de modo que puede añadir lógica personalizada.
+        </p>
+<p>
+            La solución <code class="classname">Zend_Db_Table</code> es una implementación del patrón
+            <a class="ulink" href="http://www.martinfowler.com/eaaCatalog/tableDataGateway.html" target="_top">Table Data
+            Gateway</a>. La solución también incluye una clase que implementa el patrón
+            <a class="ulink" href="http://www.martinfowler.com/eaaCatalog/rowDataGateway.html" target="_top">Row Data
+            Gateway</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.concrete"></a>27.5.2. Usar Zend_Db_Table como una clase concreta</h3></div></div></div>
+<p>
+            A partir de Zend Framework 1.9, puede instanciar <code class="classname">Zend_Db_Table</code>. Este
+            beneficio añadido significa que no tiene que extender una clase base y configurarla para realizar
+            operaciones simples tales como seleccionar, insertar, actualizar y eliminar en una única
+            tabla. A continuación se muestra un ejemplo del caso de uso más simple.
+        </p>
+<div class="example">
+<a name="zend.db.table.defining.concrete-instantiation.example1"></a><p class="title"><b>Ejemplo 27.80. Declarar una clase de tabla usando solo el nombre en forma de cadena</b></p>
+<div class="example-contents"><pre class="programlisting">
+Zend_Db_Table::setDefaultAdapter($dbAdapter);
+$bugTable = new Zend_Db_Table('bug');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El ejemplo anterior representa el caso de uso más simple. Tenga en cuenta todas las
+            opciones descritas más abajo para configurar tablas <code class="classname">Zend_Db_Table</code>. Si
+            quiere poder usar el caso de uso concreto, además de las funciones de relación más
+            complejas, consulte la documentación de <code class="classname">Zend_Db_Table_Definition</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.defining"></a>27.5.3. Definir una clase de tabla</h3></div></div></div>
+<p>
+            Para cada tabla de su base de datos a la que quiera acceder, defina una clase que extienda
+            <code class="classname">Zend_Db_Table_Abstract</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.defining.table-schema"></a>27.5.3.1. Definir el nombre de la tabla y el esquema</h4></div></div></div>
+<p>
+                Declare la tabla de la base de datos para la que se define esta clase, usando la
+                variable protegida <code class="varname">$_name</code>. Se trata de una cadena, y debe contener el
+                nombre de la tabla tal y como aparece escrito en la base de datos.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.table-schema.example1"></a><p class="title"><b>Ejemplo 27.81. Declarar una clase de tabla con nombre de tabla explícito</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si no especifica el nombre de la tabla, se usa por defecto el nombre de la clase. Si
+                confía en este comportamiento por defecto, el nombre de la clase debe coincidir con el
+                nombre de la tabla tal y como aparece en la base de datos.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.table-schema.example"></a><p class="title"><b>Ejemplo 27.82. Declarar una clase de tabla con nombre de tabla implícito</b></p>
+<div class="example-contents"><pre class="programlisting">
+class bugs extends Zend_Db_Table_Abstract
+{
+    // el nombre de la tabla coincide con el nombre de la clase
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                También puede declarar el esquema de la tabla, ya sea con la variable protegida
+                <code class="varname">$_schema</code>, o con el esquema anteponiéndolo al nombre de la tabla en la
+                propiedad <code class="varname">$_name</code>. Cualquier esquema especificado con la propiedad
+                <code class="varname">$_name</code> tiene prioridad sobre un esquema especificado con la propiedad
+                <code class="varname">$_schema</code>. En algunas marcas de <acronym class="acronym">RDBMS</acronym>, el
+                término para esquema es "base de datos" o "tablespace", pero se usa de forma similar.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.table-schema.example3"></a><p class="title"><b>Ejemplo 27.83. Declarar una clase de tabla con esquema</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Primera alternativa:
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_schema = 'bug_db';
+    protected $_name   = 'bugs';
+}
+
+// Segunda alternativa:
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bug_db.bugs';
+}
+
+// Si se especifican esquemas tanto en $_name como en $_schema, el que
+// se especifica en $_name tiene prioridad:
+
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name   = 'bug_db.bugs';
+    protected $_schema = 'ignored';
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                El esquema y los nombres de tabla también se pueden especificar mediante directivas de
+                configuración del constructor, que sobrescriben cualquier valor por defecto especificado con
+                las propiedades <code class="varname">$_name</code> y <code class="varname">$_schema</code>. Una
+                especificación de esquema dada con la directiva <span class="property">name</span> sobrescribe cualquier valor
+                proporcionado con la opción <span class="property">schema</span>.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.table-schema.example.constructor"></a><p class="title"><b>Ejemplo 27.84. Declarar los nombres de tabla y esquema al instanciar</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+}
+
+// Primera alternativa:
+
+$tableBugs = new Bugs(array('name' =&gt; 'bugs', 'schema' =&gt; 'bug_db'));
+
+// Segunda alternativa:
+
+$tableBugs = new Bugs(array('name' =&gt; 'bug_db.bugs'));
+
+// Si se especifican esquemas tanto en 'name' como en 'schema', el que
+// se especifica en 'name' tiene prioridad:
+
+$tableBugs = new Bugs(array('name' =&gt; 'bug_db.bugs',
+                            'schema' =&gt; 'ignored'));
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si no especifica el nombre del esquema, se usa por defecto el esquema al que está
+                conectada su instancia de adaptador de base de datos.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.defining.primary-key"></a>27.5.3.2. Definir la clave primaria de la tabla</h4></div></div></div>
+<p>
+                Toda tabla debe tener una clave primaria. Puede declarar la columna de la clave primaria
+                usando la variable protegida <code class="varname">$_primary</code>. Puede ser una cadena
+                que nombre la única columna para la clave primaria, o bien un array de nombres de
+                columnas si su clave primaria es compuesta.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.primary-key.example"></a><p class="title"><b>Ejemplo 27.85. Ejemplo de especificación de la clave primaria</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+    protected $_primary = 'bug_id';
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si no especifica la clave primaria, <code class="classname">Zend_Db_Table_Abstract</code>
+                intenta descubrir la clave primaria basándose en la información proporcionada por el
+                método <code class="methodname">describeTable()</code>´.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Toda clase de tabla debe saber qué columnas se pueden usar para identificar filas
+                    de forma unívoca. Si no se especifican columnas de clave primaria en la definición
+                    de la clase de tabla o en los argumentos del constructor de la tabla, ni se
+                    descubren en los metadatos de la tabla proporcionados por
+                    <code class="methodname">describeTable()</code>, entonces la tabla
+                    no se puede usar con <code class="classname">Zend_Db_Table</code>.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.defining.setup"></a>27.5.3.3. Sobrescribir los métodos de configuración de la tabla</h4></div></div></div>
+<p>
+                Cuando crea una instancia de una clase de tabla, el constructor invoca un conjunto de
+                métodos protegidos que inicializan los metadatos de la tabla. Puede extender cualquiera de
+                estos métodos para definir metadatos de forma explícita. Recuerde invocar el método del
+                mismo nombre en la clase padre al final de su método.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.setup.example"></a><p class="title"><b>Ejemplo 27.86. Ejemplo de sobrescritura del método _setupTableName()</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected function _setupTableName()
+    {
+        $this-&gt;_name = 'bugs';
+        parent::_setupTableName();
+    }
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Los métodos de configuración que puede sobrescribir son los siguientes:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="methodname">_setupDatabaseAdapter()</code> comprueba que se ha
+                        proporcionado un adaptador; obtiene un adaptador por defecto del registro si es
+                        necesario. Al sobrescribir este método, puede establecer un adaptador de base de
+                        datos desde alguna otra fuente.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">_setupTableName()</code> establece por defecto el nombre de
+                        la tabla como el nombre de la clase. Al sobrescribir este método, puede establecer
+                        el nombre de la tabla antes de que se ejecute este comportamiento por defecto.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">_setupMetadata()</code> establece el esquema si el nombre
+                        de la tabla contiene el patrón "<span class="command"><strong>schema.table</strong></span>"; invoca
+                        <code class="methodname">describeTable()</code> para obtener información de metadatos;
+                        establece por defecto el array <code class="varname">$_cols</code> con las columnas
+                        reportadas por <code class="methodname">describeTable()</code>. Al sobrescribir este
+                        método, puede especificar las columnas.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">_setupPrimaryKey()</code> establece por defecto las columnas
+                        de la clave primaria como las reportadas por <code class="methodname">describeTable()</code>;
+                        comprueba que las columnas de la clave primaria están incluidas en el array
+                        <code class="varname">$_cols</code>. Al sobrescribir este método, puede especificar las
+                        columnas de la clave primaria.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.initialization"></a>27.5.3.4. Inicialización de la tabla</h4></div></div></div>
+<p>
+                Si la lógica específica de la aplicación necesita inicializarse cuando se construye
+                una clase de tabla, puede optar por mover sus tareas al método
+                <code class="methodname">init()</code>, el cual se invoca después de que se hayan procesado
+                todos los metadatos de la tabla. Esto se recomienda frente al método
+                <code class="methodname">__construct()</code> si no necesita alterar los metadatos de ninguna
+                forma programática.
+            </p>
+<div class="example">
+<a name="zend.db.table.defining.init.usage.example"></a><p class="title"><b>Ejemplo 27.87. Ejemplo de uso del método init()</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_observer;
+
+    public function init()
+    {
+        $this-&gt;_observer = new MyObserverClass();
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.constructing"></a>27.5.4. Crear una instancia de una tabla</h3></div></div></div>
+<p>
+            Antes de usar una clase de tabla, cree una instancia usando su constructor. El
+            argumento del constructor es un array de opciones. La opción más importante para un
+            constructor de tabla es la instancia del adaptador de base de datos, que representa una
+            conexión activa a un <acronym class="acronym">RDBMS</acronym>. Hay tres formas de especificar el
+            adaptador de base de datos a una clase de tabla, y estas tres formas se describen a
+            continuación:
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.constructing.adapter"></a>27.5.4.1. Especificar un adaptador de base de datos</h4></div></div></div>
+<p>
+                La primera forma de proporcionar un adaptador de base de datos a una clase de tabla es
+                pasándolo como un objeto de tipo <code class="classname">Zend_Db_Adapter_Abstract</code> en el
+                array de opciones, identificado por la clave '<span class="property">db</span>'.
+            </p>
+<div class="example">
+<a name="zend.db.table.constructing.adapter.example"></a><p class="title"><b>Ejemplo 27.88. Ejemplo de construcción de una tabla usando un objeto adaptador</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db = Zend_Db::factory('PDO_MYSQL', $options);
+
+$table = new Bugs(array('db' =&gt; $db));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.constructing.default-adapter"></a>27.5.4.2. Establecer un adaptador de base de datos por defecto</h4></div></div></div>
+<p>
+                La segunda forma de proporcionar un adaptador de base de datos a una clase de tabla es
+                declarando un objeto de tipo <code class="classname">Zend_Db_Adapter_Abstract</code> como
+                adaptador de base de datos por defecto para todas las instancias posteriores de tablas en su
+                aplicación. Puede hacer esto con el método estático
+                <code class="methodname">Zend_Db_Table_Abstract::setDefaultAdapter()</code>. El argumento
+                es un objeto de tipo <code class="classname">Zend_Db_Adapter_Abstract</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.constructing.default-adapter.example"></a><p class="title"><b>Ejemplo 27.89. Ejemplo de construcción de una tabla usando el adaptador por defecto</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db = Zend_Db::factory('PDO_MYSQL', $options);
+Zend_Db_Table_Abstract::setDefaultAdapter($db);
+
+// Más tarde...
+
+$table = new Bugs();
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Puede resultar conveniente crear el objeto adaptador de base de datos en un lugar
+                central de su aplicación, como el bootstrap, y luego almacenarlo como el adaptador por
+                defecto. Esto le proporciona un medio para asegurarse de que la instancia del adaptador es
+                la misma en toda su aplicación. Sin embargo, establecer un adaptador por defecto se limita
+                a una única instancia de adaptador.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.constructing.registry"></a>27.5.4.3. Almacenar un adaptador de base de datos en el registro</h4></div></div></div>
+<p>
+                La tercera forma de proporcionar un adaptador de base de datos a una clase de tabla es
+                pasando una cadena en el array de opciones, también identificada por la clave
+                '<span class="property">db</span>'. La cadena se usa como clave para la instancia estática
+                <code class="classname">Zend_Registry</code>, donde la entrada en esa clave es un objeto de
+                tipo <code class="classname">Zend_Db_Adapter_Abstract</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.constructing.registry.example"></a><p class="title"><b>Ejemplo 27.90. Ejemplo de construcción de una tabla usando una clave de registro</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db = Zend_Db::factory('PDO_MYSQL', $options);
+Zend_Registry::set('my_db', $db);
+
+// Más tarde...
+
+$table = new Bugs(array('db' =&gt; 'my_db'));
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Al igual que al establecer el adaptador por defecto, esto le proporciona el medio para
+                asegurarse de que se usa la misma instancia de adaptador en toda su aplicación. Usar el
+                registro es más flexible, porque puede almacenar más de una instancia de adaptador. Una
+                instancia de adaptador dada es específica de una determinada marca de
+                <acronym class="acronym">RDBMS</acronym> e instancia de base de datos. Si su aplicación necesita
+                acceder a múltiples bases de datos o incluso a múltiples marcas de base de datos,
+                entonces necesita usar múltiples adaptadores.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.insert"></a>27.5.5. Insertar filas en una tabla</h3></div></div></div>
+<p>
+            Puede usar el objeto tabla para insertar filas en la tabla de base de datos en la que se
+            basa el objeto tabla. Use el método <code class="methodname">insert()</code> de su objeto tabla.
+            El argumento es un array asociativo, que asigna nombres de columna a valores.
+        </p>
+<div class="example">
+<a name="zend.db.table.insert.example"></a><p class="title"><b>Ejemplo 27.91. Ejemplo de inserción en una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$data = array(
+    'created_on'      =&gt; '2007-03-22',
+    'bug_description' =&gt; 'Something wrong',
+    'bug_status'      =&gt; 'NEW'
+);
+
+$table-&gt;insert($data);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Por defecto, los valores en su array de datos se insertan como valores literales, usando
+            parámetros. Si necesita que se traten como expresiones <acronym class="acronym">SQL</acronym>, debe
+            asegurarse de que se distinguen de las cadenas normales. Use un objeto de tipo
+            <code class="classname">Zend_Db_Expr</code> para ello.
+        </p>
+<div class="example">
+<a name="zend.db.table.insert.example-expr"></a><p class="title"><b>Ejemplo 27.92. Ejemplo de inserción de expresiones en una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$data = array(
+    'created_on'      =&gt; new Zend_Db_Expr('CURDATE()'),
+    'bug_description' =&gt; 'Something wrong',
+    'bug_status'      =&gt; 'NEW'
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            En los ejemplos de inserción de filas anteriores, se asume que la tabla tiene una
+            clave primaria autoincremental. Este es el comportamiento por defecto de
+            <code class="classname">Zend_Db_Table_Abstract</code>, pero también existen otros tipos de claves
+            primarias. Las siguientes secciones describen cómo dar soporte a diferentes tipos de claves primarias.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.insert.key-auto"></a>27.5.5.1. Usar una tabla con clave autoincremental</h4></div></div></div>
+<p>
+                Una clave primaria autoincremental genera un valor entero único para usted si
+                omite la columna de clave primaria en su sentencia <acronym class="acronym">SQL</acronym>
+                <code class="constant">INSERT</code>.
+            </p>
+<p>
+                En <code class="classname">Zend_Db_Table_Abstract</code>, si define la variable protegida
+                <code class="varname">$_sequence</code> con el valor booleano
+                <code class="constant">TRUE</code>, entonces la clase asume que la tabla tiene una
+                clave primaria autoincremental.
+            </p>
+<div class="example">
+<a name="zend.db.table.insert.key-auto.example"></a><p class="title"><b>Ejemplo 27.93. Ejemplo de declaración de una tabla con clave primaria autoincremental</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+
+    // This is the default in the Zend_Db_Table_Abstract class;
+    // you do not need to define this.
+    protected $_sequence = true;
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                MySQL, Microsoft <acronym class="acronym">SQL</acronym> Server y SQLite son ejemplos de
+                marcas de <acronym class="acronym">RDBMS</acronym> que admiten claves primarias autoincrementales.
+            </p>
+<p>
+                PostgreSQL tiene una notación <code class="constant">SERIAL</code> que define implícitamente
+                una secuencia basada en el nombre de la tabla y la columna, y usa la secuencia para
+                generar valores de clave para las nuevas filas. <acronym class="acronym">IBM</acronym>
+                <acronym class="acronym">DB2</acronym> tiene una notación <code class="constant">IDENTITY</code>
+                que funciona de forma similar. Si usa cualquiera de estas notaciones, trate su clase
+                <code class="classname">Zend_Db_Table</code> como si tuviera una columna autoincremental
+                respecto a la declaración de la variable miembro <code class="varname">$_sequence</code>
+                como <code class="constant">TRUE</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.insert.key-sequence"></a>27.5.5.2. Usar una tabla con una secuencia</h4></div></div></div>
+<p>
+                Una secuencia es un objeto de base de datos que genera un valor único, que puede
+                usarse como valor de clave primaria en una o más tablas de la base de datos.
+            </p>
+<p>
+                Si define <code class="varname">$_sequence</code> como una cadena, entonces
+                <code class="classname">Zend_Db_Table_Abstract</code> asume que la cadena nombra un objeto de
+                secuencia en la base de datos. La secuencia se invoca para generar un nuevo valor, y este
+                valor se usa en la operación <code class="constant">INSERT</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.insert.key-sequence.example"></a><p class="title"><b>Ejemplo 27.94. Ejemplo de declaración de una tabla con una secuencia</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+
+    protected $_sequence = 'bug_sequence';
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Oracle, PostgreSQL e <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym> son
+                ejemplos de marcas de <acronym class="acronym">RDBMS</acronym> que admiten objetos de secuencia en
+                la base de datos.
+            </p>
+<p>
+                PostgreSQL e <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym> también tienen
+                sintaxis que define secuencias de forma implícita y asociada a columnas. Si usa esta
+                notación, trate la tabla como si tuviera una columna de clave autoincremental. Defina el
+                nombre de la secuencia como una cadena solo en los casos en los que invocaría la secuencia
+                de forma explícita para obtener el siguiente valor de clave.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.insert.key-natural"></a>27.5.5.3. Usar una tabla con una clave natural</h4></div></div></div>
+<p>
+                Algunas tablas tienen una clave natural. Esto significa que la clave no la genera
+                automáticamente la tabla ni una secuencia. Debe especificar el valor para la clave
+                primaria en este caso.
+            </p>
+<p>
+                Si define <code class="varname">$_sequence</code> con el valor booleano
+                <code class="constant">FALSE</code>, entonces <code class="classname">Zend_Db_Table_Abstract</code>
+                asume que la tabla tiene una clave primaria natural. Debe proporcionar valores para las
+                columnas de la clave primaria en el array de datos del método
+                <code class="methodname">insert()</code>, o de lo contrario este método lanza una
+                <code class="classname">Zend_Db_Table_Exception</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.insert.key-natural.example"></a><p class="title"><b>Ejemplo 27.95. Ejemplo de declaración de una tabla con una clave natural</b></p>
+<div class="example-contents"><pre class="programlisting">
+class BugStatus extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bug_status';
+
+    protected $_sequence = false;
+}
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Todas las marcas de <acronym class="acronym">RDBMS</acronym> admiten tablas con claves
+                    naturales. Ejemplos de tablas que a menudo se declaran con claves naturales son las
+                    tablas de consulta (lookup), las tablas de intersección en relaciones muchos a
+                    muchos, o la mayoría de las tablas con claves primarias compuestas.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.update"></a>27.5.6. Actualizar filas en una tabla</h3></div></div></div>
+<p>
+            Puede actualizar filas en una tabla de base de datos usando el método
+            <code class="methodname">update()</code> de una clase de tabla. Este método toma dos argumentos: un
+            array asociativo de columnas a cambiar y los nuevos valores que asignar a estas columnas; y una
+            expresión <acronym class="acronym">SQL</acronym> que se usa en una cláusula <code class="constant">WHERE</code>,
+            como criterio para las filas a cambiar en la operación <code class="constant">UPDATE</code>.
+        </p>
+<div class="example">
+<a name="zend.db.table.update.example"></a><p class="title"><b>Ejemplo 27.96. Ejemplo de actualización de filas en una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$data = array(
+    'updated_on'      =&gt; '2007-03-23',
+    'bug_status'      =&gt; 'FIXED'
+);
+
+$where = $table-&gt;getAdapter()-&gt;quoteInto('bug_id = ?', 1234);
+
+$table-&gt;update($data, $where);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Dado que el método <code class="methodname">update()</code> de la tabla delega en el método
+            <a class="link" href="zend.db.phtml#zend.db.adapter.write.update" title="27.1.4.3. Updating Data"><code class="methodname">update()</code></a>
+            del adaptador de base de datos, el segundo argumento puede ser un array de expresiones
+            <acronym class="acronym">SQL</acronym>. Las expresiones se combinan como términos booleanos usando un
+            operador <code class="constant">AND</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los valores e identificadores en la expresión <acronym class="acronym">SQL</acronym> no se
+                entrecomillan automáticamente. Si tiene valores o identificadores que requieran
+                entrecomillado, usted es responsable de hacerlo. Use los métodos
+                <code class="methodname">quote()</code>,
+                <code class="methodname">quoteInto()</code>, y <code class="methodname">quoteIdentifier()</code>
+                del adaptador de base de datos.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.delete"></a>27.5.7. Eliminar filas de una tabla</h3></div></div></div>
+<p>
+            Puede eliminar filas de una tabla de base de datos usando el método
+            <code class="methodname">delete()</code>. Este método toma un argumento, que es una expresión
+            <acronym class="acronym">SQL</acronym> que se usa en una cláusula <code class="constant">WHERE</code>, como
+            criterio para las filas a eliminar.
+        </p>
+<div class="example">
+<a name="zend.db.table.delete.example"></a><p class="title"><b>Ejemplo 27.97. Ejemplo de eliminación de filas de una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$where = $table-&gt;getAdapter()-&gt;quoteInto('bug_id = ?', 1235);
+
+$table-&gt;delete($where);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Dado que el método <code class="methodname">delete()</code> de la tabla delega en el método
+            <a class="link" href="zend.db.phtml#zend.db.adapter.write.delete" title="27.1.4.4. Deleting Data"><code class="methodname">delete()</code></a>
+            del adaptador de base de datos, el argumento también puede ser un array de expresiones
+            <acronym class="acronym">SQL</acronym>. Las expresiones se combinan como términos booleanos usando un
+            operador <code class="constant">AND</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los valores e identificadores en la expresión <acronym class="acronym">SQL</acronym> no se
+                entrecomillan automáticamente. Si tiene valores o identificadores que requieran
+                entrecomillado, usted es responsable de hacerlo. Use los métodos
+                <code class="methodname">quote()</code>,
+                <code class="methodname">quoteInto()</code>, y <code class="methodname">quoteIdentifier()</code>
+                del adaptador de base de datos.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.find"></a>27.5.8. Buscar filas por clave primaria</h3></div></div></div>
+<p>
+            Puede consultar la tabla de base de datos en busca de filas que coincidan con valores
+            específicos en la clave primaria, usando el método <code class="methodname">find()</code>. El
+            primer argumento de este método es bien un único valor, bien un array de valores a comparar
+            con la clave primaria de la tabla.
+        </p>
+<div class="example">
+<a name="zend.db.table.find.example"></a><p class="title"><b>Ejemplo 27.98. Ejemplo de búsqueda de filas por valores de clave primaria</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+// Find a single row
+// Returns a Rowset
+$rows = $table-&gt;find(1234);
+
+// Find multiple rows
+// Also returns a Rowset
+$rows = $table-&gt;find(array(1234, 5678));
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Si especifica un único valor, el método devuelve como máximo una fila, porque una
+            clave primaria no puede tener valores duplicados y hay como máximo una fila en la tabla
+            de base de datos que coincide con el valor que especifique. Si especifica varios valores en
+            un array, el método devuelve como máximo tantas filas como el número de valores distintos que
+            especifique.
+        </p>
+<p>
+            El método <code class="methodname">find()</code> puede devolver menos filas que el número de
+            valores que especifique para la clave primaria, si algunos de los valores no coinciden con
+            ninguna fila de la tabla de base de datos. El método incluso puede devolver cero filas. Dado
+            que el número de filas devueltas es variable, el método <code class="methodname">find()</code>
+            devuelve un objeto de tipo <code class="classname">Zend_Db_Table_Rowset_Abstract</code>.
+        </p>
+<p>
+            Si la clave primaria es compuesta, es decir, consta de varias columnas, puede
+            especificar las columnas adicionales como argumentos adicionales al método
+            <code class="methodname">find()</code>. Debe proporcionar tantos argumentos como el número de
+            columnas de la clave primaria de la tabla.
+        </p>
+<p>
+            Para encontrar múltiples filas en una tabla con clave primaria compuesta, proporcione
+            un array para cada uno de los argumentos. Todos estos arrays deben tener el mismo número de
+            elementos. Los valores de cada array se forman en tuplas en orden; por ejemplo, el primer
+            elemento de todos los argumentos array define el primer valor de clave primaria compuesta,
+            luego los segundos elementos de todos los arrays definen el segundo valor de clave primaria
+            compuesta, y así sucesivamente.
+        </p>
+<div class="example">
+<a name="zend.db.table.find.example-compound"></a><p class="title"><b>Ejemplo 27.99. Ejemplo de búsqueda de filas por valores de clave primaria compuesta</b></p>
+<div class="example-contents">
+<p>
+                La llamada a <code class="methodname">find()</code> siguiente, para encontrar coincidencias
+                de múltiples filas, puede coincidir con dos filas en la base de datos. La primera fila
+                debe tener el valor de clave primaria (1234, 'ABC'), y la segunda fila debe tener el valor
+                de clave primaria (5678, 'DEF').
+            </p>
+<pre class="programlisting">
+class BugsProducts extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs_products';
+    protected $_primary = array('bug_id', 'product_id');
+}
+
+$table = new BugsProducts();
+
+// Find a single row with a compound primary key
+// Returns a Rowset
+$rows = $table-&gt;find(1234, 'ABC');
+
+// Find multiple rows with compound primary keys
+// Also returns a Rowset
+$rows = $table-&gt;find(array(1234, 5678), array('ABC', 'DEF'));
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.fetch-all"></a>27.5.9. Consultar un conjunto de filas</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.fetch-all.select"></a>27.5.9.1. API de Select</h4></div></div></div>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Advertencia</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    La <acronym class="acronym">API</acronym> para operaciones de recuperación se ha sustituido
+                    para permitir que un objeto <code class="classname">Zend_Db_Table_Select</code> modifique la
+                    consulta. Sin embargo, el uso obsoleto de los métodos <code class="methodname">fetchRow()</code>
+                    y <code class="methodname">fetchAll()</code> seguirá funcionando sin
+                    modificación.
+                </p>
+<p>
+                    Las siguientes sentencias son todas legales y funcionalmente idénticas, sin
+                    embargo se recomienda actualizar su código para aprovechar el nuevo uso
+                    siempre que sea posible.
+                </p>
+<pre class="programlisting">
+/**
+ * Fetching a rowset
+ */
+$rows = $table-&gt;fetchAll(
+    'bug_status = "NEW"',
+    'bug_id ASC',
+    10,
+    0
+    );
+$rows = $table-&gt;fetchAll(
+    $table-&gt;select()
+        -&gt;where('bug_status = ?', 'NEW')
+        -&gt;order('bug_id ASC')
+        -&gt;limit(10, 0)
+    );
+// or with binding
+$rows = $table-&gt;fetchAll(
+    $table-&gt;select()
+        -&gt;where('bug_status = :status')
+        -&gt;bind(array(':status'=&gt;'NEW')
+        -&gt;order('bug_id ASC')
+        -&gt;limit(10, 0)
+    );
+
+/**
+ * Fetching a single row
+ */
+$row = $table-&gt;fetchRow(
+    'bug_status = "NEW"',
+    'bug_id ASC'
+    );
+$row = $table-&gt;fetchRow(
+    $table-&gt;select()
+        -&gt;where('bug_status = ?', 'NEW')
+        -&gt;order('bug_id ASC')
+    );
+// or with binding
+$row = $table-&gt;fetchRow(
+    $table-&gt;select()
+        -&gt;where('bug_status = :status')
+        -&gt;bind(array(':status'=&gt;'NEW')
+        -&gt;order('bug_id ASC')
+    );
+</pre>
+</td></tr>
+</table></div>
+<p>
+                El objeto <code class="classname">Zend_Db_Table_Select</code> es una extensión del objeto
+                <code class="classname">Zend_Db_Select</code> que aplica restricciones específicas a
+                una consulta. Las mejoras y restricciones son:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Puede</em></span> optar por devolver un subconjunto de columnas
+                        dentro de una consulta fetchRow o fetchAll. Esto puede proporcionar beneficios
+                        de optimización cuando no es deseable devolver un gran conjunto de resultados para
+                        todas las columnas.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Puede</em></span> especificar columnas que evalúen expresiones
+                        dentro de la tabla seleccionada. Sin embargo, esto significará que la fila o
+                        rowset devuelto será de <span class="property">readOnly</span> y no se podrá usar para
+                        operaciones <code class="methodname">save()</code>. Un
+                        <code class="classname">Zend_Db_Table_Row</code> con estado
+                        <span class="property">readOnly</span> lanzará una excepción si se intenta una
+                        operación <code class="methodname">save()</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Puede</em></span> permitir cláusulas <code class="constant">JOIN</code>
+                        en una consulta select para permitir búsquedas multitabla.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>No puede</em></span> especificar columnas de una tabla
+                        unida (JOINed) para que se devuelvan en una fila o rowset. Hacerlo desencadenará
+                        un error de <acronym class="acronym">PHP</acronym>. Esto se hizo para asegurar que se
+                        mantenga la integridad de <code class="classname">Zend_Db_Table</code>. Es decir, un
+                        <code class="classname">Zend_Db_Table_Row</code> solo debería referenciar columnas
+                        derivadas de su tabla padre.
+                    </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.simple.usage.example"></a><p class="title"><b>Ejemplo 27.100. Uso simple</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select = $table-&gt;select();
+$select-&gt;where('bug_status = ?', 'NEW');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Las interfaces fluidas se implementan en todo el componente, por lo que esto se puede
+                reescribir en una forma más abreviada.
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.fluent.interface.example"></a><p class="title"><b>Ejemplo 27.101. Ejemplo de interfaz fluida</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$rows =
+    $table-&gt;fetchAll($table-&gt;select()-&gt;where('bug_status = ?', 'NEW'));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.fetch-all.usage"></a>27.5.9.2. Recuperar un rowset</h4></div></div></div>
+<p>
+                Puede consultar un conjunto de filas usando cualquier criterio distinto de los
+                valores de la clave primaria, usando el método <code class="methodname">fetchAll()</code> de la
+                clase de tabla. Este método devuelve un objeto de tipo
+                <code class="classname">Zend_Db_Table_Rowset_Abstract</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.finding.row.example"></a><p class="title"><b>Ejemplo 27.102. Ejemplo de búsqueda de filas mediante una expresión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select = $table-&gt;select()-&gt;where('bug_status = ?', 'NEW');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                También puede pasar criterios de ordenación en una cláusula <code class="constant">ORDER</code>
+                BY, así como valores enteros de cuenta y desplazamiento, usados para que la consulta
+                devuelva un subconjunto específico de filas. Estos valores se usan en una cláusula
+                <code class="constant">LIMIT</code>, o en lógica equivalente para marcas de
+                <acronym class="acronym">RDBMS</acronym> que no admiten la sintaxis
+                <code class="constant">LIMIT</code>.
+            </p>
+<div class="example">
+<a name="zend.db.table.fetch-all.example2"></a><p class="title"><b>Ejemplo 27.103. Ejemplo de búsqueda de filas mediante una expresión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$order  = 'bug_id';
+
+// Return the 21st through 30th rows
+$count  = 10;
+$offset = 20;
+
+$select = $table-&gt;select()-&gt;where('bug_status = ?', 'NEW')
+                          -&gt;order($order)
+                          -&gt;limit($count, $offset);
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Todos los argumentos anteriores son opcionales. Si omite la cláusula
+                <code class="constant">ORDER</code>, el conjunto de resultados incluye filas de la tabla en un
+                orden impredecible. Si no se establece ninguna cláusula <code class="constant">LIMIT</code>,
+                recupera todas las filas de la tabla que coincidan con la cláusula
+                <code class="constant">WHERE</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.advanced.usage"></a>27.5.9.3. Uso avanzado</h4></div></div></div>
+<p>
+                Para solicitudes más específicas y optimizadas, puede que desee limitar el número de
+                columnas devueltas en una fila o rowset. Esto se puede lograr pasando una cláusula
+                <code class="constant">FROM</code> al objeto select. El primer argumento de la cláusula
+                <code class="constant">FROM</code> es idéntico al de un objeto
+                <code class="classname">Zend_Db_Select</code>, con la adición de poder pasar
+                una instancia de <code class="classname">Zend_Db_Table_Abstract</code> y hacer que
+                determine automáticamente el nombre de la tabla.
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.retrieving.a.example"></a><p class="title"><b>Ejemplo 27.104. Recuperar columnas específicas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select = $table-&gt;select();
+$select-&gt;from($table, array('bug_id', 'bug_description'))
+       -&gt;where('bug_status = ?', 'NEW');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td>
+<th align="left">Importante</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    El rowset contiene filas que siguen siendo 'válidas': simplemente contienen un
+                    subconjunto de las columnas de una tabla. Si se invoca un método
+                    <code class="methodname">save()</code> en una fila parcial, solo se modificarán los campos
+                    disponibles.
+                </p></td></tr>
+</table></div>
+<p>
+                También puede especificar expresiones dentro de una cláusula <code class="constant">FROM</code>
+                y hacer que estas se devuelvan como una fila o rowset readOnly. En este ejemplo
+                devolveremos filas de la tabla bugs que muestran un agregado del número de bugs nuevos
+                reportados por individuos. Observe la cláusula <code class="constant">GROUP</code>. La columna
+                'count' se pondrá a disposición de la fila para su evaluación y se puede acceder a ella
+                como si fuera parte del esquema.
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.retrieving.b.example"></a><p class="title"><b>Ejemplo 27.105. Recuperar expresiones como columnas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select = $table-&gt;select();
+$select-&gt;from($table,
+              array('COUNT(reported_by) as `count`', 'reported_by'))
+       -&gt;where('bug_status = ?', 'NEW')
+       -&gt;group('reported_by');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                También puede usar una tabla de consulta (lookup) como parte de su consulta para
+                refinar aún más sus operaciones de recuperación. En este ejemplo, la tabla accounts se
+                consulta como parte de una búsqueda de todos los bugs nuevos reportados por 'Bob'.
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.refine.example"></a><p class="title"><b>Ejemplo 27.106. Usar una tabla de consulta para refinar los resultados de fetchAll()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+// retrieve with from part set, important when joining
+$select = $table-&gt;select(Zend_Db_Table::SELECT_WITH_FROM_PART);
+$select-&gt;setIntegrityCheck(false)
+       -&gt;where('bug_status = ?', 'NEW')
+       -&gt;join('accounts', 'accounts.account_name = bugs.reported_by')
+       -&gt;where('accounts.account_name = ?', 'Bob');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                <code class="classname">Zend_Db_Table_Select</code> se usa principalmente para restringir y
+                validar, de modo que pueda aplicar el criterio para una consulta <code class="constant">SELECT</code>
+                legal. Sin embargo, puede haber ciertos casos en los que necesite la flexibilidad del
+                componente <code class="classname">Zend_Db_Table_Row</code> y no necesite una fila escribible o
+                eliminable. Para este caso de uso específico, es posible recuperar una fila o
+                rowset pasando un valor <code class="constant">FALSE</code> a
+                <code class="methodname">setIntegrityCheck()</code>. La fila o rowset resultante se
+                devolverá como una fila 'bloqueada' (lo que significa que <code class="methodname">save()</code>,
+                <code class="methodname">delete()</code> y cualquier método de establecimiento de campo lanzarán
+                una excepción).
+            </p>
+<div class="example">
+<a name="zend.db.table.qry.rows.set.integrity.example"></a><p class="title"><b>Ejemplo 27.107.
+                    Eliminar la comprobación de integridad en Zend_Db_Table_Select para permitir filas JOINed
+                </b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select = $table-&gt;select(Zend_Db_Table::SELECT_WITH_FROM_PART)
+                -&gt;setIntegrityCheck(false);
+$select-&gt;where('bug_status = ?', 'NEW')
+       -&gt;join('accounts',
+              'accounts.account_name = bugs.reported_by',
+              'account_name')
+       -&gt;where('accounts.account_name = ?', 'Bob');
+
+$rows = $table-&gt;fetchAll($select);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.fetch-row"></a>27.5.10. Consultar una única fila</h3></div></div></div>
+<p>
+            Puede consultar una única fila usando criterios similares a los del método
+            <code class="methodname">fetchAll()</code>.
+        </p>
+<div class="example">
+<a name="zend.db.table.fetch-row.example1"></a><p class="title"><b>Ejemplo 27.108. Ejemplo de búsqueda de una única fila mediante una expresión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$select  = $table-&gt;select()-&gt;where('bug_status = ?', 'NEW')
+                           -&gt;order('bug_id');
+
+$row = $table-&gt;fetchRow($select);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Este método devuelve un objeto de tipo <code class="classname">Zend_Db_Table_Row_Abstract</code>.
+            Si el criterio de búsqueda que especificó no coincide con ninguna fila de la tabla de base de
+            datos, entonces <code class="methodname">fetchRow()</code> devuelve el valor
+            <code class="constant">NULL</code> de <acronym class="acronym">PHP</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.info"></a>27.5.11. Recuperar información de metadatos de la tabla</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Db_Table_Abstract</code> proporciona cierta información
+            sobre sus metadatos. El método <code class="methodname">info()</code> devuelve una estructura de
+            array con información sobre la tabla, sus columnas y clave primaria, y otros metadatos.
+        </p>
+<div class="example">
+<a name="zend.db.table.info.example"></a><p class="title"><b>Ejemplo 27.109. Ejemplo de obtención del nombre de la tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$info = $table-&gt;info();
+
+echo "The table name is " . $info['name'] . "\n";
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Las claves del array devuelto por el método <code class="methodname">info()</code> se
+            describen a continuación:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>name</em></span> =&gt; el nombre de la tabla.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>cols</em></span> =&gt; un array, con los nombres de
+                    las columnas de la tabla.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>primary</em></span> =&gt; un array, con los nombres de
+                    las columnas de la clave primaria.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>metadata</em></span> =&gt; un array asociativo, que
+                    asigna nombres de columna a información sobre las columnas. Esta es la información
+                    devuelta por el método <code class="methodname">describeTable()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>rowClass</em></span> =&gt; el nombre de la clase concreta
+                    usada para los objetos Row devueltos por los métodos de esta instancia de tabla. Por
+                    defecto es <code class="classname">Zend_Db_Table_Row</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>rowsetClass</em></span> =&gt; el nombre de la clase
+                    concreta usada para los objetos Rowset devueltos por los métodos de esta instancia de
+                    tabla. Por defecto es <code class="classname">Zend_Db_Table_Rowset</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>referenceMap</em></span> =&gt; un array asociativo, con
+                    información sobre las referencias de esta tabla a cualquier tabla padre. Consulte
+                    <a class="link" href="zend.db.table.relationships.phtml#zend.db.table.relationships.defining" title="27.8.2. Defining Relationships">este capítulo</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>dependentTables</em></span> =&gt; un array de nombres de
+                    clase de las tablas que hacen referencia a esta tabla. Consulte
+                    <a class="link" href="zend.db.table.relationships.phtml#zend.db.table.relationships.defining" title="27.8.2. Defining Relationships">este capítulo</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>schema</em></span> =&gt; el nombre del esquema (o
+                    base de datos o tablespace) de esta tabla.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.metadata.caching"></a>27.5.12. Almacenar en caché los metadatos de la tabla</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Db_Table_Abstract</code> consulta la
+            base de datos subyacente en busca de <a class="link" href="zend.db.table.phtml#zend.db.table.info" title="27.5.11. Retrieving Table Metadata Information">metadatos de la
+                tabla</a> cada vez que se necesitan esos datos para realizar operaciones de tabla.
+            El objeto tabla obtiene los metadatos de la tabla desde la
+            base de datos usando el método <code class="methodname">describeTable()</code> del adaptador.
+            Las operaciones que requieren esta introspección incluyen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="methodname">insert()</code></p></li>
+<li class="listitem"><p><code class="methodname">find()</code></p></li>
+<li class="listitem"><p><code class="methodname">info()</code></p></li>
+</ul></div>
+<p>
+            En algunas circunstancias, particularmente cuando se instancian muchos objetos de tabla
+            contra la misma tabla de base de datos, consultar la base de datos para obtener los metadatos
+            de la tabla en cada instancia puede resultar indeseable desde el punto de vista del
+            rendimiento. En tales casos, los usuarios pueden beneficiarse de almacenar en caché los
+            metadatos de la tabla recuperados de la base de datos.
+        </p>
+<p>
+            Hay dos formas principales en las que un usuario puede aprovechar el almacenamiento en
+            caché de metadatos de la tabla:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Invocar
+                    <code class="methodname">Zend_Db_Table_Abstract::setDefaultMetadataCache()</code></em></span>
+                    - Esto permite a un desarrollador establecer una vez el objeto de caché por defecto
+                    a usar en todas las clases de tabla.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Configurar
+                    <code class="methodname">Zend_Db_Table_Abstract::__construct()</code></em></span> -
+                    Esto permite a un desarrollador establecer el objeto de caché a usar para una
+                    instancia particular de clase de tabla.
+                </p></li>
+</ul></div>
+<p>
+            En ambos casos, la especificación de caché debe ser bien <code class="constant">NULL</code> (es
+            decir, no usar caché), bien una instancia de
+            <a class="link" href="zend.cache.frontends.phtml#zend.cache.frontends.core" title="17.3.1. Zend_Cache_Core"><code class="classname">Zend_Cache_Core</code></a>.
+            Los métodos se pueden usar conjuntamente cuando sea deseable tener tanto una caché de
+            metadatos por defecto como la capacidad de cambiar la caché para objetos de tabla
+            individuales.
+        </p>
+<div class="example">
+<a name="zend.db.table.metadata.caching-default"></a><p class="title"><b>Ejemplo 27.110. Usar una caché de metadatos por defecto para todos los objetos de tabla</b></p>
+<div class="example-contents">
+<p>
+                El siguiente código muestra cómo establecer una caché de metadatos por defecto para
+                usarla con todos los objetos de tabla:
+            </p>
+<pre class="programlisting">
+// First, set up the Cache
+$frontendOptions = array(
+    'automatic_serialization' =&gt; true
+    );
+
+$backendOptions  = array(
+    'cache_dir'                =&gt; 'cacheDir'
+    );
+
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+
+// Next, set the cache to be used with all table objects
+Zend_Db_Table_Abstract::setDefaultMetadataCache($cache);
+
+// A table class is also needed
+class Bugs extends Zend_Db_Table_Abstract
+{
+    // ...
+}
+
+// Each instance of Bugs now uses the default metadata cache
+$bugs = new Bugs();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.table.metadata.caching-instance"></a><p class="title"><b>Ejemplo 27.111. Usar una caché de metadatos para un objeto de tabla específico</b></p>
+<div class="example-contents">
+<p>
+                El siguiente código muestra cómo establecer una caché de metadatos para una instancia
+                de objeto de tabla específica:
+            </p>
+<pre class="programlisting">
+// First, set up the Cache
+$frontendOptions = array(
+    'automatic_serialization' =&gt; true
+    );
+
+$backendOptions  = array(
+    'cache_dir'                =&gt; 'cacheDir'
+    );
+
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+
+// A table class is also needed
+class Bugs extends Zend_Db_Table_Abstract
+{
+    // ...
+}
+
+// Configure an instance upon instantiation
+$bugs = new Bugs(array('metadataCache' =&gt; $cache));
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Automatic Serialization with the Cache Frontend">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Serialización automática con el frontend de caché</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Dado que la información devuelta por el método <code class="methodname">describeTable()</code>
+                del adaptador es un array, asegúrese de que la opción
+                <span class="property">automatic_serialization</span> se establece en
+                <code class="constant">TRUE</code> para el frontend <code class="classname">Zend_Cache_Core</code>.
+            </p></td></tr>
+</table></div>
+<p>
+            Aunque los ejemplos anteriores usan <code class="classname">Zend_Cache_Backend_File</code>, los
+            desarrolladores pueden usar el backend de caché que resulte apropiado para la situación.
+            Consulte <a class="link" href="zend.cache.phtml" title="Chapter 17. Zend_Cache">Zend_Cache</a> para más información.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.metadata.caching.hardcoding"></a>27.5.12.1. Codificar los metadatos de la tabla de forma fija</h4></div></div></div>
+<p>
+                Para llevar el almacenamiento en caché de metadatos un paso más allá, también puede
+                optar por codificar los metadatos de forma fija (hardcode). En este caso particular, sin
+                embargo, cualquier cambio en el esquema de la tabla requerirá un cambio en su código. Por
+                ello, solo se recomienda para quienes estén optimizando para
+                el uso en producción.
+            </p>
+<p>
+                La estructura de metadatos es la siguiente:
+            </p>
+<pre class="programlisting">
+protected $_metadata = array(
+    '&lt;column_name&gt;' =&gt; array(
+        'SCHEMA_NAME'      =&gt; &lt;string&gt;,
+        'TABLE_NAME'       =&gt; &lt;string&gt;,
+        'COLUMN_NAME'      =&gt; &lt;string&gt;,
+        'COLUMN_POSITION'  =&gt; &lt;int&gt;,
+        'DATA_TYPE'        =&gt; &lt;string&gt;,
+        'DEFAULT'          =&gt; NULL|&lt;value&gt;,
+        'NULLABLE'         =&gt; &lt;bool&gt;,
+        'LENGTH'           =&gt; &lt;string - length&gt;,
+        'SCALE'            =&gt; NULL|&lt;value&gt;,
+        'PRECISION'        =&gt; NULL|&lt;value&gt;,
+        'UNSIGNED'         =&gt; NULL|&lt;bool&gt;,
+        'PRIMARY'          =&gt; &lt;bool&gt;,
+        'PRIMARY_POSITION' =&gt; &lt;int&gt;,
+        'IDENTITY'         =&gt; &lt;bool&gt;,
+    ),
+    // additional columns...
+);
+</pre>
+<p>
+                Una forma fácil de obtener los valores adecuados es usar la caché de
+                metadatos, y luego deserializar los valores almacenados en la caché.
+            </p>
+<p>
+                Puede desactivar esta optimización desactivando el
+                indicador <span class="property">metadataCacheInClass</span>:
+            </p>
+<pre class="programlisting">
+// At instantiation:
+$bugs = new Bugs(array('metadataCacheInClass' =&gt; false));
+
+// Or later:
+$bugs-&gt;setMetadataCacheInClass(false);
+</pre>
+<p>
+                El indicador está activado por defecto, lo que asegura que el
+                array <code class="varname">$_metadata</code> solo se rellene una vez por
+                instancia.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.extending"></a>27.5.13. Personalizar y extender una clase de tabla</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.extending.row-rowset"></a>27.5.13.1. Usar clases Row o Rowset personalizadas</h4></div></div></div>
+<p>
+                Por defecto, los métodos de la clase Table devuelven un Rowset en instancias de la
+                clase concreta <code class="classname">Zend_Db_Table_Rowset</code>, y los Rowsets contienen una
+                colección de instancias de la clase concreta <code class="classname">Zend_Db_Table_Row</code>.
+                Puede especificar una clase alternativa para usar en cualquiera de ellas, pero deben ser
+                clases que extiendan <code class="classname">Zend_Db_Table_Rowset_Abstract</code> y
+                <code class="classname">Zend_Db_Table_Row_Abstract</code>, respectivamente.
+            </p>
+<p>
+                Puede especificar las clases Row y Rowset usando el array de opciones del constructor
+                de la tabla, en las claves '<span class="property">rowClass</span>' y '<span class="property">rowsetClass</span>'
+                respectivamente. Especifique los nombres de las clases usando cadenas.
+            </p>
+<div class="example">
+<a name="zend.db.table.extending.row-rowset.example"></a><p class="title"><b>Ejemplo 27.112. Ejemplo de especificación de las clases Row y Rowset</b></p>
+<div class="example-contents"><pre class="programlisting">
+class My_Row extends Zend_Db_Table_Row_Abstract
+{
+    ...
+}
+
+class My_Rowset extends Zend_Db_Table_Rowset_Abstract
+{
+    ...
+}
+
+$table = new Bugs(
+    array(
+        'rowClass'    =&gt; 'My_Row',
+        'rowsetClass' =&gt; 'My_Rowset'
+    )
+);
+
+$where = $table-&gt;getAdapter()-&gt;quoteInto('bug_status = ?', 'NEW')
+
+// Returns an object of type My_Rowset,
+// containing an array of objects of type My_Row.
+$rows = $table-&gt;fetchAll($where);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Puede cambiar las clases especificándolas con los métodos
+                <code class="methodname">setRowClass()</code> y <code class="methodname">setRowsetClass()</code>.
+                Esto se aplica a las filas y rowsets creados posteriormente; no cambia la clase de
+                ninguna fila o rowset que haya creado previamente.
+            </p>
+<div class="example">
+<a name="zend.db.table.extending.row-rowset.example2"></a><p class="title"><b>Ejemplo 27.113. Ejemplo de cambio de las clases Row y Rowset</b></p>
+<div class="example-contents"><pre class="programlisting">
+$table = new Bugs();
+
+$where = $table-&gt;getAdapter()-&gt;quoteInto('bug_status = ?', 'NEW')
+
+// Returns an object of type Zend_Db_Table_Rowset
+// containing an array of objects of type Zend_Db_Table_Row.
+$rowsStandard = $table-&gt;fetchAll($where);
+
+$table-&gt;setRowClass('My_Row');
+$table-&gt;setRowsetClass('My_Rowset');
+
+// Returns an object of type My_Rowset,
+// containing an array of objects of type My_Row.
+$rowsCustom = $table-&gt;fetchAll($where);
+
+// The $rowsStandard object still exists, and it is unchanged.
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Para más información sobre las clases Row y Rowset, consulte
+                <a class="link" href="zend.db.table.row.phtml" title="27.6. Zend_Db_Table_Row">este capítulo</a> y <a class="link" href="zend.db.table.rowset.phtml" title="27.7. Zend_Db_Table_Rowset">este otro</a>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.extending.insert-update"></a>27.5.13.2. Definir lógica personalizada para insertar, actualizar y eliminar</h4></div></div></div>
+<p>
+                Puede sobrescribir los métodos <code class="methodname">insert()</code> y
+                <code class="methodname">update()</code> en su clase de tabla. Esto le da la
+                oportunidad de implementar código personalizado que se ejecuta antes de realizar la
+                operación de base de datos. Asegúrese de invocar el método de la clase padre cuando haya
+                terminado.
+            </p>
+<div class="example">
+<a name="zend.db.table.extending.insert-update.example"></a><p class="title"><b>Ejemplo 27.114. Lógica personalizada para gestionar marcas de tiempo</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+
+    public function insert(array $data)
+    {
+        // add a timestamp
+        if (empty($data['created_on'])) {
+            $data['created_on'] = time();
+        }
+        return parent::insert($data);
+    }
+
+    public function update(array $data, $where)
+    {
+        // add a timestamp
+        if (empty($data['updated_on'])) {
+            $data['updated_on'] = time();
+        }
+        return parent::update($data, $where);
+    }
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                También puede sobrescribir el método <code class="methodname">delete()</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.extending.finders"></a>27.5.13.3. Definir métodos de búsqueda personalizados en Zend_Db_Table</h4></div></div></div>
+<p>
+                Puede implementar métodos de consulta personalizados en su clase de tabla, si tiene
+                necesidad frecuente de realizar consultas contra esta tabla con criterios específicos. La
+                mayoría de las consultas se pueden escribir usando <code class="methodname">fetchAll()</code>,
+                pero esto requiere que duplique código para formar las condiciones de la consulta si
+                necesita ejecutar la consulta en varios lugares de su aplicación. Por lo tanto, puede
+                resultar conveniente implementar un método en la clase de tabla para realizar consultas de
+                uso frecuente contra esta tabla.
+            </p>
+<div class="example">
+<a name="zend.db.table.extending.finders.example"></a><p class="title"><b>Ejemplo 27.115. Método personalizado para buscar bugs por estado</b></p>
+<div class="example-contents"><pre class="programlisting">
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+
+    public function findByStatus($status)
+    {
+        $where = $this-&gt;getAdapter()-&gt;quoteInto('bug_status = ?', $status);
+        return $this-&gt;fetchAll($where, 'bug_id');
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.extending.inflection"></a>27.5.13.4. Definir inflexión en Zend_Db_Table</h4></div></div></div>
+<p>
+                Algunas personas prefieren que el nombre de la clase de tabla coincida con un nombre de
+                tabla en el <acronym class="acronym">RDBMS</acronym> mediante una transformación de cadena llamada
+                <span class="emphasis"><em>inflexión</em></span>.
+            </p>
+<p>
+                Por ejemplo, si el nombre de su clase de tabla es "BugsProducts", coincidiría
+                con la tabla física en la base de datos llamada "bugs_products", si
+                omite la declaración explícita de la propiedad de clase <code class="varname">$_name</code>.
+                En este mapeo de inflexión, el nombre de la clase escrito en formato "CamelCase" se
+                transformaría a minúsculas, y las palabras se separarían con un guion bajo.
+            </p>
+<p>
+                Puede especificar el nombre de la tabla de base de datos independientemente del nombre
+                de la clase declarando el nombre de la tabla con la propiedad de clase
+                <code class="varname">$_name</code> en cada una de sus clases de tabla.
+            </p>
+<p>
+                <code class="classname">Zend_Db_Table_Abstract</code> no realiza ninguna inflexión para
+                mapear el nombre de la clase al nombre de la tabla. Si omite la declaración de
+                <code class="varname">$_name</code> en su clase de tabla, la clase se mapea a una tabla de base
+                de datos que coincide exactamente con el nombre de la clase.
+            </p>
+<p>
+                Es inapropiado transformar identificadores de la base de datos, porque esto puede
+                producir ambigüedad o hacer que algunos identificadores sean inaccesibles. Usar los
+                identificadores <acronym class="acronym">SQL</acronym> exactamente tal y como aparecen en la
+                base de datos hace que <code class="classname">Zend_Db_Table_Abstract</code> sea a la vez más
+                simple y más flexible.
+            </p>
+<p>
+                Si prefiere usar inflexión, entonces debe implementar la transformación usted
+                mismo, sobrescribiendo el método <code class="methodname">_setupTableName()</code> en sus
+                clases de tabla. Una forma de hacerlo es definir una clase abstracta que extienda
+                <code class="classname">Zend_Db_Table_Abstract</code>, y luego hacer que el resto de sus tablas
+                extiendan su nueva clase abstracta.
+            </p>
+<div class="example">
+<a name="zend.db.table.extending.inflection.example"></a><p class="title"><b>Ejemplo 27.116. Ejemplo de una clase de tabla abstracta que implementa inflexión</b></p>
+<div class="example-contents"><pre class="programlisting">
+abstract class MyAbstractTable extends Zend_Db_Table_Abstract
+{
+    protected function _setupTableName()
+    {
+        if (!$this-&gt;_name) {
+            $this-&gt;_name = myCustomInflector(get_class($this));
+        }
+        parent::_setupTableName();
+    }
+}
+
+class BugsProducts extends MyAbstractTable
+{
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Usted es responsable de escribir las funciones para realizar la transformación de
+                inflexión. Zend Framework no proporciona tal función.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.db.select.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.db.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.table.row.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">27.4. Zend_Db_Select </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 27.6. Zend_Db_Table_Row</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

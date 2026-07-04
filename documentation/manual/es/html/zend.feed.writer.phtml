@@ -1,0 +1,694 @@
+<?php $title = '33.10. Zend_Feed_Writer'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.10. Zend_Feed_Writer</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.reader.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.feed.pubsubhubbub.introduction.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.writer"></a>33.10. Zend_Feed_Writer</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.writer.introduction"></a>33.10.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Feed_Writer</code> es el componente hermano de
+            <code class="classname">Zend_Feed_Reader</code> responsable de generar feeds para su salida. Soporta
+            la especificación Atom 1.0 (<acronym class="acronym">RFC</acronym> 4287) y
+            <acronym class="acronym">RSS</acronym> 2.0 tal como la especifica el RSS Advisory Board
+            (<acronym class="acronym">RSS</acronym> 2.0.11). No se desvía de estos estándares. Sin embargo,
+            ofrece un sencillo sistema de extensiones que permite implementar cualquier extensión y
+            módulo para cualquiera de estas dos especificaciones si no vienen incluidos de
+            fábrica.
+        </p>
+<p>
+            En muchos sentidos, <code class="classname">Zend_Feed_Writer</code> es el inverso de
+            <code class="classname">Zend_Feed_Reader</code>. Mientras que <code class="classname">Zend_Feed_Reader</code>
+            se centra en ofrecer una arquitectura fácil de usar apoyada en métodos getter,
+            <code class="classname">Zend_Feed_Writer</code> se apoya en setters o mutadores con nombres
+            similares. Esto garantiza que la <acronym class="acronym">API</acronym> no suponga una curva de
+            aprendizaje para quien esté familiarizado con <code class="classname">Zend_Feed_Reader</code>.
+        </p>
+<p>
+            Como resultado de este diseño, el resto puede incluso resultar obvio. Tras bambalinas,
+            los datos establecidos en cualquier objeto contenedor de datos de
+            <code class="classname">Zend_Feed_Writer</code> se traducen, en el momento del renderizado, a un
+            objeto DOMDocument usando los elementos de feed necesarios. Para cada
+            tipo de feed soportado existe tanto un renderizador Atom 1.0 como uno <acronym class="acronym">RSS</acronym> 2.0.
+            Usar una clase DOMDocument en lugar de una solución de plantillas tiene numerosas ventajas,
+            siendo la más obvia la capacidad de exportar el DOMDocument para
+            procesamiento adicional y confiar en <acronym class="acronym">PHP</acronym> <acronym class="acronym">DOM</acronym> para
+            un renderizado correcto y válido.
+        </p>
+<p>
+            Al igual que <code class="classname">Zend_Feed_Reader</code>, <code class="classname">Zend_Feed_Writer</code>
+            es un reemplazo independiente para la arquitectura Builder de <code class="classname">Zend_Feed</code>
+            y no es compatible con dichas clases.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.writer.architecture"></a>33.10.2. Arquitectura</h3></div></div></div>
+<p>
+            La arquitectura de <code class="classname">Zend_Feed_Writer</code> es muy sencilla. Cuenta con dos
+            conjuntos principales de clases: contenedores de datos y renderizadores.
+        </p>
+<p>
+            Los contenedores incluyen las clases <code class="classname">Zend_Feed_Writer_Feed</code> y
+            <code class="classname">Zend_Feed_Writer_Entry</code>. Las clases Entry pueden adjuntarse
+            a cualquier clase Feed. El único propósito de estos contenedores es recopilar datos sobre el
+            feed a generar mediante una sencilla interfaz de métodos setter. Estos métodos realizan
+            algunas pruebas de validez de los datos. Por ejemplo, validarán cualquier <acronym class="acronym">URI</acronym>,
+            fecha, etc. que se les pase. Estas comprobaciones no están vinculadas a ninguna de las
+            definiciones de los estándares de feed. Los objetos contenedores también contienen métodos
+            que permiten un renderizado y exportación rápidos del feed final, y estos pueden
+            reutilizarse a voluntad.
+        </p>
+<p>
+            Además de las clases principales de contenedor de datos, existen dos clases adicionales
+            específicas de Atom 2.0: <code class="classname">Zend_Feed_Writer_Source</code> y
+            <code class="classname">Zend_Feed_Writer_Deleted</code>. La primera implementa los elementos
+            source de Atom 2.0, que transportan metadatos del feed de origen para una entrada
+            específica dentro de un feed agregado (es decir, el feed actual no es la fuente original
+            de la entrada). La segunda implementa el <acronym class="acronym">RFC</acronym> de Atom Tombstones
+            que permite a los feeds llevar referencias a entradas que han sido eliminadas.
+        </p>
+<p>
+            Aunque existen dos tipos principales de contenedores de datos, hay cuatro renderizadores:
+            dos renderizadores de contenedor coincidentes por cada tipo de feed soportado. Cada
+            renderizador acepta un contenedor y, en función de su contenido, intenta generar un
+            marcado de feed válido. Si el renderizador no puede generar un marcado de feed válido,
+            quizás debido a que al contenedor le falta un dato obligatorio, lo notificará lanzando
+            una <code class="classname">Exception</code>. Aunque es posible ignorar las
+            <code class="classname">Exception</code>s, esto elimina la salvaguarda predeterminada
+            de asegurar que se dispone de datos suficientes para renderizar un feed completamente
+            válido.
+        </p>
+<p>
+            Para explicarlo con más claridad, puede construir un conjunto de contenedores de datos
+            para un feed en el que hay un contenedor Feed, al que se han añadido algunos contenedores
+            Entry y un contenedor Deleted. Esto forma una jerarquía de datos que se asemeja a un feed
+            normal. Cuando se realiza el renderizado, esta jerarquía tiene sus piezas pasadas a los
+            renderizadores correspondientes, y los feeds parciales (todos DOMDocuments) se ensamblan
+            después para crear un feed completo. En el caso de los contenedores Source o Deleted
+            (Tombstone), estos se renderizan solo para Atom 2.0 y se ignoran para
+            <acronym class="acronym">RSS</acronym>.
+        </p>
+<p>
+            Debido a que el sistema está dividido entre contenedores de datos y renderizadores, esto
+            puede hacer que las extensiones resulten algo interesantes. Una extensión típica que
+            ofrezca elementos con espacio de nombres a nivel de feed y de entrada debe reflejar ella
+            misma esa misma arquitectura, es decir, ofrecer contenedores de datos a nivel de feed y
+            de entrada, y los renderizadores correspondientes. Afortunadamente, no se requiere ningún
+            trabajo de integración complejo, ya que todas las clases de extensión simplemente se
+            registran y son utilizadas automáticamente por las clases principales. Conoceremos las
+            extensiones con más detalle al final de esta sección.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.writer.getting.started"></a>33.10.3. Primeros pasos</h3></div></div></div>
+<p>
+            Usar <code class="classname">Zend_Feed_Writer</code> es tan sencillo como establecer datos y
+            disparar el renderizador. Aquí hay un ejemplo para generar un feed Atom 1.0 mínimo.
+            Como esto demuestra, cada feed o entrada usa un contenedor de datos independiente.
+        </p>
+<pre class="programlisting">
+/**
+ * Create the parent feed
+ */
+$feed = new Zend_Feed_Writer_Feed;
+$feed-&gt;setTitle('Paddy\'s Blog');
+$feed-&gt;setLink('http://www.example.com');
+$feed-&gt;setFeedLink('http://www.example.com/atom', 'atom');
+$feed-&gt;addAuthor(array(
+    'name'  =&gt; 'Paddy',
+    'email' =&gt; 'paddy@example.com',
+    'uri'   =&gt; 'http://www.example.com',
+));
+$feed-&gt;setDateModified(time());
+$feed-&gt;addHub('http://pubsubhubbub.appspot.com/');
+
+/**
+ * Add one or more entries. Note that entries must
+ * be manually added once created.
+ */
+$entry = $feed-&gt;createEntry();
+$entry-&gt;setTitle('All Your Base Are Belong To Us');
+$entry-&gt;setLink('http://www.example.com/all-your-base-are-belong-to-us');
+$entry-&gt;addAuthor(array(
+    'name'  =&gt; 'Paddy',
+    'email' =&gt; 'paddy@example.com',
+    'uri'   =&gt; 'http://www.example.com',
+));
+$entry-&gt;setDateModified(time());
+$entry-&gt;setDateCreated(time());
+$entry-&gt;setDescription('Exposing the difficultly of porting games to English.');
+$entry-&gt;setContent(
+    'I am not writing the article. The example is long enough as is ;).'
+);
+$feed-&gt;addEntry($entry);
+
+/**
+ * Render the resulting feed to Atom 1.0 and assign to $out.
+ * You can substitute "atom" with "rss" to generate an RSS 2.0 feed.
+ */
+$out = $feed-&gt;export('atom');
+</pre>
+<p>
+            La salida renderizada debería ser la siguiente:
+        </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;feed xmlns="http://www.w3.org/2005/Atom"&gt;
+    &lt;title type="text"&gt;Paddy's Blog&lt;/title&gt;
+    &lt;subtitle type="text"&gt;Writing about PC Games since 176 BC.&lt;/subtitle&gt;
+    &lt;updated&gt;2009-12-14T20:28:18+00:00&lt;/updated&gt;
+    &lt;generator uri="http://framework.zend.com" version="1.10.0alpha"&gt;
+        Zend_Feed_Writer
+    &lt;/generator&gt;
+    &lt;link rel="alternate" type="text/html" href="http://www.example.com"/&gt;
+    &lt;link rel="self" type="application/atom+xml"
+        href="http://www.example.com/atom"/&gt;
+    &lt;id&gt;http://www.example.com&lt;/id&gt;
+    &lt;author&gt;
+        &lt;name&gt;Paddy&lt;/name&gt;
+        &lt;email&gt;paddy@example.com&lt;/email&gt;
+        &lt;uri&gt;http://www.example.com&lt;/uri&gt;
+    &lt;/author&gt;
+    &lt;link rel="hub" href="http://pubsubhubbub.appspot.com/"/&gt;
+    &lt;entry&gt;
+        &lt;title type="html"&gt;&lt;![CDATA[All Your Base Are Belong To
+            Us]]&gt;&lt;/title&gt;
+        &lt;summary type="html"&gt;
+            &lt;![CDATA[Exposing the difficultly of porting games to
+                English.]]&gt;
+        &lt;/summary&gt;
+        &lt;published&gt;2009-12-14T20:28:18+00:00&lt;/published&gt;
+        &lt;updated&gt;2009-12-14T20:28:18+00:00&lt;/updated&gt;
+        &lt;link rel="alternate" type="text/html"
+             href="http://www.example.com/all-your-base-are-belong-to-us"/&gt;
+        &lt;id&gt;http://www.example.com/all-your-base-are-belong-to-us&lt;/id&gt;
+        &lt;author&gt;
+            &lt;name&gt;Paddy&lt;/name&gt;
+            &lt;email&gt;paddy@example.com&lt;/email&gt;
+            &lt;uri&gt;http://www.example.com&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;content type="html"&gt;
+            &lt;![CDATA[I am not writing the article.
+                     The example is long enough as is ;).]]&gt;
+        &lt;/content&gt;
+    &lt;/entry&gt;
+&lt;/feed&gt;
+</pre>
+<p>
+            Este es un ejemplo Atom 1.0 perfectamente válido. Cabe destacar que omitir un
+            dato obligatorio, como un título, disparará una
+            <code class="classname">Exception</code> al renderizar como Atom 1.0. Esto será diferente para
+            <acronym class="acronym">RSS</acronym> 2.0, ya que un título puede omitirse siempre que se incluya una
+            descripción. Esto da lugar a excepciones que difieren entre ambos estándares dependiendo
+            del renderizador en uso. Por diseño, <code class="classname">Zend_Feed_Writer</code> no
+            renderizará un feed inválido para ninguno de los estándares a menos que el usuario final
+            decida deliberadamente ignorar todas las excepciones. Esta salvaguarda incorporada se
+            añadió para garantizar que los usuarios sin conocimientos profundos de las especificaciones
+            correspondientes tengan un poco menos de que preocuparse.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.writer.setting.feed.data.points"></a>33.10.4. Estableciendo puntos de datos del feed</h3></div></div></div>
+<p>
+            Antes de poder renderizar un feed, primero debe configurar los datos necesarios para
+            el feed que se va a renderizar. Esto utiliza una sencilla <acronym class="acronym">API</acronym> de
+            estilo setter que a su vez sirve como un método inicial de validación de los datos
+            establecidos. Por diseño, la <acronym class="acronym">API</acronym> coincide estrechamente con la de
+            <code class="classname">Zend_Feed_Reader</code> para evitar confusión e incertidumbre
+            innecesarias.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>Los usuarios han comentado que la falta de una notación sencilla basada en arrays
+            para los datos de entrada provoca extensos tramos de código. Esto se abordará en una
+            versión futura.</p></td></tr>
+</table></div>
+<p>
+            <code class="classname">Zend_Feed_Writer</code> ofrece esta <acronym class="acronym">API</acronym> a través de
+            sus clases contenedoras de datos <code class="classname">Zend_Feed_Writer_Feed</code> y
+            <code class="classname">Zend_Feed_Writer_Entry</code> (sin mencionar las clases específicas de
+            Atom 2.0 y las de extensión). Estas clases simplemente almacenan
+            todos los datos del feed de forma independiente del tipo, lo que significa que puede
+            reutilizar cualquier contenedor de datos con cualquier renderizador sin necesitar trabajo
+            adicional. Ambas clases también son susceptibles de ser extendidas, lo que significa que
+            una extensión puede definir sus propias clases contenedoras que se registran en las
+            clases contenedoras base como extensiones, y se comprueban cuando cualquier llamada a
+            método dispara el método <code class="methodname">__call()</code> del contenedor base.
+        </p>
+<p>
+            Aquí hay un resumen de la <acronym class="acronym">API</acronym> Core para Feeds. Debe tener en cuenta
+            que comprende no solo los estándares básicos de <acronym class="acronym">RSS</acronym> y Atom, sino que
+            también contempla una serie de extensiones incluidas junto con
+            <code class="classname">Zend_Feed_Writer</code>. La nomenclatura de estos
+            métodos provenientes de extensiones sigue siendo bastante genérica: todos los métodos de
+            extensión operan al mismo nivel que la <acronym class="acronym">API</acronym> Core, aunque también
+            permitimos recuperar cualquier objeto de extensión específico por separado si es
+            necesario.
+        </p>
+<p>
+            La <acronym class="acronym">API</acronym> a nivel de feed para datos está contenida en
+            <code class="classname">Zend_Feed_Writer_Feed</code>. Además de la <acronym class="acronym">API</acronym>
+            detallada a continuación, la clase también implementa las interfaces
+            <code class="classname">Countable</code> e <code class="classname">Iterator</code>.
+        </p>
+<div class="table">
+<a name="id1799"></a><p class="title"><b>Tabla 33.7. Métodos de la API a nivel de feed</b></p>
+<div class="table-contents"><table class="table" summary="Feed Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">setId()</code></td>
+<td>
+                            Establece un ID único asociado con este feed. Para Atom 1.0
+                            esto es un elemento atom:id, mientras que para <acronym class="acronym">RSS</acronym> 2.0 se
+                            añade como un elemento guid. Estos son opcionales siempre que se añada un
+                            enlace, es decir, el enlace se establece como el ID.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setTitle()</code></td>
+<td>Establece el título del feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">setDescription()</code></td>
+<td>Establece la descripción de texto del feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">setLink()</code></td>
+<td>
+                            Establece una <acronym class="acronym">URI</acronym> al sitio web <acronym class="acronym">HTML</acronym>
+                            que contiene la misma o
+                            similar información que este feed (es decir, si el feed proviene de un
+                            blog, debe proporcionar la <acronym class="acronym">URI</acronym> del blog donde se
+                            pueda leer la versión <acronym class="acronym">HTML</acronym> de las entradas).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setFeedLinks()</code></td>
+<td>
+                            Añade un enlace a un feed <acronym class="acronym">XML</acronym>, ya sea el feed que
+                            se está generando o una <acronym class="acronym">URI</acronym> alternativa que apunte al
+                            mismo feed pero en un formato diferente. Como mínimo, se recomienda
+                            incluir un enlace al feed que se está generando para que tenga una
+                            <acronym class="acronym">URI</acronym> final identificable que permita a un cliente
+                            rastrear sus cambios de ubicación sin necesitar redirecciones constantes.
+                            El parámetro es un array de arrays, donde cada subarray contiene las
+                            claves "type" y "uri". El type debe ser uno de "atom", "rss" o "rdf".
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addAuthors()</code></td>
+<td>
+                            Establece los datos de los autores. El parámetro es un array de arrays
+                            donde cada subarray puede contener las claves "name", "email" y
+                            "uri". El valor "uri" solo aplica para feeds Atom, ya que
+                            <acronym class="acronym">RSS</acronym> no dispone de forma de mostrarlo. Para
+                            <acronym class="acronym">RSS</acronym> 2.0, el renderizado creará dos elementos: un
+                            elemento author que contiene la referencia de email con el nombre entre
+                            paréntesis, y un elemento creator de Dublin Core que solo contiene el
+                            nombre.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addAuthor()</code></td>
+<td>
+                            Establece los datos de un único autor siguiendo el mismo
+                            formato de array descrito anteriormente para un único subarray.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setDateCreated()</code></td>
+<td>
+                            Establece la fecha en la que se creó este feed. Generalmente
+                            solo aplicable a Atom, donde representa la fecha en la que se creó el
+                            recurso descrito por un documento Atom 1.0. El parámetro esperado
+                            puede ser una marca de tiempo <acronym class="acronym">UNIX</acronym> o un objeto
+                            <code class="classname">Zend_Date</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setDateModified()</code></td>
+<td>
+                            Establece la fecha en la que se modificó por última vez este feed. El
+                            parámetro esperado puede ser una marca de tiempo <acronym class="acronym">UNIX</acronym> o
+                            un objeto <code class="classname">Zend_Date</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setLastBuildDate()</code></td>
+<td>
+                            Establece la fecha en la que se construyó por última vez este feed. El
+                            parámetro esperado puede ser una marca de tiempo <acronym class="acronym">UNIX</acronym> o
+                            un objeto <code class="classname">Zend_Date</code>. Esto solo se
+                            renderizará para feeds <acronym class="acronym">RSS</acronym> 2.0 y se renderiza
+                            automáticamente como la fecha actual por defecto cuando no se establece
+                            explícitamente.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setLanguage()</code></td>
+<td>
+                            Establece el idioma del feed. Se omitirá a menos que se establezca.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setGenerator()</code></td>
+<td>
+                            Permite establecer un generador. El parámetro debe ser un
+                            array que contenga las claves "name", "version" y "uri". Si se omite,
+                            se añadirá un generador por defecto que hace referencia a
+                            <code class="classname">Zend_Feed_Writer</code>, la versión actual de Zend
+                            Framework y la <acronym class="acronym">URI</acronym> del Framework.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCopyright()</code></td>
+<td>Establece un aviso de copyright asociado con el feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">addHubs()</code></td>
+<td>
+                            Acepta un array de endpoints Hub de Pubsubhubbub para renderizarlos en
+                            el feed como enlaces Atom, de modo que los suscriptores PuSH puedan
+                            suscribirse a su feed. Tenga en cuenta que debe implementar un Publisher
+                            de Pubsubhubbub para que se habiliten las actualizaciones en tiempo real.
+                            Un Publisher puede implementarse usando
+                            <code class="classname">Zend_Feed_Pubsubhubbub_Publisher</code>.
+                            El método <code class="methodname">addHub()</code> permite añadir
+                            un único hub a la vez.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addCategories()</code></td>
+<td>
+                            Acepta un array de categorías para renderizar, donde cada elemento es a
+                            su vez un array cuyas posibles claves incluyen "term", "label" y
+                            "scheme". El "term" es típicamente un nombre de categoría adecuado para
+                            su inclusión en una <acronym class="acronym">URI</acronym>. El "label" puede ser un
+                            nombre de categoría legible por humanos que soporte caracteres especiales
+                            (se codifica en <acronym class="acronym">HTML</acronym> durante el renderizado) y es
+                            una clave requerida. El "scheme" (denominado domain en
+                            <acronym class="acronym">RSS</acronym>) es opcional pero debe ser una
+                            <acronym class="acronym">URI</acronym> válida. El método
+                            <code class="methodname">addCategory()</code> permite añadir una única categoría
+                            a la vez.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setImage()</code></td>
+<td>
+                            Acepta un array de metadatos de imagen para una imagen
+                            <acronym class="acronym">RSS</acronym> o un logo Atom. Atom 1.0 solo requiere una
+                            <acronym class="acronym">URI</acronym>. <acronym class="acronym">RSS</acronym> 2.0 requiere una
+                            <acronym class="acronym">URI</acronym>, un enlace <acronym class="acronym">HTML</acronym> y un título
+                            de imagen. <acronym class="acronym">RSS</acronym>
+                            2.0 opcionalmente puede enviar un ancho, alto y descripción de imagen. El
+                            parámetro array puede contener estos usando las claves:
+                            <span class="property">uri</span>,
+                            <span class="property">link</span>, <span class="property">title</span>,
+                            <span class="property">description</span>, <span class="property">height</span> y
+                            <span class="property">width</span>. El enlace <acronym class="acronym">HTML</acronym> de
+                            <acronym class="acronym">RSS</acronym> 2.0 debe apuntar a la página
+                            <acronym class="acronym">HTML</acronym> de la fuente del feed.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">createEntry()</code></td>
+<td>
+                            Devuelve una nueva instancia de
+                            <code class="classname">Zend_Feed_Writer_Entry</code>. Este es el contenedor de
+                            datos a nivel de entrada. Las nuevas entradas no se asignan
+                            automáticamente al feed actual, por lo que debe llamar explícitamente a
+                            <code class="methodname">addEntry()</code> para añadir la entrada al renderizado.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addEntry()</code></td>
+<td>
+                            Añade una instancia de <code class="classname">Zend_Feed_Writer_Entry</code>
+                            al contenedor de feed actual para su renderizado.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">createTombstone()</code></td>
+<td>
+                            Devuelve una nueva instancia de
+                            <code class="classname">Zend_Feed_Writer_Deleted</code>. Este es el contenedor
+                            de datos a nivel de Tombstone de Atom 2.0. Las nuevas entradas no se
+                            asignan automáticamente al feed actual, por lo que debe llamar
+                            explícitamente a <code class="methodname">addTombstone()</code> para añadir la
+                            entrada eliminada al renderizado.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addTombstone()</code></td>
+<td>
+                            Añade una instancia de <code class="classname">Zend_Feed_Writer_Deleted</code> al
+                            contenedor de feed actual para su renderizado.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">removeEntry()</code></td>
+<td>
+                            Acepta un parámetro que indica un índice de array de la entrada a
+                            eliminar del feed.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">export()</code></td>
+<td>
+                            Exporta toda la jerarquía de datos a un feed <acronym class="acronym">XML</acronym>. El
+                            método tiene dos parámetros. El primero es el tipo de feed, uno de "atom"
+                            o "rss". El segundo es un booleano opcional para establecer si se
+                            lanzan excepciones. El valor por defecto es <code class="constant">TRUE</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Además de estos setters, también existen getters correspondientes para recuperar
+                datos del contenedor de datos Entry. Por ejemplo, <code class="methodname">setImage()</code>
+                se corresponde con un método <code class="methodname">getImage()</code>.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.writer.setting.entry.data.points"></a>33.10.5. Estableciendo puntos de datos de la entrada</h3></div></div></div>
+<p>
+            Aquí hay un resumen de la <acronym class="acronym">API</acronym> Core para Entries e Items. Debe tener
+            en cuenta que comprende no solo los estándares básicos de <acronym class="acronym">RSS</acronym> y Atom,
+            sino que también contempla una serie de extensiones incluidas junto con
+            <code class="classname">Zend_Feed_Writer</code>. La nomenclatura de estos
+            métodos provenientes de extensiones sigue siendo bastante genérica: todos los métodos de
+            extensión operan al mismo nivel que la <acronym class="acronym">API</acronym> Core, aunque también
+            permitimos recuperar cualquier objeto de extensión específico por separado si es
+            necesario.
+        </p>
+<p>
+            La <acronym class="acronym">API</acronym> a nivel de entrada para datos está contenida en
+            <code class="classname">Zend_Feed_Writer_Entry</code>.
+        </p>
+<div class="table">
+<a name="id1800"></a><p class="title"><b>Tabla 33.8. Métodos de la API a nivel de entrada</b></p>
+<div class="table-contents"><table class="table" summary="Entry Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">setId()</code></td>
+<td>
+                            Establece un ID único asociado con esta entrada. Para Atom 1.0
+                            esto es un elemento atom:id, mientras que para <acronym class="acronym">RSS</acronym> 2.0 se
+                            añade como un elemento guid. Estos son opcionales siempre que se añada un
+                            enlace, es decir, el enlace se establece como el ID.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setTitle()</code></td>
+<td>Establece el título de la entrada.</td>
+</tr>
+<tr>
+<td><code class="methodname">setDescription()</code></td>
+<td>Establece la descripción de texto de la entrada.</td>
+</tr>
+<tr>
+<td><code class="methodname">setContent()</code></td>
+<td>Establece el contenido de la entrada.</td>
+</tr>
+<tr>
+<td><code class="methodname">setLink()</code></td>
+<td>
+                            Establece una <acronym class="acronym">URI</acronym> al sitio web <acronym class="acronym">HTML</acronym>
+                            que contiene la misma o
+                            similar información que esta entrada (es decir, si el feed proviene de un
+                            blog, debe proporcionar la <acronym class="acronym">URI</acronym> del artículo del
+                            blog donde se pueda leer la versión <acronym class="acronym">HTML</acronym> de la
+                            entrada).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addAuthors()</code></td>
+<td>
+                            Establece los datos de los autores. El parámetro es un array de arrays
+                            donde cada subarray puede contener las claves "name", "email" y
+                            "uri". El valor "uri" solo aplica para feeds Atom, ya que
+                            <acronym class="acronym">RSS</acronym> no dispone de forma de mostrarlo. Para
+                            <acronym class="acronym">RSS</acronym> 2.0, el renderizado creará dos elementos: un
+                            elemento author que contiene la referencia de email con el nombre entre
+                            paréntesis, y un elemento creator de Dublin Core que solo contiene el
+                            nombre.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">addAuthor()</code></td>
+<td>
+                            Establece los datos de un único autor siguiendo el mismo
+                            formato descrito anteriormente para un único subarray.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setDateCreated()</code></td>
+<td>
+                            Establece la fecha en la que se creó este feed. Generalmente
+                            solo aplicable a Atom, donde representa la fecha en la que se creó el
+                            recurso descrito por un documento Atom 1.0. El parámetro esperado
+                            puede ser una marca de tiempo <acronym class="acronym">UNIX</acronym> o un objeto
+                            <code class="classname">Zend_Date</code>. Si se omite, se usará la fecha y
+                            hora actuales.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setDateModified()</code></td>
+<td>
+                            Establece la fecha en la que se modificó por última vez este feed. El
+                            parámetro esperado puede ser una marca de tiempo <acronym class="acronym">UNIX</acronym> o
+                            un objeto <code class="classname">Zend_Date</code>. Si se omite, se usará la
+                            fecha y hora actuales.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCopyright()</code></td>
+<td>Establece un aviso de copyright asociado con el feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">addCategories()</code></td>
+<td>
+                            Acepta un array de categorías para renderizar, donde cada elemento es a
+                            su vez un array cuyas posibles claves incluyen "term", "label" y
+                            "scheme". El "term" es típicamente un nombre de categoría adecuado para
+                            su inclusión en una <acronym class="acronym">URI</acronym>. El "label" puede ser un
+                            nombre de categoría legible por humanos que soporte caracteres especiales
+                            (se codifica durante el renderizado) y es una clave requerida. El
+                            "scheme" (denominado domain en <acronym class="acronym">RSS</acronym>) es opcional
+                            pero debe ser una <acronym class="acronym">URI</acronym> válida. El método
+                            <code class="methodname">addCategory()</code> permite añadir una única categoría
+                            a la vez.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCommentCount()</code></td>
+<td>
+                            Establece el número de comentarios asociados con esta entrada. El
+                            renderizado difiere entre <acronym class="acronym">RSS</acronym> y Atom 2.0 según
+                            el elemento o atributo necesario.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setEnclosure()</code></td>
+<td>
+                            Añade un enclosure a la entrada. El parámetro array puede contener las
+                            claves 'uri', 'type' y 'length'. Solo 'uri' es obligatorio para Atom,
+                            aunque los demás también deben proporcionarse o el renderizado
+                            <acronym class="acronym">RSS</acronym> (donde son obligatorios) lanzará una
+                            excepción.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCommentLink()</code></td>
+<td>
+                            Establece un enlace a una página <acronym class="acronym">HTML</acronym> que contiene
+                            los comentarios asociados con esta entrada.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCommentFeedLink()</code></td>
+<td>
+                            Establece un enlace a un feed <acronym class="acronym">XML</acronym> que contiene
+                            los comentarios asociados con esta entrada. El parámetro es un array que
+                            contiene las claves "uri" y "type", donde el type es uno de "rdf", "rss"
+                            o "atom".
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setCommentFeedLinks()</code></td>
+<td>
+                            Igual que <code class="methodname">setCommentFeedLink()</code> excepto que
+                            acepta un array de arrays, donde cada subarray contiene los
+                            parámetros esperados de <code class="methodname">setCommentFeedLink()</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">setEncoding()</code></td>
+<td>
+                            Establece la codificación del texto de la entrada. Por defecto será
+                            <acronym class="acronym">UTF-8</acronym>, que es la codificación preferida.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Además de estos setters, también existen getters correspondientes para recuperar
+                datos del contenedor de datos Entry.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.reader.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.feed.pubsubhubbub.introduction.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">33.9. Zend_Feed_Reader </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 33.11. Zend_Feed_Pubsubhubbub</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

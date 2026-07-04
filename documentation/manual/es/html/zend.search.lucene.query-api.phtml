@@ -1,0 +1,658 @@
+<?php $title = '61.5. API de construcción de consultas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.5. API de construcción de consultas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-language.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.charset.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.query-api"></a>61.5. API de construcción de consultas</h2></div></div></div>
+<p>
+        Además de analizar una consulta en forma de cadena automáticamente, también es posible construirlas
+        con la <acronym class="acronym">API</acronym> de consultas.
+    </p>
+<p>
+        Las consultas de usuario pueden combinarse con consultas creadas a través de la API de consultas.
+        Simplemente use el analizador de consultas para construir una consulta a partir de una cadena:
+    </p>
+<pre class="programlisting">
+$query = Zend_Search_Lucene_Search_QueryParser::parse($queryString);
+</pre>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.exceptions"></a>61.5.1. Excepciones del analizador de consultas</h3></div></div></div>
+<p>
+            El analizador de consultas puede generar dos tipos de excepciones:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="classname">Zend_Search_Lucene_Exception</code> se lanza si algo
+                        sale mal en el propio analizador de consultas.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Search_Lucene_Search_QueryParserException</code> se
+                        lanza cuando hay un error en la sintaxis de la consulta.
+                    </p></li>
+</ul></div>
+<p>
+
+            Es una buena idea capturar
+            las excepciones <code class="classname">Zend_Search_Lucene_Search_QueryParserException</code> y manejarlas
+            apropiadamente:
+        </p>
+<pre class="programlisting">
+try {
+    $query = Zend_Search_Lucene_Search_QueryParser::parse($queryString);
+} catch (Zend_Search_Lucene_Search_QueryParserException $e) {
+    echo "Query syntax error: " . $e-&gt;getMessage() . "\n";
+}
+</pre>
+<p>
+            Se debe usar la misma técnica para el método find() de un objeto
+            <code class="classname">Zend_Search_Lucene</code>.
+        </p>
+<p>
+            A partir de la versión 1.5, las excepciones de análisis de consultas se suprimen por defecto. Si la consulta no
+            se ajusta al lenguaje de consultas, entonces se tokeniza usando el analizador predeterminado actual y todos
+            los términos tokenizados se usan para la búsqueda. Use el método
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::dontSuppressQueryParsingExceptions()</code>
+            para activar las excepciones.
+            Los métodos
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::suppressQueryParsingExceptions()</code>
+            y
+            <code class="methodname">Zend_Search_Lucene_Search_QueryParser::queryParsingExceptionsSuppressed()</code>
+            también están destinados a gestionar el comportamiento del manejo de excepciones.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.term-query"></a>61.5.2. Consulta de término</h3></div></div></div>
+<p>
+            Las consultas de término se pueden usar para buscar con un único término.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
+word1
+</pre>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term  = new Zend_Search_Lucene_Index_Term('word1', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            El campo del término es opcional. <code class="classname">Zend_Search_Lucene</code> busca en
+            todos los campos indexados de cada documento si no se especifica el campo:
+        </p>
+<pre class="programlisting">
+// Search for 'word1' in all indexed fields
+$term  = new Zend_Search_Lucene_Index_Term('word1');
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.multiterm-query"></a>61.5.3. Consulta multi-término</h3></div></div></div>
+<p>
+            Las consultas multi-término se pueden usar para buscar con un conjunto de términos.
+        </p>
+<p>
+            Cada término de un conjunto puede definirse como <span class="emphasis"><em>requerido</em></span>,
+            <span class="emphasis"><em>prohibido</em></span>, o <span class="emphasis"><em>ninguno de los dos</em></span>.
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>requerido</em></span> significa que los documentos que no coincidan con este término
+                        no coincidirán con la consulta;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>prohibido</em></span> significa que los documentos que coincidan con este término no
+                        coincidirán con la consulta;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>ninguno de los dos</em></span>, en cuyo caso los documentos coincidentes no están ni
+                        prohibidos ni obligados a coincidir con el término. Un documento debe coincidir con al
+                        menos 1 término, sin embargo, para coincidir con la consulta.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Si se añaden términos opcionales a una consulta con términos requeridos, ambas consultas tendrán el
+            mismo conjunto de resultados, pero los términos opcionales pueden afectar la puntuación de los documentos coincidentes.
+        </p>
+<p>
+            Ambos métodos de búsqueda se pueden usar para consultas multi-término.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
++word1 author:word2 -word3
+</pre>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>'+' se usa para definir un término requerido.</p></li>
+<li class="listitem"><p>'-' se usa para definir un término prohibido.</p></li>
+<li class="listitem"><p>
+                    El prefijo 'field:' se usa para indicar un campo del documento para una búsqueda.
+                    Si se omite, entonces se buscan todos los campos.
+                </p></li>
+</ul></div>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_MultiTerm();
+
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'), true);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2', 'author'),
+                null);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'), false);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            También es posible especificar una lista de términos dentro del constructor de la consulta MultiTerm:
+        </p>
+<pre class="programlisting">
+$terms = array(new Zend_Search_Lucene_Index_Term('word1'),
+               new Zend_Search_Lucene_Index_Term('word2', 'author'),
+               new Zend_Search_Lucene_Index_Term('word3'));
+$signs = array(true, null, false);
+
+$query = new Zend_Search_Lucene_Search_Query_MultiTerm($terms, $signs);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            El array <code class="varname">$signs</code> contiene información sobre el tipo de término:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">TRUE</code> se usa para definir un término requerido.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">FALSE</code> se usa para definir un término prohibido.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">NULL</code> se usa para definir un término que no es ni
+                        requerido ni prohibido.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.boolean-query"></a>61.5.4. Consulta booleana</h3></div></div></div>
+<p>
+            Las consultas booleanas permiten construir una consulta usando otras consultas y operadores booleanos.
+        </p>
+<p>
+            Cada subconsulta de un conjunto puede definirse como <span class="emphasis"><em>requerida</em></span>,
+            <span class="emphasis"><em>prohibida</em></span>, o <span class="emphasis"><em>opcional</em></span>.
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>requerida</em></span> significa que los documentos que no coincidan con esta
+                        subconsulta no coincidirán con la consulta;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>prohibida</em></span> significa que los documentos que coincidan con esta subconsulta
+                        no coincidirán con la consulta;
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>opcional</em></span>, en cuyo caso los documentos coincidentes no están ni
+                        prohibidos ni obligados a coincidir con la subconsulta. Un documento debe coincidir
+                        con al menos 1 subconsulta, sin embargo, para coincidir con la consulta.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Si se añaden subconsultas opcionales a una consulta con subconsultas requeridas, ambas consultas
+            tendrán el mismo conjunto de resultados, pero las subconsultas opcionales pueden afectar la puntuación de los documentos
+            coincidentes.
+        </p>
+<p>
+            Ambos métodos de búsqueda se pueden usar para consultas booleanas.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
++(word1 word2 word3) (author:word4 author:word5) -(word6)
+</pre>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    '+' se usa para definir una subconsulta requerida.
+                </p></li>
+<li class="listitem"><p>
+                    '-' se usa para definir una subconsulta prohibida.
+                </p></li>
+<li class="listitem"><p>
+                    El prefijo 'field:' se usa para indicar un campo del documento para una búsqueda.
+                    Si se omite, entonces se buscan todos los campos.
+                </p></li>
+</ul></div>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Boolean();
+
+$subquery1 = new Zend_Search_Lucene_Search_Query_MultiTerm();
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'));
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2'));
+$subquery1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'));
+
+$subquery2 = new Zend_Search_Lucene_Search_Query_MultiTerm();
+$subquery2-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word4', 'author'));
+$subquery2-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word5', 'author'));
+
+$term6 = new Zend_Search_Lucene_Index_Term('word6');
+$subquery3 = new Zend_Search_Lucene_Search_Query_Term($term6);
+
+$query-&gt;addSubquery($subquery1, true  /* required */);
+$query-&gt;addSubquery($subquery2, null  /* optional */);
+$query-&gt;addSubquery($subquery3, false /* prohibited */);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            También es posible especificar una lista de subconsultas dentro del constructor de la consulta Boolean:
+        </p>
+<pre class="programlisting">
+...
+$subqueries = array($subquery1, $subquery2, $subquery3);
+$signs = array(true, null, false);
+
+$query = new Zend_Search_Lucene_Search_Query_Boolean($subqueries, $signs);
+
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            El array <code class="varname">$signs</code> contiene información sobre el tipo de subconsulta:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">TRUE</code> se usa para definir una subconsulta requerida.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">FALSE</code> se usa para definir una subconsulta prohibida.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">NULL</code> se usa para definir una subconsulta que no es
+                        ni requerida ni prohibida.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Toda consulta que use operadores booleanos puede reescribirse usando la notación de signos y
+            construirse usando la <acronym class="acronym">API</acronym>. Por ejemplo:
+        </p>
+<pre class="programlisting">
+word1 AND (word2 AND word3 AND NOT word4) OR word5
+</pre>
+<p>
+            es equivalente a
+        </p>
+<pre class="programlisting">
+(+(word1) +(+word2 +word3 -word4)) (word5)
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.wildcard"></a>61.5.5. Consulta de comodín</h3></div></div></div>
+<p>
+            Las consultas de comodín se pueden usar para buscar documentos que contengan cadenas que coincidan con
+            patrones especificados.
+        </p>
+<p>
+            El símbolo '?' se usa como comodín de un solo carácter.
+        </p>
+<p>
+            El símbolo '*' se usa como comodín de varios caracteres.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
+field1:test*
+</pre>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$pattern = new Zend_Search_Lucene_Index_Term('test*', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Wildcard($pattern);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            El campo del término es opcional. <code class="classname">Zend_Search_Lucene</code> busca en
+            todos los campos de cada documento si no se especifica un campo:
+        </p>
+<pre class="programlisting">
+$pattern = new Zend_Search_Lucene_Index_Term('test*');
+$query = new Zend_Search_Lucene_Search_Query_Wildcard($pattern);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.fuzzy"></a>61.5.6. Consulta difusa</h3></div></div></div>
+<p>
+            Las consultas difusas se pueden usar para buscar documentos que contengan cadenas que coincidan con
+            términos similares al término especificado.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
+field1:test~
+</pre>
+<p>
+            Esta consulta coincide con documentos que contienen las palabras 'test', 'text', 'best' y otras.
+        </p>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Se puede especificar una similitud opcional después del signo "~".
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
+field1:test~0.4
+</pre>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test', 'field1');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term, 0.4);
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            El campo del término es opcional. <code class="classname">Zend_Search_Lucene</code> busca en
+            todos los campos de cada documento si no se especifica un campo:
+        </p>
+<pre class="programlisting">
+$term = new Zend_Search_Lucene_Index_Term('test');
+$query = new Zend_Search_Lucene_Search_Query_Fuzzy($term);
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.phrase-query"></a>61.5.7. Consulta de frase</h3></div></div></div>
+<p>
+            Las consultas de frase se pueden usar para buscar una frase dentro de los documentos.
+        </p>
+<p>
+            Las consultas de frase son muy flexibles y permiten al usuario o desarrollador buscar frases
+            exactas así como frases 'imprecisas'.
+        </p>
+<p>
+            Las frases también pueden contener huecos o términos en las mismas posiciones; pueden ser generados por
+            el analizador para diferentes propósitos. Por ejemplo, un término puede duplicarse para aumentar
+            su peso, o se pueden colocar varios sinónimos en una única posición.
+        </p>
+<pre class="programlisting">
+$query1 = new Zend_Search_Lucene_Search_Query_Phrase();
+
+// Add 'word1' at 0 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word1'));
+
+// Add 'word2' at 1 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word2'));
+
+// Add 'word3' at 3 relative position.
+$query1-&gt;addTerm(new Zend_Search_Lucene_Index_Term('word3'), 3);
+
+...
+
+$query2 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2', 'word3'), array(0,1,3));
+
+...
+
+// Query without a gap.
+$query3 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2', 'word3'));
+
+...
+
+$query4 = new Zend_Search_Lucene_Search_Query_Phrase(
+                array('word1', 'word2'), array(0,1), 'annotation');
+</pre>
+<p>
+            Una consulta de frase puede construirse en un solo paso con un constructor de clase o paso a paso
+            con llamadas al método <code class="methodname">Zend_Search_Lucene_Search_Query_Phrase::addTerm()</code>.
+        </p>
+<p>
+            El constructor de la clase <code class="classname">Zend_Search_Lucene_Search_Query_Phrase</code> toma
+            tres argumentos opcionales:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Search_Query_Phrase(
+    [array $terms[, array $offsets[, string $field]]]
+);
+</pre>
+<p>
+            El parámetro <code class="varname">$terms</code> es un array de cadenas que contiene un conjunto de
+            términos de la frase. Si se omite o es igual a <code class="constant">NULL</code>, entonces se construye una
+            consulta vacía.
+        </p>
+<p>
+            El parámetro <code class="varname">$offsets</code> es un array de enteros que contiene los desplazamientos
+            de los términos en una frase. Si se omite o es igual a <code class="constant">NULL</code>, entonces se
+            asume que las posiciones de los términos son secuenciales sin huecos.
+        </p>
+<p>
+            El parámetro <code class="varname">$field</code> es una cadena que indica el campo del documento
+            a buscar. Si se omite o es igual a <code class="constant">NULL</code>, entonces se busca en el campo
+            predeterminado.
+        </p>
+<p>
+            Así:
+        </p>
+<pre class="programlisting">
+$query =
+    new Zend_Search_Lucene_Search_Query_Phrase(array('zend', 'framework'));
+</pre>
+<p>
+            buscará la frase 'zend framework' en todos los campos.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase(
+                 array('zend', 'download'), array(0, 2)
+             );
+</pre>
+<p>
+            buscará la frase 'zend ????? download' y coincidirá con 'zend platform download',
+            'zend studio download', 'zend core download', 'zend framework download', etcétera.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase(
+                 array('zend', 'framework'), null, 'title'
+             );
+</pre>
+<p>
+            buscará la frase 'zend framework' en el campo 'title'.
+        </p>
+<p>
+            <code class="methodname">Zend_Search_Lucene_Search_Query_Phrase::addTerm()</code> toma dos
+            argumentos, un objeto <code class="classname">Zend_Search_Lucene_Index_Term</code> requerido y una
+            posición opcional:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Search_Query_Phrase::addTerm(
+    Zend_Search_Lucene_Index_Term $term[, integer $position]
+);
+</pre>
+<p>
+            El parámetro <code class="varname">$term</code> describe el siguiente término en la frase. Debe
+            indicar el mismo campo que los términos anteriores, o se lanzará una excepción.
+        </p>
+<p>
+            El parámetro <code class="varname">$position</code> indica la posición del término en la frase.
+        </p>
+<p>
+            Así:
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend'));
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework'));
+</pre>
+<p>
+            buscará la frase 'zend framework'.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend'), 0);
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework'), 2);
+</pre>
+<p>
+            buscará la frase 'zend ????? download' y coincidirá con 'zend platform download',
+            'zend studio download', 'zend core download', 'zend framework download', etcétera.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Search_Lucene_Search_Query_Phrase();
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('zend', 'title'));
+$query-&gt;addTerm(new Zend_Search_Lucene_Index_Term('framework', 'title'));
+</pre>
+<p>
+            buscará la frase 'zend framework' en el campo 'title'.
+        </p>
+<p>
+            El factor de holgura (slop) establece el número de otras palabras permitidas entre las palabras especificadas en la
+            frase de consulta. Si se establece en cero, entonces la consulta correspondiente es una búsqueda de frase exacta.
+            Para valores mayores esto funciona como los operadores WITHIN o NEAR.
+        </p>
+<p>
+            El factor de holgura es en realidad una distancia de edición, donde las ediciones corresponden a mover términos
+            en la frase de consulta. Por ejemplo, para intercambiar el orden de dos palabras se requieren dos movimientos
+            (el primer movimiento coloca las palabras una encima de la otra), así que para permitir reordenaciones de
+            frases, el factor de holgura debe ser de al menos dos.
+        </p>
+<p>
+            Las coincidencias más exactas obtienen una puntuación más alta que las coincidencias menos exactas; por lo tanto, los resultados de búsqueda se
+            ordenan por exactitud. La holgura es cero por defecto, requiriendo coincidencias exactas.
+        </p>
+<p>
+            El factor de holgura se puede asignar después de la creación de la consulta:
+        </p>
+<pre class="programlisting">
+// Query without a gap.
+$query =
+    new Zend_Search_Lucene_Search_Query_Phrase(array('word1', 'word2'));
+
+// Search for 'word1 word2', 'word1 ... word2'
+$query-&gt;setSlop(1);
+$hits1 = $index-&gt;find($query);
+
+// Search for 'word1 word2', 'word1 ... word2',
+// 'word1 ... ... word2', 'word2 word1'
+$query-&gt;setSlop(2);
+$hits2 = $index-&gt;find($query);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.queries.range"></a>61.5.8. Consulta de rango</h3></div></div></div>
+<p>
+            Las <a class="link" href="zend.search.lucene.query-language.phtml#zend.search.lucene.query-language.range" title="61.4.5. Range Searches">consultas de rango</a> están
+            destinadas a buscar términos dentro de un intervalo especificado.
+        </p>
+<p>
+            Cadena de consulta:
+        </p>
+<pre class="programlisting">
+mod_date:[20020101 TO 20030101]
+title:{Aida TO Carmen}
+</pre>
+<p>o</p>
+<p>
+            Construcción de la consulta mediante la <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+$from = new Zend_Search_Lucene_Index_Term('20020101', 'mod_date');
+$to   = new Zend_Search_Lucene_Index_Term('20030101', 'mod_date');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, $to, true // inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Los campos de término son opcionales. <code class="classname">Zend_Search_Lucene</code> busca en todos los
+            campos si no se especifica el campo:
+        </p>
+<pre class="programlisting">
+$from = new Zend_Search_Lucene_Index_Term('Aida');
+$to   = new Zend_Search_Lucene_Index_Term('Carmen');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, $to, false // non-inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+<p>
+            Cualquiera (pero no ambos) de los términos límite puede establecerse en <code class="constant">NULL</code>.
+            <code class="classname">Zend_Search_Lucene</code> busca desde el principio o
+            hasta el final del diccionario para los campos especificados en este caso:
+        </p>
+<pre class="programlisting">
+// searches for ['20020101' TO ...]
+$from = new Zend_Search_Lucene_Index_Term('20020101', 'mod_date');
+$query = new Zend_Search_Lucene_Search_Query_Range(
+                 $from, null, true // inclusive
+             );
+$hits  = $index-&gt;find($query);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-language.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.charset.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.4. Lenguaje de consultas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 61.6. Conjunto de caracteres</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

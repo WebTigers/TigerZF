@@ -1,0 +1,170 @@
+<?php $title = 'Capítulo 23. Zend_Console_Getopt'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 23. Zend_Console_Getopt</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.config.writer.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.console.getopt.rules.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.console.getopt"></a>Capítulo 23. Zend_Console_Getopt</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.console.getopt.phtml#zend.console.getopt.introduction">23.1. Introducción</a></span></dt>
+<dt><span class="sect1"><a href="zend.console.getopt.rules.phtml">23.2. Declaración de reglas de Getopt</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.console.getopt.rules.phtml#zend.console.getopt.rules.short">23.2.1. Declaración de opciones con la sintaxis corta</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.rules.phtml#zend.console.getopt.rules.long">23.2.2. Declaración de opciones con la sintaxis larga</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.console.getopt.fetching.phtml">23.3. Obtención de opciones y argumentos</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.console.getopt.fetching.phtml#zend.console.getopt.fetching.exceptions">23.3.1. Manejo de excepciones de Getopt</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.fetching.phtml#zend.console.getopt.fetching.byname">23.3.2. Obtención de opciones por nombre</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.fetching.phtml#zend.console.getopt.fetching.reporting">23.3.3. Informe de opciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.fetching.phtml#zend.console.getopt.fetching.remainingargs">23.3.4. Obtención de argumentos que no son opciones</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.console.getopt.configuration.phtml">23.4. Configuración de Zend_Console_Getopt</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.addrules">23.4.1. Añadir reglas de opciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.addhelp">23.4.2. Añadir mensajes de ayuda</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.addaliases">23.4.3. Añadir alias de opciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.addargs">23.4.4. Añadir listas de argumentos</a></span></dt>
+<dt><span class="sect2"><a href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.config">23.4.5. Añadir configuración</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.console.getopt.introduction"></a>23.1. Introducción</h2></div></div></div>
+<p>
+        La clase <code class="classname">Zend_Console_Getopt</code> ayuda a las
+        aplicaciones de línea de comandos a analizar sus opciones y argumentos.
+    </p>
+<p>
+        Los usuarios pueden especificar argumentos de línea de comandos cuando
+        ejecutan su aplicación. Estos argumentos tienen un significado para la
+        aplicación, ya sea para cambiar el comportamiento de algún modo, elegir
+        recursos, o especificar parámetros. Muchas opciones han desarrollado un
+        significado habitual, por ejemplo <span class="command"><strong>--verbose</strong></span> habilita
+        salida adicional en muchas aplicaciones. Otras opciones pueden tener un
+        significado que es diferente para cada aplicación. Por ejemplo,
+        <span class="command"><strong>-c</strong></span> habilita características distintas en
+        <span class="command"><strong>grep</strong></span>, <span class="command"><strong>ls</strong></span>, y
+        <span class="command"><strong>tar</strong></span>.
+    </p>
+<p>
+        A continuación se muestran algunas definiciones de términos. El uso
+        común de los términos varía, pero esta documentación usará las
+        definiciones que se dan a continuación.
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                "argumento": una cadena que aparece en la línea de comandos
+                a continuación del nombre del comando. Los argumentos pueden
+                ser opciones o bien pueden aparecer sin una opción, para
+                nombrar recursos sobre los que opera el comando.
+            </p></li>
+<li class="listitem"><p>
+                "opción": un argumento que indica que el comando debe
+                cambiar su comportamiento predeterminado de algún modo.
+            </p></li>
+<li class="listitem"><p>
+                "flag" (indicador): la primera parte de una opción,
+                identifica el propósito de la opción. Un flag va precedido
+                convencionalmente por uno o dos guiones
+                (<span class="command"><strong>-</strong></span> o <span class="command"><strong>--</strong></span>).
+                Un solo guión precede a un flag de un solo carácter
+                o a un conjunto de flags de un solo carácter.
+                Un doble guión precede a un flag multicarácter.
+                Los flags largos no pueden agruparse.
+            </p></li>
+<li class="listitem">
+<p>
+                "parámetro": la parte secundaria de una opción; un valor de
+                datos que puede acompañar a un flag, si es aplicable a la
+                opción dada. Por ejemplo, muchos comandos aceptan una opción
+                <span class="command"><strong>--verbose</strong></span>, pero típicamente
+                esta opción no tiene parámetro. Sin embargo, una opción como
+                <span class="command"><strong>--user</strong></span> casi siempre requiere
+                un parámetro a continuación.
+            </p>
+<p>
+                Un parámetro puede darse como un argumento independiente
+                a continuación de un argumento flag, o como parte de la
+                misma cadena de argumento, separado del flag por un símbolo
+                igual (<span class="command"><strong>=</strong></span>).
+                Esta última forma solo es admitida por flags largos.
+                Por ejemplo,
+                <span class="command"><strong>-u username</strong></span>, <span class="command"><strong>--user username</strong></span>,
+                y <span class="command"><strong>--user=username</strong></span> son formas admitidas
+                por <code class="classname">Zend_Console_Getopt</code>.
+            </p>
+</li>
+<li class="listitem"><p>
+                "cluster" (agrupación): múltiples flags de un solo carácter
+                combinados en un único argumento de cadena y precedidos por
+                un solo guión. Por ejemplo, "<span class="command"><strong>ls -1str</strong></span>"
+                usa un cluster de cuatro flags cortos. Este comando es
+                equivalente a "<span class="command"><strong>ls -1 -s -t -r</strong></span>".
+                Solo los flags de un solo carácter pueden agruparse en un
+                cluster. No se puede hacer un cluster de flags largos.
+            </p></li>
+</ul></div>
+<p>
+        Por ejemplo, en <span class="command"><strong>mysql --user=root mydatabase</strong></span>,
+        <span class="command"><strong>mysql</strong></span> es un <span class="emphasis"><em>comando</em></span>,
+        <span class="command"><strong>--user=root</strong></span> es una <span class="emphasis"><em>opción</em></span>,
+        <span class="command"><strong>--user</strong></span> es un <span class="emphasis"><em>flag</em></span>,
+        <span class="command"><strong>root</strong></span> es un <span class="emphasis"><em>parámetro</em></span> de la opción,
+        y <span class="command"><strong>mydatabase</strong></span> es un argumento pero no una opción
+        según nuestra definición.
+    </p>
+<p>
+        <code class="classname">Zend_Console_Getopt</code> proporciona una interfaz para declarar
+        qué flags son válidos para su aplicación, mostrar un mensaje de error y de uso
+        si se usa un flag inválido, e informar a su código de aplicación
+        qué flags especificó el usuario.
+    </p>
+<div class="note"><table border="0" summary="Note: Getopt is not an Application Framework">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Getopt no es un framework de aplicaciones</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Console_Getopt</code> <span class="emphasis"><em>no</em></span>
+            interpreta el significado de los flags y parámetros, ni esta clase
+            implementa el flujo de trabajo de la aplicación ni invoca código de
+            aplicación. Usted debe implementar esas acciones en el código de su
+            propia aplicación. Puede usar la clase <code class="classname">Zend_Console_Getopt</code>
+            para analizar la línea de comandos y proporcionar métodos orientados
+            a objetos para consultar qué opciones dio un usuario, pero el código
+            que use esta información para invocar partes de su aplicación debería
+            estar en otra clase <acronym class="acronym">PHP</acronym>.
+        </p></td></tr>
+</table></div>
+<p>
+        Las siguientes secciones describen el uso de <code class="classname">Zend_Console_Getopt</code>.
+    </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.config.writer.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.console.getopt.rules.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 22. Zend_Config_Writer </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 23.2. Declaración de reglas de Getopt</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,228 @@
+<?php $title = '64.26. Zend_Service_ReCaptcha'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.26. Zend_Service_ReCaptcha</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.rackspace.servers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.short-url.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.recaptcha"></a>64.26. Zend_Service_ReCaptcha</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.recaptcha.introduction"></a>64.26.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_ReCaptcha</code> proporciona un cliente para el <a class="ulink" href="http://recaptcha.net/" target="_top">servicio web reCAPTCHA</a>.
+            Según el sitio de reCAPTCHA, "reCAPTCHA es un servicio CAPTCHA gratuito que
+            ayuda a digitalizar libros." Cada reCAPTCHA requiere que el usuario introduzca
+            dos palabras, la primera de las cuales es el CAPTCHA real, y la segunda
+            es una palabra de un texto escaneado que el software de reconocimiento óptico
+            de caracteres (OCR) no ha podido identificar.
+            La suposición es que si un usuario introduce correctamente la primera
+            palabra, es probable que la segunda también se haya introducido correctamente, y se puede
+            usar para mejorar el software OCR utilizado para digitalizar libros.
+        </p>
+<p>
+            Para usar el servicio reCAPTCHA, deberá <a class="ulink" href="http://recaptcha.net/whyrecaptcha.html" target="_top">registrarse para obtener una
+                cuenta</a> y registrar uno o más dominios con el
+            servicio para generar claves públicas y privadas.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.recaptcha.simplestuse"></a>64.26.2. Uso más simple</h3></div></div></div>
+<p>
+            Instancie un objeto <code class="classname">Zend_Service_ReCaptcha</code>, pasándole
+            sus claves pública y privada:
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.example-1"></a><p class="title"><b>Ejemplo 64.119. Creación de una instancia del servicio reCAPTCHA</b></p>
+<div class="example-contents"><pre class="programlisting">
+$recaptcha = new Zend_Service_ReCaptcha($pubKey, $privKey);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Para renderizar el reCAPTCHA, simplemente llame al método
+            <code class="methodname">getHTML()</code>:
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.example-2"></a><p class="title"><b>Ejemplo 64.120. Mostrando el reCAPTCHA</b></p>
+<div class="example-contents"><pre class="programlisting">
+echo $recaptcha-&gt;getHTML();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Cuando se envía el formulario, debería recibir dos campos,
+            'recaptcha_challenge_field' y 'recaptcha_response_field'. Pase
+            estos al método <code class="methodname">verify()</code> del objeto reCAPTCHA:
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.example-3"></a><p class="title"><b>Ejemplo 64.121. Verificación de los campos del formulario</b></p>
+<div class="example-contents"><pre class="programlisting">
+$result = $recaptcha-&gt;verify(
+    $_POST['recaptcha_challenge_field'],
+    $_POST['recaptcha_response_field']
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Una vez que tenga el resultado, compruébelo para ver si es válido. El
+            resultado es un objeto <code class="classname">Zend_Service_ReCaptcha_Response</code>,
+            que proporciona un método <code class="methodname">isValid()</code>.
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.example-4"></a><p class="title"><b>Ejemplo 64.122. Validación del reCAPTCHA</b></p>
+<div class="example-contents"><pre class="programlisting">
+if (!$result-&gt;isValid()) {
+    // Failed validation
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Es incluso más sencillo usar <a class="link" href="zend.captcha.adapters.phtml#zend.captcha.adapters.recaptcha" title="18.3.5. Zend_Captcha_ReCaptcha">el adaptador reCAPTCHA</a>
+            de <code class="classname">Zend_Captcha</code>, o usar ese adaptador como
+            backend para el <a class="link" href="zend.form.standardElements.phtml#zend.form.standardElements.captcha" title="36.6.2. Zend_Form_Element_Captcha">elemento de
+                formulario CAPTCHA</a>. En cada caso, los detalles del renderizado y
+            la validación del reCAPTCHA se automatizan para usted.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.recaptcha.mailhide"></a>64.26.3. Ocultando direcciones de correo electrónico</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_ReCaptcha_MailHide</code> se puede usar para ocultar
+            direcciones de correo electrónico. Reemplazará una parte de una dirección de correo electrónico con un enlace que abre una ventana
+            emergente con un desafío reCAPTCHA. Resolver el desafío revelará la
+            dirección de correo electrónico completa.
+        </p>
+<p>
+            Para usar este componente necesitará
+            <a class="ulink" href="http://recaptcha.net/whyrecaptcha.html" target="_top">una cuenta</a> para generar
+            claves públicas y privadas para la <acronym class="acronym">API</acronym> de mailhide.
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.mailhide.example-1"></a><p class="title"><b>Ejemplo 64.123. Uso del componente de ocultación de correo</b></p>
+<div class="example-contents"><pre class="programlisting">
+// The mail address we want to hide
+$mail = 'mail@example.com';
+
+// Create an instance of the mailhide component, passing it your public
+// and private keys, as well as the mail address you want to hide
+$mailHide = new Zend_Service_ReCaptcha_MailHide();
+$mailHide-&gt;setPublicKey($pubKey);
+$mailHide-&gt;setPrivateKey($privKey);
+$mailHide-&gt;setEmail($mail);
+
+// Display it
+print($mailHide);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El ejemplo anterior mostrará "m...@example.com" donde "..." tiene un enlace que abre
+            una ventana emergente con un desafío reCAPTCHA.
+        </p>
+<p>
+            La clave pública, la clave privada y la dirección de correo electrónico también se pueden especificar en el
+            constructor de la clase. También existe un cuarto argumento que le permite establecer algunas
+            opciones para el componente. Las opciones disponibles se listan en la siguiente tabla:
+
+            </p>
+<div class="table">
+<a name="zend.service.recaptcha.mailhide.options.table"></a><p class="title"><b>Tabla 64.19. Opciones de Zend_Service_ReCaptcha_MailHide</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Service_ReCaptcha_MailHide options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Descripción</th>
+<th>Valores esperados</th>
+<th>Valor por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>linkTitle</td>
+<td>El atributo title del enlace</td>
+<td>string</td>
+<td>'Reveal this e-mail address'</td>
+</tr>
+<tr>
+<td>linkHiddenText</td>
+<td>El texto que incluye el enlace emergente</td>
+<td>string</td>
+<td>'...'</td>
+</tr>
+<tr>
+<td>popupWidth</td>
+<td>El ancho de la ventana emergente</td>
+<td>int</td>
+<td>500</td>
+</tr>
+<tr>
+<td>popupHeight</td>
+<td>La altura de la ventana emergente</td>
+<td>int</td>
+<td>300</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p><br class="table-break">
+        </p>
+<p>
+            Las opciones de configuración se pueden establecer enviándolas como el cuarto argumento al
+            constructor o llamando a <code class="methodname">setOptions($options)</code>, que acepta
+            un array asociativo o una instancia de <a class="link" href="zend.config.phtml" title="Chapter 21. Zend_Config">Zend_Config</a>.
+        </p>
+<div class="example">
+<a name="zend.service.recaptcha.mailhide.example-2"></a><p class="title"><b>Ejemplo 64.124. Generación de muchas direcciones de correo electrónico ocultas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Create an instance of the mailhide component, passing it your public
+// and private keys, as well as some configuration options
+$mailHide = new Zend_Service_ReCaptcha_MailHide();
+$mailHide-&gt;setPublicKey($pubKey);
+$mailHide-&gt;setPrivateKey($privKey);
+$mailHide-&gt;setOptions(array(
+    'linkTitle' =&gt; 'Click me',
+    'linkHiddenText' =&gt; '+++++',
+));
+
+// The mail addresses we want to hide
+$mailAddresses = array(
+    'mail@example.com',
+    'johndoe@example.com',
+    'janedoe@example.com',
+);
+
+foreach ($mailAddresses as $mail) {
+    $mailHide-&gt;setEmail($mail);
+    print($mailHide);
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.rackspace.servers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.short-url.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.25. Zend_Service_Rackspace_Servers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.27. Zend_Service_ShortUrl</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,141 @@
+<?php $title = '23.2. Declaración de reglas de Getopt'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">23.2. Declaración de reglas de Getopt</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.console.getopt.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 23. Zend_Console_Getopt</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.console.getopt.fetching.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.console.getopt.rules"></a>23.2. Declaración de reglas de Getopt</h2></div></div></div>
+<p>
+        El constructor de la clase <code class="classname">Zend_Console_Getopt</code> toma
+        de uno a tres argumentos. El primer argumento
+        declara qué opciones admite su aplicación.
+        Esta clase admite formas de sintaxis alternativas para declarar las opciones.
+        Consulte las secciones siguientes para conocer el formato y el uso de estas formas de sintaxis.
+    </p>
+<p>
+        El constructor toma dos argumentos más, ambos opcionales.
+        El segundo argumento puede contener los argumentos de línea de comandos.
+        Por defecto es <code class="varname">$_SERVER['argv']</code>.
+    </p>
+<p>
+        El tercer argumento del constructor puede contener opciones de
+        configuración para personalizar el comportamiento de
+        <code class="classname">Zend_Console_Getopt</code>.
+        Consulte <a class="link" href="zend.console.getopt.configuration.phtml#zend.console.getopt.configuration.config" title="23.4.5. Adding Configuration">Adding Configuration</a>
+        para conocer las opciones disponibles.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.rules.short"></a>23.2.1. Declaración de opciones con la sintaxis corta</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Console_Getopt</code> admite una sintaxis compacta similar
+            a la utilizada por <acronym class="acronym">GNU</acronym> Getopt (véase <a class="ulink" href="http://www.gnu.org/software/libc/manual/html_node/Getopt.html" target="_top">http://www.gnu.org/software/libc/manual/html_node/Getopt.html</a>.
+            Esta sintaxis solo admite indicadores de un único carácter. En una única
+            cadena, escriba cada una de las letras que corresponden a los indicadores
+            admitidos por su aplicación. Una letra seguida de un carácter de dos puntos
+            (<span class="emphasis"><em>:</em></span>) indica un indicador que requiere un
+            parámetro.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.rules.short.example"></a><p class="title"><b>Ejemplo 23.1. Uso de la sintaxis corta</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El ejemplo anterior muestra el uso de <code class="classname">Zend_Console_Getopt</code>
+            para declarar que las opciones se pueden dar como <span class="command"><strong>-a</strong></span>,
+            <span class="command"><strong>-b</strong></span>, o <span class="command"><strong>-p</strong></span>. Este último indicador
+            requiere un parámetro.
+        </p>
+<p>
+            La sintaxis corta se limita a indicadores de un único carácter.
+            Los alias, los tipos de parámetro y las cadenas de ayuda no son compatibles
+            en la sintaxis corta.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.rules.long"></a>23.2.2. Declaración de opciones con la sintaxis larga</h3></div></div></div>
+<p>
+            También está disponible una sintaxis diferente con más funciones. Esta
+            sintaxis le permite especificar alias para los indicadores, tipos de parámetros
+            de opción, y también cadenas de ayuda para describir el uso al usuario.
+            En lugar de la única cadena utilizada en la sintaxis corta para declarar
+            las opciones, la sintaxis larga usa un array asociativo como
+            primer argumento del constructor.
+        </p>
+<p>
+            La clave de cada elemento del array asociativo es una cadena con
+            un formato que nombra el indicador, con cualquier alias, separados por el
+            símbolo de barra vertical ("<span class="emphasis"><em>|</em></span>"). Después de esta serie de alias
+            de indicadores, si la opción requiere un parámetro, hay un símbolo de igual
+            ("<span class="emphasis"><em>=</em></span>") con una letra que representa el
+            <span class="emphasis"><em>tipo</em></span> del parámetro:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    "<span class="emphasis"><em>=s</em></span>" para un parámetro de tipo cadena
+                </p></li>
+<li class="listitem"><p>
+                    "<span class="emphasis"><em>=w</em></span>" para un parámetro de tipo palabra
+                    (una cadena que no contiene espacios en blanco)
+                </p></li>
+<li class="listitem"><p>
+                    "<span class="emphasis"><em>=i</em></span>" para un parámetro de tipo entero
+                </p></li>
+</ul></div>
+<p>
+            Si el parámetro es opcional, use un guion ("<span class="emphasis"><em>-</em></span>")
+            en lugar del símbolo de igual.
+        </p>
+<p>
+            El valor de cada elemento en el array asociativo es una cadena de ayuda
+            para describir a un usuario cómo utilizar su programa.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.rules.long.example"></a><p class="title"><b>Ejemplo 23.2. Uso de la sintaxis larga</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt(
+  array(
+    'apple|a'    =&gt; 'apple option, with no parameter',
+    'banana|b=i' =&gt; 'banana option, with required integer parameter',
+    'pear|p-s'   =&gt; 'pear option, with optional string parameter'
+  )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            En la declaración de ejemplo anterior, hay tres opciones.
+            <span class="command"><strong>--apple</strong></span> y <span class="command"><strong>-a</strong></span> son alias entre
+            sí, y la opción no toma ningún parámetro.
+            <span class="command"><strong>--banana</strong></span> y <span class="command"><strong>-b</strong></span> son alias entre
+            sí, y la opción toma un parámetro entero obligatorio.
+            Por último, <span class="command"><strong>--pear</strong></span> y <span class="command"><strong>-p</strong></span> son alias
+            entre sí, y la opción puede tomar un parámetro de tipo cadena opcional.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.console.getopt.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.console.getopt.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.console.getopt.fetching.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 23. Zend_Console_Getopt </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 23.3. Obtención de opciones y argumentos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

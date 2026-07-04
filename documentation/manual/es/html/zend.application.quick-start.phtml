@@ -1,0 +1,403 @@
+<?php $title = '14.2. Inicio rápido de Zend_Application'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">14.2. Inicio rápido de Zend_Application</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.application.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 14. Zend_Application</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.application.theory-of-operation.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.application.quick-start"></a>14.2. Inicio rápido de Zend_Application</h2></div></div></div>
+<p>
+        Hay dos caminos para empezar a usar
+        <code class="classname">Zend_Application</code>, y dependen de cómo inicie su
+        proyecto. En cada caso, siempre empieza creando una
+        clase <code class="classname">Bootstrap</code>, y un archivo de configuración relacionado.
+    </p>
+<p>
+        Si planea usar <code class="classname">Zend_Tool</code> para crear su proyecto,
+        continúe leyendo a continuación. Si va a añadir
+        <code class="classname">Zend_Application</code> a un proyecto ya existente, querrá
+        <a class="link" href="zend.application.quick-start.phtml#zend.application.quick-start.manual" title="14.2.2. Adding Zend_Application to your application">saltar más adelante</a>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.quick-start.zend-tool"></a>14.2.1. Uso de Zend_Tool</h3></div></div></div>
+<p>
+            La forma más rápida de empezar a usar <code class="classname">Zend_Application</code> es usar
+            <code class="classname">Zend_Tool</code> para generar su proyecto. Esto también creará
+            su clase <code class="classname">Bootstrap</code> y su archivo.
+        </p>
+<p>
+            Para crear un proyecto, ejecute el comando <span class="command"><strong>zf</strong></span> (en sistemas *nix):
+        </p>
+<pre class="programlisting">
+% zf create project newproject
+</pre>
+<p>
+            O el comando <code class="filename">zf.bat</code> de Windows:
+        </p>
+<pre class="programlisting">
+C:&gt; zf.bat create project newproject
+</pre>
+<p>
+            Ambos crearán una estructura de proyecto similar a la siguiente:
+        </p>
+<pre class="programlisting">
+newproject
+|-- application
+|   |-- Bootstrap.php
+|   |-- configs
+|   |   `-- application.ini
+|   |-- controllers
+|   |   |-- ErrorController.php
+|   |   `-- IndexController.php
+|   |-- models
+|   `-- views
+|       |-- helpers
+|       `-- scripts
+|           |-- error
+|           |   `-- error.phtml
+|           `-- index
+|               `-- index.phtml
+|-- library
+|-- public
+|   `-- index.php
+`-- tests
+    |-- application
+    |   `-- bootstrap.php
+    |-- library
+    |   `-- bootstrap.php
+    `-- phpunit.xml
+</pre>
+<p>
+            En el diagrama anterior, su bootstrap está en
+            <code class="filename">newproject/application/Bootstrap.php</code>, y se ve
+            así inicialmente:
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+}
+</pre>
+<p>
+            También notará que se crea un archivo de configuración,
+            <code class="filename">newproject/application/configs/application.ini</code>. Tiene el
+            siguiente contenido:
+        </p>
+<pre class="programlisting">
+[production]
+phpSettings.display_startup_errors = 0
+phpSettings.display_errors = 0
+includePaths.library = APPLICATION_PATH "/../library"
+bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
+bootstrap.class = "Bootstrap"
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+
+[staging : production]
+
+[testing : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+</pre>
+<p>
+            Todas las configuraciones de este archivo de configuración son para su uso con
+            <code class="classname">Zend_Application</code> y su bootstrap.
+        </p>
+<p>
+            Otro archivo de interés es el archivo
+            <code class="filename">newproject/public/index.php</code>, que invoca
+            <code class="classname">Zend_Application</code> y lo despacha.
+        </p>
+<pre class="programlisting">
+// Define path to application directory
+defined('APPLICATION_PATH')
+    || define('APPLICATION_PATH',
+              realpath(dirname(__FILE__) . '/../application'));
+
+// Define application environment
+defined('APPLICATION_ENV')
+    || define('APPLICATION_ENV',
+              (getenv('APPLICATION_ENV') ? getenv('APPLICATION_ENV')
+                                         : 'production'));
+
+/** Zend_Application */
+require_once 'Zend/Application.php';
+
+// Create application, bootstrap, and run
+$application = new Zend_Application(
+    APPLICATION_ENV,
+    APPLICATION_PATH . '/configs/application.ini'
+);
+$application-&gt;bootstrap()
+            -&gt;run();
+</pre>
+<p>
+            Para continuar con el inicio rápido, por favor <a class="link" href="zend.application.quick-start.phtml#zend.application.quick-start.resources" title="14.2.3. Adding and creating resources">salte a la
+            sección de recursos</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.quick-start.manual"></a>14.2.2. Añadir Zend_Application a su aplicación</h3></div></div></div>
+<p>
+            Los fundamentos de <code class="classname">Zend_Application</code> son bastante simples:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Crear un archivo <code class="filename">application/Bootstrap.php</code>, con la
+                    clase <code class="classname">Bootstrap</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Crear un archivo de configuración <code class="filename">application/configs/application.ini</code>
+                    con la configuración base necesaria para
+                    <code class="classname">Zend_Application</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Modificar su <code class="filename">public/index.php</code> para utilizar
+                    <code class="classname">Zend_Application</code>.
+                </p></li>
+</ul></div>
+<p>
+            Primero, cree su clase <code class="classname">Bootstrap</code>. Cree un archivo,
+            <code class="filename">application/Bootstrap.php</code>, con el siguiente contenido:
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+}
+</pre>
+<p>
+            Ahora, cree su configuración. Para este tutorial, usaremos una
+            configuración de estilo <acronym class="acronym">INI</acronym>; puede, por supuesto, usar un archivo de configuración
+            <acronym class="acronym">XML</acronym>, <acronym class="acronym">JSON</acronym>, <acronym class="acronym">YAML</acronym>, o
+            <acronym class="acronym">PHP</acronym> también. Cree el archivo
+            <code class="filename">application/configs/application.ini</code>, y proporcione el siguiente
+            contenido:
+        </p>
+<pre class="programlisting">
+[production]
+phpSettings.display_startup_errors = 0
+phpSettings.display_errors = 0
+includePaths.library = APPLICATION_PATH "/../library"
+bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
+bootstrap.class = "Bootstrap"
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+
+[staging : production]
+
+[testing : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+</pre>
+<p>
+            Ahora, modifiquemos su script de entrada,
+            <code class="filename">public/index.php</code>. Si el archivo no existe, créelo;
+            de lo contrario, reemplácelo con el siguiente contenido:
+        </p>
+<pre class="programlisting">
+// Define path to application directory
+defined('APPLICATION_PATH')
+    || define('APPLICATION_PATH',
+              realpath(dirname(__FILE__) . '/../application'));
+
+// Define application environment
+defined('APPLICATION_ENV')
+    || define('APPLICATION_ENV',
+              (getenv('APPLICATION_ENV') ? getenv('APPLICATION_ENV')
+                                         : 'production'));
+
+// Typically, you will also want to add your library/ directory
+// to the include_path, particularly if it contains your ZF installed
+set_include_path(implode(PATH_SEPARATOR, array(
+    dirname(dirname(__FILE__)) . '/library',
+    get_include_path(),
+)));
+
+/** Zend_Application */
+require_once 'Zend/Application.php';
+
+// Create application, bootstrap, and run
+$application = new Zend_Application(
+    APPLICATION_ENV,
+    APPLICATION_PATH . '/configs/application.ini'
+);
+$application-&gt;bootstrap()
+            -&gt;run();
+</pre>
+<p>
+            Puede notar que el valor de la constante del entorno de la aplicación busca
+            una variable de entorno "APPLICATION_ENV". Recomendamos establecer
+            esto en el entorno de su servidor web. En Apache, puede establecerlo
+            ya sea en la definición de su vhost, o en su archivo <code class="filename">.htaccess</code>.
+            Recomendamos el siguiente contenido para su archivo
+            <code class="filename">public/.htaccess</code>:
+        </p>
+<pre class="programlisting">
+SetEnv APPLICATION_ENV development
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+RewriteRule ^.*$ index.php [NC,L]
+</pre>
+<div class="note"><table border="0" summary="Note: Learn about mod_rewrite">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Aprenda sobre mod_rewrite</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Las reglas de reescritura anteriores permiten el acceso a cualquier archivo bajo la
+                raíz de documentos de su host virtual. Si hay archivos que no desea
+                exponer de esta manera, es posible que desee ser más restrictivo en sus
+                reglas. Vaya al sitio web de Apache para <a class="ulink" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html" target="_top">aprender
+                más sobre mod_rewrite</a>.
+            </p></td></tr>
+</table></div>
+<p>
+            En este punto, ya está listo para empezar a aprovechar
+            <code class="classname">Zend_Application</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.quick-start.resources"></a>14.2.3. Añadir y crear recursos</h3></div></div></div>
+<p>
+            Si siguió las instrucciones anteriores, su clase bootstrap
+            utilizará un controlador frontal, y cuando se ejecute, despachará
+            el controlador frontal. Sin embargo, es muy probable que
+            necesite un poco más de configuración que esto.
+        </p>
+<p>
+            En esta sección, veremos cómo añadir dos recursos a su
+            aplicación. Primero, configuraremos sus layouts, y luego
+            personalizaremos su objeto view.
+        </p>
+<p>
+            Uno de los recursos estándar proporcionados con
+            <code class="classname">Zend_Application</code> es el recurso "layout". Este
+            recurso espera que defina valores de configuración que luego usará
+            para configurar su instancia de <code class="classname">Zend_Layout</code>.
+        </p>
+<p>
+            Para usarlo, todo lo que necesitamos hacer es actualizar el archivo de configuración.
+        </p>
+<pre class="programlisting">
+[production]
+phpSettings.display_startup_errors = 0
+phpSettings.display_errors = 0
+bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
+bootstrap.class = "Bootstrap"
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+; ADD THE FOLLOWING LINES
+resources.layout.layout = "layout"
+resources.layout.layoutPath = APPLICATION_PATH "/layouts/scripts"
+
+[staging : production]
+
+[testing : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+</pre>
+<p>
+            Si aún no lo ha hecho, cree el directorio
+            <code class="filename">application/layouts/scripts/</code>, y el archivo
+            <code class="filename">layout.phtml</code> dentro de ese directorio. Un buen layout
+            inicial es el siguiente (y se conecta con el recurso view que se cubre
+            a continuación):
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;doctype() ?&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;?php echo $this-&gt;headTitle() ?&gt;
+    &lt;?php echo $this-&gt;headLink() ?&gt;
+    &lt;?php echo $this-&gt;headStyle() ?&gt;
+    &lt;?php echo $this-&gt;headScript() ?&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php echo $this-&gt;layout()-&gt;content ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+            En este punto, ya tendrá un layout funcional.
+        </p>
+<p>
+            Ahora, añadiremos un recurso view personalizado. Al inicializar la vista,
+            querremos establecer el DocType <acronym class="acronym">HTML</acronym> y un valor predeterminado para el título
+            a usar en el head <acronym class="acronym">HTML</acronym>. Esto se puede lograr editando su
+            clase <code class="classname">Bootstrap</code> para añadir un método:
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected function _initView()
+    {
+        // Initialize view
+        $view = new Zend_View();
+        $view-&gt;doctype('XHTML1_STRICT');
+        $view-&gt;headTitle('My First Zend Framework Application');
+
+        // Add it to the ViewRenderer
+        $viewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper(
+            'ViewRenderer'
+        );
+        $viewRenderer-&gt;setView($view);
+
+        // Return it, so that it can be stored by the bootstrap
+        return $view;
+    }
+}
+</pre>
+<p>
+            Este método se ejecutará automáticamente cuando haga bootstrap de la
+            aplicación, y garantizará que su vista se inicialice de acuerdo con
+            las necesidades de su aplicación.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.quick-start.next-steps"></a>14.2.4. Próximos pasos con Zend_Application</h3></div></div></div>
+<p>
+            Lo anterior debería servirle para empezar con <code class="classname">Zend_Application</code>
+            y la creación del bootstrap de su aplicación. A partir de aquí, debería empezar a
+            crear métodos de recursos, o, para máxima reutilización, clases plugin
+            de recursos. ¡Continúe leyendo para aprender más!
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.application.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.application.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.application.theory-of-operation.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 14. Zend_Application </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 14.3. Teoría de funcionamiento</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

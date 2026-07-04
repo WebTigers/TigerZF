@@ -1,0 +1,199 @@
+<?php $title = 'Capítulo 53. Zend_OpenId'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 53. Zend_OpenId</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.oauth.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.openid.consumer.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.openid"></a>Capítulo 53. Zend_OpenId</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.openid.phtml#zend.openid.introduction">53.1. Introducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.openid.phtml#zend.openid.introduction.what">53.1.1. ¿Qué es OpenID?</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.phtml#zend.openid.introduction.how">53.1.2. ¿Cómo funciona?</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.phtml#zend.openid.introduction.structure">53.1.3. Estructura de Zend_OpenId</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.phtml#zend.openid.introduction.standards">53.1.4. Estándares de OpenID soportados</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.openid.consumer.phtml">53.2. Fundamentos de Zend_OpenId_Consumer</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.authentication">53.2.1. Autenticación OpenID</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.combine">53.2.2. Combinar todos los pasos en una página</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.realm">53.2.3. Ámbito (realm) del consumidor</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.check">53.2.4. Comprobación inmediata</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.storage">53.2.5. Zend_OpenId_Consumer_Storage</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.sreg">53.2.6. Extensión Simple Registration</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.auth">53.2.7. Integración con Zend_Auth</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.consumer.phtml#zend.openid.consumer.mvc">53.2.8. Integración con Zend_Controller</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.openid.provider.phtml">53.3. Zend_OpenId_Provider</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.openid.provider.phtml#zend.openid.provider.start">53.3.1. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.provider.phtml#zend.openid.provider.all">53.3.2. Scripts de proveedor combinados</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.provider.phtml#zend.openid.provider.sreg">53.3.3. Extensión Simple Registration</a></span></dt>
+<dt><span class="sect2"><a href="zend.openid.provider.phtml#zend.openid.provider.else">53.3.4. ¿Algo más?</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.openid.introduction"></a>53.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_OpenId</code> es un componente de Zend Framework que ofrece
+        una <acronym class="acronym">API</acronym> sencilla para construir sitios habilitados para OpenID y proveedores de identidad.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.introduction.what"></a>53.1.1. ¿Qué es OpenID?</h3></div></div></div>
+<p>
+            OpenID es un conjunto de protocolos para identidades digitales centradas en el usuario.
+            Estos protocolos permiten a los usuarios crear una identidad en línea, mediante un proveedor
+            de identidad. Esta identidad puede utilizarse en cualquier sitio que soporte OpenID.
+            Usando sitios habilitados para OpenID, los usuarios no necesitan recordar los tokens de
+            autenticación tradicionales, como nombres de usuario y contraseñas, para cada sitio. Todos los
+            sitios habilitados para OpenID aceptan una única identidad OpenID. Esta identidad es
+            típicamente una <acronym class="acronym">URL</acronym>. Puede ser la <acronym class="acronym">URL</acronym> de la página
+            personal del usuario, su blog u otro recurso que pueda proporcionar información adicional
+            sobre él. Eso significa que un usuario necesita solo un identificador para todos los sitios
+            y servicios que utiliza. OpenID es una solución abierta, descentralizada y libre, centrada
+            en el usuario. Los usuarios pueden elegir qué proveedor de OpenID utilizar, o incluso crear
+            su propio servidor de identidad personal. No se requiere ninguna autoridad central para
+            aprobar o registrar sitios habilitados para OpenID o proveedores de identidad.
+        </p>
+<p>
+            Para más información sobre OpenID visite el <a class="ulink" href="http://www.openid.net/" target="_top">sitio
+                oficial de OpenID</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.introduction.how"></a>53.1.2. ¿Cómo funciona?</h3></div></div></div>
+<p>
+            El propósito del componente <code class="classname">Zend_OpenId</code> es
+            implementar el protocolo de autenticación OpenID tal como se describe en el siguiente
+            diagrama de secuencia:
+        </p>
+<p>
+            <img src="figures/zend.openid.protocol.jpg" align="middle">
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+                    La autenticación es iniciada por el usuario final, quien pasa su
+                    identificador OpenID al consumidor OpenID a través de un agente de usuario.
+                </p></li>
+<li class="listitem"><p>
+                    El consumidor OpenID realiza la normalización y el descubrimiento sobre el
+                    identificador proporcionado por el usuario. Mediante este proceso, el consumidor
+                    obtiene el identificador reclamado, la <acronym class="acronym">URL</acronym> del
+                    proveedor OpenID y una versión del protocolo OpenID.
+                </p></li>
+<li class="listitem"><p>
+                    El consumidor OpenID establece una asociación opcional con el
+                    proveedor utilizando claves Diffie-Hellman. Como resultado, ambas partes
+                    tienen un "secreto compartido" común que se utiliza para firmar y verificar
+                    los mensajes posteriores.
+                </p></li>
+<li class="listitem"><p>
+                    El consumidor OpenID redirige al agente de usuario a la <acronym class="acronym">URL</acronym> del
+                    proveedor OpenID con una solicitud de autenticación OpenID.
+                </p></li>
+<li class="listitem"><p>
+                    El proveedor OpenID comprueba si el agente de usuario ya
+                    está autenticado y, si no, ofrece hacerlo.
+                </p></li>
+<li class="listitem"><p>
+                    El usuario final introduce la contraseña requerida.
+                </p></li>
+<li class="listitem"><p>
+                    El proveedor OpenID comprueba si tiene permitido pasar la identidad
+                    del usuario al consumidor dado, y pregunta al usuario si es necesario.
+                </p></li>
+<li class="listitem"><p>
+                    El usuario permite o deniega el paso de su identidad.
+                </p></li>
+<li class="listitem"><p>
+                    El proveedor OpenID redirige al agente de usuario de vuelta al consumidor
+                    OpenID con una solicitud de "autenticación aprobada" o "fallida".
+                </p></li>
+<li class="listitem"><p>
+                    El consumidor OpenID verifica la información recibida del
+                    proveedor utilizando el secreto compartido que obtuvo en el paso 3 o
+                    enviando una solicitud directa adicional al proveedor OpenID.
+                </p></li>
+</ol></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.introduction.structure"></a>53.1.3. Estructura de Zend_OpenId</h3></div></div></div>
+<p>
+            <code class="classname">Zend_OpenId</code> consta de dos subpaquetes. El primero
+            es <code class="classname">Zend_OpenId_Consumer</code> para desarrollar sitios habilitados
+            para OpenID, y el segundo es <code class="classname">Zend_OpenId_Provider</code> para desarrollar
+            servidores OpenID. Son completamente independientes entre sí y pueden usarse
+            por separado.
+        </p>
+<p>
+            El único código común utilizado por estos subpaquetes es la extensión Simple
+            Registration de OpenID, implementada por la clase
+            <code class="classname">Zend_OpenId_Extension_Sreg</code>, y un conjunto de funciones
+            de utilidad implementadas por la clase <code class="classname">Zend_OpenId</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_OpenId</code> aprovecha la <a class="ulink" href="http://php.net/gmp" target="_top">extensión GMP</a>, cuando está disponible. Considere
+                habilitar la extensión GMP para mejorar el rendimiento al usar
+                <code class="classname">Zend_OpenId</code>.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.introduction.standards"></a>53.1.4. Estándares de OpenID soportados</h3></div></div></div>
+<p>
+            El componente <code class="classname">Zend_OpenId</code> soporta los siguientes
+            estándares:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Protocolo de autenticación OpenID versión 1.1
+                </p></li>
+<li class="listitem"><p>
+                    Protocolo de autenticación OpenID versión 2.0 draft 11
+                </p></li>
+<li class="listitem"><p>
+                    Extensión Simple Registration de OpenID versión 1.0
+                </p></li>
+<li class="listitem"><p>
+                    Extensión Simple Registration de OpenID versión 1.1 draft 1
+                </p></li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.oauth.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.openid.consumer.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 52. Zend_Oauth </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 53.2. Fundamentos de Zend_OpenId_Consumer</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

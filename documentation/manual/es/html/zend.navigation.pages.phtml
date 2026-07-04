@@ -1,0 +1,870 @@
+<?php $title = '51.2. Páginas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">51.2. Páginas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.navigation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 51. Zend_Navigation</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.navigation.containers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.navigation.pages"></a>51.2. Páginas</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Navigation</code> incluye dos tipos de página:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <a class="link" href="zend.navigation.pages.phtml#zend.navigation.pages.mvc" title="51.2.2. Zend_Navigation_Page_Mvc">Páginas MVC</a>
+                     – usando la clase <code class="classname">Zend_Navigation_Page_Mvc</code>
+                </p></li>
+<li class="listitem"><p>
+                    <a class="link" href="zend.navigation.pages.phtml#zend.navigation.pages.uri" title="51.2.3. Zend_Navigation_Page_Uri">Páginas URI</a>
+                     – usando la clase <code class="classname">Zend_Navigation_Page_Uri</code>
+                </p></li>
+</ul></div>
+<p>
+
+        Las páginas MVC enlazan a páginas web dentro del sitio, y se definen usando parámetros
+        MVC (<code class="code">action</code>, <code class="code">controller</code>,
+        <code class="code">module</code>, <code class="code">route</code>, <code class="code">params</code>). Las páginas
+        URI se definen mediante una única propiedad <code class="code">uri</code>, que le da
+        toda la flexibilidad para enlazar páginas fuera del sitio o hacer otras cosas
+        con los enlaces generados (por ejemplo, un URI que se convierte en
+        <code class="code">&lt;a href="#"&gt;foo&lt;a&gt;</code>).
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.pages.common"></a>51.2.1. Características comunes de las páginas</h3></div></div></div>
+<p>
+        Todas las clases de página deben extender <code class="classname">Zend_Navigation_Page</code>,
+        y por lo tanto compartirán un conjunto común de características y propiedades. Cabe destacar
+        que comparten las opciones de la tabla siguiente y el mismo proceso de
+        inicialización.
+    </p>
+<p>
+        Las claves de opciones se corresponden con métodos <code class="code">set</code>. Esto significa que
+        la opción <code class="code">order</code> se corresponde con el método <code class="methodname">setOrder()</code>,
+        y <code class="code">reset_params</code> se corresponde con el método
+        <code class="methodname">setResetParams()</code>. Si no hay un método setter para
+        la opción, se establecerá como propiedad personalizada de la página.
+    </p>
+<p>
+        Lea más sobre cómo extender <code class="classname">Zend_Navigation_Page</code> en
+        <a class="link" href="zend.navigation.pages.phtml#zend.navigation.pages.custom" title="51.2.4. Creating custom page types">Creación de tipos de página personalizados</a>.
+    </p>
+<div class="table">
+<a name="zend.navigation.pages.common.options"></a><p class="title"><b>Tabla 51.1. Opciones comunes de página</b></p>
+<div class="table-contents"><table class="table" summary="Common page options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave</th>
+<th>Tipo</th>
+<th>Por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">label</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>Una etiqueta de página, como 'Home' o 'Blog'.</td>
+</tr>
+<tr>
+<td><code class="code">id</code></td>
+<td>
+<span class="type">String</span> | <code class="code">int</code>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Una etiqueta/atributo id que puede usarse al renderizar
+                        la página, típicamente en un elemento anchor.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">class</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Una clase <acronym class="acronym">CSS</acronym> que puede usarse al renderizar la página,
+                        típicamente en un elemento anchor.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">title</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Una breve descripción de la página, típicamente para usarse
+                        como el atributo <code class="code">title</code> en un anchor.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">target</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Especifica un target que puede usarse para la página,
+                        típicamente en un elemento anchor.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">accesskey</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Este atributo asigna una tecla de acceso a un elemento <code class="code">A</code>.
+                        Una tecla de acceso es un único carácter del conjunto de caracteres del documento.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">fragment</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        El identificador de fragmento (identificador de anchor) que apunta a
+                        un anchor dentro de un recurso que es subordinado a otro,
+                        recurso primario. El identificador de fragmento se introduce mediante
+                        una marca de almohadilla '#'.
+                        Ejemplo: http://www.example.org/foo.html#bar
+                        ('bar' es el identificador de fragmento)
+                    </td>
+</tr>
+<tr>
+<td><code class="code">rel</code></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>
+                        Especifica relaciones directas (forward) para la página.
+                        Cada elemento del array es un par clave-valor, donde la
+                        clave designa el tipo de relación/enlace, y el valor es
+                        un puntero a la página enlazada. Un ejemplo de par clave-valor
+                        es <code class="code">'alternate' =&gt; 'format/plain.html'</code>.
+                        Para permitir total flexibilidad, no hay restricciones sobre
+                        los valores de relación. El valor no tiene que ser una cadena.
+                        Lea más sobre <code class="code">rel</code> y <code class="code">rev</code> en
+                        <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.navigation.links" title="78.4.1.18.5. Links Helper">la
+                        sección sobre el ayudante Links.</a>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">rev</code></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>
+                        Especifica relaciones inversas para la página. Funciona exactamente
+                        igual que <code class="code">rel</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">order</code></td>
+<td>
+                        <span class="type">String</span> | <code class="code">int</code> | <code class="constant">NULL</code>
+                    </td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Funciona como order para elementos en
+                        <a class="link" href="zend.form.quickstart.phtml#zend.form.quickstart.render" title="36.2.3. Render a form">
+                        <code class="classname">Zend_Form</code></a>. Si se especifica,
+                        la página se iterará en un orden específico, lo que significa
+                        que puede forzar que una página se itere antes que otras
+                        estableciendo el atributo <code class="code">order</code> a un número bajo,
+                        p. ej. -100. Si se da un <span class="type">String</span>, debe
+                        parsearse a un <code class="code">int</code> válido. Si se da
+                        <code class="constant">NULL</code>, se restablecerá, lo que significa que se usará el
+                        orden en el que la página fue añadida al contenedor.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">resource</code></td>
+<td>
+                        <span class="type">String</span> | <code class="classname">Zend_Acl_Resource_Interface</code>
+                        | <code class="constant">NULL</code>
+                    </td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Recurso <acronym class="acronym">ACL</acronym> a asociar con la página. Lea más en
+                        <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.navigation.acl" title="78.4.1.18.2. Integration with ACL">la
+                        sección sobre la integración de <acronym class="acronym">ACL</acronym> en los ayudantes de vista.</a>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">privilege</code></td>
+<td>
+<span class="type">String</span> | <code class="constant">NULL</code>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Privilegio <acronym class="acronym">ACL</acronym> a asociar con la página. Lea más en
+                        <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.navigation.acl" title="78.4.1.18.2. Integration with ACL">la
+                        sección sobre la integración de <acronym class="acronym">ACL</acronym> en los ayudantes de vista.</a>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">active</code></td>
+<td><code class="code">bool</code></td>
+<td><code class="constant">FALSE</code></td>
+<td>
+                        Si la página debe considerarse activa para la
+                        solicitud actual. Si active es <code class="constant">FALSE</code> o no
+                        se indica, las páginas <acronym class="acronym">MVC</acronym> verificarán sus propiedades contra el
+                        objeto request al llamar a <code class="code">$page-&gt;isActive()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">visible</code></td>
+<td><code class="code">bool</code></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                        Si la página debe ser visible para el usuario, o solo
+                        formar parte de la estructura. Los ayudantes de vista omiten
+                        las páginas invisibles.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">pages</code></td>
+<td>
+                        <span class="type">Array</span> | <code class="classname">Zend_Config</code> |
+                        <code class="constant">NULL</code>
+                    </td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        Páginas hijas de la página. Esto puede ser un <span class="type">Array</span>
+                        u objeto <code class="classname">Zend_Config</code> que contenga bien
+                        opciones de página que puedan pasarse al método <code class="methodname">factory()</code>,
+                        o instancias reales de <code class="classname">Zend_Navigation_Page</code>,
+                        o una mezcla de ambos.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note: Custom properties">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Propiedades personalizadas</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Todas las páginas admiten establecer y obtener propiedades personalizadas mediante
+            el uso de los métodos mágicos <code class="methodname">__set($name, $value)</code>,
+            <code class="methodname">__get($name)</code>, <code class="methodname">__isset($name)</code> y
+            <code class="methodname">__unset($name)</code>. Las propiedades personalizadas pueden tener cualquier valor,
+            y se incluirán en el array que devuelve
+            <code class="code">$page-&gt;toArray()</code>, lo que significa que las páginas
+            pueden serializarse/deserializarse correctamente incluso si las páginas
+            contienen propiedades que no son nativas de la clase de página.
+        </p>
+<p>
+            Tanto las propiedades nativas como las personalizadas pueden establecerse usando
+            <code class="code">$page-&gt;set($name, $value)</code> y obtenerse usando
+            <code class="code">$page-&gt;get($name)</code>, o mediante métodos mágicos.
+        </p>
+</td></tr>
+</table></div>
+<div class="example">
+<a name="zend.navigation.pages.common.example.customprops"></a><p class="title"><b>Ejemplo 51.1. Propiedades personalizadas de página</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo muestra cómo pueden usarse las propiedades personalizadas.
+        </p>
+<pre class="programlisting">
+$page = new Zend_Navigation_Page_Mvc();
+$page-&gt;foo = 'bar';
+$page-&gt;meaning = 42;
+
+echo $page-&gt;foo;
+
+if ($page-&gt;meaning != 42) {
+    // action should be taken
+}
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.pages.mvc"></a>51.2.2. Zend_Navigation_Page_Mvc</h3></div></div></div>
+<p>
+        Las páginas <acronym class="acronym">MVC</acronym> se definen usando parámetros <acronym class="acronym">MVC</acronym> conocidos de
+        el componente <code class="classname">Zend_Controller</code>. Una página <acronym class="acronym">MVC</acronym>
+        usará <code class="classname">Zend_Controller_Action_Helper_Url</code> internamente
+        en el método <code class="methodname">getHref()</code> para generar hrefs, y
+        el método <code class="methodname">isActive()</code> intersectará los parámetros de
+        <code class="classname">Zend_Controller_Request_Abstract</code>
+        con los parámetros de la página para determinar si la página está activa.
+    </p>
+<div class="table">
+<a name="zend.navigation.pages.mvc.options"></a><p class="title"><b>Tabla 51.2. Opciones de página MVC</b></p>
+<div class="table-contents"><table class="table" summary="MVC page options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave</th>
+<th>Tipo</th>
+<th>Por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">action</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>Nombre de la acción a usar al generar el href de la página.</td>
+</tr>
+<tr>
+<td><code class="code">controller</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>Nombre del controlador a usar al generar el href de la página.</td>
+</tr>
+<tr>
+<td><code class="code">module</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>Nombre del módulo a usar al generar el href de la página.</td>
+</tr>
+<tr>
+<td><code class="code">params</code></td>
+<td><span class="type">Array</span></td>
+<td><code class="methodname">array()</code></td>
+<td>Parámetros de usuario a usar al generar el href de la página.</td>
+</tr>
+<tr>
+<td><code class="code">route</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>Nombre de la ruta a usar al generar el href de la página.</td>
+</tr>
+<tr>
+<td><code class="code">reset_params</code></td>
+<td><code class="code">bool</code></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                        Si los parámetros de usuario deben restablecerse al generar el href de la página.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">encode_url</code></td>
+<td><code class="code">bool</code></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                        Si el href debe codificarse al ensamblar la URL.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Los tres ejemplos siguientes asumen una configuración <acronym class="acronym">MVC</acronym> por defecto con
+            la ruta <code class="code">default</code> establecida.
+        </p>
+<p>
+            La <acronym class="acronym">URI</acronym> devuelta es relativa al <code class="code">baseUrl</code> en
+            <code class="classname">Zend_Controller_Front</code>. En los ejemplos, el baseUrl
+            es '/' por simplicidad.
+        </p>
+</td></tr>
+</table></div>
+<div class="example">
+<a name="zend.navigation.pages.mvc.example.getHref"></a><p class="title"><b>Ejemplo 51.2. getHref() genera el URI de la página</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo muestra que las páginas <acronym class="acronym">MVC</acronym> usan
+            <code class="classname">Zend_Controller_Action_Helper_Url</code> internamente
+            para generar <acronym class="acronym">URI</acronym>s al llamar a <code class="code">$page-&gt;getHref()</code>.
+        </p>
+<pre class="programlisting">
+// getHref() returns /
+$page = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'index',
+    'controller' =&gt; 'index'
+));
+
+// getHref() returns /blog/post/view
+$page = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'view',
+    'controller' =&gt; 'post',
+    'module'     =&gt; 'blog'
+));
+
+// getHref() returns /blog/post/view/id/1337
+$page = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'view',
+    'controller' =&gt; 'post',
+    'module'     =&gt; 'blog',
+    'params'     =&gt; array('id' =&gt; 1337)
+));
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.pages.mvc.example.isActive"></a><p class="title"><b>Ejemplo 51.3. isActive() determina si la página está activa</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo muestra que las páginas <acronym class="acronym">MVC</acronym> determinan si están activas
+            usando los parámetros encontrados en el objeto request.
+        </p>
+<pre class="programlisting">
+/*
+ * Dispatched request:
+ * - module:     default
+ * - controller: index
+ * - action:     index
+ */
+$page1 = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'index',
+    'controller' =&gt; 'index'
+));
+
+$page2 = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'bar',
+    'controller' =&gt; 'index'
+));
+
+$page1-&gt;isActive(); // returns true
+$page2-&gt;isActive(); // returns false
+
+/*
+ * Dispatched request:
+ * - module:     blog
+ * - controller: post
+ * - action:     view
+ * - id:         1337
+ */
+$page = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'view',
+    'controller' =&gt; 'post',
+    'module'     =&gt; 'blog'
+));
+
+// returns true, because request has the same module, controller and action
+$page-&gt;isActive();
+
+/*
+ * Dispatched request:
+ * - module:     blog
+ * - controller: post
+ * - action:     view
+ */
+$page = new Zend_Navigation_Page_Mvc(array(
+    'action'     =&gt; 'view',
+    'controller' =&gt; 'post',
+    'module'     =&gt; 'blog',
+    'params'     =&gt; array('id' =&gt; null)
+));
+
+// returns false, because page requires the id param to be set in the request
+$page-&gt;isActive(); // returns false
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.pages.mvc.example.routes"></a><p class="title"><b>Ejemplo 51.4. Uso de rutas</b></p>
+<div class="example-contents">
+<p>
+            Las rutas pueden usarse con páginas <acronym class="acronym">MVC</acronym>. Si una página tiene una ruta, esta
+            ruta se usará en <code class="methodname">getHref()</code> para generar la
+            <acronym class="acronym">URL</acronym> de la página.
+        </p>
+<p>
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Tenga en cuenta que al usar la propiedad <code class="code">route</code> en una
+                    página, también debe especificar los parámetros por defecto que la
+                    ruta define (module, controller, action, etc.), de lo contrario
+                    el método <code class="methodname">isActive()</code> no podrá
+                    determinar si la página está activa. La razón de esto es que
+                    actualmente no hay forma de obtener los parámetros por defecto de un
+                    objeto <code class="classname">Zend_Controller_Router_Route_Interface</code>,
+                    ni de recuperar la ruta actual de un
+                    objeto <code class="classname">Zend_Controller_Router_Interface</code>.
+                </p></td></tr>
+</table></div>
+<p>
+        </p>
+<pre class="programlisting">
+// the following route is added to the ZF router
+Zend_Controller_Front::getInstance()-&gt;getRouter()-&gt;addRoute(
+    'article_view', // route name
+    new Zend_Controller_Router_Route(
+        'a/:id',
+        array(
+            'module'     =&gt; 'news',
+            'controller' =&gt; 'article',
+            'action'     =&gt; 'view',
+            'id'         =&gt; null
+        )
+    )
+);
+
+// a page is created with a 'route' option
+$page = new Zend_Navigation_Page_Mvc(array(
+    'label'      =&gt; 'A news article',
+    'route'      =&gt; 'article_view',
+    'module'     =&gt; 'news',    // required for isActive(), see note above
+    'controller' =&gt; 'article', // required for isActive(), see note above
+    'action'     =&gt; 'view',    // required for isActive(), see note above
+    'params'     =&gt; array('id' =&gt; 42)
+));
+
+// returns: /a/42
+$page-&gt;getHref();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.pages.mvc.example.setparams"></a><p class="title"><b>Ejemplo 51.5. Establecer parámetros a usar al ensamblar la URL</b></p>
+<div class="example-contents"><pre class="programlisting">
+// The following route is added to the ZF router
+Zend_Controller_Front::getInstance()-&gt;getRouter()-&gt;addRoute(
+    'article_list', // route name
+    new Zend_Controller_Router_Route(
+        'blog/:category/:page',
+        array(
+            'module'     =&gt; 'blog',
+            'controller' =&gt; 'article',
+            'action'     =&gt; 'list',
+            'category'   =&gt; null,
+            'page'       =&gt; null,
+        )
+    )
+);
+
+// A page is created with the 'route' option
+$page = new Zend_Navigation_Page_Mvc(array(
+    'label'      =&gt; 'Article list',
+    'module'     =&gt; 'blog',
+    'controller' =&gt; 'post',
+    'action'     =&gt; 'list',
+));
+
+// Add multiple parameters at once
+$page-&gt;addParams(
+    array(
+        'category' =&gt; 'news',
+        'page'     =&gt; 1,
+    )
+);
+
+// Add a single parameter
+$page-&gt;addParam('category', 'news');
+
+// Set multiple parameters at once (Overwrites any previously set parameters!)
+$page-&gt;setParams(
+    array(
+        'category' =&gt; 'news',
+        'page'     =&gt; 1,
+    )
+);
+
+// Set a single parameter
+$page-&gt;setParam('category', 'news');
+
+// Retrieve all parameters
+$params = $page-&gt;getParams();
+
+// Retrieve a single parameter
+$category = $page-&gt;getParam('category');
+
+// Remove a parameter
+$page-&gt;removeParam('page');
+
+// Clear all parameters
+$page-&gt;clearParams();
+        </pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.pages.uri"></a>51.2.3. Zend_Navigation_Page_Uri</h3></div></div></div>
+<p>
+        Las páginas de tipo <code class="classname">Zend_Navigation_Page_Uri</code> pueden
+        usarse para enlazar a páginas en otros dominios o sitios, o para implementar
+        lógica personalizada para la página. Las páginas <acronym class="acronym">URI</acronym> son simples; además
+        de las opciones de página comunes, una página <acronym class="acronym">URI</acronym> solo admite una opción —
+        <code class="code">uri</code>. El <code class="code">uri</code> se devolverá al
+        llamar a <code class="code">$page-&gt;getHref()</code>, y puede ser una
+        <span class="type">String</span> o <code class="constant">NULL</code>.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Navigation_Page_Uri</code> no intentará determinar
+            si debe estar activa al llamar a <code class="code">$page-&gt;isActive()</code>.
+            Simplemente devuelve lo que está establecido actualmente, así que para hacer activa una página <acronym class="acronym">URI</acronym>
+            debe llamar manualmente a <code class="code">$page-&gt;setActive()</code> o
+            especificar <code class="code">active</code> como opción de página al construirla.
+        </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.navigation.pages.uri.options"></a><p class="title"><b>Tabla 51.3. Opciones de página URI</b></p>
+<div class="table-contents"><table class="table" summary="URI page options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave</th>
+<th>Tipo</th>
+<th>Por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td><code class="code">uri</code></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                        <acronym class="acronym">URI</acronym> de la página. Puede ser cualquier cadena o
+                        <code class="constant">NULL</code>.
+                    </td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.pages.custom"></a>51.2.4. Creación de tipos de página personalizados</h3></div></div></div>
+<p>
+        Al extender <code class="classname">Zend_Navigation_Page</code>, normalmente
+        no es necesario sobrescribir el constructor ni los métodos
+        <code class="methodname">setOptions()</code> o <code class="methodname">setConfig()</code>. El constructor de la página
+        acepta un único parámetro, un <span class="type">Array</span> u
+        objeto <code class="classname">Zend_Config</code>, que se pasa a
+        <code class="methodname">setOptions()</code> o <code class="methodname">setConfig()</code> respectivamente.
+        Esos métodos a su vez llamarán al método <code class="methodname">set()</code>, que
+        mapeará las opciones a propiedades nativas o personalizadas. Si se indica la
+        opción <span class="property">internal_id</span>, el método primero buscará un
+        método llamado <code class="methodname">setInternalId()</code>, y le pasará la opción a este
+        método si existe. Si el método no existe, la opción se
+        establecerá como propiedad personalizada de la página, y será accesible mediante
+        <span class="command"><strong>$internalId = $page-&gt;internal_id;</strong></span> o
+        <span class="command"><strong>$internalId = $page-&gt;get('internal_id');</strong></span>.
+    </p>
+<div class="example">
+<a name="zend.navigation.custom.example.simple"></a><p class="title"><b>Ejemplo 51.6. La página personalizada más simple</b></p>
+<div class="example-contents">
+<p>
+            Lo único que una clase de página personalizada necesita implementar es el
+            método <code class="methodname">getHref()</code>.
+        </p>
+<pre class="programlisting">
+class My_Simple_Page extends Zend_Navigation_Page
+{
+    public function getHref()
+    {
+        return 'something-completely-different';
+    }
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.custom.example.properties"></a><p class="title"><b>Ejemplo 51.7. Una página personalizada con propiedades</b></p>
+<div class="example-contents">
+<p>
+            Al añadir propiedades a una página extendida, no es necesario
+            sobrescribir/modificar <code class="methodname">setOptions()</code> o
+            <code class="methodname">setConfig()</code>.
+        </p>
+<pre class="programlisting">
+class My_Navigation_Page extends Zend_Navigation_Page
+{
+    private $_foo;
+    private $_fooBar;
+
+    public function setFoo($foo)
+    {
+        $this-&gt;_foo = $foo;
+    }
+
+    public function getFoo()
+    {
+        return $this-&gt;_foo;
+    }
+
+    public function setFooBar($fooBar)
+    {
+        $this-&gt;_fooBar = $fooBar;
+    }
+
+    public function getFooBar()
+    {
+        return $this-&gt;_fooBar;
+    }
+
+    public function getHref()
+    {
+        return $this-&gt;foo . '/' . $this-&gt;fooBar;
+    }
+}
+
+// can now construct using
+$page = new My_Navigation_Page(array(
+    'label'   =&gt; 'Property names are mapped to setters',
+    'foo'     =&gt; 'bar',
+    'foo_bar' =&gt; 'baz'
+));
+
+// ...or
+$page = Zend_Navigation_Page::factory(array(
+    'type'    =&gt; 'My_Navigation_Page',
+    'label'   =&gt; 'Property names are mapped to setters',
+    'foo'     =&gt; 'bar',
+    'foo_bar' =&gt; 'baz'
+));
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.pages.factory"></a>51.2.5. Creación de páginas usando la fábrica de páginas</h3></div></div></div>
+<p>
+        Todas las páginas (incluidas las clases personalizadas) pueden crearse usando la fábrica
+        de páginas, <code class="methodname">Zend_Navigation_Page::factory()</code>. La fábrica
+        puede recibir un array con opciones, o un
+        objeto <code class="classname">Zend_Config</code>. Cada clave del
+        array/config corresponde a una opción de página, como se ve en la
+        sección sobre <a class="link" href="zend.navigation.pages.phtml" title="51.2. Pages">Páginas</a>.
+        Si se indica la opción <code class="code">uri</code> y no se indican opciones <acronym class="acronym">MVC</acronym>
+        (<code class="code">action, controller, module, route</code>), se creará una página
+        <acronym class="acronym">URI</acronym>. Si se indica alguna de las opciones <acronym class="acronym">MVC</acronym>, se creará una
+        página <acronym class="acronym">MVC</acronym>.
+    </p>
+<p>
+        Si se indica <code class="code">type</code>, la fábrica asumirá que el valor es
+        el nombre de la clase que debe crearse. Si el valor es
+        <code class="code">mvc</code> o <code class="code">uri</code> se creará una página MVC/URI.
+    </p>
+<div class="example">
+<a name="zend.navigation.pages.factory.example.mvc"></a><p class="title"><b>Ejemplo 51.8. Creación de una página MVC usando la fábrica de páginas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$page = Zend_Navigation_Page::factory(array(
+    'label'  =&gt; 'My MVC page',
+    'action' =&gt; 'index'
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'label'      =&gt; 'Search blog',
+    'action'     =&gt; 'index',
+    'controller' =&gt; 'search',
+    'module'     =&gt; 'blog'
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'label'      =&gt; 'Home',
+    'action'     =&gt; 'index',
+    'controller' =&gt; 'index',
+    'module'     =&gt; 'index',
+    'route'      =&gt; 'home'
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'type'   =&gt; 'mvc',
+    'label'  =&gt; 'My MVC page'
+));
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.pages.factory.example.uri"></a><p class="title"><b>Ejemplo 51.9. Creación de una página URI usando la fábrica de páginas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$page = Zend_Navigation_Page::factory(array(
+    'label' =&gt; 'My URI page',
+    'uri'   =&gt; 'http://www.example.com/'
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'label'  =&gt; 'Search',
+    'uri'    =&gt; 'http://www.example.com/search',
+    'active' =&gt; true
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'label' =&gt; 'My URI page',
+    'uri'   =&gt; '#'
+));
+
+$page = Zend_Navigation_Page::factory(array(
+    'type'   =&gt; 'uri',
+    'label'  =&gt; 'My URI page'
+));
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.navigation.pages.factory.example.custom"></a><p class="title"><b>Ejemplo 51.10. Creación de un tipo de página personalizado usando la fábrica de páginas</b></p>
+<div class="example-contents">
+<p>
+            Para crear un tipo de página personalizado usando la fábrica, use la opción
+            <code class="code">type</code> para especificar un nombre de clase a instanciar.
+        </p>
+<pre class="programlisting">
+class My_Navigation_Page extends Zend_Navigation_Page
+{
+    protected $_fooBar = 'ok';
+
+    public function setFooBar($fooBar)
+    {
+        $this-&gt;_fooBar = $fooBar;
+    }
+}
+
+$page = Zend_Navigation_Page::factory(array(
+    'type'    =&gt; 'My_Navigation_Page',
+    'label'   =&gt; 'My custom page',
+    'foo_bar' =&gt; 'foo bar'
+));
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.navigation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.navigation.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.navigation.containers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 51. Zend_Navigation </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 51.3. Contenedores</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

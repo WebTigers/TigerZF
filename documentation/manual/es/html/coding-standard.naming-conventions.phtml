@@ -1,0 +1,294 @@
+<?php $title = 'C.3. Convenciones de nomenclatura'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">C.3. Convenciones de nomenclatura</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="coding-standard.php-file-formatting.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice C. Estándar de codificación de Zend Framework para PHP</th>
+<td width="20%" align="right"> <a accesskey="n" href="coding-standard.coding-style.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="coding-standard.naming-conventions"></a>C.3. Convenciones de nomenclatura</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.classes"></a>C.3.1. Clases</h3></div></div></div>
+<p>
+                Zend Framework estandariza una convención de nomenclatura de clases mediante la cual
+                los nombres de las clases se corresponden directamente con los directorios en los que
+                se almacenan. El directorio de nivel raíz de la biblioteca estándar de Zend Framework
+                es el directorio "Zend/", mientras que el directorio de nivel raíz de la biblioteca
+                extras de Zend Framework es el directorio "ZendX/". Todas las clases de Zend Framework
+                se almacenan de forma jerárquica bajo estos directorios raíz.
+            </p>
+<p>
+                Los nombres de clase solo pueden contener caracteres alfanuméricos. Se permiten
+                números en los nombres de clase, pero se desaconsejan en la mayoría de los casos.
+                Los guiones bajos solo se permiten en lugar del separador de ruta; el nombre de archivo
+                "<code class="filename">Zend/Db/Table.php</code>" debe corresponderse con el nombre de
+                clase "<code class="classname">Zend_Db_Table</code>".
+            </p>
+<p>
+                Si un nombre de clase está compuesto por más de una palabra, la primera letra de cada
+                nueva palabra debe ir en mayúscula. No se permiten letras mayúsculas consecutivas, por
+                ejemplo, una clase "Zend_PDF" no está permitida, mientras que
+                "<code class="classname">Zend_Pdf</code>" es aceptable.
+            </p>
+<p>
+                Estas convenciones definen un mecanismo de pseudo-espacio de nombres para Zend Framework.
+                Zend Framework adoptará la característica de espacios de nombres de <acronym class="acronym">PHP</acronym>
+                cuando esté disponible y sea factible que nuestros desarrolladores la utilicen en sus
+                aplicaciones.
+            </p>
+<p>
+                Consulta los nombres de clase en las bibliotecas estándar y extras para ver ejemplos
+                de esta convención de nomenclatura.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    <span class="emphasis"><em>Importante</em></span>: el código que debe desplegarse junto
+                    con las bibliotecas de Zend Framework pero que no forma parte de las bibliotecas
+                    estándar o extras (por ejemplo, código de la aplicación o bibliotecas que no son
+                    distribuidas por Zend) nunca debe comenzar con "Zend_" ni "ZendX_".
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.abstracts"></a>C.3.2. Clases abstractas</h3></div></div></div>
+<p>
+                En general, las clases abstractas siguen las mismas convenciones que las <a class="link" href="coding-standard.naming-conventions.phtml#coding-standard.naming-conventions.classes" title="C.3.1. Classes">clases</a>,
+                con una regla adicional: los nombres de las clases abstractas deben terminar con el
+                término "Abstract", y ese término no debe ir precedido de un guion bajo. Como ejemplo,
+                <code class="classname">Zend_Controller_Plugin_Abstract</code> se considera un nombre
+                inválido, pero <code class="classname">Zend_Controller_PluginAbstract</code> o
+                <code class="classname">Zend_Controller_Plugin_PluginAbstract</code> serían nombres
+                válidos.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Esta convención de nomenclatura es nueva en la versión 1.9.0 de Zend Framework. Las
+                    clases anteriores a esa versión pueden no seguir esta regla, pero se renombrarán en
+                    el futuro para cumplirla.
+                </p>
+<p>
+                    La razón de este cambio se debe al uso de espacios de nombres. A medida que nos
+                    acercamos a Zend Framework 2.0 y al uso de <acronym class="acronym">PHP</acronym> 5.3,
+                    utilizaremos espacios de nombres. La forma más sencilla de automatizar la conversión
+                    a espacios de nombres es simplemente convertir los guiones bajos en el separador de
+                    espacio de nombres, pero con las antiguas convenciones de nomenclatura, esto deja el
+                    nombre de la clase simplemente como "Abstract" o "Interface", ambas palabras
+                    reservadas en <acronym class="acronym">PHP</acronym>. Si anteponemos el nombre del
+                    (sub)componente al nombre de la clase, podemos evitar estos problemas.
+                </p>
+<p>
+                    Para ilustrar la situación, considera convertir la clase
+                    <code class="classname">Zend_Controller_Request_Abstract</code> para que use espacios de nombres:
+                </p>
+<pre class="programlisting">
+namespace Zend\Controller\Request;
+
+abstract class Abstract
+{
+    // ...
+}
+</pre>
+<p>
+                    Claramente, esto no funcionará. Sin embargo, bajo las nuevas convenciones de
+                    nomenclatura, esto se convertiría en:
+                </p>
+<pre class="programlisting">
+namespace Zend\Controller\Request;
+
+abstract class RequestAbstract
+{
+    // ...
+}
+</pre>
+<p>
+                    Seguimos conservando la semántica y la separación de espacios de nombres, mientras
+                    omitimos los problemas de palabras clave; al mismo tiempo, describe mejor la
+                    clase abstracta.
+                </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.interfaces"></a>C.3.3. Interfaces</h3></div></div></div>
+<p>
+                En general, las interfaces siguen las mismas convenciones que las <a class="link" href="coding-standard.naming-conventions.phtml#coding-standard.naming-conventions.classes" title="C.3.1. Classes">clases</a>,
+                con una regla adicional: los nombres de las interfaces pueden terminar opcionalmente
+                con el término "Interface", pero ese término no debe ir precedido de un guion bajo.
+                Como ejemplo, <code class="classname">Zend_Controller_Plugin_Interface</code> se
+                considera un nombre inválido, pero <code class="classname">Zend_Controller_PluginInterface</code>
+                o <code class="classname">Zend_Controller_Plugin_PluginInterface</code> serían nombres
+                válidos.
+            </p>
+<p>
+                Aunque esta regla no es obligatoria, se recomienda encarecidamente, ya que proporciona
+                una buena señal visual a los desarrolladores sobre qué archivos contienen interfaces
+                en lugar de clases.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Esta convención de nomenclatura es nueva en la versión 1.9.0 de Zend Framework. Las
+                    clases anteriores a esa versión pueden no seguir esta regla, pero se renombrarán en
+                    el futuro para cumplirla. Consulta <a class="link" href="coding-standard.naming-conventions.phtml#coding-standard.naming-conventions.abstracts" title="C.3.2. Abstract Classes">la
+                        sección anterior</a> para más información sobre la razón de este cambio.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.filenames"></a>C.3.4. Nombres de archivo</h3></div></div></div>
+<p>
+                Para todos los demás archivos, solo se permiten caracteres alfanuméricos, guiones bajos
+                y el carácter guion ("-"). Los espacios están estrictamente prohibidos.
+            </p>
+<p>
+                Cualquier archivo que contenga código <acronym class="acronym">PHP</acronym> debe terminar
+                con la extensión "<code class="filename">.php</code>", con la notable excepción de los
+                scripts de vista. Los siguientes ejemplos muestran nombres de archivo aceptables para
+                las clases de Zend Framework:
+            </p>
+<pre class="programlisting">
+Zend/Db.php
+
+Zend/Controller/Front.php
+
+Zend/View/Helper/FormRadio.php
+</pre>
+<p>
+                Los nombres de archivo deben corresponderse con los nombres de clase como se describió
+                anteriormente.
+            </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.functions-and-methods"></a>C.3.5. Funciones y métodos</h3></div></div></div>
+<p>
+                Los nombres de función solo pueden contener caracteres alfanuméricos. No se permiten
+                guiones bajos. Se permiten números en los nombres de función, pero se desaconsejan en
+                la mayoría de los casos.
+            </p>
+<p>
+                Los nombres de función siempre deben comenzar con una letra minúscula. Cuando un
+                nombre de función consta de más de una palabra, la primera letra de cada nueva palabra
+                debe ir en mayúscula. Esto se conoce comúnmente como formato "camelCase".
+            </p>
+<p>
+                Se fomenta generalmente la verbosidad. Los nombres de función deben ser tan verbosos
+                como sea práctico para describir completamente su propósito y comportamiento.
+            </p>
+<p>
+                Estos son ejemplos de nombres aceptables para funciones:
+            </p>
+<pre class="programlisting">
+filterInput()
+
+getElementById()
+
+widgetFactory()
+</pre>
+<p>
+                Para la programación orientada a objetos, los accesores de variables de instancia o
+                estáticas deben ir siempre precedidos por "get" o "set". Al implementar patrones de
+                diseño, como los patrones singleton o factory, el nombre del método debe contener el
+                nombre del patrón cuando sea práctico para describir de forma más completa el
+                comportamiento.
+            </p>
+<p>
+                Para los métodos de objetos declarados con el modificador "private" o "protected", el
+                primer carácter del nombre del método debe ser un guion bajo. Esta es la única
+                aplicación aceptable de un guion bajo en un nombre de método. Los métodos declarados
+                "public" nunca deben contener un guion bajo.
+            </p>
+<p>
+                Las funciones en el ámbito global (también llamadas "funciones flotantes") están
+                permitidas, pero se desaconsejan en la mayoría de los casos. Considera envolver estas
+                funciones en una clase estática.
+            </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.variables"></a>C.3.6. Variables</h3></div></div></div>
+<p>
+                Los nombres de variable solo pueden contener caracteres alfanuméricos. No se permiten
+                guiones bajos. Se permiten números en los nombres de variable, pero se desaconsejan en
+                la mayoría de los casos.
+            </p>
+<p>
+                Para las variables de instancia declaradas con el modificador "private" o "protected",
+                el primer carácter del nombre de la variable debe ser un único guion bajo. Esta es la
+                única aplicación aceptable de un guion bajo en un nombre de variable. Las variables
+                miembro declaradas "public" nunca deben comenzar con un guion bajo.
+            </p>
+<p>
+                Al igual que con los nombres de función (ver sección 3.3), los nombres de variable
+                siempre deben comenzar con una letra minúscula y seguir la convención de mayúsculas
+                "camelCaps".
+            </p>
+<p>
+                Se fomenta generalmente la verbosidad. Las variables siempre deben ser tan verbosas
+                como sea práctico para describir los datos que el desarrollador pretende almacenar en
+                ellas. Los nombres de variable concisos como "<code class="varname">$i</code>" y
+                "<code class="varname">$n</code>" se desaconsejan en todos los contextos salvo en los
+                bucles más pequeños. Si un bucle contiene más de 20 líneas de código, las variables de
+                índice deben tener nombres más descriptivos.
+            </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="coding-standard.naming-conventions.constants"></a>C.3.7. Constantes</h3></div></div></div>
+<p>
+                Las constantes pueden contener tanto caracteres alfanuméricos como guiones bajos. Se
+                permiten números en los nombres de constante.
+            </p>
+<p>
+                Todas las letras utilizadas en un nombre de constante deben ir en mayúscula, mientras
+                que todas las palabras de un nombre de constante deben separarse mediante caracteres
+                de guion bajo.
+            </p>
+<p>
+                Por ejemplo, <code class="constant">EMBED_SUPPRESS_EMBED_EXCEPTION</code> está permitido,
+                pero <code class="constant">EMBED_SUPPRESSEMBEDEXCEPTION</code> no lo está.
+            </p>
+<p>
+                Las constantes deben definirse como miembros de clase con el modificador "const".
+                Definir constantes en el ámbito global con la función "define" está permitido, pero se
+                desaconseja firmemente.
+            </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="coding-standard.php-file-formatting.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="coding-standard.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="coding-standard.coding-style.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">C.2. Formato de archivos PHP </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> C.4. Estilo de codificación</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

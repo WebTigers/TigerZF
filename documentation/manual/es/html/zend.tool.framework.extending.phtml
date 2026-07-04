@@ -1,0 +1,198 @@
+<?php $title = '72.6. Extendiendo y configurando Zend_Tool_Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">72.6. Extendiendo y configurando Zend_Tool_Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tool.framework.system-providers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 72. Zend_Tool_Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.tool.project.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.tool.framework.extending"></a>72.6. Extendiendo y configurando Zend_Tool_Framework</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.console-client"></a>72.6.1. Personalización del cliente de consola de Zend_Tool</h3></div></div></div>
+<p>
+            Desde Zend Framework 1.9, <code class="classname">Zend_Tool_Framework</code> permite a los
+            desarrolladores almacenar información, valores de configuración específicos del proveedor,
+            y archivos personalizados en una ubicación especial en la máquina del desarrollador. Estos
+            valores de configuración y archivos pueden ser usados por los proveedores para extender
+            funcionalidad, personalizar funcionalidad, o cualquier otro motivo que un proveedor
+            considere adecuado.
+        </p>
+<p>
+            El propósito principal, y el propósito más utilizado inmediatamente por los proveedores
+            existentes, es permitir a los desarrolladores personalizar la forma en que los proveedores
+            "listos para usar" realizan su trabajo.
+        </p>
+<p>
+            Una de las funcionalidades más solicitadas es poder proporcionar perfiles de proyecto
+            personalizados al proveedor de proyectos de <code class="classname">Zend_Tool_Project</code>.
+            Esto permitiría a los desarrolladores almacenar un perfil personalizado en un lugar especial
+            que puede ser usado repetidamente por el sistema <code class="classname">Zend_Tool</code> para
+            construir perfiles personalizados. Otra funcionalidad comúnmente solicitada es poder
+            configurar el comportamiento de los proveedores con un ajuste de configuración. Para
+            lograr esto, no solo necesitamos tener un archivo de configuración de
+            <code class="classname">Zend_Tool</code>, sino que también necesitamos tener un lugar donde
+            encontrar este archivo de configuración.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.console-client.home-directory"></a>72.6.1.1. El directorio de inicio</h4></div></div></div>
+<p>
+                Antes de que el cliente de consola pueda comenzar a buscar un archivo de configuración
+                de <code class="classname">Zend_Tool</code> o un directorio de almacenamiento local, primero
+                debe poder identificar dónde se encuentra el "directorio de inicio".
+            </p>
+<p>
+                En máquinas basadas en *nix, <acronym class="acronym">PHP</acronym> tendrá disponible una
+                variable de entorno llamada <code class="constant">HOME</code> con una ruta al directorio
+                de inicio del usuario actual. Típicamente, esta ruta será muy similar a
+                <code class="filename">/home/miusuario</code>.
+            </p>
+<p>
+                En máquinas basadas en Windows, <acronym class="acronym">PHP</acronym> típicamente tendrá
+                disponible una variable de entorno llamada <code class="constant">HOMEPATH</code> con el
+                directorio de inicio del usuario actual. Este directorio se encuentra usualmente en
+                <code class="filename">C:\Documents and Settings\Username\</code>, o en Vista en
+                <code class="filename">C:\Users\Username</code>.
+            </p>
+<p>
+                Si no se puede encontrar un directorio de inicio, o si desea cambiar la ubicación en
+                la que el cliente de consola de <code class="classname">Zend_Tool_Framework</code> encuentra
+                el directorio de inicio, puede proporcionar una variable de entorno llamada
+                <code class="constant">ZF_HOME</code> para especificar dónde encontrar el directorio de
+                inicio.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.console-client.local-storage"></a>72.6.1.2. Almacenamiento local</h4></div></div></div>
+<p>
+                Una vez que se puede localizar un directorio de inicio, el cliente de consola de
+                <code class="classname">Zend_Tool_Framework</code> puede autodescubrir el directorio de
+                almacenamiento local, o puede indicársele dónde esperar el directorio de almacenamiento
+                local.
+            </p>
+<p>
+                Suponiendo que se ha encontrado el directorio de inicio (aquí denotado como
+                <code class="varname">$HOME</code>), el cliente de consola buscará entonces el directorio
+                de almacenamiento local en <code class="filename">$HOME/.zf/</code>. Si se encuentra,
+                establecerá el directorio de almacenamiento local en esta ubicación.
+            </p>
+<p>
+                Si no se puede encontrar el directorio, o el desarrollador desea sobrescribir esta
+                ubicación, esto se puede hacer estableciendo una variable de entorno.
+                Independientemente de si <code class="varname">$HOME</code> se ha establecido previamente
+                o no, el desarrollador puede proporcionar la variable de entorno
+                <code class="constant">ZF_STORAGE_DIR</code>.
+            </p>
+<p>
+                Una vez que se encuentra la ruta a un directorio de almacenamiento local, el directorio
+                <span class="emphasis"><em>debe</em></span> existir para que pueda pasarse al entorno de
+                ejecución de <code class="classname">Zend_Tool_Framework</code>, ya que no se creará por
+                usted.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.console-client.configuration-file"></a>72.6.1.3. Configuración del usuario</h4></div></div></div>
+<p>
+                Al igual que con el almacenamiento local, una vez que se puede localizar un directorio
+                de inicio, el cliente de consola de <code class="classname">Zend_Tool_Framework</code>
+                puede entonces intentar autodescubrir la ruta a un archivo de configuración, o puede
+                indicársele específicamente dónde encontrar el archivo de configuración.
+            </p>
+<p>
+                Suponiendo que se ha encontrado el directorio de inicio (aquí denotado como
+                <code class="varname">$HOME</code>), el cliente de consola intentará entonces buscar la
+                existencia de un archivo de configuración ubicado en
+                <code class="filename">$HOME/.zf.ini</code>. Este archivo, si se encuentra, se usará como
+                el archivo de configuración para <code class="classname">Zend_Tool_Framework</code>.
+            </p>
+<p>
+                Si esa ubicación no existe, pero sí existe un directorio de almacenamiento local,
+                entonces el cliente de consola intentará localizar el archivo de configuración dentro
+                del directorio de almacenamiento local. Suponiendo que el directorio de almacenamiento
+                local existe en <code class="varname">$LOCAL_STORAGE</code>, entonces si existe un archivo
+                como <code class="filename">$LOCAL_STORAGE/zf.ini</code>, será encontrado por el cliente de
+                consola y utilizado como el archivo de configuración de
+                <code class="classname">Zend_Tool_Framework</code>.
+            </p>
+<p>
+                Si el archivo no puede ser autodescubierto o el desarrollador desea especificar la
+                ubicación del archivo de configuración, el desarrollador puede hacerlo estableciendo
+                una variable de entorno. Si se establece la variable de entorno
+                <code class="constant">ZF_CONFIG_FILE</code>, entonces su valor se usará como la ubicación
+                del archivo de configuración a usar con el cliente de consola. La variable
+                <code class="constant">ZF_CONFIG_FILE</code> puede apuntar a cualquier archivo
+                <acronym class="acronym">INI</acronym>, <acronym class="acronym">XML</acronym> o
+                <acronym class="acronym">PHP</acronym> legible por <code class="classname">Zend_Config</code>.
+            </p>
+<p>
+                Si el archivo no existe ni en la ubicación autodescubierta ni en la proporcionada, no
+                se usará, ya que <code class="classname">Zend_Tool_Framework</code> no intenta crear el
+                archivo automáticamente.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.console-client.configuration-content"></a>72.6.1.4. Contenido del archivo de configuración del usuario</h4></div></div></div>
+<p>
+                El archivo de configuración debe estructurarse como un archivo de configuración de
+                <code class="classname">Zend_Config</code>, en formato <acronym class="acronym">INI</acronym>,
+                y sin que se definan secciones. Las claves de primer nivel deben ser usadas por el
+                proveedor que busca un valor específico. Por ejemplo, si el proveedor "Project" espera
+                un directorio "profiles", entonces típicamente se entenderá que buscará el siguiente
+                par clave-valor <acronym class="acronym">INI</acronym>:
+            </p>
+<pre class="programlisting">
+project.profile = some/path/to/some-directory
+</pre>
+<p>
+                El único prefijo <acronym class="acronym">INI</acronym> reservado es el valor "php". El
+                prefijo "php" para los valores se reserva para almacenar nombres y valores de
+                configuraciones de <acronym class="acronym">PHP</acronym> ajustables en tiempo de ejecución,
+                como <span class="property">include_path</span> o <span class="property">error_reporting</span>.
+                Para sobrescribir <span class="property">include_path</span> y
+                <span class="property">error_reporting</span> con un valor
+                <acronym class="acronym">INI</acronym>, un desarrollador establecería:
+            </p>
+<pre class="programlisting">
+php.include_path = "/path/to/includes1:/path/to/includes2"
+php.error_reporting = 1
+</pre>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td>
+<th align="left">Importante</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    El prefijo reservado "php" solo funciona con archivos <acronym class="acronym">INI</acronym>.
+                    No puede establecer valores <acronym class="acronym">INI</acronym> de
+                    <acronym class="acronym">PHP</acronym> con configuración <acronym class="acronym">PHP</acronym> o
+                    <acronym class="acronym">XML</acronym>.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tool.framework.system-providers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.tool.framework.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.tool.project.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">72.5. Proveedores de sistema incluidos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 73. Zend_Tool_Project</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

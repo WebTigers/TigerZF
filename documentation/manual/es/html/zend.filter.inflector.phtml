@@ -1,0 +1,461 @@
+<?php $title = '35.6. Zend_Filter_Inflector'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">35.6. Zend_Filter_Inflector</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.filter.input.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 35. Zend_Filter</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.form.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.filter.inflector"></a>35.6. Zend_Filter_Inflector</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Filter_Inflector</code> es una herramienta de propósito general para
+        la inflexión de cadenas basada en reglas hacia un destino dado.
+    </p>
+<p>
+        Por ejemplo, puede que necesite transformar palabras en MixedCase o camelCase en
+        una ruta; por legibilidad, políticas del sistema operativo, u otras razones, también
+        necesita ponerlo en minúsculas, y quiere separar las palabras usando un guion ('-').
+        Un inflector puede hacer esto por usted.
+    </p>
+<p>
+        <code class="classname">Zend_Filter_Inflector</code> implementa
+        <code class="classname">Zend_Filter_Interface</code>; usted realiza la inflexión llamando a
+        <code class="methodname">filter()</code> en la instancia del objeto.
+    </p>
+<div class="example">
+<a name="zend.filter.inflector.camel_case_example"></a><p class="title"><b>Ejemplo 35.1. Transformar texto MixedCase y camelCase a otro formato</b></p>
+<div class="example-contents"><pre class="programlisting">
+$inflector = new Zend_Filter_Inflector('pages/:page.:suffix');
+$inflector-&gt;setRules(array(
+    ':page'  =&gt; array('Word_CamelCaseToDash', 'StringToLower'),
+    'suffix' =&gt; 'html'
+));
+
+$string   = 'camelCasedWords';
+$filtered = $inflector-&gt;filter(array('page' =&gt; $string));
+// pages/camel-cased-words.html
+
+$string   = 'this_is_not_camel_cased';
+$filtered = $inflector-&gt;filter(array('page' =&gt; $string));
+// pages/this_is_not_camel_cased.html
+</pre></div>
+</div>
+<br class="example-break"><div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.operation"></a>35.6.1. Funcionamiento</h3></div></div></div>
+<p>
+            Un inflector requiere un <span class="emphasis"><em>destino</em></span> y una o más
+            <span class="emphasis"><em>reglas</em></span>. Un destino es básicamente una cadena que
+            define marcadores de posición para las variables que desea sustituir. Estos se
+            especifican con el prefijo ':': <span class="emphasis"><em>:script</em></span>.
+        </p>
+<p>
+            Al llamar a <code class="methodname">filter()</code>, usted pasa un array de
+            pares clave y valor correspondientes a las variables del destino.
+        </p>
+<p>
+            Cada variable del destino puede tener cero o más reglas asociadas
+            a ella. Las reglas pueden ser <span class="emphasis"><em>estáticas</em></span> o hacer referencia a una
+            clase <code class="classname">Zend_Filter</code>. Las reglas estáticas sustituirán por el
+            texto proporcionado. En caso contrario, se usará una clase que coincida con la regla
+            proporcionada para inflexionar el texto. Las clases se especifican
+            típicamente usando un nombre corto que indica el nombre del filtro sin
+            ningún prefijo común.
+        </p>
+<p>
+            Por ejemplo, puede usar cualquier implementación concreta de
+            <code class="classname">Zend_Filter</code>; sin embargo, en lugar de referirse a ellas
+            como '<code class="classname">Zend_Filter_Alpha</code>' o
+            '<code class="classname">Zend_Filter_StringToLower</code>', debe especificar
+            únicamente '<code class="classname">Alpha</code>' o '<code class="classname">StringToLower</code>'.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.paths"></a>35.6.2. Establecer rutas a filtros alternativos</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Filter_Inflector</code> usa
+            <code class="classname">Zend_Loader_PluginLoader</code> para gestionar la carga de filtros
+            a usar con la inflexión. Por defecto, cualquier filtro con el prefijo
+            <code class="classname">Zend_Filter</code> estará disponible. Para acceder a filtros con
+            ese prefijo pero que se encuentran más profundamente en la jerarquía, como los
+            distintos filtros Word, simplemente elimine el prefijo <code class="classname">Zend_Filter</code>:
+        </p>
+<pre class="programlisting">
+// use Zend_Filter_Word_CamelCaseToDash as a rule
+$inflector-&gt;addRules(array('script' =&gt; 'Word_CamelCaseToDash'));
+</pre>
+<p>
+            Para establecer rutas alternativas, <code class="classname">Zend_Filter_Inflector</code> tiene un
+            método de utilidad que actúa como proxy hacia el cargador de plugins,
+            <code class="methodname">addFilterPrefixPath()</code>:
+        </p>
+<pre class="programlisting">
+$inflector-&gt;addFilterPrefixPath('My_Filter', 'My/Filter/');
+</pre>
+<p>
+            Alternativamente, puede recuperar el cargador de plugins del
+            inflector, e interactuar con él directamente:
+        </p>
+<pre class="programlisting">
+$loader = $inflector-&gt;getPluginLoader();
+$loader-&gt;addPrefixPath('My_Filter', 'My/Filter/');
+</pre>
+<p>
+            Para más opciones sobre cómo modificar las rutas a los filtros, consulte <a class="link" href="zend.loader.pluginloader.phtml" title="42.4. Loading Plugins">la documentación
+                de PluginLoader</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.targets"></a>35.6.3. Establecer el destino del inflector</h3></div></div></div>
+<p>
+            El destino del inflector es una cadena con algunos marcadores de posición para
+            variables. Los marcadores de posición toman la forma de un identificador, un signo de
+            dos puntos (':') por defecto, seguido de un nombre de variable: ':script', ':path',
+            etc. El método <code class="methodname">filter()</code> busca el identificador
+            seguido del nombre de variable que se va a sustituir.
+        </p>
+<p>
+            Puede cambiar el identificador usando el método
+            <code class="methodname">setTargetReplacementIdentifier()</code>, o pasándolo
+            como tercer argumento al constructor:
+        </p>
+<pre class="programlisting">
+// Via constructor:
+$inflector = new Zend_Filter_Inflector('#foo/#bar.#sfx', null, '#');
+
+// Via accessor:
+$inflector-&gt;setTargetReplacementIdentifier('#');
+</pre>
+<p>
+            Normalmente, establecerá el destino a través del constructor. Sin embargo,
+            puede que desee volver a establecer el destino más adelante (por ejemplo, para modificar el
+            inflector predeterminado en componentes principales, como
+            <code class="classname">ViewRenderer</code> o <code class="classname">Zend_Layout</code>).
+            <code class="methodname">setTarget()</code> se puede usar para este propósito:
+        </p>
+<pre class="programlisting">
+$inflector = $layout-&gt;getInflector();
+$inflector-&gt;setTarget('layouts/:script.phtml');
+</pre>
+<p>
+            Además, puede que desee tener un miembro de clase para su clase
+            que pueda usar para mantener actualizado el destino del inflector -- sin
+            necesidad de actualizar directamente el destino cada vez (ahorrando así
+            llamadas a métodos). <code class="methodname">setTargetReference()</code> le permite hacer
+            esto:
+        </p>
+<pre class="programlisting">
+class Foo
+{
+    /**
+     * @var string Inflector target
+     */
+    protected $_target = 'foo/:bar/:baz.:suffix';
+
+    /**
+     * Constructor
+     * @return void
+     */
+    public function __construct()
+    {
+        $this-&gt;_inflector = new Zend_Filter_Inflector();
+        $this-&gt;_inflector-&gt;setTargetReference($this-&gt;_target);
+    }
+
+    /**
+     * Set target; updates target in inflector
+     *
+     * @param  string $target
+     * @return Foo
+     */
+    public function setTarget($target)
+    {
+        $this-&gt;_target = $target;
+        return $this;
+    }
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.rules"></a>35.6.4. Reglas de inflexión</h3></div></div></div>
+<p>
+            Como se mencionó en la introducción, hay dos tipos de reglas:
+            estáticas y basadas en filtros.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Es importante tener en cuenta que, independientemente del método con el que agregue
+                reglas al inflector, ya sea una por una o todas a la vez, el orden es muy
+                importante. Los nombres más específicos, o los nombres que puedan contener otros nombres de regla,
+                deben agregarse antes que los nombres menos específicos. Por ejemplo, suponiendo los dos nombres
+                de regla 'moduleDir' y 'module', la regla 'moduleDir' debe aparecer antes que 'module',
+                ya que 'module' está contenido dentro de 'moduleDir'. Si 'module' se agregara antes que
+                'moduleDir', 'module' coincidiría con parte de 'moduleDir' y lo procesaría, dejando 'Dir'
+                dentro del destino sin inflexionar.
+            </p></td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.filter.inflector.rules.static"></a>35.6.4.1. Reglas estáticas</h4></div></div></div>
+<p>
+                Las reglas estáticas realizan una simple sustitución de cadenas; úselas cuando
+                tenga un segmento en el destino que normalmente será estático, pero
+                que desea permitir que el desarrollador modifique. Use el
+                método <code class="methodname">setStaticRule()</code> para establecer o modificar la regla:
+            </p>
+<pre class="programlisting">
+$inflector = new Zend_Filter_Inflector(':script.:suffix');
+$inflector-&gt;setStaticRule('suffix', 'phtml');
+
+// change it later:
+$inflector-&gt;setStaticRule('suffix', 'php');
+</pre>
+<p>
+                Al igual que con el propio destino, también puede vincular una regla estática a
+                una referencia, lo que le permite actualizar una sola variable en lugar de
+                requerir una llamada a método; esto suele ser útil cuando su clase usa
+                un inflector internamente, y no quiere que sus usuarios necesiten
+                obtener el inflector para actualizarlo. El
+                método <code class="methodname">setStaticRuleReference()</code> se usa para
+                lograr esto:
+            </p>
+<pre class="programlisting">
+class Foo
+{
+    /**
+     * @var string Suffix
+     */
+    protected $_suffix = 'phtml';
+
+    /**
+     * Constructor
+     * @return void
+     */
+    public function __construct()
+    {
+        $this-&gt;_inflector = new Zend_Filter_Inflector(':script.:suffix');
+        $this-&gt;_inflector-&gt;setStaticRuleReference('suffix', $this-&gt;_suffix);
+    }
+
+    /**
+     * Set suffix; updates suffix static rule in inflector
+     *
+     * @param  string $suffix
+     * @return Foo
+     */
+    public function setSuffix($suffix)
+    {
+        $this-&gt;_suffix = $suffix;
+        return $this;
+    }
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.filter.inflector.rules.filters"></a>35.6.4.2. Reglas de inflector con filtro</h4></div></div></div>
+<p>
+                Los filtros de <code class="classname">Zend_Filter</code> también pueden usarse como reglas de inflector.
+                Al igual que las reglas estáticas, están vinculados a una
+                variable de destino; a diferencia de las reglas estáticas, puede definir varios filtros
+                para usar al inflexionar. Estos filtros se procesan en orden, así que
+                tenga cuidado de registrarlos en un orden que tenga sentido para los
+                datos que reciba.
+            </p>
+<p>
+                Las reglas pueden agregarse usando <code class="methodname">setFilterRule()</code> (que
+                sobrescribe cualquier regla anterior para esa variable) o
+                <code class="methodname">addFilterRule()</code> (que añade la nueva regla a cualquier
+                regla existente para esa variable). Los filtros se especifican de una
+                de las siguientes formas:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Cadena</em></span>. La cadena puede ser un nombre de clase
+                        de filtro, o un segmento de nombre de clase menos cualquier prefijo establecido
+                        en el cargador de plugins del inflector (por defecto, sin el
+                        prefijo '<code class="classname">Zend_Filter</code>').
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Objeto filtro</em></span>. Cualquier instancia de objeto
+                        que implemente <code class="classname">Zend_Filter_Interface</code> puede
+                        pasarse como filtro.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Array</em></span>. Un array de una o más
+                        cadenas u objetos filtro como se definió anteriormente.
+                    </p></li>
+</ul></div>
+<pre class="programlisting">
+$inflector = new Zend_Filter_Inflector(':script.:suffix');
+
+// Set rule to use Zend_Filter_Word_CamelCaseToDash filter
+$inflector-&gt;setFilterRule('script', 'Word_CamelCaseToDash');
+
+// Add rule to lowercase string
+$inflector-&gt;addFilterRule('script', new Zend_Filter_StringToLower());
+
+// Set rules en-masse
+$inflector-&gt;setFilterRule('script', array(
+    'Word_CamelCaseToDash',
+    new Zend_Filter_StringToLower()
+));
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.filter.inflector.rules.multiple"></a>35.6.4.3. Establecer muchas reglas a la vez</h4></div></div></div>
+<p>
+                Generalmente, es más fácil establecer muchas reglas a la vez que
+                configurar una única variable y sus reglas de inflexión de una en una.
+                Los métodos <code class="methodname">addRules()</code>
+                y <code class="methodname">setRules()</code> de <code class="classname">Zend_Filter_Inflector</code> permiten esto.
+            </p>
+<p>
+                Cada método recibe un array de pares variable y regla, donde la
+                regla puede ser de cualquier tipo aceptado (cadena, objeto filtro,
+                o array). Los nombres de variable aceptan una notación especial para
+                permitir establecer reglas estáticas y reglas de filtro, según la
+                siguiente notación:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>prefijo ':'</em></span>: reglas de filtro.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Sin prefijo</em></span>: regla estática.
+                    </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.filter.inflector.rules.multiple.example"></a><p class="title"><b>Ejemplo 35.2. Establecer múltiples reglas a la vez</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Could also use setRules() with this notation:
+$inflector-&gt;addRules(array(
+    // filter rules:
+    ':controller' =&gt; array('CamelCaseToUnderscore','StringToLower'),
+    ':action'     =&gt; array('CamelCaseToUnderscore','StringToLower'),
+
+    // Static rule:
+    'suffix'      =&gt; 'phtml'
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.utility"></a>35.6.5. Métodos de utilidad</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Filter_Inflector</code> tiene una serie de métodos de utilidad
+            para obtener y establecer el cargador de plugins, manipular y
+            recuperar reglas, y controlar si se lanzan excepciones y cuándo.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setPluginLoader()</code> puede usarse cuando ha
+                    configurado su propio cargador de plugins y desea usarlo con
+                    <code class="classname">Zend_Filter_Inflector</code>;
+                    <code class="methodname">getPluginLoader()</code> recupera el actualmente establecido.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setThrowTargetExceptionsOn()</code> puede usarse para
+                    controlar si <code class="methodname">filter()</code> lanza o no una
+                    excepción cuando un identificador de sustitución dado que se le pasa
+                    no se encuentra en el destino. Por defecto, no se lanzan excepciones.
+                    <code class="methodname">isThrowTargetExceptionsOn()</code> le indicará
+                    cuál es el valor actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getRules($spec = null)</code> puede usarse para recuperar todas las
+                    reglas registradas para todas las variables, o solo las reglas de una
+                    única variable.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getRule($spec, $index)</code> obtiene una única regla
+                    para una variable dada; esto puede ser útil para obtener una
+                    regla de filtro específica para una variable que tiene una cadena de filtros.
+                    Debe pasarse <code class="varname">$index</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">clearRules()</code> borrará todas las reglas
+                    registradas actualmente.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.inflector.config"></a>35.6.6. Uso de Zend_Config con Zend_Filter_Inflector</h3></div></div></div>
+<p>
+            Puede usar <code class="classname">Zend_Config</code> para establecer reglas, rutas de prefijo
+            de filtro, y otros estados del objeto en sus inflectores, ya sea pasando
+            un objeto <code class="classname">Zend_Config</code> al constructor o a
+            <code class="methodname">setOptions()</code>. Se pueden especificar los siguientes ajustes:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">target</span> especifica el destino de la inflexión.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">filterPrefixPath</span> especifica uno o más pares de prefijo
+                    y ruta de filtro para usar con el inflector.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">throwTargetExceptionsOn</span> debe ser un booleano
+                    que indique si se deben lanzar o no excepciones cuando un
+                    identificador de sustitución sigue presente después de la inflexión.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">targetReplacementIdentifier</span> especifica el
+                    carácter a usar al identificar las variables de sustitución en
+                    la cadena de destino.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">rules</span> especifica un array de reglas de inflexión;
+                    debe consistir en claves que especifiquen valores o
+                    arrays de valores, consistentes con <code class="methodname">addRules()</code>.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.filter.inflector.config.example"></a><p class="title"><b>Ejemplo 35.3. Uso de Zend_Config con Zend_Filter_Inflector</b></p>
+<div class="example-contents"><pre class="programlisting">
+// With the constructor:
+$config    = new Zend_Config($options);
+$inflector = new Zend_Filter_Inflector($config);
+
+// Or with setOptions():
+$inflector = new Zend_Filter_Inflector();
+$inflector-&gt;setOptions($config);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.filter.input.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.filter.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.form.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">35.5. Zend_Filter_Input </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 36. Zend_Form</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

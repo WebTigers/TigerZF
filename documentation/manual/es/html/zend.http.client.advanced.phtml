@@ -1,0 +1,479 @@
+<?php $title = '38.2. Zend_Http_Client - Uso avanzado'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">38.2. Zend_Http_Client - Uso avanzado</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.http.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 38. Zend_Http</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.http.client.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.http.client.advanced"></a>38.2. Zend_Http_Client - Uso avanzado</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.redirections"></a>38.2.1. Redirecciones HTTP</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Http_Client</code> gestiona automáticamente las
+            redirecciones <acronym class="acronym">HTTP</acronym>, y seguirá hasta 5 redirecciones. Esto se puede
+            cambiar configurando el parámetro de configuración 'maxredirects'.
+        </p>
+<p>
+            Según el RFC de <acronym class="acronym">HTTP</acronym>/1.1, las respuestas <acronym class="acronym">HTTP</acronym> 301 y 302
+            deberían ser tratadas por el cliente reenviando la misma petición a la
+            ubicación especificada, usando el mismo método de petición. Sin embargo, la mayoría de los
+            clientes no implementan esto y siempre usan una petición <code class="constant">GET</code> al
+            redirigir. Por defecto, <code class="classname">Zend_Http_Client</code> hace lo mismo - cuando
+            redirige en una respuesta 301 o 302, todos los parámetros <code class="constant">GET</code> y POST
+            se reinician, y se envía una petición <code class="constant">GET</code> a la nueva ubicación. Este
+            comportamiento se puede cambiar configurando el parámetro de configuración 'strictredirects'
+            al booleano <code class="constant">TRUE</code>:
+            </p>
+<div class="example">
+<a name="zend.http.client.redirections.example-1"></a><p class="title"><b>Ejemplo 38.6. Forzar redirecciones estrictas RFC 2616 en respuestas 301 y 302</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Strict Redirections
+$client-&gt;setConfig(array('strictredirects' =&gt; true));
+
+// Non-strict Redirections
+$client-&gt;setConfig(array('strictredirects' =&gt; false));
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+<p>
+            Siempre puede obtener el número de redirecciones realizadas después de enviar una
+            petición usando el método getRedirectionsCount().
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.cookies"></a>38.2.2. Añadir cookies y usar la persistencia de cookies</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Http_Client</code> proporciona una interfaz sencilla para añadir cookies
+            a su petición, de modo que no se requiere ninguna modificación directa de la cabecera.
+            Esto se hace usando el método setCookie(). Este método
+            se puede usar de varias maneras:
+
+            </p>
+<div class="example">
+<a name="zend.http.client.cookies.example-1"></a><p class="title"><b>Ejemplo 38.7. Configurar cookies usando setCookie()</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Easy and simple: by providing a cookie name and cookie value
+$client-&gt;setCookie('flavor', 'chocolate chips');
+
+// By directly providing a raw cookie string (name=value)
+// Note that the value must be already URL encoded
+$client-&gt;setCookie('flavor=chocolate%20chips');
+
+// By providing a Zend_Http_Cookie object
+$cookie = Zend_Http_Cookie::fromString('flavor=chocolate%20chips');
+$client-&gt;setCookie($cookie);
+</pre></div>
+</div>
+<p><br class="example-break">
+
+            Para más información sobre los objetos <code class="classname">Zend_Http_Cookie</code>, vea
+            <a class="link" href="zend.http.cookies.phtml" title="38.4. Zend_Http_Cookie and Zend_Http_CookieJar">esta sección</a>.
+        </p>
+<p>
+            <code class="classname">Zend_Http_Client</code> también proporciona los medios para la persistencia de cookies -
+            es decir, hacer que el cliente almacene internamente todas las cookies enviadas y recibidas,
+            y las reenvíe automáticamente en peticiones subsiguientes. Esto es
+            útil, por ejemplo, cuando necesita iniciar sesión en un sitio remoto
+            primero y recibir una cookie de autenticación o de sesión antes de
+            enviar más peticiones.
+
+            </p>
+<div class="example">
+<a name="zend.http.client.cookies.example-2"></a><p class="title"><b>Ejemplo 38.8. Habilitar la persistencia de cookies</b></p>
+<div class="example-contents"><pre class="programlisting">
+// To turn cookie stickiness on, set a Cookie Jar
+$client-&gt;setCookieJar();
+
+// First request: log in and start a session
+$client-&gt;setUri('http://example.com/login.php');
+$client-&gt;setParameterPost('user', 'h4x0r');
+$client-&gt;setParameterPost('password', '1337');
+$client-&gt;request('POST');
+
+// The Cookie Jar automatically stores the cookies set
+// in the response, like a session ID cookie.
+
+// Now we can send our next request - the stored cookies
+// will be automatically sent.
+$client-&gt;setUri('http://example.com/read_member_news.php');
+$client-&gt;request('GET');
+</pre></div>
+</div>
+<p><br class="example-break">
+
+            Para más información sobre la clase <code class="classname">Zend_Http_CookieJar</code>, vea
+            <a class="link" href="zend.http.cookies.phtml#zend.http.cookies.cookiejar" title="38.4.5. The Zend_Http_CookieJar Class: Instantiation">esta sección</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.custom_headers"></a>38.2.3. Configurar cabeceras de petición personalizadas</h3></div></div></div>
+<p>
+            Configurar cabeceras personalizadas se puede hacer usando el método setHeaders().
+            Este método es bastante versátil y se puede usar de varias maneras, como
+            muestra el siguiente ejemplo:
+
+            </p>
+<div class="example">
+<a name="zend.http.client.custom_headers.example-1"></a><p class="title"><b>Ejemplo 38.9. Configurar una única cabecera de petición personalizada</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Setting a single header, overwriting any previous value
+$client-&gt;setHeaders('Host', 'www.example.com');
+
+// Another way of doing the exact same thing
+$client-&gt;setHeaders('Host: www.example.com');
+
+// Setting several values for the same header
+// (useful mostly for Cookie headers):
+$client-&gt;setHeaders('Cookie', array(
+    'PHPSESSID=1234567890abcdef1234567890abcdef',
+    'language=he'
+));
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+<p>
+            setHeader() también se puede usar fácilmente para configurar varias cabeceras en una
+            sola llamada, proporcionando un array de cabeceras como único parámetro:
+
+            </p>
+<div class="example">
+<a name="zend.http.client.custom_headers.example-2"></a><p class="title"><b>Ejemplo 38.10. Configurar múltiples cabeceras de petición personalizadas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Setting multiple headers, overwriting any previous value
+$client-&gt;setHeaders(array(
+    'Host' =&gt; 'www.example.com',
+    'Accept-encoding' =&gt; 'gzip,deflate',
+    'X-Powered-By' =&gt; 'Zend Framework'));
+
+// The array can also contain full array strings:
+$client-&gt;setHeaders(array(
+    'Host: www.example.com',
+    'Accept-encoding: gzip,deflate',
+    'X-Powered-By: Zend Framework'));
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.file_uploads"></a>38.2.4. Subida de archivos</h3></div></div></div>
+<p>
+            Puede subir archivos a través de <acronym class="acronym">HTTP</acronym> usando el método setFileUpload.
+            Este método toma un nombre de archivo como primer parámetro, un nombre de
+            formulario como segundo parámetro, y datos como tercer parámetro opcional.
+            Si el tercer parámetro de datos es <code class="constant">NULL</code>, el primer parámetro de nombre de archivo
+            se considera un archivo real en disco, y <code class="classname">Zend_Http_Client</code>
+            intentará leer este archivo y subirlo. Si el parámetro de datos no es
+            <code class="constant">NULL</code>, el primer parámetro de nombre de archivo se enviará como el nombre del archivo,
+            pero no es necesario que exista un archivo real en el disco.
+            El segundo parámetro de nombre de formulario siempre es obligatorio, y equivale
+            al atributo "name" de una etiqueta &gt;input&lt;, si el archivo fuera a
+            subirse a través de un formulario <acronym class="acronym">HTML</acronym>.
+            Un cuarto parámetro opcional proporciona el content-type del archivo. Si
+            no se especifica, y <code class="classname">Zend_Http_Client</code> lee el archivo del disco,
+            se usará la función mime_content_type para adivinar el tipo de contenido del
+            archivo, si está disponible. En cualquier caso, el tipo MIME
+            por defecto será application/octet-stream.
+            </p>
+<div class="example">
+<a name="zend.http.client.file_uploads.example-1"></a><p class="title"><b>Ejemplo 38.11. Usar setFileUpload para subir archivos</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Uploading arbitrary data as a file
+$text = 'this is some plain text';
+$client-&gt;setFileUpload('some_text.txt', 'upload', $text, 'text/plain');
+
+// Uploading an existing file
+$client-&gt;setFileUpload('/tmp/Backup.tar.gz', 'bufile');
+
+// Send the files
+$client-&gt;request('POST');
+</pre></div>
+</div>
+<p><br class="example-break">
+
+            En el primer ejemplo, la variable $text se sube y estará
+            disponible como $_FILES['upload'] en el lado del servidor. En el segundo
+            ejemplo, el archivo existente /tmp/Backup.tar.gz se sube al
+            servidor y estará disponible como $_FILES['bufile']. El tipo de contenido
+            se adivinará automáticamente si es posible - y si no, el tipo de
+            contenido se establecerá en 'application/octet-stream'.
+        </p>
+<div class="note"><table border="0" summary="Note: Uploading files">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Subida de archivos</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Al subir archivos, el content-type de la petición <acronym class="acronym">HTTP</acronym> se
+                establece automáticamente en multipart/form-data. Tenga en cuenta que
+                debe enviar una petición POST o PUT para subir archivos.
+                La mayoría de los servidores ignorarán el cuerpo de la petición en otros métodos de
+                petición.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.raw_post_data"></a>38.2.5. Enviar datos POST en bruto</h3></div></div></div>
+<p>
+            Puede usar un <code class="classname">Zend_Http_Client</code> para enviar datos POST en bruto usando el
+            método setRawData(). Este método toma dos parámetros: el primero
+            es el dato a enviar en el cuerpo de la petición. El segundo parámetro
+            opcional es el content-type del dato. Aunque este parámetro es
+            opcional, normalmente debería configurarlo antes de enviar la petición -
+            ya sea usando setRawData(), o con otro método: setEncType().
+
+            </p>
+<div class="example">
+<a name="zend.http.client.raw_post_data.example-1"></a><p class="title"><b>Ejemplo 38.12. Enviar datos POST en bruto</b></p>
+<div class="example-contents"><pre class="programlisting">
+$xml = '&lt;book&gt;' .
+       '  &lt;title&gt;Islands in the Stream&lt;/title&gt;' .
+       '  &lt;author&gt;Ernest Hemingway&lt;/author&gt;' .
+       '  &lt;year&gt;1970&lt;/year&gt;' .
+       '&lt;/book&gt;';
+
+$client-&gt;setRawData($xml, 'text/xml')-&gt;request('POST');
+
+// Another way to do the same thing:
+$client-&gt;setRawData($xml)-&gt;setEncType('text/xml')-&gt;request('POST');
+</pre></div>
+</div>
+<p><br class="example-break">
+
+            Los datos deberían estar disponibles en el lado del servidor a través de la variable
+            $HTTP_RAW_POST_DATA de <acronym class="acronym">PHP</acronym> o a través del flujo php://input.
+        </p>
+<div class="note"><table border="0" summary="Note: Using raw POST data">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Uso de datos POST en bruto</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Configurar datos POST en bruto para una petición anulará cualquier parámetro POST
+                o subida de archivos. No debería intentar usar ambos en
+                la misma petición. Tenga en cuenta que la mayoría de los servidores ignorarán
+                el cuerpo de la petición a menos que envíe una petición POST.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.http_authentication"></a>38.2.6. Autenticación HTTP</h3></div></div></div>
+<p>
+            Actualmente, <code class="classname">Zend_Http_Client</code> solo soporta la autenticación básica
+            <acronym class="acronym">HTTP</acronym>. Esta característica se utiliza mediante el método
+            <code class="methodname">setAuth()</code>, o especificando un nombre de usuario y una contraseña en
+            la URI. El método <code class="methodname">setAuth()</code>
+            toma 3 parámetros: el nombre de usuario, la contraseña y un parámetro
+            opcional de tipo de autenticación. Como se mencionó, actualmente solo se soporta la
+            autenticación básica (el soporte para la autenticación digest está
+            planeado).
+
+            </p>
+<div class="example">
+<a name="zend.http.client.http_authentication.example-1"></a><p class="title"><b>Ejemplo 38.13. Configurar el usuario y la contraseña de autenticación HTTP</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Using basic authentication
+$client-&gt;setAuth('shahar', 'myPassword!', Zend_Http_Client::AUTH_BASIC);
+
+// Since basic auth is default, you can just do this:
+$client-&gt;setAuth('shahar', 'myPassword!');
+
+// You can also specify username and password in the URI
+$client-&gt;setUri('http://christer:secret@example.com');
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.multiple_requests"></a>38.2.7. Enviar múltiples peticiones con el mismo cliente</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Http_Client</code> también fue diseñado específicamente para gestionar varias
+            peticiones consecutivas con el mismo objeto. Esto es útil en casos
+            en los que un script requiere obtener datos de varios lugares, o
+            cuando acceder a un recurso <acronym class="acronym">HTTP</acronym> específico requiere iniciar sesión y
+            obtener una cookie de sesión, por ejemplo.
+        </p>
+<p>
+            Al realizar varias peticiones al mismo host, se recomienda encarecidamente
+            habilitar el indicador de configuración 'keepalive'. De esta manera,
+            si el servidor soporta conexiones keep-alive, la conexión al
+            servidor solo se cerrará una vez que todas las peticiones se hayan completado y el objeto
+            Client se destruya. Esto evita la sobrecarga de abrir y
+            cerrar conexiones <acronym class="acronym">TCP</acronym> con el servidor.
+        </p>
+<p>
+            Cuando realiza varias peticiones con el mismo cliente, pero quiere
+            asegurarse de que todos los parámetros específicos de la petición se limpian, debería
+            usar el método resetParameters(). Esto asegura que los parámetros <code class="constant">GET</code> y
+            POST, el cuerpo de la petición y las cabeceras específicas de la petición se
+            reinician y no se reutilizan en la siguiente petición.
+        </p>
+<div class="note"><table border="0" summary="Note: Resetting parameters">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Reiniciar parámetros</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Tenga en cuenta que las cabeceras que no son específicas de la petición no se reinician por defecto
+                cuando se usa el método <code class="methodname">resetParameters()</code>.
+                Solo se reinician las cabeceras 'Content-length' y 'Content-type'. Esto
+                le permite configurar de una vez cabeceras como 'Accept-language' y
+                'Accept-encoding'
+            </p>
+<p>
+                Para limpiar todas las cabeceras y otros datos excepto la URI y el método, use
+                <code class="methodname">resetParameters(true)</code>.
+            </p>
+</td></tr>
+</table></div>
+<p>
+            Otra característica diseñada específicamente para peticiones consecutivas es
+            el objeto Cookie Jar. Los Cookie Jar le permiten guardar automáticamente las
+            cookies establecidas por el servidor en la primera petición, y enviarlas en
+            peticiones consecutivas de forma transparente. Esto permite, por ejemplo, pasar
+            por una petición de autenticación antes de enviar la petición real de
+            obtención de datos.
+        </p>
+<p>
+            Si su aplicación requiere una petición de autenticación por usuario,
+            y las peticiones consecutivas pueden realizarse en más de un script
+            en su aplicación, podría ser una buena idea almacenar el objeto Cookie Jar
+            en la sesión del usuario. De esta manera, solo necesitará
+            autenticar al usuario una vez por sesión.
+        </p>
+<div class="example">
+<a name="zend.http.client.multiple_requests.example-1"></a><p class="title"><b>Ejemplo 38.14. Realizar peticiones consecutivas con un cliente</b></p>
+<div class="example-contents"><pre class="programlisting">
+// First, instantiate the client
+$client = new Zend_Http_Client('http://www.example.com/fetchdata.php', array(
+    'keepalive' =&gt; true
+));
+
+// Do we have the cookies stored in our session?
+if (isset($_SESSION['cookiejar']) &amp;&amp;
+    $_SESSION['cookiejar'] instanceof Zend_Http_CookieJar) {
+
+    $client-&gt;setCookieJar($_SESSION['cookiejar']);
+} else {
+    // If we don't, authenticate and store cookies
+    $client-&gt;setCookieJar();
+    $client-&gt;setUri('http://www.example.com/login.php');
+    $client-&gt;setParameterPost(array(
+        'user' =&gt; 'shahar',
+        'pass' =&gt; 'somesecret'
+    ));
+    $client-&gt;request(Zend_Http_Client::POST);
+
+    // Now, clear parameters and set the URI to the original one
+    // (note that the cookies that were set by the server are now
+    // stored in the jar)
+    $client-&gt;resetParameters();
+    $client-&gt;setUri('http://www.example.com/fetchdata.php');
+}
+
+$response = $client-&gt;request(Zend_Http_Client::GET);
+
+// Store cookies in session, for next page
+$_SESSION['cookiejar'] = $client-&gt;getCookieJar();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.client.streaming"></a>38.2.8. Transmisión de datos</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Http_Client</code> acepta y devuelve datos como
+            cadenas de <acronym class="acronym">PHP</acronym>. Sin embargo, en muchos casos hay archivos grandes que enviar o
+            recibir, por lo que mantenerlos en memoria puede ser innecesario o demasiado costoso. Para estos
+            casos, <code class="classname">Zend_Http_Client</code> soporta leer datos de archivos (y en
+            general, flujos de <acronym class="acronym">PHP</acronym>) y escribir datos en archivos (flujos).
+        </p>
+<p>
+            Para usar un flujo para pasar datos a <code class="classname">Zend_Http_Client</code>,
+            use el método <code class="methodname">setRawData()</code> con el argumento de datos siendo un recurso de
+            flujo (por ejemplo, el resultado de <code class="methodname">fopen()</code>).
+
+            </p>
+<div class="example">
+<a name="zend.http.client.streaming.example-1"></a><p class="title"><b>Ejemplo 38.15. Enviar un archivo a un servidor HTTP con transmisión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$fp = fopen("mybigfile.zip", "r");
+$client-&gt;setRawData($fp, 'application/zip')-&gt;request('PUT');
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+<p>
+            Actualmente solo las peticiones PUT soportan el envío de flujos al servidor <acronym class="acronym">HTTP</acronym>.
+        </p>
+<p>
+            Para recibir datos del servidor como flujo, use
+            <code class="methodname">setStream()</code>. El argumento opcional especifica el nombre de archivo donde se
+            almacenarán los datos. Si el argumento es simplemente <code class="constant">TRUE</code> (por defecto),
+            se usará un archivo temporal que se eliminará una vez que el objeto de respuesta se destruya.
+            Configurar el argumento en <code class="constant">FALSE</code> deshabilita la funcionalidad de transmisión.
+        </p>
+<p>
+            Al usar la transmisión, el método <code class="methodname">request()</code> devolverá un objeto de la
+            clase <code class="classname">Zend_Http_Client_Response_Stream</code>, que tiene dos métodos
+            útiles: <code class="methodname">getStreamName()</code> devolverá el nombre del archivo donde
+            se almacena la respuesta, y <code class="methodname">getStream()</code> devolverá el flujo desde
+            el cual se puede leer la respuesta.
+        </p>
+<p>
+            Puede escribir la respuesta en un archivo predefinido, o usar un archivo temporal para almacenarla
+            y enviarla o escribirla en otro archivo usando funciones de flujo habituales.
+
+            </p>
+<div class="example">
+<a name="zend.http.client.streaming.example-2"></a><p class="title"><b>Ejemplo 38.16. Recibir un archivo de un servidor HTTP con transmisión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$client-&gt;setStream(); // will use temp file
+$response = $client-&gt;request('GET');
+// copy file
+copy($response-&gt;getStreamName(), "my/downloads/file");
+// use stream
+$fp = fopen("my/downloads/file2", "w");
+stream_copy_to_stream($response-&gt;getStream(), $fp);
+// Also can write to known file
+$client-&gt;setStream("my/downloads/myfile")-&gt;request('GET');
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.http.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.http.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.http.client.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 38. Zend_Http </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 38.3. Zend_Http_Client - Adaptadores de conexión</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

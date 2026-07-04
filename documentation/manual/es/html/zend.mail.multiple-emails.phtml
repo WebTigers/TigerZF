@@ -1,0 +1,114 @@
+<?php $title = '45.3. Envío de múltiples correos por conexión SMTP'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">45.3. Envío de múltiples correos por conexión SMTP</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mail.sending.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 45. Zend_Mail</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mail.different-transports.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.mail.multiple-emails"></a>45.3. Envío de múltiples correos por conexión SMTP</h2></div></div></div>
+<p>
+        Por defecto, un único transporte SMTP crea una única conexión y
+        la reutiliza durante toda la ejecución del script. Puede enviar múltiples
+        correos electrónicos a través de esta conexión SMTP. Se emite un comando RSET antes de cada
+        entrega para asegurar que se sigue el protocolo de negociación (handshake) SMTP correcto.
+    </p>
+<p>
+        Opcionalmente, también puede definir una dirección y nombre From por defecto,
+        así como una cabecera reply-to por defecto. Esto puede hacerse mediante los
+        métodos estáticos <code class="methodname">setDefaultFrom()</code> y
+        <code class="methodname">setDefaultReplyTo()</code>. Estos valores por defecto se usarán cuando
+        no especifique una dirección/nombre From o Reply-to hasta que se restablezcan (limpien) los valores por defecto.
+        Restablecer los valores por defecto puede hacerse mediante el uso de
+        <code class="methodname">clearDefaultFrom()</code> y
+        <code class="methodname">clearDefaultReplyTo</code>.
+    </p>
+<div class="example">
+<a name="zend.mail.multiple-emails.example-1"></a><p class="title"><b>Ejemplo 45.4. Envío de múltiples correos por conexión SMTP</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Create transport
+$config = array('name' =&gt; 'sender.example.com');
+$transport = new Zend_Mail_Transport_Smtp('mail.example.com', $config);
+
+// Set From &amp; Reply-To address and name for all emails to send.
+Zend_Mail::setDefaultFrom('sender@example.com', 'John Doe');
+Zend_Mail::setDefaultReplyTo('replyto@example.com','Jane Doe');
+
+// Loop through messages
+for ($i = 0; $i &lt; 5; $i++) {
+    $mail = new Zend_Mail();
+    $mail-&gt;addTo('studio@example.com', 'Test');
+
+    $mail-&gt;setSubject(
+        'Demonstration - Sending Multiple Mails per SMTP Connection'
+    );
+    $mail-&gt;setBodyText('...Your message here...');
+    $mail-&gt;send($transport);
+}
+
+// Reset defaults
+Zend_Mail::clearDefaultFrom();
+Zend_Mail::clearDefaultReplyTo();
+</pre></div>
+</div>
+<br class="example-break"><p>
+        Si desea tener una conexión separada para cada envío de
+        correo, tendrá que crear y destruir su transporte antes y
+        después de cada llamada al método <code class="methodname">send()</code>. O, alternativamente,
+        puede manipular la conexión entre cada entrega accediendo al
+        objeto de protocolo del transporte.
+    </p>
+<div class="example">
+<a name="zend.mail.multiple-emails.example-2"></a><p class="title"><b>Ejemplo 45.5. Control manual de la conexión de transporte</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Create transport
+$transport = new Zend_Mail_Transport_Smtp();
+
+$protocol = new Zend_Mail_Protocol_Smtp('mail.example.com');
+$protocol-&gt;connect();
+$protocol-&gt;helo('sender.example.com');
+
+$transport-&gt;setConnection($protocol);
+
+// Loop through messages
+for ($i = 0; $i &lt; 5; $i++) {
+    $mail = new Zend_Mail();
+    $mail-&gt;addTo('studio@example.com', 'Test');
+    $mail-&gt;setFrom('studio@example.com', 'Test');
+    $mail-&gt;setSubject(
+        'Demonstration - Sending Multiple Mails per SMTP Connection'
+    );
+    $mail-&gt;setBodyText('...Your message here...');
+
+    // Manually control the connection
+    $protocol-&gt;rset();
+    $mail-&gt;send($transport);
+}
+
+$protocol-&gt;quit();
+$protocol-&gt;disconnect();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mail.sending.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.mail.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mail.different-transports.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">45.2. Envío por SMTP </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 45.4. Uso de diferentes transportes</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

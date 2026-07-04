@@ -1,0 +1,1466 @@
+<?php $title = '33.9. Zend_Feed_Reader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.9. Zend_Feed_Reader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.custom-feed.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.feed.writer.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.reader"></a>33.9. Zend_Feed_Reader</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.introduction"></a>33.9.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Feed_Reader</code> es un componente utilizado para
+            consumir feeds <acronym class="acronym">RSS</acronym> y Atom de cualquier versión, incluyendo
+            <acronym class="acronym">RDF</acronym>/<acronym class="acronym">RSS</acronym> 1.0,
+            <acronym class="acronym">RSS</acronym> 2.0, Atom 0.3 y Atom 1.0. La <acronym class="acronym">API</acronym> para
+            recuperar los datos del feed es
+            deliberadamente simple ya que <code class="classname">Zend_Feed_Reader</code> es
+            capaz de buscar en cualquier feed de cualquier tipo la información
+            solicitada a través de la <acronym class="acronym">API</acronym>. Si los elementos típicos que contienen esta
+            información no están presentes, se adaptará y recurrirá a una
+            variedad de elementos alternativos en su lugar. Esta capacidad de elegir entre
+            alternativas elimina la necesidad de que los usuarios creen su propia
+            capa de abstracción sobre el componente para hacerlo útil o de tener
+            un conocimiento profundo de los estándares subyacentes, las
+            alternativas actuales y las extensiones con espacio de nombres.
+        </p>
+<p>
+            Internamente, <code class="classname">Zend_Feed_Reader</code> funciona casi
+            por completo realizando consultas XPath contra el Document Object Model
+            del <acronym class="acronym">XML</acronym> del feed. El <acronym class="acronym">DOM</acronym> no se expone mediante una <acronym class="acronym">API</acronym> de propiedades
+            encadenadas como <code class="classname">Zend_Feed</code>, aunque los
+            objetos subyacentes DOMDocument, DOMElement y DOMXPath se exponen para su manipulación
+            externa. Este enfoque singular de análisis es consistente y
+            el componente ofrece un sistema de plugins para añadir a la <acronym class="acronym">API</acronym> de nivel de Feed y Entry
+            escribiendo Extensiones de manera similar.
+        </p>
+<p>
+            El rendimiento se ve favorecido de tres maneras. En primer lugar,
+            <code class="classname">Zend_Feed_Reader</code> admite el uso de caché mediante
+            <code class="classname">Zend_Cache</code> para mantener una copia del
+            <acronym class="acronym">XML</acronym> original del feed. Esto le permite omitir peticiones de red para una <acronym class="acronym">URI</acronym>
+            de feed si
+            la caché es válida. En segundo lugar, la <acronym class="acronym">API</acronym> de nivel de Feed y Entry está respaldada
+            por una caché interna (no persistente) de modo que las llamadas repetidas a la <acronym class="acronym">API</acronym> para el
+            mismo feed evitarán un uso adicional del <acronym class="acronym">DOM</acronym> o de XPath. En tercer lugar, importar
+            feeds desde una <acronym class="acronym">URI</acronym> puede aprovechar
+            las peticiones <acronym class="acronym">HTTP</acronym> Condicionales <code class="constant">GET</code>,
+            que permiten a los servidores emitir una respuesta 304 vacía cuando el
+            feed solicitado no ha cambiado desde la última vez que lo solicitó.
+            En este último caso, una instancia de <code class="classname">Zend_Cache</code>
+            mantendrá el último feed recibido junto con los valores de las cabeceras ETag y
+            Last-Modified enviados en la respuesta <acronym class="acronym">HTTP</acronym>.
+        </p>
+<p>
+            En relación con <code class="classname">Zend_Feed</code>,
+            <code class="classname">Zend_Feed_Reader</code> se concibió como un
+            reemplazo independiente de <code class="classname">Zend_Feed</code>, pero no
+            es compatible hacia atrás con <code class="classname">Zend_Feed</code>.
+            Más bien, es una alternativa que sigue una ideología diferente centrada
+            en ser sencillo de usar, flexible, consistente y ampliable mediante
+            el sistema de plugins. <code class="classname">Zend_Feed_Reader</code> tampoco
+            es capaz de construir feeds y delega esa responsabilidad
+            en <code class="classname">Zend_Feed_Writer</code>, su compañero de armas.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.import"></a>33.9.2. Importando feeds</h3></div></div></div>
+<p>
+            Importar un feed con <code class="classname">Zend_Feed_Reader</code> no
+            es muy diferente de hacerlo con <code class="classname">Zend_Feed</code>. Los feeds pueden
+            importarse desde una cadena, un archivo, una <acronym class="acronym">URI</acronym> o una instancia de tipo
+            <code class="classname">Zend_Feed_Abstract</code>. Al importar desde una <acronym class="acronym">URI</acronym> puede
+            utilizarse adicionalmente una petición <acronym class="acronym">HTTP</acronym> Condicional <code class="constant">GET</code>.
+            Si la importación falla, se lanzará una excepción. El resultado final será un
+            objeto de tipo <code class="classname">Zend_Feed_Reader_FeedInterface</code>, cuyas
+            implementaciones principales son
+            <code class="classname">Zend_Feed_Reader_Feed_Rss</code> y
+            <code class="classname">Zend_Feed_Reader_Feed_Atom</code>
+            (¡<code class="classname">Zend_Feed</code> se quedó con todos los nombres cortos!). Ambos
+            objetos admiten múltiples versiones (todas las existentes) de estos tipos generales de feed.
+        </p>
+<p>
+            En el siguiente ejemplo, importamos un feed <acronym class="acronym">RDF</acronym>/<acronym class="acronym">RSS</acronym> 1.0
+            y extraemos alguna información básica que puede guardarse en una base de datos o
+            en otro lugar.
+        </p>
+<pre class="programlisting">
+$feed = Zend_Feed_Reader::import('http://www.planet-php.net/rdf/');
+$data = array(
+    'title'        =&gt; $feed-&gt;getTitle(),
+    'link'         =&gt; $feed-&gt;getLink(),
+    'dateModified' =&gt; $feed-&gt;getDateModified(),
+    'description'  =&gt; $feed-&gt;getDescription(),
+    'language'     =&gt; $feed-&gt;getLanguage(),
+    'entries'      =&gt; array(),
+);
+
+foreach ($feed as $entry) {
+    $edata = array(
+        'title'        =&gt; $entry-&gt;getTitle(),
+        'description'  =&gt; $entry-&gt;getDescription(),
+        'dateModified' =&gt; $entry-&gt;getDateModified(),
+        'authors'       =&gt; $entry-&gt;getAuthors(),
+        'link'         =&gt; $entry-&gt;getLink(),
+        'content'      =&gt; $entry-&gt;getContent()
+    );
+    $data['entries'][] = $edata;
+}
+</pre>
+<p>
+            El ejemplo anterior demuestra
+            la <acronym class="acronym">API</acronym> de <code class="classname">Zend_Feed_Reader</code>, y también
+            demuestra parte de su funcionamiento interno. En realidad, el feed
+            <acronym class="acronym">RDF</acronym> seleccionado no tiene ningún elemento nativo de fecha o autor,
+            sin embargo utiliza el módulo Dublin Core 1.1, que ofrece
+            elementos de creador y fecha con espacio de nombres.
+            <code class="classname">Zend_Feed_Reader</code> recurre a estos y
+            opciones similares si no existen elementos nativos relevantes. Si
+            no puede encontrar en absoluto una alternativa, devolverá <code class="constant">NULL</code>,
+            indicando que no se pudo encontrar la información en el feed. Debe tener en cuenta
+            que las clases que implementan
+            <code class="classname">Zend_Feed_Reader_FeedInterface</code> también implementan
+            las interfaces <acronym class="acronym">SPL</acronym> <code class="classname">Iterator</code> y
+            <code class="classname">Countable</code>.
+        </p>
+<p>
+            Los feeds también pueden importarse desde cadenas, archivos, e incluso objetos de
+            tipo <code class="classname">Zend_Feed_Abstract</code>.
+        </p>
+<pre class="programlisting">
+// desde una URI
+$feed = Zend_Feed_Reader::import('http://www.planet-php.net/rdf/');
+
+// desde una cadena
+$feed = Zend_Feed_Reader::importString($feedXmlString);
+
+// desde un archivo
+$feed = Zend_Feed_Reader::importFile('./feed.xml');
+
+// desde un objeto Zend_Feed_Abstract
+$zfeed = Zend_Feed::import('http://www.planet-php.net/atom/');
+$feed  = Zend_Feed_Reader::importFeed($zfeed);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.sources"></a>33.9.3. Recuperando las fuentes subyacentes de Feed y Entry</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Feed_Reader</code> hace todo lo posible por no
+            encasillarle en un espacio limitado. Si necesita trabajar con un feed fuera de
+            <code class="classname">Zend_Feed_Reader</code>, puede extraer los objetos DOMDocument o DOMElement
+            base de cualquier clase, o incluso una cadena <acronym class="acronym">XML</acronym>
+            que los contenga. También se proporcionan métodos para extraer el objeto DOMXPath actual
+            (con todos los espacios de nombres del núcleo y de las Extensiones registrados) y el prefijo correcto usado
+            en todas las consultas XPath para el Feed o Entry actual. Los métodos básicos
+            a utilizar (en cualquier objeto) son <code class="methodname">saveXml()</code>,
+            <code class="methodname">getDomDocument()</code>,
+            <code class="methodname">getElement()</code>,
+            <code class="methodname">getXpath()</code> y
+            <code class="methodname">getXpathPrefix()</code>. Estos le permitirán liberarse
+            de <code class="classname">Zend_Feed_Reader</code> y hacer cualquier otra cosa
+            que desee.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">saveXml()</code> devuelve una cadena <acronym class="acronym">XML</acronym>
+                    que contiene únicamente el elemento que representa el objeto actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getDomDocument()</code> devuelve el objeto DOMDocument
+                    que representa el feed completo (incluso si se llama desde un objeto Entry).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getElement()</code> devuelve el
+                    DOMElement del objeto actual (es decir, el Feed o el Entry actual).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getXpath()</code> devuelve el objeto DOMXPath del feed
+                    actual (incluso si se llama desde un objeto Entry) con los espacios de nombres del
+                    tipo de feed actual y todas las Extensiones cargadas
+                    preregistrados.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getXpathPrefix()</code> devuelve el prefijo
+                    de consulta para el objeto actual (es decir, el Feed o el
+                    Entry actual) que incluye la ruta de consulta XPath correcta para ese
+                    Feed o Entry específico.
+                </p></li>
+</ul></div>
+<p>
+            He aquí un ejemplo donde un feed podría incluir una Extensión <acronym class="acronym">RSS</acronym> no
+            soportada por <code class="classname">Zend_Feed_Reader</code> de forma predeterminada.
+            Cabe destacar que podría escribir y registrar una Extensión (tratado más adelante)
+            para hacer esto, pero eso no siempre se justifica para una comprobación rápida. Debe registrar cualquier
+            espacio de nombres nuevo en el objeto DOMXPath antes de usarlo, a menos que ya esté
+            registrado por <code class="classname">Zend_Feed_Reader</code> o por una
+            Extensión de antemano.
+        </p>
+<pre class="programlisting">
+$feed        = Zend_Feed_Reader::import('http://www.planet-php.net/rdf/');
+$xpathPrefix = $feed-&gt;getXpathPrefix();
+$xpath       = $feed-&gt;getXpath();
+$xpath-&gt;registerNamespace('admin', 'http://webns.net/mvcb/');
+$reportErrorsTo = $xpath-&gt;evaluate('string('
+                                 . $xpathPrefix
+                                 . '/admin:errorReportsTo)');
+</pre>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Advertencia</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si registra un espacio de nombres ya registrado con un nombre de prefijo diferente
+                al usado internamente por
+                <code class="classname">Zend_Feed_Reader</code>, esto romperá el
+                funcionamiento interno de este componente.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.cache-request"></a>33.9.4. Soporte de caché y peticiones inteligentes</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.reader.cache-request.cache"></a>33.9.4.1. Añadiendo soporte de caché a Zend_Feed_Reader</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Feed_Reader</code> admite el uso de una
+                instancia de <code class="classname">Zend_Cache</code> para almacenar en caché feeds (como
+                <acronym class="acronym">XML</acronym>) y así evitar peticiones de red innecesarias. Añadir una caché es aquí tan
+                sencillo como en otros componentes de Zend Framework: cree
+                y configure su caché y luego indique a
+                <code class="classname">Zend_Feed_Reader</code> que la use. La clave de caché
+                utilizada es "<code class="classname">Zend_Feed_Reader_</code>" seguida del hash
+                <acronym class="acronym">MD5</acronym> de la <acronym class="acronym">URI</acronym> del feed.
+            </p>
+<pre class="programlisting">
+$frontendOptions = array(
+   'lifetime' =&gt; 7200,
+   'automatic_serialization' =&gt; true
+);
+$backendOptions = array('cache_dir' =&gt; './tmp/');
+$cache = Zend_Cache::factory(
+    'Core', 'File', $frontendOptions, $backendOptions
+);
+
+Zend_Feed_Reader::setCache($cache);
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Aunque se aparte un poco del tema, también debería considerar
+                    añadir una caché a
+                    <code class="classname">Zend_Loader_PluginLoader</code>, que es
+                    utilizado por <code class="classname">Zend_Feed_Reader</code> para cargar
+                    Extensiones.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.reader.cache-request.http-conditional-get"></a>33.9.4.2. Soporte de HTTP Conditional GET</h4></div></div></div>
+<p>
+                La gran pregunta que a menudo se hace al importar un feed con frecuencia es
+                si realmente ha cambiado. Con una caché habilitada, puede añadir soporte de
+                <acronym class="acronym">HTTP</acronym> Condicional <code class="constant">GET</code> a su arsenal para responder esa
+                pregunta.
+            </p>
+<p>
+                Usando este método, puede solicitar feeds desde <acronym class="acronym">URI</acronym>s e incluir
+                los últimos valores conocidos de las cabeceras de respuesta ETag y Last-Modified
+                con la petición (usando las cabeceras If-None-Match e If-Modified-Since).
+                Si el feed en el servidor permanece sin cambios, debería
+                recibir una respuesta 304 que indica a
+                <code class="classname">Zend_Feed_Reader</code> que use la
+                versión en caché. Si se envía un feed completo en una respuesta con un código de estado
+                200, esto significa que el feed ha cambiado y
+                <code class="classname">Zend_Feed_Reader</code> analizará la nueva
+                versión y la guardará en la caché. También almacenará en caché los nuevos
+                valores de las cabeceras ETag y Last-Modified para uso futuro.
+            </p>
+<p>
+                Estas peticiones "condicionales" no tienen garantizado el soporte
+                por parte del servidor al que se solicita una <acronym class="acronym">URI</acronym>, pero pueden intentarse
+                de todos modos. Sin embargo, la mayoría de las fuentes de feed comunes, como los blogs, deberían
+                soportarlo. Para habilitar las peticiones condicionales, necesitará
+                proporcionar una caché a <code class="classname">Zend_Feed_Reader</code>.
+            </p>
+<pre class="programlisting">
+$frontendOptions = array(
+   'lifetime' =&gt; 86400,
+   'automatic_serialization' =&gt; true
+);
+$backendOptions = array('cache_dir' =&gt; './tmp/');
+$cache = Zend_Cache::factory(
+    'Core', 'File', $frontendOptions, $backendOptions
+);
+
+Zend_Feed_Reader::setCache($cache);
+Zend_Feed_Reader::useHttpConditionalGet();
+
+$feed = Zend_Feed_Reader::import('http://www.planet-php.net/rdf/');
+</pre>
+<p>
+                En el ejemplo anterior, con las peticiones <acronym class="acronym">HTTP</acronym> Condicionales
+                <code class="constant">GET</code> habilitadas, los valores de las cabeceras de respuesta ETag y
+                Last-Modified se almacenarán en caché junto con el feed. Durante las próximas 24 horas (el tiempo de vida
+                de la caché), los feeds solo se actualizarán en la caché si se recibe una respuesta distinta de 304
+                que contenga un documento <acronym class="acronym">XML</acronym> <acronym class="acronym">RSS</acronym> o Atom válido.
+            </p>
+<p>
+                Si pretende gestionar las cabeceras de la petición desde fuera de
+                <code class="classname">Zend_Feed_Reader</code>, puede establecer las
+                cabeceras de petición If-None-Matches e If-Modified-Since correspondientes
+                mediante el método de importación por <acronym class="acronym">URI</acronym>.
+            </p>
+<pre class="programlisting">
+$lastEtagReceived = '5e6cefe7df5a7e95c8b1ba1a2ccaff3d';
+$lastModifiedDateReceived = 'Wed, 08 Jul 2009 13:37:22 GMT';
+$feed = Zend_Feed_Reader::import(
+    $uri, $lastEtagReceived, $lastModifiedDateReceived
+);
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.locate"></a>33.9.5. Localizando URIs de feeds desde sitios web</h3></div></div></div>
+<p>
+            Hoy en día, muchos sitios web son conscientes de que la ubicación de sus feeds
+            <acronym class="acronym">XML</acronym> no siempre es obvia. Un pequeño gráfico
+            <acronym class="acronym">RDF</acronym>, <acronym class="acronym">RSS</acronym> o Atom ayuda cuando el usuario está leyendo la página, pero ¿qué ocurre cuando una máquina
+            visita la página intentando identificar dónde están ubicados sus feeds? Para ayudar en
+            esto, los sitios web pueden apuntar a sus feeds usando etiquetas &lt;link&gt; en
+            la sección &lt;head&gt; de su <acronym class="acronym">HTML</acronym>. Para aprovechar esto,
+            puede usar <code class="classname">Zend_Feed_Reader</code> para localizar estos
+            feeds usando el método estático <code class="methodname">findFeedLinks()</code>.
+        </p>
+<p>
+            Este método llama a cualquier <acronym class="acronym">URI</acronym> y busca la ubicación de feeds
+            <acronym class="acronym">RSS</acronym>, <acronym class="acronym">RDF</acronym>
+            y Atom asumiendo que el <acronym class="acronym">HTML</acronym> del sitio web contiene los enlaces relevantes.
+            Luego devuelve un objeto de valor donde puede comprobar la existencia de una
+            <acronym class="acronym">URI</acronym> de feed <acronym class="acronym">RSS</acronym>, <acronym class="acronym">RDF</acronym> o Atom.
+        </p>
+<p>
+            El objeto devuelto es una subclase de <code class="classname">ArrayObject</code>
+            llamada <code class="classname">Zend_Feed_Reader_Collection_FeedLink</code>, de modo que puede convertirla
+            a un array, o iterar sobre ella, para acceder a todos los enlaces detectados.
+            Sin embargo, como un atajo sencillo, puede simplemente tomar el primer enlace
+            <acronym class="acronym">RSS</acronym>, <acronym class="acronym">RDF</acronym> o Atom usando sus propiedades públicas como en el ejemplo siguiente.
+            De lo contrario, cada elemento del <code class="classname">ArrayObject</code> es un array simple
+            con las claves "type" y "uri" donde el type es uno de "rdf", "rss" o
+            "atom".
+        </p>
+<pre class="programlisting">
+$links = Zend_Feed_Reader::findFeedLinks('http://www.planet-php.net');
+
+if(isset($links-&gt;rdf)) {
+    echo $links-&gt;rdf, "\n"; // http://www.planet-php.org/rdf/
+}
+if(isset($links-&gt;rss)) {
+    echo $links-&gt;rss, "\n"; // http://www.planet-php.org/rss/
+}
+if(isset($links-&gt;atom)) {
+    echo $links-&gt;atom, "\n"; // http://www.planet-php.org/atom/
+}
+</pre>
+<p>
+            Basándose en estos enlaces, puede entonces importar desde la fuente que
+            desee de la manera habitual.
+        </p>
+<p>
+            Este método rápido solo le proporciona un enlace por cada tipo de feed, pero
+            los sitios web pueden indicar muchos enlaces de cualquier tipo. Quizás se trate de un sitio de noticias
+            con un feed <acronym class="acronym">RSS</acronym> para cada categoría de noticias. Puede iterar sobre
+            todos los enlaces usando el iterador del ArrayObject.
+        </p>
+<pre class="programlisting">
+$links = Zend_Feed_Reader::findFeedLinks('http://www.planet-php.net');
+
+foreach ($links as $link) {
+    echo $link['uri'], "\n";
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.attribute-collections"></a>33.9.6. Colecciones de atributos</h3></div></div></div>
+<p>
+            En un intento por simplificar los tipos de retorno, con Zend Framework 1.10 los tipos
+            devueltos por los distintos métodos de nivel de feed y entrada pueden incluir un objeto
+            de tipo <code class="classname">Zend_Feed_Reader_Collection_CollectionAbstract</code>.
+            A pesar del nombre especial de la clase, que explicaré a continuación, esto es solo una simple
+            subclase de <code class="classname">ArrayObject</code> de <acronym class="acronym">SPL</acronym>.
+        </p>
+<p>
+            El propósito principal aquí es permitir la presentación de la mayor cantidad posible de datos
+            de los elementos solicitados, a la vez que se permite el acceso a los datos más relevantes
+            como un simple array. Esto también impone un enfoque estándar para devolver
+            dichos datos, que anteriormente podían oscilar entre arrays y objetos.
+        </p>
+<p>
+            El nuevo tipo de clase actúa de forma idéntica a <code class="classname">ArrayObject</code>
+            con la única adición de un nuevo método <code class="methodname">getValues()</code>
+            que devuelve un simple array plano que contiene la información más relevante.
+        </p>
+<p>
+            Un ejemplo sencillo de esto es
+            <code class="methodname">Zend_Feed_Reader_FeedInterface::getCategories()</code>. Cuando se usa con
+            cualquier feed <acronym class="acronym">RSS</acronym> o Atom, este método devolverá los datos de categoría como un
+            objeto contenedor llamado <code class="classname">Zend_Feed_Reader_Collection_Category</code>. El
+            objeto contenedor contendrá, por categoría, tres campos de datos: term, scheme y
+            label. El "term" es el nombre básico de la categoría, a menudo legible por máquina (es decir, funciona bien
+            con <acronym class="acronym">URI</acronym>s). El scheme representa un esquema de categorización (normalmente un
+            identificador <acronym class="acronym">URI</acronym>) también conocido como "domain" en <acronym class="acronym">RSS</acronym>
+            2.0. El "label" es un nombre de categoría legible por humanos que admite
+            entidades <acronym class="acronym">HTML</acronym>. En <acronym class="acronym">RSS</acronym> 2.0 no existe un atributo label,
+            por lo que siempre se establece con el mismo valor que el term, por comodidad.
+        </p>
+<p>
+            Para acceder a las etiquetas de categoría por sí mismas en un simple array de valores,
+            podría hacer algo como:
+        </p>
+<pre class="programlisting">
+$feed = Zend_Feed_Reader::import('http://www.example.com/atom.xml');
+$categories = $feed-&gt;getCategories();
+$labels = array();
+foreach ($categories as $cat) {
+    $labels[] = $cat['label']
+}
+</pre>
+<p>
+            Es un ejemplo un tanto forzado, pero el punto es que las etiquetas están entrelazadas con
+            otra información.
+        </p>
+<p>
+            Sin embargo, la clase contenedora le permite acceder a los datos "más relevantes"
+            como un simple array usando el método <code class="methodname">getValues()</code>. El concepto
+            de "más relevante" es obviamente una decisión subjetiva. Para las categorías significa las etiquetas
+            de categoría (no los terms ni los schemes), mientras que para los autores serían sus nombres
+            (no sus direcciones de correo electrónico ni <acronym class="acronym">URI</acronym>s). El array simple es plano (solo
+            valores) y se pasa por <code class="methodname">array_unique()</code> para eliminar
+            duplicados.
+        </p>
+<pre class="programlisting">
+$feed = Zend_Feed_Reader::import('http://www.example.com/atom.xml');
+$categories = $feed-&gt;getCategories();
+$labels = $categories-&gt;getValues();
+</pre>
+<p>
+            El ejemplo anterior muestra cómo extraer únicamente las etiquetas y nada más, ofreciendo
+            así un acceso sencillo a las etiquetas de categoría sin trabajo adicional para extraer
+            esos datos por sí mismos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.retrieve-info"></a>33.9.7. Recuperando información del feed</h3></div></div></div>
+<p>
+            Recuperar información de un feed (cubriremos las entradas e items en la
+            siguiente sección, aunque siguen los mismos principios) utiliza una <acronym class="acronym">API</acronym> claramente
+            definida que es exactamente la misma independientemente de si el feed en
+            cuestión es <acronym class="acronym">RSS</acronym>, <acronym class="acronym">RDF</acronym> o Atom. Lo mismo aplica para las
+            subversiones de estos estándares, y hemos probado cada una de las versiones de
+            <acronym class="acronym">RSS</acronym> y Atom. Aunque
+            el <acronym class="acronym">XML</acronym> subyacente del feed puede diferir sustancialmente en términos de las
+            etiquetas y elementos que presentan, no obstante todos intentan
+            transmitir información similar y para reflejar esto todas las diferencias
+            y disparidades entre etiquetas alternativas son gestionadas internamente por
+            <code class="classname">Zend_Feed_Reader</code>, presentándole una
+            interfaz idéntica para cada uno. Idealmente, no debería tener que preocuparse por
+            si un feed es <acronym class="acronym">RSS</acronym> o Atom, siempre que pueda extraer la
+            información que desea.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Aunque determinar el terreno común entre los tipos de feed es en sí mismo complejo, cabe
+                señalar que <acronym class="acronym">RSS</acronym> en particular es una "especificación" constantemente
+                disputada. Esto tiene sus raíces en el documento original de <acronym class="acronym">RSS</acronym> 2.0,
+                que contiene ambigüedades y no detalla el tratamiento correcto de todos los
+                elementos. Como resultado, este componente aplica rigurosamente la Especificación
+                <acronym class="acronym">RSS</acronym> 2.0.11 publicada por la RSS Advisory Board y su
+                Perfil de Mejores Prácticas de <acronym class="acronym">RSS</acronym> que la acompaña. No se soportará
+                ninguna otra interpretación de <acronym class="acronym">RSS</acronym> 2.0, aunque pueden permitirse excepciones
+                cuando no impidan directamente la aplicación de los dos documentos mencionados
+                anteriormente.
+            </p></td></tr>
+</table></div>
+<p>
+            Por supuesto, no vivimos en un mundo ideal, por lo que puede haber ocasiones en las que la
+            <acronym class="acronym">API</acronym> simplemente no cubra lo que está buscando. Para ayudarle,
+            <code class="classname">Zend_Feed_Reader</code> ofrece un sistema de plugins que
+            le permite escribir Extensiones para ampliar la <acronym class="acronym">API</acronym> del núcleo y cubrir cualquier
+            dato adicional que esté tratando de extraer de los feeds. Si escribir
+            otra Extensión resulta demasiado complicado, puede simplemente tomar los
+            objetos <acronym class="acronym">DOM</acronym> o XPath subyacentes y hacerlo manualmente en su
+            aplicación. Por supuesto, realmente le animamos a escribir una Extensión
+            simplemente para hacerla más portable y reutilizable, y las Extensiones útiles pueden proponerse
+            al Framework para su incorporación formal.
+        </p>
+<p>
+            He aquí un resumen de la <acronym class="acronym">API</acronym> del núcleo para Feeds. Debe tener en cuenta que
+            comprende no solo los estándares básicos de <acronym class="acronym">RSS</acronym> y Atom, sino que también
+            tiene en cuenta una serie de Extensiones incluidas junto con
+            <code class="classname">Zend_Feed_Reader</code>. La nomenclatura de estos
+            métodos provenientes de Extensiones sigue siendo bastante genérica: todos los métodos de las Extensiones
+            operan al mismo nivel que la <acronym class="acronym">API</acronym> del núcleo, aunque le permitimos
+            recuperar cualquier objeto de Extensión específico por separado si es necesario.
+        </p>
+<div class="table">
+<a name="id1793"></a><p class="title"><b>Tabla 33.1. Métodos de la API a nivel de Feed</b></p>
+<div class="table-contents"><table class="table" summary="Feed Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">getId()</code></td>
+<td>Devuelve un ID único asociado con este feed</td>
+</tr>
+<tr>
+<td><code class="methodname">getTitle()</code></td>
+<td>Devuelve el título del feed</td>
+</tr>
+<tr>
+<td><code class="methodname">getDescription()</code></td>
+<td>Devuelve la descripción de texto del feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">getLink()</code></td>
+<td>
+                            Devuelve una <acronym class="acronym">URI</acronym> al sitio web <acronym class="acronym">HTML</acronym>
+                            que contiene la misma información o similar
+                            a este feed (es decir, si el feed proviene de un blog,
+                            debería proporcionar la <acronym class="acronym">URI</acronym> del blog donde
+                            se puede leer la versión <acronym class="acronym">HTML</acronym> de las entradas).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getFeedLink()</code></td>
+<td>
+                            Devuelve la <acronym class="acronym">URI</acronym> de este feed, que puede ser la
+                            misma <acronym class="acronym">URI</acronym> usada para importar el feed. Hay
+                            casos importantes en los que el enlace del feed puede diferir porque la <acronym class="acronym">URI</acronym>
+                            de origen se está actualizando y se pretende eliminarla en
+                            el futuro.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getAuthors()</code></td>
+<td>
+                            Devuelve un objeto de tipo
+                            <code class="classname">Zend_Feed_Reader_Collection_Author</code>, que es un
+                            <code class="classname">ArrayObject</code> cuyos elementos son cada uno arrays simples
+                            que contienen cualquier combinación de las claves "name", "email" y "uri". Cuando
+                            no sean relevantes para los datos de origen, algunas de estas claves pueden omitirse.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getAuthor(integer $index = 0)</code></td>
+<td>
+                            Devuelve el primer autor conocido, o con el
+                            parámetro opcional <code class="varname">$index</code> cualquier índice
+                            específico del array de Authors descrito anteriormente (devolviendo
+                            <code class="constant">NULL</code> si el índice no es válido).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getDateCreated()</code></td>
+<td>
+                            Devuelve la fecha en la que se creó este feed. Generalmente
+                            solo aplica a Atom, donde representa la fecha en que se creó el recurso
+                            descrito por un documento Atom 1.0. La fecha devuelta
+                            será un objeto <code class="classname">Zend_Date</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getDateModified()</code></td>
+<td>
+                            Devuelve la fecha en la que este feed se modificó por última vez. La fecha devuelta
+                            será un objeto <code class="classname">Zend_Date</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getLastBuildDate()</code></td>
+<td>
+                            Devuelve la fecha en la que este feed se construyó por última vez. La fecha devuelta
+                            será un objeto <code class="classname">Zend_Date</code>. Esto solo es
+                            compatible con <acronym class="acronym">RSS</acronym>: los feeds Atom siempre devolverán
+                            <code class="constant">NULL</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getLanguage()</code></td>
+<td>
+                            Devuelve el idioma del feed (si está definido) o simplemente el
+                            idioma indicado en el documento <acronym class="acronym">XML</acronym>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getGenerator()</code></td>
+<td>
+                            Devuelve el generador del feed, por ejemplo, el software que
+                            lo generó. Esto puede diferir entre <acronym class="acronym">RSS</acronym> y Atom
+                            ya que Atom define una notación distinta.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getCopyright()</code></td>
+<td>Devuelve cualquier aviso de copyright asociado con el feed.</td>
+</tr>
+<tr>
+<td><code class="methodname">getHubs()</code></td>
+<td>
+                            Devuelve un array de todos los endpoints <acronym class="acronym">URI</acronym> de servidores Hub
+                            anunciados por el feed para su uso con el Protocolo
+                            Pubsubhubbub, permitiendo suscripciones al feed para actualizaciones en tiempo real.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getCategories()</code></td>
+<td>
+                            Devuelve un objeto <code class="classname">Zend_Feed_Reader_Collection_Category</code>
+                            que contiene los detalles de las categorías asociadas con el
+                            feed general. Los campos soportados incluyen "term" (el nombre de categoría legible
+                            por máquina), "scheme" (el esquema de categorización y dominio para esta
+                            categoría), y "label" (un nombre de categoría legible por humanos, decodificado de
+                            <acronym class="acronym">HTML</acronym>). Cuando cualquiera de los tres campos está ausente,
+                            se establecen al valor alternativo más cercano disponible o, en el caso
+                            de "scheme", se establece en <code class="constant">NULL</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getImage()</code></td>
+<td>
+                            Devuelve un array que contiene datos relacionados con cualquier imagen o logo del feed,
+                            o <code class="constant">NULL</code> si no se encuentra ninguna imagen. El array resultante puede
+                            contener las siguientes claves: <span class="property">uri</span>,
+                            <span class="property">link</span>, <span class="property">title</span>,
+                            <span class="property">description</span>, <span class="property">height</span>, y
+                            <span class="property">width</span>. Los logos de Atom solo contienen una
+                            <acronym class="acronym">URI</acronym>, por lo que el resto de los metadatos se toman
+                            únicamente de feeds <acronym class="acronym">RSS</acronym>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Dada la variedad de feeds existentes, algunos de estos métodos
+            sin duda devolverán <code class="constant">NULL</code>, indicando que la información relevante
+            no pudo localizarse. Cuando sea posible, <code class="classname">Zend_Feed_Reader</code>
+            recurrirá a elementos alternativos durante su búsqueda. Por
+            ejemplo, buscar una fecha de modificación en un feed <acronym class="acronym">RSS</acronym> es más
+            complicado de lo que parece. Los feeds <acronym class="acronym">RSS</acronym> 2.0 deberían incluir una
+            etiqueta <span class="command"><strong>&lt;lastBuildDate&gt;</strong></span> y (o) un
+            elemento <span class="command"><strong>&lt;pubDate&gt;</strong></span>. Pero ¿qué ocurre si no lo hace, tal vez
+            se trate de un feed <acronym class="acronym">RSS</acronym> 1.0? Quizás en su lugar tenga un
+            elemento <span class="command"><strong>&lt;atom:updated&gt;</strong></span> con información idéntica
+            (Atom puede usarse para complementar la sintaxis de <acronym class="acronym">RSS</acronym>). De no ser así,
+            podríamos simplemente mirar las entradas, elegir la más reciente y usar su
+            elemento <span class="command"><strong>&lt;pubDate&gt;</strong></span>. Suponiendo que exista... Muchos
+            feeds también usan elementos <span class="command"><strong>&lt;dc:date&gt;</strong></span> de Dublin Core 1.0 o 1.1
+            para feeds y entradas. O podríamos encontrar a Atom acechando de nuevo.
+        </p>
+<p>
+            El punto es que <code class="classname">Zend_Feed_Reader</code> fue diseñado
+            para saber esto. Cuando solicita la fecha de modificación (o cualquier
+            otra cosa), buscará todas estas alternativas hasta que
+            se rinda y devuelva <code class="constant">NULL</code>, o encuentre una
+            alternativa que debería tener la respuesta correcta.
+        </p>
+<p>
+            Además de los métodos anteriores, todos los objetos Feed implementan métodos
+            para recuperar los objetos <acronym class="acronym">DOM</acronym> y XPath de los feeds actuales, según se
+            describió anteriormente. Los objetos Feed también implementan las interfaces <acronym class="acronym">SPL</acronym> Iterator y
+            Countable. La <acronym class="acronym">API</acronym> extendida se resume a continuación.
+        </p>
+<div class="table">
+<a name="id1794"></a><p class="title"><b>Tabla 33.2. Métodos de la API extendida a nivel de Feed</b></p>
+<div class="table-contents"><table class="table" summary="Extended Feed Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">getDomDocument()</code></td>
+<td>
+                            Devuelve el objeto DOMDocument padre para todo el
+                            documento <acronym class="acronym">XML</acronym> de origen
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getElement()</code></td>
+<td>
+                            Devuelve el objeto DOMElement de nivel de feed actual
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">saveXml()</code></td>
+<td>
+                            Devuelve una cadena que contiene un documento <acronym class="acronym">XML</acronym> del
+                            elemento del feed completo (esto no es el documento
+                            original sino una versión reconstruida)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getXpath()</code></td>
+<td>
+                            Devuelve el objeto DOMXPath usado internamente para ejecutar consultas sobre el
+                            objeto DOMDocument (esto incluye espacios de nombres del núcleo y de las Extensiones
+                            preregistrados)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getXpathPrefix()</code></td>
+<td>
+                            Devuelve el prefijo de ruta <acronym class="acronym">DOM</acronym> válido antepuesto
+                            a todas las consultas XPath que coinciden con el feed consultado
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getEncoding()</code></td>
+<td>
+                            Devuelve la codificación del documento <acronym class="acronym">XML</acronym> de origen
+                            (nota: esto no puede tener en cuenta errores como que el
+                            servidor envíe documentos en una codificación diferente). Cuando no está
+                            definida, se aplica la codificación <acronym class="acronym">UTF-8</acronym> predeterminada de Unicode.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">count()</code></td>
+<td>
+                            Devuelve un recuento de las entradas o items que contiene este feed
+                            (implementa la interfaz <acronym class="acronym">SPL</acronym> <code class="classname">Countable</code>)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">current()</code></td>
+<td>
+                            Devuelve la entrada actual (usando el índice actual
+                            de <code class="methodname">key()</code>)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">key()</code></td>
+<td>Devuelve el índice de la entrada actual</td>
+</tr>
+<tr>
+<td><code class="methodname">next()</code></td>
+<td>Incrementa el valor del índice de entrada en uno</td>
+</tr>
+<tr>
+<td><code class="methodname">rewind()</code></td>
+<td>Reinicia el índice de entrada a 0</td>
+</tr>
+<tr>
+<td><code class="methodname">valid()</code></td>
+<td>
+                            Comprueba que el índice de la entrada actual sea válido, es decir,
+                            que no sea inferior a 0 y no exceda el número
+                            de entradas existentes.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getExtensions()</code></td>
+<td>
+                            Devuelve un array de todos los objetos de Extensión cargados para
+                            el feed actual (nota: existen tanto Extensiones a nivel de feed como a nivel de entrada,
+                            y aquí solo se devuelven las Extensiones a nivel de feed).
+                            Las claves del array tienen la forma {ExtensionName}_Feed.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getExtension(string $name)</code></td>
+<td>
+                            Devuelve un objeto de Extensión para el feed registrado bajo el
+                            nombre proporcionado. Esto permite un acceso más detallado a
+                            las Extensiones que de otro modo podrían estar ocultas dentro de la implementación
+                            de los métodos estándar de la <acronym class="acronym">API</acronym>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getType()</code></td>
+<td>
+                            Devuelve una constante estática de la clase (por ejemplo,
+                            <code class="constant">Zend_Feed_Reader::TYPE_ATOM_03</code>,
+                            es decir, Atom 0.3) que indica exactamente qué tipo de feed
+                            se está consumiendo.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.entry"></a>33.9.8. Recuperando información de Entry/Item</h3></div></div></div>
+<p>
+            Recuperar información de entradas o items específicos (dependiendo de
+            si habla de Atom o de <acronym class="acronym">RSS</acronym>) es idéntico a los datos a nivel de feed.
+            Acceder a las entradas es simplemente cuestión de iterar sobre un objeto Feed
+            o usar la interfaz <acronym class="acronym">SPL</acronym> <code class="classname">Iterator</code> que implementan los objetos Feed
+            y llamar al método apropiado en cada uno.
+        </p>
+<div class="table">
+<a name="id1795"></a><p class="title"><b>Tabla 33.3. Métodos de la API a nivel de Entry</b></p>
+<div class="table-contents"><table class="table" summary="Entry Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">getId()</code></td>
+<td>Devuelve un ID único para la entrada actual.</td>
+</tr>
+<tr>
+<td><code class="methodname">getTitle()</code></td>
+<td>Devuelve el título de la entrada actual.</td>
+</tr>
+<tr>
+<td><code class="methodname">getDescription()</code></td>
+<td>Devuelve una descripción de la entrada actual.</td>
+</tr>
+<tr>
+<td><code class="methodname">getLink()</code></td>
+<td>
+                            Devuelve una <acronym class="acronym">URI</acronym> a la versión <acronym class="acronym">HTML</acronym>
+                            de la entrada actual.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getPermaLink()</code></td>
+<td>
+                            Devuelve el enlace permanente a la entrada actual. En la mayoría de los casos,
+                            es lo mismo que usar <code class="methodname">getLink()</code>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getAuthors()</code></td>
+<td>
+                            Devuelve un objeto de tipo
+                            <code class="classname">Zend_Feed_Reader_Collection_Author</code>, que es un
+                            <code class="classname">ArrayObject</code> cuyos elementos son cada uno arrays simples
+                            que contienen cualquier combinación de las claves "name", "email" y "uri". Cuando
+                            no sean relevantes para los datos de origen, algunas de estas claves pueden omitirse.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getAuthor(integer $index = 0)</code></td>
+<td>
+                            Devuelve el primer autor conocido, o con el
+                            parámetro opcional <code class="varname">$index</code> cualquier índice
+                            específico del array de Authors descrito anteriormente (devolviendo
+                            <code class="constant">NULL</code> si el índice no es válido).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getDateCreated()</code></td>
+<td>
+                            Devuelve la fecha en la que se creó la entrada
+                            actual. Generalmente solo aplica a Atom, donde
+                            representa la fecha en que se creó el recurso descrito por un
+                            documento Atom 1.0.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getDateModified()</code></td>
+<td>
+                            Devuelve la fecha en que la entrada actual se modificó
+                            por última vez
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getContent()</code></td>
+<td>
+                            Devuelve el contenido de la entrada actual (con cualquier
+                            entidad revertida si es posible, suponiendo que el tipo de contenido sea
+                            <acronym class="acronym">HTML</acronym>). Se devuelve la descripción si no existe
+                            un elemento de contenido separado.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getEnclosure()</code></td>
+<td>
+                            Devuelve un array que contiene el valor de todos los
+                            atributos de un elemento &lt;enclosure&gt; multimedia, incluyendo
+                            como claves del array: <span class="emphasis"><em>url</em></span>,
+                            <span class="emphasis"><em>length</em></span>, <span class="emphasis"><em>type</em></span>.
+                            De acuerdo con el Perfil de Mejores Prácticas de <acronym class="acronym">RSS</acronym> de
+                            la RSS Advisory Board, no se ofrece soporte para
+                            múltiples enclosures, ya que dicho soporte no forma parte de la
+                            especificación de <acronym class="acronym">RSS</acronym>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getCommentCount()</code></td>
+<td>
+                            Devuelve el número de comentarios realizados en esta entrada en el
+                            momento en que se generó el feed por última vez
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getCommentLink()</code></td>
+<td>
+                            Devuelve una <acronym class="acronym">URI</acronym> que apunta a la página <acronym class="acronym">HTML</acronym>
+                            donde se pueden hacer comentarios sobre esta entrada
+                        </td>
+</tr>
+<tr>
+<td>
+                            <code class="methodname">getCommentFeedLink([string $type =
+                                'atom'|'rss'])</code>
+                        </td>
+<td>
+                            Devuelve una <acronym class="acronym">URI</acronym> que apunta a un feed del tipo indicado
+                            que contiene todos los comentarios de esta entrada (el tipo por defecto es
+                            Atom/<acronym class="acronym">RSS</acronym> según el tipo de feed actual).
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getCategories()</code></td>
+<td>
+                            Devuelve un objeto <code class="classname">Zend_Feed_Reader_Collection_Category</code>
+                            que contiene los detalles de las categorías asociadas con la
+                            entrada. Los campos soportados incluyen "term" (el nombre de categoría legible
+                            por máquina), "scheme" (el esquema de categorización y dominio para esta
+                            categoría), y "label" (un nombre de categoría legible por humanos, decodificado de
+                            <acronym class="acronym">HTML</acronym>). Cuando cualquiera de los tres campos está ausente,
+                            se establecen al valor alternativo más cercano disponible o, en el caso
+                            de "scheme", se establece en <code class="constant">NULL</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            La <acronym class="acronym">API</acronym> extendida para entradas es idéntica a la de los feeds, con la
+            excepción de los métodos del Iterator, que no son necesarios aquí.
+        </p>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
+<th align="left">Precaución</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                A menudo existe confusión sobre los conceptos de fechas de modificación y de
+                creación. En Atom, se trata de dos conceptos claramente definidos
+                (así que no se preocupe), pero en <acronym class="acronym">RSS</acronym> son vagos.
+                <acronym class="acronym">RSS</acronym> 2.0
+                define un único elemento <span class="emphasis"><em>&lt;pubDate&gt;</em></span>
+                que típicamente se refiere a la fecha en que se publicó esta entrada,
+                es decir, una especie de fecha de creación. Esto no siempre es así, y
+                puede cambiar con actualizaciones o no. Como resultado, si realmente
+                desea comprobar si una entrada ha cambiado, no confíe en los
+                resultados de <code class="methodname">getDateModified()</code>. En su lugar,
+                considere rastrear el hash <acronym class="acronym">MD5</acronym> de tres elementos
+                concatenados, por ejemplo, usando <code class="methodname">getTitle()</code>,
+                <code class="methodname">getDescription()</code> y
+                <code class="methodname">getContent()</code>. Si la entrada realmente fue
+                actualizada, este cálculo de hash dará un resultado distinto al de
+                los hashes guardados previamente para la misma entrada. Esto está obviamente
+                orientado al contenido, y no ayudará a detectar cambios en otros
+                elementos relevantes. Los feeds Atom no deberían requerir estos pasos.
+            </p>
+<p>
+                Para complicar aún más las cosas,
+                las fechas en los feeds pueden seguir diferentes estándares. Las fechas de Atom y
+                de Dublin Core deberían seguir <acronym class="acronym">ISO</acronym> 8601,
+                y las fechas de <acronym class="acronym">RSS</acronym> deberían
+                seguir <acronym class="acronym">RFC</acronym> 822 o <acronym class="acronym">RFC</acronym> 2822,
+                lo cual también es común. Los métodos de fecha
+                lanzarán una excepción si <code class="classname">Zend_Date</code>
+                no puede cargar la cadena de fecha usando uno de los estándares anteriores, o las
+                posibilidades reconocidas por <acronym class="acronym">PHP</acronym> para las fechas de <acronym class="acronym">RSS</acronym>.
+            </p>
+</td></tr>
+</table></div>
+<div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Advertencia</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los valores devueltos por estos métodos no se validan. Esto
+                significa que los usuarios deben realizar validación sobre todos los datos recuperados,
+                incluido el filtrado de cualquier <acronym class="acronym">HTML</acronym>, como el proveniente de
+                <code class="methodname">getContent()</code>, antes de que sea generado como salida por su
+                aplicación. Recuerde que la mayoría de los feeds provienen de fuentes
+                externas y, por lo tanto, la suposición predeterminada debería ser que
+                no se puede confiar en ellos.
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="id1796"></a><p class="title"><b>Tabla 33.4. Métodos de la API extendida a nivel de Entry</b></p>
+<div class="table-contents"><table class="table" summary="Extended Entry Level API Methods" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><code class="methodname">getDomDocument()</code></td>
+<td>
+                            Devuelve el objeto DOMDocument padre para todo
+                            el feed (no solo la entrada actual)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getElement()</code></td>
+<td>
+                            Devuelve el objeto DOMElement de nivel de entrada actual
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getXpath()</code></td>
+<td>
+                            Devuelve el objeto DOMXPath usado internamente para ejecutar consultas sobre el
+                            objeto DOMDocument (esto incluye espacios de nombres del núcleo y de las Extensiones
+                            preregistrados)
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getXpathPrefix()</code></td>
+<td>
+                            Devuelve el prefijo de ruta <acronym class="acronym">DOM</acronym> válido antepuesto
+                            a todas las consultas XPath que coinciden con la entrada consultada
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getEncoding()</code></td>
+<td>
+                            Devuelve la codificación del documento <acronym class="acronym">XML</acronym> de origen
+                            (nota: esto no puede tener en cuenta errores como que el servidor envíe
+                            documentos en una codificación diferente). La codificación predeterminada aplicada
+                            en ausencia de cualquier otra es la codificación <acronym class="acronym">UTF-8</acronym> de
+                            Unicode.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getExtensions()</code></td>
+<td>
+                            Devuelve un array de todos los objetos de Extensión cargados para
+                            la entrada actual (nota: existen tanto Extensiones a nivel de feed como a nivel de
+                            entrada, y aquí solo se devuelven las Extensiones a nivel de entrada). Las claves del
+                            array tienen la forma {ExtensionName}_Entry.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getExtension(string $name)</code></td>
+<td>
+                            Devuelve un objeto de Extensión para la entrada registrada bajo el
+                            nombre proporcionado. Esto permite un acceso más detallado a
+                            las Extensiones que de otro modo podrían estar ocultas dentro de la implementación
+                            de los métodos estándar de la <acronym class="acronym">API</acronym>.
+                        </td>
+</tr>
+<tr>
+<td><code class="methodname">getType()</code></td>
+<td>
+                            Devuelve una constante estática de la clase (por ejemplo,
+                            <code class="constant">Zend_Feed_Reader::TYPE_ATOM_03</code>,
+                            es decir, Atom 0.3) que indica exactamente qué tipo
+                            de feed se está consumiendo.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.reader.extending"></a>33.9.9. Extendiendo las APIs de Feed y Entry</h3></div></div></div>
+<p>
+            Extender <code class="classname">Zend_Feed_Reader</code> le permite añadir
+            métodos tanto a nivel de feed como de entrada que cubran la recuperación
+            de información no soportada aún por
+            <code class="classname">Zend_Feed_Reader</code>. Dado el número de
+            extensiones de <acronym class="acronym">RSS</acronym> y
+            Atom que existen, esto es algo bueno ya que
+            <code class="classname">Zend_Feed_Reader</code> no podría posiblemente añadir
+            todo.
+        </p>
+<p>
+            Existen dos tipos posibles de Extensiones: aquellas que recuperan
+            información de elementos que son hijos inmediatos del elemento
+            raíz (por ejemplo, <span class="command"><strong>&lt;channel&gt;</strong></span> para <acronym class="acronym">RSS</acronym> o
+            <span class="command"><strong>&lt;feed&gt;</strong></span> para Atom) y aquellas que recuperan
+            información de elementos hijos de una entrada (por ejemplo,
+            <span class="command"><strong>&lt;item&gt;</strong></span> para <acronym class="acronym">RSS</acronym> o
+            <span class="command"><strong>&lt;entry&gt;</strong></span> para Atom). En el sistema de archivos, estas se agrupan como
+            clases dentro de un espacio de nombres basado en el nombre del estándar de la extensión. Por ejemplo,
+            internamente tenemos las clases <code class="classname">Zend_Feed_Reader_Extension_DublinCore_Feed</code>
+            y <code class="classname">Zend_Feed_Reader_Extension_DublinCore_Entry</code>,
+            que son dos Extensiones que implementan el soporte de Dublin Core
+            1.0 y 1.1.
+        </p>
+<p>
+            Las Extensiones se cargan en <code class="classname">Zend_Feed_Reader</code>
+            usando <code class="classname">Zend_Loader_PluginLoader</code>, por lo que su funcionamiento
+            le resultará familiar por otros componentes de Zend Framework.
+            <code class="classname">Zend_Feed_Reader</code> ya incluye varias
+            de estas Extensiones; sin embargo, aquellas que no se usan internamente ni se
+            registran de forma predeterminada (las llamadas Extensiones del núcleo) deben registrarse
+            en <code class="classname">Zend_Feed_Reader</code> antes de usarse. Las
+            Extensiones incluidas son:
+        </p>
+<div class="table">
+<a name="id1797"></a><p class="title"><b>Tabla 33.5. Extensiones del núcleo (preregistradas)</b></p>
+<div class="table-contents"><table class="table" summary="Core Extensions (pre-registered)" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td>DublinCore (Feed y Entry)</td>
+<td>
+                            Implementa el soporte para Dublin Core Metadata Element Set 1.0 y 1.1
+                        </td>
+</tr>
+<tr>
+<td>Content (solo Entry)</td>
+<td>Implementa el soporte para Content 1.0</td>
+</tr>
+<tr>
+<td>Atom (Feed y Entry)</td>
+<td>Implementa el soporte para Atom 0.3 y Atom 1.0</td>
+</tr>
+<tr>
+<td>Slash</td>
+<td>
+                            Implementa el soporte para el módulo Slash de <acronym class="acronym">RSS</acronym> 1.0
+                        </td>
+</tr>
+<tr>
+<td>WellFormedWeb</td>
+<td>Implementa el soporte para Well Formed Web CommentAPI 1.0</td>
+</tr>
+<tr>
+<td>Thread</td>
+<td>
+                            Implementa el soporte para las Atom Threading Extensions descritas
+                            en <acronym class="acronym">RFC</acronym> 4685
+                        </td>
+</tr>
+<tr>
+<td>Podcast</td>
+<td>
+                            Implementa el soporte para la <code class="constant">DTD</code> Podcast 1.0 de
+                            Apple
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Las Extensiones del núcleo son algo especiales ya que son extremadamente
+            comunes y multifacéticas. Por ejemplo, tenemos una Extensión del núcleo para Atom.
+            Atom se implementa como una Extensión (no solo como una clase base) porque
+            también funciona como un módulo <acronym class="acronym">RSS</acronym> válido: se pueden insertar
+            elementos de Atom en feeds <acronym class="acronym">RSS</acronym>. Incluso he visto
+            feeds <acronym class="acronym">RDF</acronym> que usan mucho Atom en lugar de Extensiones
+            más comunes como Dublin Core.
+        </p>
+<div class="table">
+<a name="id1798"></a><p class="title"><b>Tabla 33.6. Extensiones no incluidas en el núcleo (deben registrarse manualmente)</b></p>
+<div class="table-contents"><table class="table" summary="Non-Core Extensions (must register manually)" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td>Syndication</td>
+<td>
+                            Implementa el soporte de Syndication 1.0 para feeds <acronym class="acronym">RSS</acronym>
+                        </td>
+</tr>
+<tr>
+<td>CreativeCommons</td>
+<td>
+                            Un módulo de <acronym class="acronym">RSS</acronym> que añade un elemento a nivel de
+                            &lt;channel&gt; o &lt;item&gt; que especifica qué licencia de Creative
+                            Commons aplica.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Las Extensiones adicionales que no son del núcleo se ofrecen pero no se registran en
+            <code class="classname">Zend_Feed_Reader</code> de forma predeterminada. Si desea
+            usarlas, deberá indicar a
+            <code class="classname">Zend_Feed_Reader</code> que las cargue antes de
+            importar un feed. Se incluirán Extensiones adicionales que no son del núcleo
+            en futuras iteraciones del componente.
+        </p>
+<p>
+            Registrar una Extensión con
+            <code class="classname">Zend_Feed_Reader</code>, de modo que se cargue y su <acronym class="acronym">API</acronym>
+            esté disponible para los objetos Feed y Entry, es algo sencillo usando el
+            <code class="classname">Zend_Loader_PluginLoader</code>. Aquí registramos
+            la Extensión opcional Slash, y descubrimos que puede llamarse directamente
+            desde la <acronym class="acronym">API</acronym> de nivel de Entry sin ningún esfuerzo. Tenga en cuenta que
+            los nombres de las Extensiones distinguen entre mayúsculas y minúsculas y usan camel case para
+            términos múltiples.
+        </p>
+<pre class="programlisting">
+Zend_Feed_Reader::registerExtension('Syndication');
+$feed = Zend_Feed_Reader::import('http://rss.slashdot.org/Slashdot/slashdot');
+$updatePeriod = $feed-&gt;current()-&gt;getUpdatePeriod();
+</pre>
+<p>
+            En el sencillo ejemplo anterior, comprobamos con qué frecuencia se actualiza un feed
+            usando el método <code class="methodname">getUpdatePeriod()</code>.
+            Dado que no forma parte de la <acronym class="acronym">API</acronym> del núcleo de
+            <code class="classname">Zend_Feed_Reader</code>, solo podía tratarse de
+            un método soportado por la recién registrada Extensión Syndication.
+        </p>
+<p>
+            Como también puede notar, los nuevos métodos de las Extensiones son accesibles desde la <acronym class="acronym">API</acronym>
+            principal usando los métodos mágicos de <acronym class="acronym">PHP</acronym>. Como alternativa,
+            también puede acceder directamente a cualquier objeto de Extensión con un resultado similar, como se ve a continuación.
+        </p>
+<pre class="programlisting">
+Zend_Feed_Reader::registerExtension('Syndication');
+$feed = Zend_Feed_Reader::import('http://rss.slashdot.org/Slashdot/slashdot');
+$syndication = $feed-&gt;getExtension('Syndication');
+$updatePeriod = $syndication-&gt;getUpdatePeriod();
+</pre>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.reader.extending.feed"></a>33.9.9.1. Escribiendo Extensiones de Zend_Feed_Reader</h4></div></div></div>
+<p>
+                Inevitablemente, habrá ocasiones en las que la
+                <acronym class="acronym">API</acronym> de <code class="classname">Zend_Feed_Reader</code> no sea capaz
+                de obtener algo que necesita de un feed o una entrada. Puede usar
+                los objetos de origen subyacentes, como DOMDocument, para obtenerlos manualmente; sin embargo,
+                hay un método más reutilizable disponible escribiendo Extensiones
+                que soporten estas nuevas consultas.
+            </p>
+<p>
+                Como ejemplo, tomemos el caso de una corporación puramente ficticia
+                llamada Jungle Books. Jungle Books ha estado
+                publicando muchas reseñas de los libros que vende (procedentes de fuentes
+                externas y clientes), distribuidas como un feed <acronym class="acronym">RSS</acronym> 2.0.
+                Su departamento de marketing se da cuenta de que las aplicaciones web
+                que usan este feed no pueden actualmente averiguar exactamente qué libro se
+                está reseñando. Para facilitarle la vida a todos, determinan
+                que el departamento técnico necesita extender <acronym class="acronym">RSS</acronym> 2.0 para incluir un
+                nuevo elemento por entrada que proporcione el número
+                <acronym class="acronym">ISBN</acronym>-10 o <acronym class="acronym">ISBN</acronym>-13 de
+                la publicación a la que se refiere la entrada. Definen el nuevo
+                elemento <span class="command"><strong>&lt;isbn&gt;</strong></span> de manera bastante simple con un nombre estándar
+                y una <acronym class="acronym">URI</acronym> de espacio de nombres:
+            </p>
+<pre class="programlisting">
+JungleBooks 1.0:
+http://example.com/junglebooks/rss/module/1.0/
+</pre>
+<p>
+                Un fragmento de <acronym class="acronym">RSS</acronym> que contiene esta extensión en la práctica podría ser
+                algo similar a:
+            </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;rss version="2.0"
+   xmlns:content="http://purl.org/rss/1.0/modules/content/"
+   xmlns:jungle="http://example.com/junglebooks/rss/module/1.0/"&gt;
+&lt;channel&gt;
+    &lt;title&gt;Jungle Books Customer Reviews&lt;/title&gt;
+    &lt;link&gt;http://example.com/junglebooks&lt;/link&gt;
+    &lt;description&gt;Many book reviews!&lt;/description&gt;
+    &lt;pubDate&gt;Fri, 26 Jun 2009 19:15:10 GMT&lt;/pubDate&gt;
+    &lt;jungle:dayPopular&gt;
+        http://example.com/junglebooks/book/938
+    &lt;/jungle:dayPopular&gt;
+    &lt;item&gt;
+        &lt;title&gt;Review Of Flatland: A Romance of Many Dimensions&lt;/title&gt;
+        &lt;link&gt;http://example.com/junglebooks/review/987&lt;/link&gt;
+        &lt;author&gt;Confused Physics Student&lt;/author&gt;
+        &lt;content:encoded&gt;
+        A romantic square?!
+        &lt;/content:encoded&gt;
+        &lt;pubDate&gt;Thu, 25 Jun 2009 20:03:28 -0700&lt;/pubDate&gt;
+        &lt;jungle:isbn&gt;048627263X&lt;/jungle:isbn&gt;
+    &lt;/item&gt;
+&lt;/channel&gt;
+&lt;/rss&gt;
+</pre>
+<p>
+                Implementar este nuevo elemento <acronym class="acronym">ISBN</acronym> como una simple extensión
+                a nivel de entrada requeriría la siguiente clase (usando su propio espacio de nombres
+                de clase fuera de Zend).
+            </p>
+<pre class="programlisting">
+class My_FeedReader_Extension_JungleBooks_Entry
+    extends Zend_Feed_Reader_Extension_EntryAbstract
+{
+    public function getIsbn()
+    {
+        if (isset($this-&gt;_data['isbn'])) {
+            return $this-&gt;_data['isbn'];
+        }
+        $isbn = $this-&gt;_xpath-&gt;evaluate(
+            'string(' . $this-&gt;getXpathPrefix() . '/jungle:isbn)'
+        );
+        if (!$isbn) {
+            $isbn = null;
+        }
+        $this-&gt;_data['isbn'] = $isbn;
+        return $this-&gt;_data['isbn'];
+    }
+
+    protected function _registerNamespaces()
+    {
+        $this-&gt;_xpath-&gt;registerNamespace(
+            'jungle', 'http://example.com/junglebooks/rss/module/1.0/'
+        );
+    }
+}
+</pre>
+<p>
+                Esta extensión es bastante fácil de seguir. Crea un nuevo método
+                <code class="methodname">getIsbn()</code> que ejecuta una consulta XPath sobre
+                la entrada actual para extraer el número <acronym class="acronym">ISBN</acronym> incluido en el
+                elemento <span class="command"><strong>&lt;jungle:isbn&gt;</strong></span>. Opcionalmente puede
+                almacenarlo en la caché interna no persistente (no es necesario seguir
+                consultando el <acronym class="acronym">DOM</acronym> si se vuelve a llamar en la misma entrada). El
+                valor se devuelve a quien lo llama. Al final tenemos un método
+                protegido (es abstracto, por lo que debe existir) que registra el
+                espacio de nombres de Jungle Books para su módulo <acronym class="acronym">RSS</acronym> personalizado. Aunque lo
+                llamemos un módulo <acronym class="acronym">RSS</acronym>, no hay nada que impida que el mismo
+                elemento se use en feeds Atom, y todas las Extensiones que usan
+                el prefijo proporcionado por <code class="methodname">getXpathPrefix()</code>
+                son en realidad neutrales y funcionan tanto en feeds <acronym class="acronym">RSS</acronym> como Atom sin
+                código adicional.
+            </p>
+<p>
+                Dado que esta Extensión se almacena fuera de Zend Framework, deberá
+                registrar la ruta de prefijo para sus Extensiones de modo que
+                <code class="classname">Zend_Loader_PluginLoader</code> pueda encontrarlas.
+                Después de eso, simplemente hay que registrar la Extensión,
+                si aún no está cargada, y usarla en la práctica.
+            </p>
+<pre class="programlisting">
+if(!Zend_Feed_Reader::isRegistered('JungleBooks')) {
+    Zend_Feed_Reader::addPrefixPath(
+        'My_FeedReader_Extension', '/path/to/My/FeedReader/Extension'
+    );
+    Zend_Feed_Reader::registerExtension('JungleBooks');
+}
+$feed = Zend_Feed_Reader::import('http://example.com/junglebooks/rss');
+
+// ISBN for whatever book the first entry in the feed was concerned with
+$firstIsbn = $feed-&gt;current()-&gt;getIsbn();
+</pre>
+<p>
+                Escribir una Extensión a nivel de feed no es muy diferente. El
+                feed de ejemplo anterior incluía un elemento
+                <span class="command"><strong>&lt;jungle:dayPopular&gt;</strong></span> sin mencionar, que Jungle
+                Books ha añadido a su estándar para incluir un enlace al
+                libro más popular del día (en términos de tráfico de visitantes). Aquí
+                hay una Extensión que añade un método
+                <code class="methodname">getDaysPopularBookLink()</code> a la
+                <acronym class="acronym">API</acronym> a nivel de feed.
+            </p>
+<pre class="programlisting">
+class My_FeedReader_Extension_JungleBooks_Feed
+    extends Zend_Feed_Reader_Extension_FeedAbstract
+{
+    public function getDaysPopularBookLink()
+    {
+        if (isset($this-&gt;_data['dayPopular'])) {
+            return $this-&gt;_data['dayPopular'];
+        }
+        $dayPopular = $this-&gt;_xpath-&gt;evaluate(
+            'string(' . $this-&gt;getXpathPrefix() . '/jungle:dayPopular)'
+        );
+        if (!$dayPopular) {
+            $dayPopular = null;
+        }
+        $this-&gt;_data['dayPopular'] = $dayPopular;
+        return $this-&gt;_data['dayPopular'];
+    }
+
+    protected function _registerNamespaces()
+    {
+        $this-&gt;_xpath-&gt;registerNamespace(
+            'jungle', 'http://example.com/junglebooks/rss/module/1.0/'
+        );
+    }
+}
+</pre>
+<p>
+                Repitamos el último ejemplo usando una Extensión personalizada para mostrar el
+                método en uso.
+            </p>
+<pre class="programlisting">
+if(!Zend_Feed_Reader::isRegistered('JungleBooks')) {
+    Zend_Feed_Reader::addPrefixPath(
+        'My_FeedReader_Extension', '/path/to/My/FeedReader/Extension'
+    );
+    Zend_Feed_Reader::registerExtension('JungleBooks');
+}
+$feed = Zend_Feed_Reader::import('http://example.com/junglebooks/rss');
+
+// URI to the information page of the day's most popular book with visitors
+$daysPopularBookLink = $feed-&gt;getDaysPopularBookLink();
+
+// ISBN for whatever book the first entry in the feed was concerned with
+$firstIsbn = $feed-&gt;current()-&gt;getIsbn();
+</pre>
+<p>
+                Repasando estos ejemplos, notará que no registramos las Extensiones
+                de feed y de entrada por separado. Las Extensiones dentro del mismo
+                estándar pueden incluir o no tanto una clase de feed como de entrada, por lo que
+                <code class="classname">Zend_Feed_Reader</code> solo requiere que
+                registre el nombre general, por ejemplo, JungleBooks, DublinCore,
+                Slash. Internamente, puede comprobar en qué nivel existen las Extensiones
+                y cargarlas si se encuentran. En nuestro caso, tenemos un conjunto completo de
+                Extensiones: <code class="classname">JungleBooks_Feed</code> y
+                <code class="classname">JungleBooks_Entry</code>.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.custom-feed.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.feed.writer.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">33.8. Clases personalizadas de Feed y Entry </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 33.10. Zend_Feed_Writer</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,275 @@
+<?php $title = '64.10. Zend_Service_Amazon_Ec2: Almacenamiento en bloques elástico (EBS)'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.10. Zend_Service_Amazon_Ec2: Almacenamiento en bloques elástico (EBS)</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.images.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.elasticip.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.ebs"></a>64.10. Zend_Service_Amazon_Ec2: Almacenamiento en bloques elástico (EBS)</h2></div></div></div>
+<p>
+        Amazon Elastic Block Store (Amazon EBS) es un nuevo tipo de almacenamiento
+        diseñado específicamente para instancias de Amazon EC2. Amazon EBS le permite
+        crear volúmenes que pueden montarse como dispositivos por las instancias de
+        Amazon EC2. Los volúmenes de Amazon EBS se comportan como dispositivos de bloque
+        externos sin formatear. Tienen nombres de dispositivo asignados por el usuario
+        y ofrecen una interfaz de dispositivo de bloque. Puede cargar un sistema de
+        archivos sobre los volúmenes de Amazon EBS, o utilizarlos tal como usaría
+        cualquier dispositivo de bloque.
+    </p>
+<p>
+        Puede crear hasta veinte volúmenes de Amazon EBS de cualquier tamaño (desde un
+        GiB hasta un TiB). Cada volumen de Amazon EBS puede adjuntarse a cualquier
+        instancia de Amazon EC2 en la misma zona de disponibilidad o puede dejarse
+        sin adjuntar.
+    </p>
+<p>
+        Amazon EBS ofrece la posibilidad de crear instantáneas (snapshots) de sus
+        volúmenes de Amazon EBS en Amazon S3. Puede utilizar estas instantáneas como
+        punto de partida para nuevos volúmenes de Amazon EBS y proteger sus datos
+        con una durabilidad a largo plazo.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.ebs.creating"></a>64.10.1. Crear volúmenes e instantáneas de EBS</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.ebs.creating.volume"></a><p class="title"><b>Ejemplo 64.36. Crear un nuevo volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                Crear un volumen EBS completamente nuevo requiere el tamaño y la zona en la
+                que desea que se encuentre el volumen EBS.
+            </p>
+<p>
+                <code class="code">createNewVolume</code> devolverá un array con información
+                sobre el nuevo volumen que incluye el volumeId, el tamaño, la zona, el estado
+                y el createTime.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;createNewVolume(40, 'us-east-1a');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.creating.volumesnapshot"></a><p class="title"><b>Ejemplo 64.37. Crear un volumen EBS a partir de una instantánea</b></p>
+<div class="example-contents">
+<p>
+                Crear un volumen EBS a partir de una instantánea requiere el snapshot_id y la
+                zona en la que desea que se encuentre el volumen EBS.
+            </p>
+<p>
+                <code class="code">createVolumeFromSnapshot</code> devolverá un array con información
+                sobre el nuevo volumen que incluye el volumeId, el tamaño, la zona, el estado, el
+                createTime y el snapshotId.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;createVolumeFromSnapshot('snap-78a54011', 'us-east-1a');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.creating.snapshot"></a><p class="title"><b>Ejemplo 64.38. Crear una instantánea de un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                Crear una instantánea de un volumen EBS requiere el volumeId del volumen EBS.
+            </p>
+<p>
+                <code class="code">createSnapshot</code> devolverá un array con información sobre la
+                nueva instantánea del volumen que incluye el snapshotId, el volumeId, el estado, el
+                startTime y el progreso.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;createSnapshot('volumeId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.ebs.describing"></a>64.10.2. Describir volúmenes e instantáneas de EBS</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.ebs.describing.volume"></a><p class="title"><b>Ejemplo 64.39. Describir un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describeVolume</code> le permite obtener información sobre un volumen EBS o un
+                conjunto de volúmenes EBS. Si no se pasa nada, devolverá todos los volúmenes EBS. Si solo
+                se necesita describir un volumen EBS, se puede pasar una cadena, mientras que se puede
+                pasar un array de identificadores de volúmenes EBS para describirlos.
+            </p>
+<p>
+                <code class="code">describeVolume</code> devolverá un array con información sobre cada volumen,
+                que incluye el volumeId, el tamaño, el estado y el createTime. Si el volumen está adjunto
+                a una instancia, se devolverá un valor adicional attachmentSet. El conjunto de adjuntos
+                contiene información sobre la instancia a la que está adjunto el volumen EBS,
+                que incluye volumeId, instanceId, device, status y attachTime.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;describeVolume('volumeId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.describing.attachedvolumes"></a><p class="title"><b>Ejemplo 64.40. Describir volúmenes adjuntos</b></p>
+<div class="example-contents">
+<p>
+                Para devolver una lista de volúmenes EBS actualmente adjuntos a una instancia en
+                ejecución, puede llamar a este método. Solo devolverá volúmenes EBS adjuntos a la
+                instancia con el instanceId indicado.
+            </p>
+<p>
+                <code class="code">describeAttachedVolumes</code> devuelve la misma información que
+                <code class="code">describeVolume</code>, pero solo para los volúmenes EBS que están actualmente
+                adjuntos al instanceId especificado.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;describeAttachedVolumes('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.describing.snapshot"></a><p class="title"><b>Ejemplo 64.41. Describir una instantánea de un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describeSnapshot</code> le permite obtener información sobre una instantánea
+                de un volumen EBS o un conjunto de instantáneas de volúmenes EBS. Si no se pasa nada,
+                devolverá información sobre todas las instantáneas de volúmenes EBS. Si solo se necesita
+                describir una instantánea de un volumen EBS, se puede pasar su snapshotId, mientras que
+                se puede pasar un array de identificadores de instantáneas de volúmenes EBS para
+                describirlas.
+            </p>
+<p>
+                <code class="code">describeSnapshot</code> devolverá un array con información sobre cada
+                instantánea de volumen EBS que incluye el snapshotId, el volumeId, el estado, el
+                startTime y el progreso.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;describeSnapshot('volumeId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.ebs.attachdetach"></a>64.10.3. Adjuntar y desadjuntar volúmenes de instancias</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.ebs.attachdetach.attach"></a><p class="title"><b>Ejemplo 64.42. Adjuntar un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">attachVolume</code> adjuntará un volumen EBS a una instancia en
+                ejecución. Para adjuntar un volumen necesita especificar el volumeId, el instanceId y el
+                device <span class="emphasis"><em>(ej.: /dev/sdh)</em></span>.
+            </p>
+<p>
+                <code class="code">attachVolume</code> devolverá un array con información sobre el
+                estado del adjunto que contiene volumeId, instanceId, device, status y
+                attachTime
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;attachVolume('volumeId', 'instanceid', '/dev/sdh');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.attachdetach.detach"></a><p class="title"><b>Ejemplo 64.43. Desadjuntar un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">detachVolume</code> desadjuntará un volumen EBS de una instancia en
+                ejecución. <code class="code">detachVolume</code> requiere que especifique el volumeId, con el
+                instanceId opcional y el nombre del device que se pasó al adjuntar el volumen. Si
+                necesita forzar la desconexión, puede establecer el cuarto parámetro en
+                <code class="constant">TRUE</code> y forzará el desadjunte del volumen.
+            </p>
+<p>
+                <code class="code">detachVolume</code> devuelve un array con información de estado sobre
+                el volumen EBS que incluye volumeId, instanceId, device, status y attachTime.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;detachVolume('volumeId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Forced Detach">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Desadjunte forzado</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Solo debería forzar un desadjunte si el intento de desadjunte anterior no se
+                produjo de forma limpia (accediendo a una instancia, desmontando el volumen y
+                desadjuntándolo normalmente). Esta opción puede provocar pérdida de datos o un
+                sistema de archivos corrupto. Utilice esta opción únicamente como último recurso
+                para desadjuntar un volumen de una instancia en fallo. La instancia no tendrá
+                oportunidad de vaciar las cachés del sistema de archivos ni sus metadatos. Si
+                utiliza esta opción, deberá realizar los procedimientos de comprobación y
+                reparación del sistema de archivos.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.ebs.deleting"></a>64.10.4. Eliminar volúmenes e instantáneas de EBS</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.ebs.deleting.volume"></a><p class="title"><b>Ejemplo 64.44. Eliminar un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">deleteVolume</code> eliminará un volumen EBS no adjunto.
+            </p>
+<p>
+                <code class="code">deleteVolume</code> devolverá un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;deleteVolume('volumeId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.ebs.deleting.snapshot"></a><p class="title"><b>Ejemplo 64.45. Eliminar una instantánea de un volumen EBS</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">deleteSnapshot</code> eliminará una instantánea de un volumen EBS.
+            </p>
+<p>
+                <code class="code">deleteSnapshot</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_ebs = new Zend_Service_Amazon_Ec2_Ebs('aws_key','aws_secret_key');
+$return = $ec2_ebs-&gt;deleteSnapshot('snapshotId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.images.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.elasticip.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.9. Zend_Service_Amazon_Ec2: Imágenes de máquina de Amazon (AMI) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.11. Zend_Service_Amazon_Ec2: Direcciones IP elásticas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

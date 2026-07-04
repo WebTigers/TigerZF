@@ -1,0 +1,243 @@
+<?php $title = '48.3. Objetos de memoria'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">48.3. Objetos de memoria</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.memory.memory-manager.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 48. Zend_Memory</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mime.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.memory.memory-objects"></a>48.3. Objetos de memoria</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-objects.movable"></a>48.3.1. Movible</h3></div></div></div>
+<p>
+            Cree objetos de memoria movibles usando el método <code class="methodname">create([$data])</code>
+            del gestor de memoria:
+        </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+</pre>
+<p>
+            "Movible" significa que dichos objetos pueden intercambiarse (swap) y descargarse de la
+            memoria y luego cargarse cuando el código de la aplicación acceda al objeto.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-objects.locked"></a>48.3.2. Bloqueado</h3></div></div></div>
+<p>
+            Cree objetos de memoria bloqueados usando el método <code class="methodname">createLocked([$data])</code>
+            del gestor de memoria:
+        </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;createLocked($data);
+</pre>
+<p>
+            "Bloqueado" significa que dichos objetos nunca se intercambian ni descargan
+            de la memoria.
+        </p>
+<p>
+            Los objetos bloqueados proporcionan la misma interfaz que los objetos movibles
+            (<code class="classname">Zend_Memory_Container_Interface</code>).
+            Por lo que un objeto bloqueado puede usarse en cualquier lugar en vez de objetos movibles.
+        </p>
+<p>
+            Es útil si una aplicación o un desarrollador puede decidir que algunos
+            objetos nunca deben intercambiarse, por consideraciones de rendimiento.
+        </p>
+<p>
+            El acceso a los objetos bloqueados es más rápido, porque el gestor de memoria no
+            necesita rastrear cambios para estos objetos.
+        </p>
+<p>
+            La clase de objetos bloqueados (<code class="classname">Zend_Memory_Container_Locked</code>)
+            garantiza prácticamente el mismo rendimiento que trabajar con una variable de tipo
+            string. La sobrecarga es una única desreferencia para obtener la propiedad de la clase.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-objects.value"></a>48.3.3. Propiedad 'value' del contenedor de memoria</h3></div></div></div>
+<p>
+            Use la propiedad '<span class="property">value</span>' del contenedor de memoria (movible o bloqueado)
+            para operar con los datos del objeto de memoria:
+        </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+
+echo $memObject-&gt;value;
+
+$memObject-&gt;value = $newValue;
+
+$memObject-&gt;value[$index] = '_';
+
+echo ord($memObject-&gt;value[$index1]);
+
+$memObject-&gt;value = substr($memObject-&gt;value, $start, $length);
+</pre>
+<p>
+            Una forma alternativa de acceder a los datos del objeto de memoria es usar el método <a class="link" href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.getRef" title="48.3.4.1. getRef() method"><code class="methodname">getRef()</code></a>.
+            Este método <span class="emphasis"><em>debe</em></span> usarse para versiones de <acronym class="acronym">PHP</acronym>
+            anteriores a la 5.2. También puede que deba usarse en otros
+            casos por razones de rendimiento.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-objects.api"></a>48.3.4. Interfaz del contenedor de memoria</h3></div></div></div>
+<p>
+            El contenedor de memoria proporciona los siguientes métodos:
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-objects.api.getRef"></a>48.3.4.1. Método getRef()</h4></div></div></div>
+<pre class="programlisting">
+public function &amp;getRef();
+</pre>
+<p>
+                El método <code class="methodname">getRef()</code> devuelve una referencia al valor del objeto.
+            </p>
+<p>
+                Los objetos movibles se cargan desde la caché en este momento si el
+                objeto aún no está en memoria. Si el objeto se carga desde
+                la caché, esto podría provocar el intercambio de otros objetos si el
+                límite de memoria se superara al tener todos los objetos gestionados
+                en memoria.
+            </p>
+<p>
+                El método <code class="methodname">getRef()</code> <span class="emphasis"><em>debe</em></span>
+                usarse para acceder a los datos del objeto de memoria en versiones de <acronym class="acronym">PHP</acronym> anteriores a la 5.2.
+            </p>
+<p>
+                Rastrear los cambios en los datos necesita recursos adicionales.
+                El método <code class="methodname">getRef()</code> devuelve una referencia a una cadena,
+                que es modificada directamente por la aplicación del usuario.
+                Por lo tanto, es buena idea usar el método <code class="methodname">getRef()</code>
+                para el procesamiento de datos de valor:
+            </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+
+$value = &amp;$memObject-&gt;getRef();
+
+for ($count = 0; $count &lt; strlen($value); $count++) {
+    $char = $value[$count];
+    ...
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-objects.api.touch"></a>48.3.4.2. Método touch()</h4></div></div></div>
+<pre class="programlisting">
+public function touch();
+</pre>
+<p>
+                El método <code class="methodname">touch()</code> debe usarse en conjunto con
+                <code class="methodname">getRef()</code>. Indica que el valor del objeto ha sido modificado:
+            </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+...
+
+$value = &amp;$memObject-&gt;getRef();
+
+for ($count = 0; $count &lt; strlen($value); $count++) {
+    ...
+    if ($condition) {
+        $value[$count] = $char;
+    }
+    ...
+}
+
+$memObject-&gt;touch();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-objects.api.lock"></a>48.3.4.3. Método lock()</h4></div></div></div>
+<pre class="programlisting">
+public function lock();
+</pre>
+<p>
+                El método <code class="methodname">lock()</code> bloquea el objeto en memoria.
+                Debe usarse para evitar el intercambio de algunos objetos que usted elija.
+                Normalmente esto no es necesario, porque el gestor de memoria usa
+                un algoritmo inteligente para elegir candidatos para el intercambio.
+                Pero si sabe con certeza que en esta parte del código algunos
+                objetos no deben intercambiarse, puede bloquearlos.
+            </p>
+<p>
+                Bloquear objetos en memoria también garantiza que la referencia
+                devuelta por el método <code class="methodname">getRef()</code> sea válida hasta que
+                desbloquee el objeto:
+            </p>
+<pre class="programlisting">
+$memObject1 = $memoryManager-&gt;create($data1);
+$memObject2 = $memoryManager-&gt;create($data2);
+...
+
+$memObject1-&gt;lock();
+$memObject2-&gt;lock();
+
+$value1 = &amp;$memObject1-&gt;getRef();
+$value2 = &amp;$memObject2-&gt;getRef();
+
+for ($count = 0; $count &lt; strlen($value2); $count++) {
+    $value1 .= $value2[$count];
+}
+
+$memObject1-&gt;touch();
+$memObject1-&gt;unlock();
+$memObject2-&gt;unlock();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-objects.api.unlock"></a>48.3.4.4. Método unlock()</h4></div></div></div>
+<pre class="programlisting">
+public function unlock();
+</pre>
+<p>
+                El método <code class="methodname">unlock()</code> desbloquea el objeto cuando ya no
+                es necesario que esté bloqueado. Vea el ejemplo anterior.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-objects.api.isLocked"></a>48.3.4.5. Método isLocked()</h4></div></div></div>
+<pre class="programlisting">
+public function isLocked();
+</pre>
+<p>
+                El método <code class="methodname">isLocked()</code> puede usarse para comprobar si el
+                objeto está bloqueado. Devuelve <code class="constant">TRUE</code> si el objeto
+                está bloqueado, o <code class="constant">FALSE</code> si no lo está.
+                Esto siempre es <code class="constant">TRUE</code> para los objetos "bloqueados",
+                y puede ser <code class="constant">TRUE</code> o <code class="constant">FALSE</code>
+                para los objetos "movibles".
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.memory.memory-manager.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.memory.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mime.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">48.2. Gestor de memoria </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 49. Zend_Mime</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

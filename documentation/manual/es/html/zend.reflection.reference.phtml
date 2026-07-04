@@ -1,0 +1,367 @@
+<?php $title = '58.3. Referencia de Zend_Reflection'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">58.3. Referencia de Zend_Reflection</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.reflection.examples.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 58. Zend_Reflection</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.registry.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.reflection.reference"></a>58.3. Referencia de Zend_Reflection</h2></div></div></div>
+<p>
+        Las diversas clases de <code class="classname">Zend_Reflection</code> imitan la
+        <acronym class="acronym">API</acronym> de la <a class="ulink" href="http://php.net/reflection" target="_top">Reflection <acronym class="acronym">API</acronym></a> de <acronym class="acronym">PHP</acronym> - con una
+        diferencia importante. La Reflection <acronym class="acronym">API</acronym> de <acronym class="acronym">PHP</acronym> no
+        proporciona introspección en las etiquetas de anotación de docblock, ni en los tipos de las
+        variables de parámetro ni en los tipos de retorno.
+    </p>
+<p>
+        <code class="classname">Zend_Reflection</code> analiza las anotaciones del docblock del método para
+        determinar los tipos de las variables de parámetro y el tipo de retorno. En concreto,
+        se usan las anotaciones <code class="code">@param</code> y <code class="code">@return</code>.
+        Sin embargo, también se puede comprobar cualquier otra etiqueta de anotación, así como
+        las descripciones estándar "corta" y "larga".
+    </p>
+<p>
+        Cada objeto de reflexión en <code class="classname">Zend_Reflection</code> sobrescribe el
+        método <code class="methodname">getDocblock()</code> para devolver una instancia de
+        <code class="classname">Zend_Reflection_Docblock</code>. Esta clase proporciona introspección
+        en los docblocks y las etiquetas de anotación.
+    </p>
+<p>
+        <code class="classname">Zend_Reflection_File</code> es una nueva clase de reflexión que permite
+        la introspección de archivos <acronym class="acronym">PHP</acronym>. Con ella, se pueden recuperar las clases,
+        funciones y el código <acronym class="acronym">PHP</acronym> global contenidos en el archivo.
+    </p>
+<p>
+        Por último, los diversos métodos que devuelven otros objetos de reflexión
+        admiten un segundo parámetro, el nombre de la clase de reflexión a usar para
+        el objeto de reflexión devuelto.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.docblock"></a>58.3.1. Zend_Reflection_Docblock</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Docblock</code> es el núcleo del
+            valor añadido de <code class="classname">Zend_Reflection</code> sobre la
+            Reflection <acronym class="acronym">API</acronym> de <acronym class="acronym">PHP</acronym>. Proporciona los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getContents()</code>: devuelve el contenido completo del
+                    docblock.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getStartLine()</code>: devuelve la posición inicial de
+                    el docblock dentro del archivo que lo define.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getEndLine()</code>: obtiene la última línea del docblock dentro del
+                    archivo que lo define.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getShortDescription()</code>: obtiene la descripción corta de
+                    una línea (normalmente la primera línea del docblock).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getLongDescription()</code>: obtiene la descripción larga del
+                    docblock.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">hasTag($name)</code>: determina si el docblock tiene la
+                    etiqueta de anotación indicada.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getTag($name)</code>: recupera el objeto de reflexión de la
+                    etiqueta de anotación indicada, o un booleano <code class="constant">FALSE</code> si no
+                    está presente.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getTags($filter)</code>: recupera todas las etiquetas, o todas las etiquetas
+                    que coincidan con la cadena <code class="varname">$filter</code> indicada. Las etiquetas
+                    devueltas serán un array de
+                    objetos <code class="classname">Zend_Reflection_Docblock_Tag</code>.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.docblock-tag"></a>58.3.2. Zend_Reflection_Docblock_Tag</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Docblock_Tag</code> proporciona reflexión para
+            etiquetas de anotación individuales. La mayoría de las etiquetas constan solo de un nombre y una
+            descripción. En el caso de algunas etiquetas especiales, la clase proporciona un
+            método de fábrica para obtener una instancia de la clase apropiada.
+        </p>
+<p>
+            Los siguientes métodos están definidos para
+            <code class="classname">Zend_Reflection_Docblock_Tag</code>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">factory($tagDocblockLine)</code>: instancia la
+                    clase de reflexión de etiqueta apropiada y la devuelve.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getName()</code>: devuelve el nombre de la etiqueta de anotación.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getDescription()</code>: devuelve la
+                    descripción de la anotación.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.docblock-tag-param"></a>58.3.3. Zend_Reflection_Docblock_Tag_Param</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Docblock_Tag_Param</code> es una versión
+            especializada de <code class="classname">Zend_Reflection_Docblock_Tag</code>. La
+            descripción de la etiqueta de anotación <code class="code">@param</code> consta del
+            tipo de parámetro, el nombre de la variable y la descripción de la variable. Añade los
+            siguientes métodos a <code class="classname">Zend_Reflection_Docblock_Tag</code>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getType()</code>: devuelve el tipo de la variable de parámetro.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getVariableName()</code>: devuelve el nombre de la variable de
+                    parámetro.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.docblock-tag-return"></a>58.3.4. Zend_Reflection_Docblock_Tag_Return</h3></div></div></div>
+<p>
+            Al igual que <code class="classname">Zend_Reflection_Docblock_Tag_Param</code>,
+            <code class="classname">Zend_Reflection_Docblock_Tag_Return</code> es una versión
+            especializada de <code class="classname">Zend_Reflection_Docblock_Tag</code>. La
+            descripción de la etiqueta de anotación <code class="code">@return</code> consta del
+            tipo de retorno y la descripción de la variable. Añade el siguiente método
+            a <code class="classname">Zend_Reflection_Docblock_Tag</code>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <code class="methodname">getType()</code>: devuelve el tipo de retorno.
+                </p></li></ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.file"></a>58.3.5. Zend_Reflection_File</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_File</code> proporciona introspección en
+            archivos <acronym class="acronym">PHP</acronym>. Con ella, se pueden examinar las clases, funciones y
+            el código <acronym class="acronym">PHP</acronym> suelto definido en un archivo. Define los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getFileName()</code>: recupera el nombre del archivo
+                    que se está reflejando.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getStartLine()</code>: recupera la línea inicial del
+                    archivo (siempre "1").
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getEndLine()</code> recupera la última línea / número de
+                    líneas del archivo.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getDocComment($reflectionClass =
+                        'Zend_Reflection_Docblock')</code>: recupera el objeto de reflexión del
+                    docblock a nivel de archivo.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getClasses($reflectionClass =
+                        'Zend_Reflection_Class')</code>: recupera un array de
+                    objetos de reflexión, uno por cada clase definida en el archivo.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getFunctions($reflectionClass =
+                        'Zend_Reflection_Function')</code>: recupera un array de
+                    objetos de reflexión, uno por cada función definida en el archivo.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getClass($name = null, $reflectionClass =
+                        'Zend_Reflection_Class')</code>: recupera el objeto de reflexión
+                    de una sola clase.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getContents()</code>: recupera el contenido completo del
+                    archivo.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.class"></a>58.3.6. Zend_Reflection_Class</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Class</code> extiende
+            <code class="code">ReflectionClass</code>, y sigue su <acronym class="acronym">API</acronym>. Añade un
+            método adicional, <code class="methodname">getDeclaringFile()</code>, que se puede
+            usar para recuperar el objeto de reflexión <code class="classname">Zend_Reflection_File</code>
+            del archivo que define la clase.
+        </p>
+<p>
+            Además, los siguientes métodos añaden un argumento adicional para
+            especificar la clase de reflexión a usar al obtener un objeto de
+            reflexión:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getDeclaringFile($reflectionClass =
+                        'Zend_Reflection_File')</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getDocblock($reflectionClass =
+                        'Zend_Reflection_Docblock')</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getInterfaces($reflectionClass =
+                        'Zend_Reflection_Class')</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getMethod($reflectionClass = 'Zend_Reflection_Method')</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getMethods($filter = -1, $reflectionClass =
+                        'Zend_Reflection_Method')</code>
+                </p></li>
+<li class="listitem"><p>
+                <code class="methodname">getParentClass($reflectionClass = 'Zend_Reflection_Class')</code>
+            </p></li>
+<li class="listitem"><p>
+                    <code class="code">getProperty($name, $reflectionClass = 'Zend_Reflection_Property')</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getProperties($filter = -1, $reflectionClass =
+                        'Zend_Reflection_Property')</code>
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.extension"></a>58.3.7. Zend_Reflection_Extension</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Extension</code> extiende
+            <code class="code">ReflectionExtension</code>, y sigue su <acronym class="acronym">API</acronym>. Sobrescribe
+            los siguientes métodos para añadir un argumento adicional que especifica
+            la clase de reflexión a usar al obtener un objeto de reflexión:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">getFunctions($reflectionClass =
+                        'Zend_Reflection_Function')</code>: recupera un array de
+                    objetos de reflexión que representan las funciones definidas por la extensión.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getClasses($reflectionClass =
+                        'Zend_Reflection_Class')</code>: recupera un array de
+                    objetos de reflexión que representan las clases definidas por la extensión.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.function"></a>58.3.8. Zend_Reflection_Function</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Function</code> añade un método para recuperar
+            el tipo de retorno de la función, además de sobrescribir varios métodos para
+            permitir especificar la clase de reflexión a usar en los objetos de reflexión
+            devueltos.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">getDocblock($reflectionClass =
+                        'Zend_Reflection_Docblock')</code>: recupera el objeto de reflexión del
+                    docblock de la función.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getParameters($reflectionClass =
+                        'Zend_Reflection_Parameter')</code>: recupera un array de
+                    todos los objetos de reflexión de los parámetros de la función.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getReturn()</code>: recupera el objeto de reflexión del
+                    tipo de retorno.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.method"></a>58.3.9. Zend_Reflection_Method</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Method</code> refleja
+            <code class="classname">Zend_Reflection_Function</code>, y solo sobrescribe un
+            método adicional:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <code class="code">getParentClass($reflectionClass =
+                        'Zend_Reflection_Class')</code>: recupera el objeto de reflexión de
+                    la clase padre.
+                </p></li></ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.parameter"></a>58.3.10. Zend_Reflection_Parameter</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Parameter</code> añade un método para recuperar
+            el tipo del parámetro, además de sobrescribir métodos para permitir especificar
+            la clase de reflexión a usar en los objetos de reflexión devueltos.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">getDeclaringClass($reflectionClass =
+                        'Zend_Reflection_Class')</code>: obtiene la clase declarante del
+                    parámetro como un objeto de reflexión (si está disponible).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getClass($reflectionClass =
+                        'Zend_Reflection_Class')</code>: obtiene la clase del
+                    parámetro como un objeto de reflexión (si está disponible).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">getDeclaringFunction($reflectionClass =
+                        'Zend_Reflection_Function')</code>: obtiene la función del
+                    parámetro como un objeto de reflexión (si está disponible).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getType()</code>: obtiene el tipo del parámetro.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.reflection.reference.property"></a>58.3.11. Zend_Reflection_Property</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Reflection_Property</code> sobrescribe un único método para
+            permitir especificar la clase del objeto de reflexión devuelto:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <code class="code">getDeclaringClass($reflectionClass =
+                        'Zend_Reflection_Class')</code>: recupera la clase
+                    declarante de la propiedad como un objeto de reflexión.
+                </p></li></ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.reflection.examples.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.reflection.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.registry.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">58.2. Ejemplos de Zend_Reflection </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 59. Zend_Registry</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

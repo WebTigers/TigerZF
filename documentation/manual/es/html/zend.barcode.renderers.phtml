@@ -1,0 +1,292 @@
+<?php $title = '16.4. Renderizadores de Zend_Barcode'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">16.4. Renderizadores de Zend_Barcode</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.barcode.objects.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 16. Zend_Barcode</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cache.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.barcode.renderers"></a>16.4. Renderizadores de Zend_Barcode</h2></div></div></div>
+<p>
+        Los renderizadores tienen algunas opciones comunes. Estas opciones se pueden establecer de cuatro maneras:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Como un array o un objeto <code class="classname">Zend_Config</code> pasado al
+                constructor.
+            </p></li>
+<li class="listitem"><p>
+                Como un array pasado al método <code class="methodname">setOptions()</code>.
+            </p></li>
+<li class="listitem"><p>
+                Como un objeto <code class="classname">Zend_Config</code> pasado al método
+                <code class="methodname">setConfig()</code>.
+            </p></li>
+<li class="listitem"><p>Como valores discretos pasados a setters individuales.</p></li>
+</ul></div>
+<div class="example">
+<a name="zend.barcode.renderers.configuration"></a><p class="title"><b>Ejemplo 16.8. Diferentes formas de parametrizar un objeto renderizador</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array('topOffset' =&gt; 10);
+
+// Case 1
+$renderer = new Zend_Barcode_Renderer_Pdf($options);
+
+// Case 2
+$renderer = new Zend_Barcode_Renderer_Pdf();
+$renderer-&gt;setOptions($options);
+
+// Case 3
+$config   = new Zend_Config($options);
+$renderer = new Zend_Barcode_Renderer_Pdf();
+$renderer-&gt;setConfig($config);
+
+// Case 4
+$renderer = new Zend_Barcode_Renderer_Pdf();
+$renderer-&gt;setTopOffset(10);
+</pre></div>
+</div>
+<br class="example-break"><div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.renderers.common.options"></a>16.4.1. Opciones comunes</h3></div></div></div>
+<p>
+            En la siguiente lista, los valores no tienen unidad; utilizaremos el término "unidad." Por
+            ejemplo, el valor predeterminado de la "barra fina" es "1 unidad." Las unidades reales dependen del
+            soporte de renderizado. Los setters individuales se obtienen poniendo en mayúscula la letra
+            inicial de la opción y anteponiendo el nombre con "set" (por ejemplo, "barHeight" =&gt;
+            "setBarHeight"). Todas las opciones tienen un getter correspondiente prefijado con "get" (por ejemplo,
+            "getBarHeight"). Las opciones disponibles son:
+        </p>
+<div class="table">
+<a name="zend.barcode.renderers.common.options.table"></a><p class="title"><b>Tabla 16.4. Opciones comunes</b></p>
+<div class="table-contents"><table class="table" summary="Common Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor predeterminado</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>rendererNamespace</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="classname">Zend_Barcode_Renderer</code></td>
+<td>
+                            Espacio de nombres del renderizador; por ejemplo, si necesita extender los
+                            renderizadores
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>horizontalPosition</em></span></td>
+<td><span class="type">String</span></td>
+<td>"left"</td>
+<td>
+                            Puede ser "left", "center" o "right". Puede ser útil con
+                            <acronym class="acronym">PDF</acronym> o si el método <code class="methodname">setWidth()</code>
+                            se usa con un renderizador de imágenes.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>verticalPosition</em></span></td>
+<td><span class="type">String</span></td>
+<td>"top"</td>
+<td>
+                            Puede ser "top", "middle" o "bottom". Puede ser útil con
+                            <acronym class="acronym">PDF</acronym> o si el método <code class="methodname">setHeight()</code>
+                            se usa con un renderizador de imágenes.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>leftOffset</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Posición superior del código de barras dentro del renderizador. Si se usa, este valor
+                            sobrescribirá la opción "horizontalPosition".
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>topOffset</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Posición superior del código de barras dentro del renderizador. Si se usa, este valor
+                            sobrescribirá la opción "verticalPosition".
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>automaticRenderError</em></span></td>
+<td><span class="type">Boolean</span></td>
+<td><code class="constant">TRUE</code></td>
+<td>
+                            Indica si se deben renderizar los errores automáticamente. Si ocurre una excepción,
+                            el objeto de código de barras proporcionado será reemplazado por una representación
+                            de error. Tenga en cuenta que algunos errores (o excepciones) no se pueden
+                            renderizar.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>moduleSize</em></span></td>
+<td><span class="type">Float</span></td>
+<td>1</td>
+<td>Tamaño de un módulo de renderizado en el soporte.</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>barcode</em></span></td>
+<td><code class="classname">Zend_Barcode_Object</code></td>
+<td><code class="constant">NULL</code></td>
+<td>El objeto de código de barras a renderizar.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Existe un getter adicional: <code class="methodname">getType()</code>. Devuelve el nombre de
+            la clase del renderizador sin el espacio de nombres (por ejemplo,
+            <code class="classname">Zend_Barcode_Renderer_Image</code> devuelve "image").
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.renderers.image"></a>16.4.2. Zend_Barcode_Renderer_Image</h3></div></div></div>
+<p>
+            El renderizador Image dibujará la lista de instrucciones del objeto de código de barras en un recurso
+            de imagen. El componente requiere la extensión GD.
+            El ancho predeterminado de un módulo es 1 píxel.
+        </p>
+<p>Las opciones disponibles son:</p>
+<div class="table">
+<a name="zend.barcode.renderers.image.table"></a><p class="title"><b>Tabla 16.5. Opciones de Zend_Barcode_Renderer_Image</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Barcode_Renderer_Image Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor predeterminado</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>height</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Le permite especificar la altura de la imagen resultante. Si es "0",
+                            la altura será calculada por el objeto de código de barras.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>width</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Le permite especificar el ancho de la imagen resultante. Si es "0",
+                            el ancho será calculado por el objeto de código de barras.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>imageType</em></span></td>
+<td><span class="type">String</span></td>
+<td>"png"</td>
+<td>
+                            Especifica el formato de la imagen. Puede ser "png", "jpeg", "jpg" o "gif".
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.renderers.pdf"></a>16.4.3. Zend_Barcode_Renderer_Pdf</h3></div></div></div>
+<p>
+            El renderizador <acronym class="acronym">PDF</acronym> dibujará la lista de instrucciones del objeto
+            de código de barras en un documento <acronym class="acronym">PDF</acronym>.
+            El ancho predeterminado de un módulo es 0.5 puntos.
+        </p>
+<p>
+            No hay opciones particulares para este renderizador.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.renderers.svg"></a>16.4.4. Zend_Barcode_Renderer_Svg</h3></div></div></div>
+<p>
+            El renderizador <acronym class="acronym">SVG</acronym> dibujará la lista de instrucciones del objeto
+            de código de barras en un documento <acronym class="acronym">SVG</acronym>.
+            El ancho predeterminado de un módulo es 1 píxel.
+        </p>
+<p>Las opciones disponibles son:</p>
+<div class="table">
+<a name="zend.barcode.renderers.svg.table"></a><p class="title"><b>Tabla 16.6. Opciones de Zend_Barcode_Renderer_Svg</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Barcode_Renderer_Svg Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor predeterminado</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>height</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Le permite especificar la altura de la imagen resultante. Si es "0",
+                            la altura será calculada por el objeto de código de barras.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>width</em></span></td>
+<td><span class="type">Integer</span></td>
+<td>0</td>
+<td>
+                            Le permite especificar el ancho de la imagen resultante. Si es "0",
+                            el ancho será calculado por el objeto de código de barras.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.barcode.objects.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.barcode.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cache.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">16.3. Objetos de Zend_Barcode </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 17. Zend_Cache</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

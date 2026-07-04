@@ -1,0 +1,566 @@
+<?php $title = '64.5. Zend_Service_Amazon_Ec2: Instances'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.5. Zend_Service_Amazon_Ec2: Instances</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.windows.instance.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.instance"></a>64.5. Zend_Service_Amazon_Ec2: Instances</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.instance.types"></a>64.5.1. Tipos de instancia</h3></div></div></div>
+<p>
+            Las instancias de Amazon EC2 se agrupan en dos familias: estándar y
+            High-CPU. Las instancias estándar tienen relaciones de memoria a
+            <acronym class="acronym">CPU</acronym> adecuadas para la mayoría de las aplicaciones de
+            propósito general; las instancias High-CPU tienen proporcionalmente más
+            recursos de <acronym class="acronym">CPU</acronym> que memoria (RAM) y son adecuadas para
+            aplicaciones que exigen un uso intensivo de cómputo. Al seleccionar los
+            tipos de instancia, quizás quiera usar tipos de instancia menos potentes
+            para sus instancias de servidor web y tipos de instancia más potentes
+            para sus instancias de base de datos. Adicionalmente, quizás quiera
+            ejecutar tipos de instancia <acronym class="acronym">CPU</acronym> para tareas de
+            procesamiento de datos intensivas en <acronym class="acronym">CPU</acronym>.
+        </p>
+<p>
+            Una de las ventajas de EC2 es que se paga por hora de instancia,
+            lo que hace conveniente y económico probar el rendimiento de su
+            aplicación en diferentes familias y tipos de instancia. Una buena
+            forma de determinar la familia y el tipo de instancia más adecuados
+            es lanzar instancias de prueba y medir el rendimiento de su aplicación.
+        </p>
+<div class="note"><table border="0" summary="Note: Instance Types">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Nota]" src="images/note.png"></td>
+<th align="left">Tipos de instancia</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los tipos de instancia se definen como constantes en el código. La
+                columna ocho de la tabla es el nombre de la constante definida
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.service.amazon.ec2.instance.types-table"></a><p class="title"><b>Tabla 64.10. Tipos de instancia disponibles</b></p>
+<div class="table-contents"><table class="table" summary="Available Instance Types" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Tipo</th>
+<th><acronym class="acronym">CPU</acronym></th>
+<th>Memoria</th>
+<th>Almacenamiento</th>
+<th>Plataforma</th>
+<th>E/S</th>
+<th>Nombre</th>
+<th>Nombre de la constante</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">Small</code></td>
+<td>
+                            <p>
+                                1 unidad de cómputo <code class="constant">EC2</code> (1 núcleo virtual con 1
+                                unidad de cómputo <code class="constant">EC2</code>)
+                            </p>
+                        </td>
+<td><p>1.7 GB</p></td>
+<td>
+                            <p>160 GB de almacenamiento de instancia (150 GB más 10 GB de partición raíz)</p>
+                        </td>
+<td><p>32 bits</p></td>
+<td><p>Moderada</p></td>
+<td><p>m1.small</p></td>
+<td><code class="constant">Zend_Service_Amazon_Ec2_Instance::SMALL</code></td>
+</tr>
+<tr>
+<td><code class="code">Large</code></td>
+<td>
+                            <p>
+                                4 unidades de cómputo <code class="constant">EC2</code> (2 núcleos virtuales con 2
+                                unidades de cómputo <code class="constant">EC2</code> cada uno)
+                            </p>
+                        </td>
+<td><p>7.5 GB</p></td>
+<td>
+                            <p>
+                                850 GB de almacenamiento de instancia (2 x 420 GB más 10 GB de partición raíz)
+                            </p>
+                        </td>
+<td><p>64 bits</p></td>
+<td><p>Alta</p></td>
+<td><p>m1.large</p></td>
+<td><code class="constant">Zend_Service_Amazon_Ec2_Instance::LARGE</code></td>
+</tr>
+<tr>
+<td><code class="code">Extra Large</code></td>
+<td>
+                            <p>
+                                8 unidades de cómputo <code class="constant">EC2</code> (4 núcleos virtuales con 2
+                                unidades de cómputo <code class="constant">EC2</code> cada uno)
+                            </p>
+                        </td>
+<td><p>15 GB</p></td>
+<td>
+                            <p>
+                                1,690 GB de almacenamiento de instancia (4 x 420 GB más 10 GB de partición raíz)
+                            </p>
+                        </td>
+<td><p>64 bits</p></td>
+<td><p>Alta</p></td>
+<td><p>m1.xlarge</p></td>
+<td><code class="constant">Zend_Service_Amazon_Ec2_Instance::XLARGE</code></td>
+</tr>
+<tr>
+<td><code class="code">High-CPU Medium</code></td>
+<td>
+                            <p>
+                                5 unidades de cómputo <code class="constant">EC2</code> (2 núcleos virtuales con 2.5
+                                unidades de cómputo <code class="constant">EC2</code> cada uno)
+                            </p>
+                        </td>
+<td><p>1.7 GB</p></td>
+<td>
+                            <p>350 GB de almacenamiento de instancia (340 GB más 10 GB de partición raíz)</p>
+                        </td>
+<td><p>32 bits</p></td>
+<td><p>Moderada</p></td>
+<td><p>c1.medium</p></td>
+<td>
+                            <code class="constant">Zend_Service_Amazon_Ec2_Instance::HCPU_MEDIUM</code>
+                        </td>
+</tr>
+<tr>
+<td><code class="code">High-CPU Extra Large</code></td>
+<td>
+                            <p>
+                                20 unidades de cómputo <code class="constant">EC2</code> (8 núcleos virtuales con 2.5
+                                unidades de cómputo <code class="constant">EC2</code> cada uno)
+                            </p>
+                        </td>
+<td><p>7 GB</p></td>
+<td>
+                            <p>
+                                1,690 GB de almacenamiento de instancia (4 x 420 GB más 10 GB de partición raíz)
+                            </p>
+                        </td>
+<td><p>64 bits</p></td>
+<td><p>Alta</p></td>
+<td><p>c1.xlarge</p></td>
+<td>
+                            <code class="constant">Zend_Service_Amazon_Ec2_Instance::HCPU_XLARGE</code>
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.instance.operations"></a>64.5.2. Ejecutar instancias de Amazon EC2</h3></div></div></div>
+<p>
+            Esta sección describe los métodos de operación para mantener las instancias de Amazon EC2.
+        </p>
+<div class="example">
+<a name="zend.service.amazon.ec2.instance.operations.run"></a><p class="title"><b>Ejemplo 64.13. Iniciar nuevas instancias Ec2</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">run</code> lanzará un número especificado de instancias EC2.
+                <code class="code">run</code> recibe un array de parámetros para iniciar, a continuación
+                se muestra una tabla con los valores válidos.
+            </p>
+<p>
+                </p>
+<div class="table">
+<a name="zend.service.amazon.ec2.instance.operations.run-table"></a><p class="title"><b>Tabla 64.11. Opciones válidas de run</b></p>
+<div class="table-contents"><table class="table" summary="Valid Run Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Descripción</th>
+<th>Obligatorio</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">imageId</code></td>
+<td>
+                                    <p>
+                                        ID de la <acronym class="acronym">AMI</acronym> con la que lanzar
+                                        las instancias.
+                                    </p>
+                                </td>
+<td><p>Sí</p></td>
+</tr>
+<tr>
+<td><code class="code">minCount</code></td>
+<td>
+                                    <p>Número mínimo de instancias a lanzar. Por defecto: 1</p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">maxCount</code></td>
+<td>
+                                    <p>Número máximo de instancias a lanzar. Por defecto: 1</p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">keyName</code></td>
+<td>
+                                    <p>
+                                        Nombre del par de claves con el que lanzar las instancias.
+                                        Si no proporciona una clave, todas las instancias serán
+                                        inaccesibles.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">securityGroup</code></td>
+<td>
+                                    <p>
+                                        Nombres de los grupos de seguridad con los que asociar
+                                        las instancias.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">userData</code></td>
+<td>
+                                    <p>
+                                        Los datos de usuario disponibles para las instancias
+                                        lanzadas. Estos no deben estar codificados en Base64.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">instanceType</code></td>
+<td>
+                                    <p>
+                                        Especifica el tipo de instancia. Por defecto: m1.small
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">placement</code></td>
+<td>
+                                    <p>
+                                        Especifica la zona de disponibilidad en la que
+                                        lanzar la(s) instancia(s). Por defecto, Amazon
+                                        <code class="constant">EC2</code> selecciona una zona de disponibilidad
+                                        por usted.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">kernelId</code></td>
+<td>
+                                    <p>
+                                        El ID del kernel con el que lanzar
+                                        la instancia.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">ramdiskId</code></td>
+<td>
+                                    <p>
+                                        El ID del disco <acronym class="acronym">RAM</acronym> con el que
+                                        lanzar la instancia.
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">blockDeviceVirtualName</code></td>
+<td>
+                                    <p>
+                                        Especifica el nombre virtual a asignar al
+                                        nombre de dispositivo correspondiente. Por ejemplo:
+                                        instancestore0
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">blockDeviceName</code></td>
+<td>
+                                    <p>
+                                         Especifica el dispositivo al que está
+                                         asignando un nombre virtual. Por ejemplo: sdb
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><code class="code">monitor</code></td>
+<td>
+                                    <p>
+                                         Activar la monitorización de instancia de
+                                         <acronym class="acronym">AWS</acronym> CloudWatch
+                                    </p>
+                                </td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p><br class="table-break">
+            </p>
+<p>
+                <code class="code">run</code> devolverá información sobre cada instancia
+                que se está iniciando.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;run(array('imageId' =&gt; 'ami-509320',
+                                   'keyName' =&gt; 'myKey',
+                                   'securityGroup' =&gt; array('web',
+                                                            'default')));
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.instance.operations.reboot"></a><p class="title"><b>Ejemplo 64.14. Reiniciar instancias Ec2</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">reboot</code> reiniciará una o más instancias.
+            </p>
+<p>
+                Esta operación es asíncrona; únicamente encola una solicitud para
+                reiniciar la(s) instancia(s) especificada(s). La operación tendrá
+                éxito si las instancias son válidas y pertenecen al usuario. Las
+                solicitudes para reiniciar instancias terminadas se ignoran.
+            </p>
+<p>
+                <code class="code">reboot</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;reboot('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.instance.operations.terminate"></a><p class="title"><b>Ejemplo 64.15. Terminar instancias Ec2</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">terminate</code> apaga una o más instancias. Esta
+                operación es idempotente; si termina una instancia más
+                de una vez, cada llamada tendrá éxito.
+            </p>
+<p>
+                <code class="code">terminate</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;terminate('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Terminated Instances">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Nota]" src="images/note.png"></td>
+<th align="left">Instancias terminadas</th>
+</tr>
+<tr><td align="left" valign="top"><p>Las instancias terminadas seguirán siendo visibles después de la terminación
+            (aproximadamente una hora).</p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.instance.utility"></a>64.5.3. Utilidades de instancias de Amazon</h3></div></div></div>
+<p>
+            En esta sección descubrirá cómo obtener información, la salida
+            de consola y ver si una instancia contiene un código de producto.
+        </p>
+<div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.describe"></a><p class="title"><b>Ejemplo 64.16. Describir instancias</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describe</code> devuelve información sobre las instancias que usted posee.
+            </p>
+<p>
+                Si especifica uno o más ID de instancia, Amazon EC2 devuelve información
+                para esas instancias. Si no especifica IDs de instancia, Amazon EC2
+                devuelve información para todas las instancias relevantes. Si especifica un
+                ID de instancia no válido, se devuelve un error. Si especifica una instancia
+                que no posee, no se incluirá en los resultados devueltos.
+            </p>
+<p>
+                <code class="code">describe</code> devolverá un array que contiene información sobre la
+                instancia.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;describe('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Terminated Instances">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Nota]" src="images/note.png"></td>
+<th align="left">Instancias terminadas</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Las instancias recientemente terminadas podrían aparecer en los resultados devueltos. Este intervalo es
+                habitualmente inferior a una hora. Si no desea que se devuelvan instancias terminadas,
+                pase un segundo variable booleana <code class="constant">TRUE</code> a
+                <code class="code">describe</code> y las instancias terminadas se ignorarán.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.describebyimageid"></a><p class="title"><b>Ejemplo 64.17. Describir instancias por Image Id</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describeByImageId</code> es funcionalmente igual a <code class="code">describe</code>
+                pero solo devolverá las instancias que estén usando el imageId proporcionado.
+            </p>
+<p>
+                <code class="code">describeByImageId</code> devolverá un array que contiene información sobre las
+                instancias que se iniciaron con el imageId pasado
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;describeByImageId('imageId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Terminated Instances">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Nota]" src="images/note.png"></td>
+<th align="left">Instancias terminadas</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Las instancias recientemente terminadas podrían aparecer en los resultados devueltos. Este
+                intervalo es habitualmente inferior a una hora. Si no desea que se devuelvan
+                instancias terminadas, pase una segunda variable booleana
+                <code class="constant">TRUE</code> a <code class="code">describe</code> y las instancias terminadas
+                se ignorarán.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.consoleOutput"></a><p class="title"><b>Ejemplo 64.18. Recuperar la salida de consola</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">consoleOutput</code> recupera la salida de consola de la
+                instancia especificada.
+            </p>
+<p>
+                La salida de consola de la instancia se almacena en búfer y se publica poco después
+                del arranque, reinicio y terminación de la instancia. Amazon EC2 conserva la salida
+                más reciente de 64 KB, que estará disponible durante al menos una hora tras la
+                publicación más reciente.
+            </p>
+<p>
+                <code class="code">consoleOutput</code> devuelve un array que contiene el
+                <code class="code">instanceId</code>, el <code class="code">timestamp</code> de la última salida
+                y la <code class="code">output</code> de la consola.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;consoleOutput('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.confirmproduct"></a><p class="title"><b>Ejemplo 64.19. Confirmar el código de producto en una instancia</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">confirmProduct</code> devuelve <code class="constant">TRUE</code> si el código de
+                producto especificado está asociado a la instancia especificada. La operación devuelve
+                <code class="constant">FALSE</code> si el código de producto no está asociado a la instancia.
+            </p>
+<p>
+                La operación <code class="code">confirmProduct</code> solo puede ser ejecutada por el propietario de la
+                <acronym class="acronym">AMI</acronym>. Esta característica es útil cuando el propietario de una <acronym class="acronym">AMI</acronym>
+                está ofreciendo soporte y desea verificar si la instancia de un usuario es elegible.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;confirmProduct('productCode', 'instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.monitor"></a><p class="title"><b>Ejemplo 64.20. Activar la monitorización de CloudWatch en una o más instancias</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">monitor</code> devuelve la lista de instancias y su
+                estado actual de la monitorización de CloudWatch. Si la instancia
+                no tiene actualmente la monitorización habilitada, se activará.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;monitor('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.instance.utility.unmonitor"></a><p class="title"><b>Ejemplo 64.21. Desactivar la monitorización de CloudWatch en una o más instancias</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">monitor</code> devuelve la lista de instancias y su
+                estado actual de la monitorización de CloudWatch. Si la instancia
+                tiene actualmente la monitorización habilitada, se desactivará.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;unmonitor('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.windows.instance.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.4. Zend_Service_Amazon_Ec2 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.6. Zend_Service_Amazon_Ec2: Windows Instances</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

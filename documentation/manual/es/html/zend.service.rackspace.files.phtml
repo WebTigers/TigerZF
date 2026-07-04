@@ -1,0 +1,739 @@
+<?php $title = '64.24. Zend_Service_Rackspace_Files'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.24. Zend_Service_Rackspace_Files</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.rackspace.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.rackspace.servers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.rackspace.files"></a>64.24. Zend_Service_Rackspace_Files</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.files.intro"></a>64.24.1. Resumen</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Rackspace_Files</code> es una clase que proporciona una
+            <acronym class="acronym">API</acronym> sencilla para gestionar <a class="ulink" href="http://www.rackspace.com/cloud/cloud_hosting_products/files/" target="_top">Rackspace
+                Cloud Files</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.files.quick-start"></a>64.24.2. Inicio rápido</h3></div></div></div>
+<p>
+            Para usar esta clase debe pasar el nombre de usuario y la clave de la API de Rackspace en la
+            construcción de la clase.
+        </p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user,$key);
+</pre>
+<p>
+            Un contenedor es un compartimento de almacenamiento para sus datos y proporciona una forma de organizar
+            sus datos. Puede pensar en un contenedor como una carpeta en Windows® o un directorio en UNIX®.
+            La diferencia principal entre un contenedor y estos otros conceptos de sistemas de archivos es que
+            los contenedores no pueden anidarse. Sin embargo, puede crear un número ilimitado de contenedores
+            dentro de su cuenta. Los datos deben almacenarse en un contenedor, por lo que debe tener al menos un
+            contenedor definido en su cuenta antes de subir datos.
+        </p>
+<p>
+            La única restricción en los nombres de contenedor es que no pueden contener una barra inclinada (/)
+            y deben tener menos de 256 bytes de longitud (tenga en cuenta que la restricción de longitud se aplica al
+            nombre usando el formato codificado en URL).
+        </p>
+<p>
+            Los contenedores se gestionan usando la clase <code class="classname">Zend_Service_Rackspace_Files_Container</code>.
+        </p>
+<p>
+            Un objeto (archivo) es la entidad básica de almacenamiento y cualquier metadato opcional que representa los archivos
+            que almacena en el sistema Cloud Files. Cuando sube datos a Cloud Files, los datos se almacenan
+            tal cual (sin compresión ni cifrado) y consisten en una ubicación (contenedor), el nombre
+            del objeto, y cualquier metadato consistente en pares clave/valor. Por ejemplo, puede optar por almacenar
+            una copia de seguridad de sus fotos digitales y organizarlas en álbumes. En este caso, cada objeto
+            podría etiquetarse con metadatos como Album : Caribbean Cruise o Album :
+            Aspen Ski Trip.
+        </p>
+<p>
+            La única restricción en los nombres de objeto es que deben tener menos de 1024 bytes de longitud
+            después de la codificación URL. Cloud Files tiene un límite en el tamaño de un único objeto subido;
+            por defecto es 5 GB. Para los metadatos, no debería exceder los 90 pares clave/valor individuales
+            para ningún objeto y la longitud total en bytes de todos los pares clave/valor no debería exceder 4KB (4096 bytes).
+        </p>
+<p>
+            Los objetos se gestionan usando la clase <code class="classname">Zend_Service_Rackspace_Files_Object</code>.
+        </p>
+<p>
+            Para crear un nuevo contenedor puede usar el método <span class="emphasis"><em>createContainer</em></span>.
+        </p>
+<pre class="programlisting">
+$container= $rackspace-&gt;createContainer('test');
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+printf("Name: %s",$container-&gt;getName());
+</pre>
+<p>
+            Este ejemplo crea un contenedor con el nombre <span class="emphasis"><em>test</em></span>. El resultado de <span class="emphasis"><em>createContainer</em></span>
+            es una nueva instancia de <code class="classname">Zend_Service_Rackspace_Files_Container</code>.
+        </p>
+<p>
+            Para almacenar un objeto (archivo) en un contenedor puede usar el método <span class="emphasis"><em>storeObject</em></span>.
+        </p>
+<pre class="programlisting">
+$name= 'example.jpg';
+$file= file_get_contents($name);
+
+$metadata= array (
+    'foo' =&gt; 'bar'
+);
+
+$rackspace-&gt;storeObject('test',$name,$file,$metadata);
+
+if ($rackspace-&gt;isSuccessful()) {
+    echo 'Object stored successfully';
+} else {
+    printf("ERROR: %s",$rackspace-&gt;getErrorMsg());
+}
+</pre>
+<p>
+            Este ejemplo almacena una imagen <span class="emphasis"><em>example.jpg</em></span> en el contenedor <span class="emphasis"><em>test</em></span>
+            con los metadatos especificados en el array <span class="emphasis"><em>$metadata</em></span>.
+        </p>
+<p>
+            Para eliminar un objeto (archivo) puede usar el método <span class="emphasis"><em>deleteObject</em></span>.
+        </p>
+<pre class="programlisting">
+$rackspace-&gt;deleteObject('test','example.jpg');
+
+if ($rackspace-&gt;isSuccessful()) {
+    echo 'Object deleted successfully';
+} else {
+    printf("ERROR: %s",$rackspace-&gt;getErrorMsg());
+}
+</pre>
+<p>
+            Este ejemplo elimina el objeto <span class="emphasis"><em>example.jpg</em></span> en el contenedor <span class="emphasis"><em>test</em></span>.
+        </p>
+<p>
+            Para publicar un contenedor como <acronym class="acronym">CDN</acronym> (Content Delivery Network) puede usar el método <span class="emphasis"><em>enableCdnContainer</em></span>.
+        </p>
+<pre class="programlisting">
+$cdnInfo= $rackspace-&gt;enableCdnContainer('test');
+
+if ($rackspace-&gt;isSuccessful()) {
+    print_r($cdnInfo);
+} else {
+    printf("ERROR: %s",$rackspace-&gt;getErrorMsg());
+}
+</pre>
+<p>
+            Este ejemplo publica el contenedor <span class="emphasis"><em>test</em></span> como <acronym class="acronym">CDN</acronym>.
+            Si la operación tiene éxito devuelve un array asociativo con los siguientes valores:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>cdn_uri</em></span>, la url del contenedor CDN;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>cdn_uri_ssl</em></span>, la url ssl del contenedor CDN;
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.files.methods"></a>64.24.3. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.service.rackspace.files.methods.copy-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">copyObject</span>(<span class="methodparam">string $container_source,string $obj_source,string $container_dest,string $obj_dest,$metadata=array(),string $content_type=null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Copia un objeto de un contenedor a otro.
+                        El resultado es <span class="emphasis"><em>true</em></span> en caso de éxito y <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container_source</em></span> es el nombre del contenedor de origen.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$obj_source</em></span> es el nombre del objeto de origen.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container_dest</em></span> es el nombre del contenedor de destino.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$obj_dest</em></span> es el nombre del objeto de destino.
+                    </p>
+<p>
+                        El array <span class="emphasis"><em>$metadata</em></span> contiene la información de metadatos relacionada con el objeto de destino.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$content_type</em></span> es el tipo de contenido opcional del objeto (archivo) de destino.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.create-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">createContainer</span>(<span class="methodparam">string $container, $metadata=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Crea un contenedor. El resultado es una instancia de <code class="classname">Zend_Service_Rackspace_Files_Container</code>.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor a crear.
+                    </p>
+<p>
+                        El array <span class="emphasis"><em>$metadata</em></span> contiene la información de metadatos relacionada con el contenedor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.delete-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deleteContainer</span>(<span class="methodparam">string $container</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Elimina un contenedor. El resultado es <span class="emphasis"><em>true</em></span> en caso de éxito y <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor a eliminar.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.delete-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deleteObject</span>(<span class="methodparam">string $container,string $object</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Elimina un objeto en un contenedor específico. Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$object</em></span> es el nombre del objeto a eliminar.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.enable-cdn-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">enableCdnContainer</span>(<span class="methodparam">string $container,integer $ttl=900</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Publica un contenedor como <acronym class="acronym">CDN</acronym> (Content Delivery Network). Devuelve un array asociativo que contiene la url CDN y la url SSL.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$ttl</em></span> es el tiempo de vida para el contenido de la caché CDN. El valor predeterminado es 15 minutos (900 segundos).
+                        El TTL mínimo que puede establecerse es 15 minutos (900 segundos); el TTL máximo es
+                        50 años (rango de 900 a 1577836800 segundos).
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-cdn-containers"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getCdnContainers</span>(<span class="methodparam">$options=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los contenedores CDN disponibles. El resultado es una instancia de <code class="classname">Zend_Service_Rackspace_Files_ContainerList</code>.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options</em></span> contiene los siguientes parámetros opcionales:
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>limit</em></span>, para un valor entero n, limita el número de resultados a un máximo de n valores.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>marker</em></span>, dado un valor de cadena x, devuelve nombres de objeto de valor mayor que el marcador especificado.
+                                </p></li>
+</ul></div>
+<p>
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-containers"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getContainers</span>(<span class="methodparam">$options=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los contenedores disponibles. El resultado es una instancia de <code class="classname">Zend_Service_Rackspace_Files_ContainerList</code>
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options</em></span> contiene los siguientes parámetros opcionales:
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>limit</em></span>, para un valor entero n, limita el número de resultados a un máximo de n valores.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>marker</em></span>, dado un valor de cadena x, devuelve nombres de objeto de valor mayor que el marcador especificado.
+                                </p></li>
+</ul></div>
+<p>
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getContainer</span>(<span class="methodparam">string $container</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve el contenedor especificado como instancia de  <code class="classname">Zend_Service_Rackspace_Files_Container</code>
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-count-containers"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getCountContainers</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve el recuento total de contenedores.
+                    </p></dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-count-objects"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getCountObjects</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve el recuento de objetos contenidos en todos los contenedores.
+                    </p></dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-info-cdn-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getInfoCdnContainer</span>(<span class="methodparam">string $container</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Obtiene la información de un contenedor CDN. El resultado es un array asociativo con toda la información CDN.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-info-containers"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getInfoContainers</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Obtiene la información sobre todos los contenedores disponibles.
+                        Devuelve un array asociativo con los siguientes valores:
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>tot_containers</em></span>, el número total de contenedores almacenados
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>size_containers</em></span>, el tamaño total, en bytes, de todos los contenedores.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>tot_objects</em></span>, el número total de objetos (archivos) almacenados en todos los contenedores.
+                                </p></li>
+</ul></div>
+<p>
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-metadata-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getMetadataContainer</span>(<span class="methodparam">string $container</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Obtiene la información de metadatos de un contenedor. El resultado es un array asociativo con todas las claves/valores de metadatos.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-metadata-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getMetadataObject</span>(<span class="methodparam">string $container, string $object</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Obtiene la información de metadatos de un objeto. El resultado es un array asociativo con todas las claves/valores de metadatos.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$object</em></span> es el nombre del objeto.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-objects"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getObjects</span>(<span class="methodparam">string $container, $options=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los objetos de un contenedor. El resultado es una instancia de <code class="classname">Zend_Service_Rackspace_Files_ObjectList</code>
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options</em></span> contiene los siguientes parámetros opcionales:
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>limit</em></span>, para un valor entero n, limita el número de resultados
+                                    a un máximo de n valores.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>marker</em></span>, dado un valor de cadena x, devuelve nombres de objeto de valor mayor
+                                    que el marcador especificado.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>prefix</em></span>, para un valor de cadena x, hace que los resultados se
+                                    limiten a nombres de objeto que empiecen con la subcadena x.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>path</em></span>, para un valor de cadena x, devuelve los nombres de objeto anidados
+                                    en la ruta pseudo.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>delimiter</em></span>, para un carácter c, devuelve todos los nombres de objeto
+                                    anidados en el contenedor (sin necesidad de objetos marcadores de directorio).
+                                </p></li>
+</ul></div>
+<p>
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getObject</span>(<span class="methodparam">string $container, string $object, $headers=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve un objeto de un contenedor. El resultado es una instancia de <code class="classname">Zend_Service_Rackspace_Files_Object</code>
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$object</em></span> es el nombre del objeto.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$headers</em></span> contiene los siguientes parámetros opcionales (consulte el <a class="ulink" href="http://www.ietf.org/rfc/rfc2616.txt" target="_top">RFC-2616</a> para más información):
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>If-Match</em></span>, un cliente que tiene una o más entidades obtenidas previamente
+                                    del recurso puede verificar que una de esas entidades es
+                                    la actual incluyendo una lista de sus etiquetas de entidad asociadas en el
+                                    campo de cabecera If-Match.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>If-None-Match</em></span>, un cliente que tiene una o más entidades obtenidas previamente
+                                    del recurso puede verificar que ninguna de esas entidades es
+                                    la actual incluyendo una lista de sus etiquetas de entidad asociadas en el
+                                    campo de cabecera If-None-Match.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>If-Modified-Since</em></span>, si la variante solicitada no ha sido modificada
+                                    desde el momento especificado en este campo, no se devolverá ninguna entidad desde el servidor.
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>If-Unmodified-Since</em></span>, si el recurso solicitado no ha sido modificado
+                                    desde el momento especificado en este campo, el servidor DEBERÍA realizar la
+                                    operación solicitada como si la cabecera If-Unmodified-Since no estuviera presente.
+                                </p></li>
+<li class="listitem">
+<p>
+                                    <span class="emphasis"><em>Range</em></span>, Rackspace soporta un subconjunto de Range y no se ajusta a la especificación completa de RFC-2616. Soportamos
+                                    especificar OFFSET-LENGTH donde OFFSET o LENGTH pueden ser opcionales (no ambos al
+                                    mismo tiempo). Las siguientes son formas soportadas de la cabecera:
+                                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                                <span class="emphasis"><em>Range: bytes=-5</em></span>, los últimos cinco bytes del objeto
+                                            </p></li>
+<li class="listitem"><p>
+                                                <span class="emphasis"><em>Range: bytes=10-15</em></span>, los cinco bytes tras un desplazamiento de 10 bytes
+                                            </p></li>
+<li class="listitem"><p>
+                                                <span class="emphasis"><em>Range: bytes=32-</em></span>, todos los datos tras los primeros 32 bytes del objeto
+                                            </p></li>
+</ul></div>
+<p>
+                                </p>
+</li>
+</ul></div>
+<p>
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.get-size-containers"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getSizeContainers</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve el tamaño, en bytes, de todos los contenedores.
+                    </p></dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.set-metadata-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setMetadataObject</span>(<span class="methodparam">string $container,string $object, array $metadata</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Actualiza la información de metadatos del objeto (todos los metadatos previos serán eliminados).
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$object</em></span> es el nombre del objeto a almacenar.
+                    </p>
+<p>
+                        El array <span class="emphasis"><em>$metadata</em></span> contiene la información de metadatos relacionada con el objeto.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.store-object"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">storeObject</span>(<span class="methodparam">string $container,string $object,string $file,$metadata=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Almacena un objeto en un contenedor específico. Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$object</em></span> es el nombre del objeto a almacenar.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$file</em></span> es el contenido del objeto a almacenar.
+                    </p>
+<p>
+                        El array <span class="emphasis"><em>$metadata</em></span> contiene la información de metadatos relacionada con el objeto a almacenar.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.files.methods.update-cdn-container"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">updateCdnContainer</span>(<span class="methodparam">string $container,integer $ttl=null,$cdn_enabled=null,$log=null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Actualiza el atributo de un contenedor <acronym class="acronym">CDN</acronym>. Devuelve un array asociativo que contiene la url CDN y la url SSL.
+                        En caso de error el resultado es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$container</em></span> es el nombre del contenedor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$ttl</em></span> es el tiempo de vida para el contenido de la caché CDN. El valor predeterminado es 15 minutos (900 segundos).
+                        El TTL mínimo que puede establecerse es 15 minutos (900 segundos); el TTL máximo es
+                        50 años (rango de 900 a 1577836800 segundos).
+                    </p>
+<p>
+                        <span class="emphasis"><em>$cdn_enabled</em></span> es el indicador para activar/desactivar la CDN. <span class="emphasis"><em>True</em></span> activa, <span class="emphasis"><em>false</em></span> desactiva.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$log</em></span> activa o desactiva la retención de registros. <span class="emphasis"><em>True</em></span> activa, <span class="emphasis"><em>false</em></span> desactiva.
+                    </p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.files.examples"></a>64.24.4. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.service.rackspace.files.examples.authenticate"></a><p class="title"><b>Ejemplo 64.109. Autenticación</b></p>
+<div class="example-contents">
+<p>Comprueba si el nombre de usuario y la clave son válidos para la autenticación de Rackspace.</p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user,$key);
+
+if ($rackspace-&gt;authenticate()) {
+    printf("Authenticated with token: %s",$rackspace-&gt;getToken());
+} else {
+    printf("ERROR: %s",$rackspace-&gt;getErrorMsg());
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.files.examples.get-object"></a><p class="title"><b>Ejemplo 64.110. Obtener un objeto</b></p>
+<div class="example-contents">
+<p>Obtiene un archivo de imagen (<span class="emphasis"><em>example.gif</em></span>) de la nube y lo muestra en el navegador</p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user,$key);
+
+$object= $rackspace-&gt;getObject('test','example.gif');
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+header('Content-type: image/gif');
+echo $object-&gt;getFile();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.files.examples.create-container"></a><p class="title"><b>Ejemplo 64.111. Crear un contenedor con metadatos</b></p>
+<div class="example-contents">
+<p>Crea un contenedor (<span class="emphasis"><em>test</em></span>) con información de metadatos (<span class="emphasis"><em>$metadata</em></span>)</p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user,$key);
+
+$metadata= array (
+    'foo'  =&gt; 'bar',
+    'foo2' =&gt; 'bar2',
+);
+
+$container= $rackspace-&gt;createContainer('test',$metadata);
+
+if ($rackspace-&gt;isSuccessful()) {
+    echo 'Container created successfully';
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.files.examples.get-metadata-container"></a><p class="title"><b>Ejemplo 64.112. Obtener los metadatos de un contenedor</b></p>
+<div class="example-contents">
+<p>Obtiene los metadatos del contenedor <span class="emphasis"><em>test</em></span></p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user, $key);
+
+$container= $rackspace-&gt;getContainer('test');
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: ' . $rackspace-&gt;getErrorMsg());
+}
+
+$metadata= $container-&gt;getMetadata();
+print_r($metadata);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.files.examples.store-object-container"></a><p class="title"><b>Ejemplo 64.113. Almacenar un objeto en un contenedor</b></p>
+<div class="example-contents">
+<p>Almacena un objeto usando una instancia de <code class="classname">Zend_Service_Rackspace_Files_Container</code></p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user, $key);
+
+$container= $rackspace-&gt;getContainer('test');
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: ' . $rackspace-&gt;getErrorMsg());
+}
+
+$file     = file_get_contents('test.jpg');
+$metadata = array (
+    'foo' =&gt; 'bar',
+);
+
+if ($container-&gt;addObject('test.jpg', $file, $metadata)) {
+    echo 'Object stored successfully';
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.files.examples.check-cdn-enabled"></a><p class="title"><b>Ejemplo 64.114. Comprobar si un contenedor tiene CDN habilitado</b></p>
+<div class="example-contents">
+<p>Comprueba si el contenedor <span class="emphasis"><em>test</em></span> tiene CDN habilitado. Si no lo tiene, lo habilitamos.</p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Files($user, $key);
+
+$container= $rackspace-&gt;getContainer('test');
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: ' . $rackspace-&gt;getErrorMsg());
+}
+
+if (!$container-&gt;isCdnEnabled()) {
+    if (!$container-&gt;enableCdn()) {
+        die('ERROR: ' . $rackspace-&gt;getErrorMsg());
+    }
+}
+printf(
+    "The container is CDN enabled with the following URLs:\n %s\n %s\n",
+    $container-&gt;getCdnUri(),
+    $container-&gt;getCdnUriSsl()
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.rackspace.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.rackspace.servers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.23. Zend_Service_Rackspace </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.25. Zend_Service_Rackspace_Servers</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,649 @@
+<?php $title = '64.37. Zend_Service_WindowsAzure_Storage_Table'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.37. Zend_Service_WindowsAzure_Storage_Table</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.storage.queue.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.yahoo.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.windowsazure.storage.table"></a>64.37. Zend_Service_WindowsAzure_Storage_Table</h2></div></div></div>
+<p>
+        El servicio Table ofrece almacenamiento estructurado en forma de tablas.
+    </p>
+<p>
+        Table Storage es ofrecido por Windows Azure como una <acronym class="acronym">API</acronym> REST que se envuelve
+        con la clase <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code> para
+        proporcionar una interfaz nativa <acronym class="acronym">PHP</acronym> a la cuenta de almacenamiento.
+    </p>
+<p>
+        Este tema enumera algunos ejemplos de uso de la clase
+        <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>. Otras características están
+        disponibles en el paquete de descarga, así como una documentación detallada de la
+        <acronym class="acronym">API</acronym> de dichas características.
+    </p>
+<p>
+        Tenga en cuenta que el almacenamiento de tablas de desarrollo (en el <acronym class="acronym">SDK</acronym> de Windows Azure) no
+        soporta todas las características proporcionadas por la <acronym class="acronym">API</acronym>. Por lo tanto, los ejemplos
+        listados en esta página deben usarse en el almacenamiento de tablas de producción de Windows Azure.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.table.api"></a>64.37.1. Operaciones sobre tablas</h3></div></div></div>
+<p>
+            Este tema enumera algunos ejemplos de operaciones que pueden ejecutarse sobre tablas.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.api.create"></a>64.37.1.1. Creación de una tabla</h4></div></div></div>
+<p>
+                Usando el siguiente código, se puede crear una tabla en el almacenamiento de tablas de
+                producción de Windows Azure.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.create.example"></a><p class="title"><b>Ejemplo 64.173. Creación de una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$result = $storageClient-&gt;createTable('testtable');
+
+echo 'New table name is: ' . $result-&gt;Name;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.api.list"></a>64.37.1.2. Listado de todas las tablas</h4></div></div></div>
+<p>
+                Usando el siguiente código, se puede consultar una lista de todas las tablas del
+                almacenamiento de tablas de producción de Windows Azure.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.list.example"></a><p class="title"><b>Ejemplo 64.174. Listado de todas las tablas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$result = $storageClient-&gt;listTables();
+foreach ($result as $table) {
+    echo 'Table name is: ' . $table-&gt;Name . "\r\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.table.entities"></a>64.37.2. Operaciones sobre entidades</h3></div></div></div>
+<p>
+            Las tablas almacenan datos como colecciones de entidades. Las entidades son similares a filas. Una
+            entidad tiene una clave primaria y un conjunto de propiedades. Una propiedad es un par nombre-valor
+            tipado, similar a una columna.
+        </p>
+<p>
+            El servicio Table no impone ningún esquema a las tablas, por lo que dos entidades en la misma
+            tabla pueden tener distintos conjuntos de propiedades. Los desarrolladores pueden optar por imponer un
+            esquema en el lado del cliente. Una tabla puede contener cualquier número de entidades.
+        </p>
+<p>
+            <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code> ofrece 2 formas de
+            trabajar con entidades:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Esquema forzado
+                </p></li>
+<li class="listitem"><p>
+                    Sin esquema forzado
+                </p></li>
+</ul></div>
+<p>
+            Todos los ejemplos harán uso de la siguiente clase de esquema forzado.
+        </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.schema"></a><p class="title"><b>Ejemplo 64.175. Esquema forzado usado en los ejemplos</b></p>
+<div class="example-contents"><pre class="programlisting">
+class SampleEntity extends Zend_Service_WindowsAzure_Storage_TableEntity
+{
+    /**
+    * @azure Name
+    */
+    public $Name;
+
+    /**
+    * @azure Age Edm.Int64
+    */
+    public $Age;
+
+    /**
+    * @azure Visible Edm.Boolean
+    */
+    public $Visible = false;
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Tenga en cuenta que si no se pasa ninguna clase de esquema a los métodos de table storage,
+            <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code> trabaja automáticamente con
+            <code class="classname">Zend_Service_WindowsAzure_Storage_DynamicTableEntity</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.enforced"></a>64.37.2.1. Entidades con esquema forzado</h4></div></div></div>
+<p>
+                Para imponer un esquema en el lado del cliente usando la clase
+                <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>, puede crear
+                una clase que herede de
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code>. Esta clase
+                proporciona alguna funcionalidad básica para que la clase
+                <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code> trabaje con un
+                esquema del lado del cliente.
+            </p>
+<p>
+                Las propiedades base proporcionadas por
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code> son:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        PartitionKey (expuesta mediante <code class="methodname">getPartitionKey()</code> y
+                        <code class="methodname">setPartitionKey()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        RowKey (expuesta mediante <code class="methodname">getRowKey()</code> y
+                        <code class="methodname">setRowKey()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        Timestamp (expuesta mediante <code class="methodname">getTimestamp()</code> y
+                        <code class="methodname">setTimestamp()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        Valor Etag (expuesto mediante <code class="methodname">getEtag()</code> y
+                        <code class="methodname">setEtag()</code>)
+                    </p></li>
+</ul></div>
+<p>
+                Aquí tiene una clase de ejemplo que hereda de
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code>:
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.enforced.schema"></a><p class="title"><b>Ejemplo 64.176. Ejemplo de clase de esquema forzado</b></p>
+<div class="example-contents"><pre class="programlisting">
+class SampleEntity extends Zend_Service_WindowsAzure_Storage_TableEntity
+{
+    /**
+     * @azure Name
+     */
+    public $Name;
+
+    /**
+     * @azure Age Edm.Int64
+     */
+    public $Age;
+
+    /**
+     * @azure Visible Edm.Boolean
+     */
+    public $Visible = false;
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                La clase <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code> asignará
+                cualquier clase heredada de
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code> a entidades de
+                table storage de Windows Azure con el tipo de dato y nombre de propiedad correctos. Todo lo
+                que hay que hacer para almacenar una propiedad en Windows Azure es añadir un comentario docblock a una
+                propiedad pública o a un getter/setter público, con el siguiente formato:
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.enforced.schema-property"></a><p class="title"><b>Ejemplo 64.177. Propiedad forzada</b></p>
+<div class="example-contents"><pre class="programlisting">
+/**
+ * @azure &lt;property name in Windows Azure&gt; &lt;optional property type&gt;
+ */
+public $&lt;property name in PHP&gt;;
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Veamos cómo definir una propiedad "Age" como un entero en el table storage de Windows
+                Azure:
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.enforced.schema-property-sample"></a><p class="title"><b>Ejemplo 64.178. Ejemplo de propiedad forzada</b></p>
+<div class="example-contents"><pre class="programlisting">
+/**
+ * @azure Age Edm.Int64
+ */
+public $Age;
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Tenga en cuenta que una propiedad no tiene por qué llamarse igual en el table storage de
+                Windows Azure. El nombre de la propiedad en el table storage de Windows Azure puede definirse,
+                así como el tipo.
+            </p>
+<p>
+                Se admiten los siguientes tipos de datos:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">Edm.Binary</code> - Un array de bytes de hasta 64 KB de tamaño.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.Boolean</code> - Un valor booleano.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.DateTime</code> - Un valor de 64 bits expresado en Tiempo
+                        Universal Coordinado (UTC). El rango de DateTime admitido comienza a las 12:00
+                        de la medianoche del 1 de enero de 1601 d. C. (E.C.), Tiempo Universal Coordinado (UTC). El
+                        rango termina el 31 de diciembre de 9999.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.Double</code> - Un valor de punto flotante de 64 bits.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.Guid</code> - Un identificador único global de 128 bits.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.Int32</code> - Un entero de 32 bits.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.Int64</code> - Un entero de 64 bits.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Edm.String</code> - Un valor codificado en UTF-16. Los valores de cadena
+                        pueden llegar a tener hasta 64 KB de tamaño.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.dynamic"></a>64.37.2.2. Entidades sin esquema forzado (también conocidas como DynamicEntity)</h4></div></div></div>
+<p>
+                Para usar la clase <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>
+                sin definir un esquema, puede hacer uso de la clase
+                <code class="classname">Zend_Service_WindowsAzure_Storage_DynamicTableEntity</code>.
+                Esta clase hereda de
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code> igual que
+                una clase de esquema forzado, pero contiene lógica adicional para hacerla dinámica y no
+                estar ligada a un esquema.
+            </p>
+<p>
+                Las propiedades base proporcionadas por
+                <code class="classname">Zend_Service_WindowsAzure_Storage_DynamicTableEntity</code> son:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        PartitionKey (expuesta mediante <code class="methodname">getPartitionKey()</code> y
+                        <code class="methodname">setPartitionKey()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        RowKey (expuesta mediante <code class="methodname">getRowKey()</code> y
+                        <code class="methodname">setRowKey()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        Timestamp (expuesta mediante <code class="methodname">getTimestamp()</code> y
+                        <code class="methodname">setTimestamp()</code>)
+                    </p></li>
+<li class="listitem"><p>
+                        Valor Etag (expuesto mediante <code class="methodname">getEtag()</code> y
+                        <code class="methodname">setEtag()</code>)
+                    </p></li>
+</ul></div>
+<p>
+                Se pueden añadir otras propiedades sobre la marcha. Su tipo en el table storage de Windows
+                Azure se determinará dinámicamente:
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.dynamic.schema"></a><p class="title"><b>Ejemplo 64.179.
+                    Añadiendo propiedades dinámicamente a
+                    Zend_Service_WindowsAzure_Storage_DynamicTableEntity
+                </b></p>
+<div class="example-contents"><pre class="programlisting">
+$target = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity(
+    'partition1', '000001'
+);
+$target-&gt;Name = 'Name'; // Will add property "Name" of type "Edm.String"
+$target-&gt;Age  = 25;     // Will add property "Age" of type "Edm.Int32"
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Opcionalmente, se puede forzar un tipo de propiedad:
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.dynamic.schema-forcedproperties"></a><p class="title"><b>Ejemplo 64.180.
+                    Forzando tipos de propiedad en Zend_Service_WindowsAzure_Storage_DynamicTableEntity
+                </b></p>
+<div class="example-contents"><pre class="programlisting">
+$target = new Zend_Service_WindowsAzure_Storage_DynamicTableEntity(
+    'partition1', '000001'
+);
+$target-&gt;Name = 'Name'; // Will add property "Name" of type "Edm.String"
+$target-&gt;Age  = 25;     // Will add property "Age" of type "Edm.Int32"
+
+// Change type of property "Age" to "Edm.Int32":
+$target-&gt;setAzurePropertyType('Age', 'Edm.Int64');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                La clase <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>
+                trabaja automáticamente con
+                <code class="classname">Zend_Service_WindowsAzure_Storage_TableEntity</code> si no se pasa
+                ninguna clase específica a los métodos de Table Storage.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.api"></a>64.37.2.3. Ejemplos de la API de entidades</h4></div></div></div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.api.insert"></a>64.37.2.3.1. Inserción de una entidad</h5></div></div></div>
+<p>
+                    Usando el siguiente código, se puede insertar una entidad en una tabla llamada
+                    "testtable". Tenga en cuenta que la tabla ya ha sido creada previamente.
+                </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.entities.insert.example"></a><p class="title"><b>Ejemplo 64.181. Inserción de una entidad</b></p>
+<div class="example-contents"><pre class="programlisting">
+$entity = new SampleEntity ('partition1', 'row1');
+$entity-&gt;FullName = "Maarten";
+$entity-&gt;Age = 25;
+$entity-&gt;Visible = true;
+
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$result = $storageClient-&gt;insertEntity('testtable', $entity);
+
+// Check the timestamp and etag of the newly inserted entity
+echo 'Timestamp: ' . $result-&gt;getTimestamp() . "\n";
+echo 'Etag: ' . $result-&gt;getEtag() . "\n";
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.api.retrieve-by-id"></a>64.37.2.3.2. Recuperación de una entidad por clave de partición y clave de fila</h5></div></div></div>
+<p>
+                    Usando el siguiente código, se puede recuperar una entidad por clave de partición y
+                    clave de fila. Tenga en cuenta que la tabla y la entidad ya han sido creadas previamente.
+                </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.api.retrieve-by-id.example"></a><p class="title"><b>Ejemplo 64.182. Recuperación de una entidad por clave de partición y clave de fila</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entity= $storageClient-&gt;retrieveEntityById(
+    'testtable', 'partition1', 'row1', 'SampleEntity'
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.api.updating"></a>64.37.2.3.3. Actualización de una entidad</h5></div></div></div>
+<p>
+                    Usando el siguiente código, se puede actualizar una entidad. Tenga en cuenta que la tabla y
+                    la entidad ya han sido creadas previamente.
+                </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.entities.updating.example"></a><p class="title"><b>Ejemplo 64.183. Actualización de una entidad</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entity = $storageClient-&gt;retrieveEntityById(
+    'testtable', 'partition1', 'row1', 'SampleEntity'
+);
+
+$entity-&gt;Name = 'New name';
+$result = $storageClient-&gt;updateEntity('testtable', $entity);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                    Si desea asegurarse de que la entidad no haya sido actualizada previamente, puede hacer que
+                    se compruebe el <acronym class="acronym">Etag</acronym> de la entidad. Si la entidad ya
+                    ha tenido una actualización, la actualización fallará para asegurarse de que no sobrescriba
+                    ningún dato más reciente.
+                </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.api.updating.example-etag"></a><p class="title"><b>Ejemplo 64.184. Actualización de una entidad (con comprobación de Etag)</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entity = $storageClient-&gt;retrieveEntityById(
+    'testtable', 'partition1', 'row1', 'SampleEntity'
+);
+
+$entity-&gt;Name = 'New name';
+
+// last parameter instructs the Etag check:
+$result = $storageClient-&gt;updateEntity('testtable', $entity, true);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.api.delete"></a>64.37.2.3.4. Eliminación de una entidad</h5></div></div></div>
+<p>
+                    Usando el siguiente código, se puede eliminar una entidad. Tenga en cuenta que la tabla y
+                    la entidad ya han sido creadas previamente.
+                </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.api.delete.example"></a><p class="title"><b>Ejemplo 64.185. Eliminación de una entidad</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entity = $storageClient-&gt;retrieveEntityById(
+    'testtable', 'partition1', 'row1', 'SampleEntity'
+);
+$result = $storageClient-&gt;deleteEntity('testtable', $entity);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.querying"></a>64.37.2.4. Realización de consultas</h4></div></div></div>
+<p>
+                Las consultas en el table storage de <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>
+                pueden realizarse de dos maneras:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Creando manualmente una condición de filtro (lo que implica aprender un nuevo
+                        lenguaje de consulta)
+                    </p></li>
+<li class="listitem"><p>
+                        Usando la interfaz fluida proporcionada por
+                        <code class="classname">Zend_Service_WindowsAzure_Storage_Table</code>
+                    </p></li>
+</ul></div>
+<p>
+                Usando el siguiente código, se puede consultar una tabla usando una condición de filtro. Tenga
+                en cuenta que la tabla y las entidades ya han sido creadas previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.entities.querying.query-filter"></a><p class="title"><b>Ejemplo 64.186. Realización de consultas usando una condición de filtro</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entities = $storageClient-&gt;storageClient-&gt;retrieveEntities(
+    'testtable',
+    'Name eq \'Maarten\' and PartitionKey eq \'partition1\'',
+    'SampleEntity'
+);
+
+foreach ($entities as $entity) {
+    echo 'Name: ' . $entity-&gt;Name . "\n";
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Usando el siguiente código, se puede consultar una tabla usando una interfaz fluida. Tenga
+                en cuenta que la tabla y las entidades ya han sido creadas previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.entities.query-fluent"></a><p class="title"><b>Ejemplo 64.187. Realización de consultas usando una interfaz fluida</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+$entities = $storageClient-&gt;storageClient-&gt;retrieveEntities(
+    'testtable',
+    $storageClient-&gt;select()
+                  -&gt;from($tableName)
+                  -&gt;where('Name eq ?', 'Maarten')
+                  -&gt;andWhere('PartitionKey eq ?', 'partition1'),
+    'SampleEntity'
+);
+
+foreach ($entities as $entity) {
+    echo 'Name: ' . $entity-&gt;Name . "\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.table.entities.batch"></a>64.37.2.5. Operaciones por lotes</h4></div></div></div>
+<p>
+                Este tema muestra cómo usar las características de transacción de grupo de entidades de tabla
+                proporcionadas por el table storage de Windows Azure. El table storage de Windows Azure admite
+                transacciones por lotes sobre entidades que están en la misma tabla y pertenecen al mismo grupo de
+                partición. Una transacción puede incluir como máximo 100 entidades.
+            </p>
+<p>
+                El siguiente ejemplo usa una operación por lotes (transacción) para insertar un conjunto de
+                entidades en la tabla "testtable". Tenga en cuenta que la tabla ya ha sido creada
+                previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.batch"></a><p class="title"><b>Ejemplo 64.188. Ejecución de una operación por lotes</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+
+// Start batch
+$batch = $storageClient-&gt;startBatch();
+
+// Insert entities in batch
+$entities = generateEntities();
+foreach ($entities as $entity) {
+    $storageClient-&gt;insertEntity($tableName, $entity);
+}
+
+// Commit
+$batch-&gt;commit();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.table.sessionhandler"></a>64.37.3. Manejador de sesiones de table storage</h3></div></div></div>
+<p>
+            Al ejecutar una aplicación <acronym class="acronym">PHP</acronym> en la plataforma Windows Azure en modo
+            balanceado (ejecutando 2 instancias de Web Role o más), es importante que
+            los datos de sesión de <acronym class="acronym">PHP</acronym> puedan compartirse entre varias instancias de Web Role.
+            El <acronym class="acronym">SDK</acronym> de Windows Azure para <acronym class="acronym">PHP</acronym> proporciona la clase
+            <code class="classname">Zend_Service_WindowsAzure_SessionHandler</code>, que usa
+            Windows Azure Table Storage como manejador de sesiones para aplicaciones
+            <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Para usar el manejador de sesiones <code class="classname">Zend_Service_WindowsAzure_SessionHandler</code>,
+            debe registrarse como el manejador de sesiones por defecto de su
+            aplicación <acronym class="acronym">PHP</acronym>:
+        </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.sessionhandler-register"></a><p class="title"><b>Ejemplo 64.189. Registro del manejador de sesiones de table storage</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+
+$sessionHandler = new Zend_Service_WindowsAzure_SessionHandler(
+    $storageClient , 'sessionstable'
+);
+$sessionHandler-&gt;register();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El nombre de clase anterior registra el manejador de sesiones
+            <code class="classname">Zend_Service_WindowsAzure_SessionHandler</code> y almacenará
+            las sesiones en una tabla llamada "sessionstable".
+        </p>
+<p>
+            Después de registrar el manejador de sesiones
+            <code class="classname">Zend_Service_WindowsAzure_SessionHandler</code>,
+            las sesiones pueden iniciarse y usarse de la misma forma que una sesión normal de
+            <acronym class="acronym">PHP</acronym>:
+        </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.table.api.sessionhandler-usage"></a><p class="title"><b>Ejemplo 64.190. Uso del manejador de sesiones de table storage</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Table(
+    'table.core.windows.net', 'myaccount', 'myauthkey'
+);
+
+$sessionHandler = new Zend_Service_WindowsAzure_SessionHandler(
+    $storageClient , 'sessionstable'
+);
+$sessionHandler-&gt;register();
+
+session_start();
+
+if (!isset($_SESSION['firstVisit'])) {
+    $_SESSION['firstVisit'] = time();
+}
+
+// ...
+</pre></div>
+</div>
+<br class="example-break"><div class="warning"><table border="0" summary="Warning">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Advertencia</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                ¡El manejador de sesiones <code class="classname">Zend_Service_WindowsAzure_SessionHandler</code>
+                debe registrarse antes de que se realice una llamada a <code class="methodname">session_start()</code>!
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.storage.queue.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.yahoo.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.36. Zend_Service_WindowsAzure_Storage_Queue </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.38. Zend_Service_Yahoo</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

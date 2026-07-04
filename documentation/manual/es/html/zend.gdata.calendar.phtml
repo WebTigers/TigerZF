@@ -1,0 +1,793 @@
+<?php $title = '37.6. Uso de Google Calendar'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">37.6. Uso de Google Calendar</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.gdata.clientlogin.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 37. Zend_Gdata</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.gdata.docs.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.gdata.calendar"></a>37.6. Uso de Google Calendar</h2></div></div></div>
+<p>
+        Puede usar la clase
+        <code class="classname">Zend_Gdata_Calendar</code>
+        para ver, crear, actualizar y eliminar eventos en el servicio en línea de Google Calendar.
+    </p>
+<p>
+        Consulte <a class="ulink" href="http://code.google.com/apis/calendar/overview.html" target="_top">
+        http://code.google.com/apis/calendar/overview.html</a>
+        para obtener más información sobre la <acronym class="acronym">API</acronym> de Google Calendar.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar.connecting"></a>37.6.1. Conexión con el servicio de Calendar</h3></div></div></div>
+<p>
+            La <acronym class="acronym">API</acronym> de Google Calendar, como todas las <acronym class="acronym">API</acronym>s de GData, está
+            basada en el Atom Publishing Protocol (APP), un formato basado en <acronym class="acronym">XML</acronym>
+            para gestionar recursos basados en web. El tráfico entre un cliente y los servidores de
+            Google Calendar se produce a través de <acronym class="acronym">HTTP</acronym> y permite tanto conexiones
+            autenticadas como no autenticadas.
+        </p>
+<p>
+            Antes de que puedan producirse transacciones, es necesario establecer esta conexión. Crear
+            una conexión con los servidores de calendario implica dos pasos: crear un cliente
+            <acronym class="acronym">HTTP</acronym> y enlazar una instancia del servicio <code class="classname">Zend_Gdata_Calendar</code>
+            a ese cliente.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.connecting.authentication"></a>37.6.1.1. Autenticación</h4></div></div></div>
+<p>
+                La <acronym class="acronym">API</acronym> de Google Calendar permite el acceso tanto a feeds de calendario
+                públicos como privados. Los feeds públicos no requieren autenticación, pero son de solo
+                lectura y ofrecen una funcionalidad reducida. Los feeds privados ofrecen la funcionalidad
+                más completa pero requieren una conexión autenticada a los servidores de calendario. Hay
+                tres esquemas de autenticación admitidos por Google Calendar:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <em class="firstterm">ClientAuth</em>
+                        proporciona autenticación directa mediante nombre de usuario/contraseña
+                        con los servidores de calendario. Dado que este esquema requiere que los
+                        usuarios proporcionen a su aplicación su contraseña, esta
+                        autenticación solo se recomienda cuando los demás
+                        esquemas de autenticación resultan insuficientes.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">AuthSub</em>
+                        permite la autenticación con los servidores de calendario a través de un
+                        servidor proxy de Google. Esto proporciona el mismo nivel de
+                        comodidad que ClientAuth pero sin el riesgo de
+                        seguridad, lo que lo convierte en una opción ideal para
+                        aplicaciones basadas en web.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">MagicCookie</em>
+                        permite la autenticación basada en una <acronym class="acronym">URL</acronym> semialeatoria
+                        disponible desde la interfaz de Google Calendar.
+                        Este es el esquema de autenticación más sencillo de
+                        implementar, pero requiere que los usuarios recuperen manualmente
+                        su <acronym class="acronym">URL</acronym> segura antes de poder autenticarse, no
+                        proporciona acceso a las listas de calendario y está limitado al
+                        acceso de solo lectura.
+                    </p></li>
+</ul></div>
+<p>
+                La biblioteca <code class="classname">Zend_Gdata</code>
+                proporciona soporte para los tres esquemas de autenticación.
+                El resto de este capítulo asumirá que está familiarizado con los
+                esquemas de autenticación disponibles y con cómo crear una
+                conexión autenticada adecuada. Para obtener más información,
+                consulte la sección <a class="link" href="zend.gdata.phtml#zend.gdata.introduction.authentication" title="37.1.4. Google Data Client Authentication">Autenticación</a>
+                de este manual o la <a class="ulink" href="http://code.google.com/apis/gdata/auth.html" target="_top">Descripción general de autenticación en la
+                Guía del desarrollador de la <acronym class="acronym">API</acronym> de Google Data</a>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.connecting.service"></a>37.6.1.2. Creación de una instancia del servicio</h4></div></div></div>
+<p>
+                Para interactuar con Google Calendar, esta biblioteca proporciona la
+                clase de servicio <code class="classname">Zend_Gdata_Calendar</code>. Esta clase proporciona una
+                interfaz común a los modelos de Google Data y Atom Publishing Protocol y ayuda
+                a organizar las peticiones hacia y desde los servidores de calendario.
+            </p>
+<p>
+                Una vez decidido el esquema de autenticación, el siguiente paso es crear una instancia
+                de <code class="classname">Zend_Gdata_Calendar</code>. El constructor de la clase acepta una
+                instancia de <code class="classname">Zend_Http_Client</code> como único argumento. Esto
+                proporciona una interfaz para la autenticación AuthSub y ClientAuth, ya que ambas
+                requieren la creación de un cliente <acronym class="acronym">HTTP</acronym> autenticado especial. Si no
+                se proporciona ningún argumento, se creará automáticamente una instancia no autenticada
+                de <code class="classname">Zend_Http_Client</code>.
+            </p>
+<p>
+                El siguiente ejemplo muestra cómo crear una clase de servicio Calendar utilizando la
+                autenticación ClientAuth:
+            </p>
+<pre class="programlisting">
+// Parameters for ClientAuth authentication
+$service = Zend_Gdata_Calendar::AUTH_SERVICE_NAME;
+$user = "sample.user@gmail.com";
+$pass = "pa$$w0rd";
+
+// Create an authenticated HTTP client
+$client = Zend_Gdata_ClientLogin::getHttpClient($user, $pass, $service);
+
+// Create an instance of the Calendar service
+$service = new Zend_Gdata_Calendar($client);
+</pre>
+<p>
+                Un servicio Calendar que utilice AuthSub se puede crear de forma similar, aunque
+                un poco más extensa:
+            </p>
+<pre class="programlisting">
+/*
+ * Retrieve the current URL so that the AuthSub server knows where to
+ * redirect the user after authentication is complete.
+ */
+function getCurrentUrl()
+{
+    global $_SERVER;
+
+    // Filter php_self to avoid a security vulnerability.
+    $php_request_uri =
+        htmlentities(substr($_SERVER['REQUEST_URI'],
+                            0,
+                            strcspn($_SERVER['REQUEST_URI'], "\n\r")),
+                            ENT_QUOTES);
+
+    if (isset($_SERVER['HTTPS']) &amp;&amp;
+        strtolower($_SERVER['HTTPS']) == 'on') {
+        $protocol = 'https://';
+    } else {
+        $protocol = 'http://';
+    }
+    $host = $_SERVER['HTTP_HOST'];
+    if ($_SERVER['HTTP_PORT'] != '' &amp;&amp;
+        (($protocol == 'http://' &amp;&amp; $_SERVER['HTTP_PORT'] != '80') ||
+        ($protocol == 'https://' &amp;&amp; $_SERVER['HTTP_PORT'] != '443'))) {
+        $port = ':' . $_SERVER['HTTP_PORT'];
+    } else {
+        $port = '';
+    }
+    return $protocol . $host . $port . $php_request_uri;
+}
+
+/**
+ * Obtain an AuthSub authenticated HTTP client, redirecting the user
+ * to the AuthSub server to login if necessary.
+ */
+function getAuthSubHttpClient()
+{
+    global $_SESSION, $_GET;
+
+    // if there is no AuthSub session or one-time token waiting for us,
+    // redirect the user to the AuthSub server to get one.
+    if (!isset($_SESSION['sessionToken']) &amp;&amp; !isset($_GET['token'])) {
+        // Parameters to give to AuthSub server
+        $next = getCurrentUrl();
+        $scope = "http://www.google.com/calendar/feeds/";
+        $secure = false;
+        $session = true;
+
+        // Redirect the user to the AuthSub server to sign in
+
+        $authSubUrl = Zend_Gdata_AuthSub::getAuthSubTokenUri($next,
+                                                             $scope,
+                                                             $secure,
+                                                             $session);
+         header("HTTP/1.0 307 Temporary redirect");
+
+         header("Location: " . $authSubUrl);
+
+         exit();
+    }
+
+    // Convert an AuthSub one-time token into a session token if needed
+    if (!isset($_SESSION['sessionToken']) &amp;&amp; isset($_GET['token'])) {
+        $_SESSION['sessionToken'] =
+            Zend_Gdata_AuthSub::getAuthSubSessionToken($_GET['token']);
+    }
+
+    // At this point we are authenticated via AuthSub and can obtain an
+    // authenticated HTTP client instance
+
+    // Create an authenticated HTTP client
+    $client = Zend_Gdata_AuthSub::getHttpClient($_SESSION['sessionToken']);
+    return $client;
+}
+
+// -&gt; Script execution begins here &lt;-
+
+// Make sure that the user has a valid session, so we can record the
+// AuthSub session token once it is available.
+session_start();
+
+// Create an instance of the Calendar service, redirecting the user
+// to the AuthSub server if necessary.
+$service = new Zend_Gdata_Calendar(getAuthSubHttpClient());
+</pre>
+<p>
+                Por último, se puede crear un servidor no autenticado para usarlo con feeds públicos
+                o con la autenticación MagicCookie:
+            </p>
+<pre class="programlisting">
+// Create an instance of the Calendar service using an unauthenticated
+// HTTP client
+
+$service = new Zend_Gdata_Calendar();
+</pre>
+<p>
+                Tenga en cuenta que la autenticación MagicCookie no se proporciona con la
+                conexión <acronym class="acronym">HTTP</acronym>, sino que se especifica junto con la visibilidad
+                deseada al enviar las consultas. Consulte la sección sobre recuperación de eventos a
+                continuación para ver un ejemplo.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar_retrieval"></a>37.6.2. Recuperación de una lista de calendarios</h3></div></div></div>
+<p>
+            El servicio de calendario admite la recuperación de una lista de calendarios del
+            usuario autenticado. Esta es la misma lista de calendarios que se muestra en la interfaz
+            de usuario de Google Calendar, salvo que también están disponibles aquellos marcados como
+            "<span class="emphasis"><em>ocultos</em></span>".
+        </p>
+<p>
+            La lista de calendarios siempre es privada y debe accederse a través de una conexión
+            autenticada. No es posible recuperar la lista de calendarios de otro usuario y no se puede
+            acceder a ella utilizando la autenticación MagicCookie. Si se intenta acceder a una lista de
+            calendarios sin las credenciales adecuadas, la operación fallará y devolverá un código de
+            estado 401 (Authentication Required).
+        </p>
+<pre class="programlisting">
+$service = Zend_Gdata_Calendar::AUTH_SERVICE_NAME;
+$client = Zend_Gdata_ClientLogin::getHttpClient($user, $pass, $service);
+$service = new Zend_Gdata_Calendar($client);
+
+try {
+    $listFeed= $service-&gt;getCalendarListFeed();
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+</pre>
+<p>
+            Al llamar a <code class="methodname">getCalendarListFeed()</code> se crea una nueva instancia de
+            <code class="classname">Zend_Gdata_Calendar_ListFeed</code> que contiene cada calendario
+            disponible como una instancia de <code class="classname">Zend_Gdata_Calendar_ListEntry</code>. Tras
+            recuperar el feed, puede utilizar el iterador y los accesores incluidos en el feed para
+            inspeccionar los calendarios contenidos.
+        </p>
+<pre class="programlisting">
+echo "&lt;h1&gt;Calendar List Feed&lt;/h1&gt;";
+echo "&lt;ul&gt;";
+foreach ($listFeed as $calendar) {
+    echo "&lt;li&gt;" . $calendar-&gt;title .
+         " (Event Feed: " . $calendar-&gt;id . ")&lt;/li&gt;";
+}
+echo "&lt;/ul&gt;";
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.event_retrieval"></a>37.6.3. Recuperación de eventos</h3></div></div></div>
+<p>
+            Al igual que la lista de calendarios, los eventos también se recuperan utilizando la
+            clase de servicio <code class="classname">Zend_Gdata_Calendar</code>. La lista de eventos devuelta es
+            de tipo <code class="classname">Zend_Gdata_Calendar_EventFeed</code> y contiene cada evento como una
+            instancia de <code class="classname">Zend_Gdata_Calendar_EventEntry</code>. Al igual que antes, el
+            iterador y los accesores incluidos en la instancia del feed de eventos permiten inspeccionar
+            eventos individuales.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.event_retrieval.queries"></a>37.6.3.1. Consultas</h4></div></div></div>
+<p>
+                Al recuperar eventos mediante la <acronym class="acronym">API</acronym> de Calendar, se utilizan
+                <acronym class="acronym">URL</acronym>s de consulta especialmente construidas para describir qué eventos
+                deben devolverse. La clase <code class="classname">Zend_Gdata_Calendar_EventQuery</code> simplifica
+                esta tarea construyendo automáticamente una <acronym class="acronym">URL</acronym> de consulta a partir de
+                los parámetros proporcionados. Puede encontrar una lista completa de estos parámetros en la
+                <a class="ulink" href="http://code.google.com/apis/gdata/reference.html#Queries" target="_top">sección de consultas
+                    de la referencia de protocolo de las <acronym class="acronym">API</acronym>s de Google Data</a>. Sin embargo,
+                hay tres parámetros que merecen especial atención:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <em class="firstterm">User</em>
+                        se utiliza para especificar el usuario cuyo calendario se
+                        está buscando, y se especifica como una dirección de correo electrónico. Si
+                        no se proporciona ningún usuario, se utilizará "default" en su lugar para
+                        indicar al usuario actualmente autenticado (si está
+                        autenticado).
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Visibility</em>
+                        especifica si debe buscarse en el calendario público o privado
+                        de un usuario. Si se utiliza una sesión no autenticada
+                        y no hay ningún MagicCookie disponible, solo estará disponible
+                        el feed público.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Projection</em>
+                        especifica cuántos datos debe devolver el
+                        servidor y en qué formato. En la mayoría de los casos querrá
+                        utilizar la proyección "full". También está disponible la
+                        proyección "basic", que coloca la mayoría de los metadatos en
+                        el campo de contenido de cada evento como texto legible por humanos, y
+                        la proyección "composite", que incluye el texto completo
+                        de cualquier comentario junto a cada evento. La vista "composite"
+                        suele ser mucho más grande que la vista "full".
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.event_retrieval.start_time"></a>37.6.3.2. Recuperación de eventos en orden por hora de inicio</h4></div></div></div>
+<p>
+                El siguiente ejemplo ilustra el uso de la clase <code class="classname">Zend_Gdata_Query</code>
+                y especifica el feed de visibilidad privada, lo que requiere que exista una
+                conexión autenticada disponible con los servidores de calendario. Si se está
+                utilizando un MagicCookie para la autenticación, la visibilidad debe establecerse en su lugar en
+                "<span class="emphasis"><em>private-magicCookieValue</em></span>", donde magicCookieValue es la
+                cadena aleatoria obtenida al visualizar la dirección <acronym class="acronym">XML</acronym> privada en
+                la interfaz de Google Calendar. Los eventos se solicitan cronológicamente por hora de inicio y solo
+                se devuelven los eventos que ocurren en el futuro.
+            </p>
+<pre class="programlisting">
+$query = $service-&gt;newEventQuery();
+$query-&gt;setUser('default');
+// Set to $query-&gt;setVisibility('private-magicCookieValue') if using
+// MagicCookie auth
+$query-&gt;setVisibility('private');
+$query-&gt;setProjection('full');
+$query-&gt;setOrderby('starttime');
+$query-&gt;setFutureevents('true');
+
+// Retrieve the event list from the calendar server
+try {
+    $eventFeed = $service-&gt;getCalendarEventFeed($query);
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+
+// Iterate through the list of events, outputting them as an HTML list
+echo "&lt;ul&gt;";
+foreach ($eventFeed as $event) {
+    echo "&lt;li&gt;" . $event-&gt;title . " (Event ID: " . $event-&gt;id . ")&lt;/li&gt;";
+}
+echo "&lt;/ul&gt;";
+</pre>
+<p>
+                Propiedades adicionales como ID, autor, when, estado del evento, visibilidad, contenido
+                web, y contenido, entre otras, están disponibles dentro de
+                <code class="classname">Zend_Gdata_Calendar_EventEntry</code>. Consulte la
+                <a class="ulink" href="http://framework.zend.com/apidoc/core/" target="_top">documentación de la
+                <acronym class="acronym">API</acronym> de Zend Framework</a> y la
+                <a class="ulink" href="http://code.google.com/apis/gdata/reference.html" target="_top">Referencia del protocolo de
+                Calendar</a> para obtener una lista completa.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.event_retrieval.date_range"></a>37.6.3.3. Recuperación de eventos en un rango de fechas específico</h4></div></div></div>
+<p>
+                Para imprimir todos los eventos dentro de un rango determinado, por ejemplo desde el 1 de
+                diciembre de 2006 hasta el 15 de diciembre de 2007, añada las dos líneas siguientes a la
+                muestra anterior. Tenga cuidado de eliminar "<span class="command"><strong>$query-&gt;setFutureevents('true')</strong></span>", ya que
+                <span class="property">futureevents</span> anulará <span class="property">startMin</span> y
+                <span class="property">startMax</span>.
+            </p>
+<pre class="programlisting">
+$query-&gt;setStartMin('2006-12-01');
+$query-&gt;setStartMax('2006-12-16');
+</pre>
+<p>
+                Tenga en cuenta que <span class="property">startMin</span> es inclusivo mientras que
+                <span class="property">startMax</span> es exclusivo. Como resultado, solo se devolverán los eventos hasta
+                el 2006-12-15 23:59:59.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.event_retrieval.fulltext"></a>37.6.3.4. Recuperación de eventos mediante consulta de texto completo</h4></div></div></div>
+<p>
+                Para imprimir todos los eventos que contengan una palabra específica, por ejemplo "dogfood", utilice
+                el método <code class="methodname">setQuery()</code> al crear la consulta.
+            </p>
+<pre class="programlisting">
+$query-&gt;setQuery("dogfood");
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.event_retrieval.individual"></a>37.6.3.5. Recuperación de eventos individuales</h4></div></div></div>
+<p>
+                Los eventos individuales se pueden recuperar especificando su ID de evento como parte de la
+                consulta. En lugar de llamar a <code class="methodname">getCalendarEventFeed()</code>,
+                debe llamarse a <code class="methodname">getCalendarEventEntry()</code>.
+            </p>
+<pre class="programlisting">
+$query = $service-&gt;newEventQuery();
+$query-&gt;setUser('default');
+$query-&gt;setVisibility('private');
+$query-&gt;setProjection('full');
+$query-&gt;setEvent($eventId);
+
+try {
+    $event = $service-&gt;getCalendarEventEntry($query);
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+</pre>
+<p>
+                De forma similar, si se conoce la <acronym class="acronym">URL</acronym> del evento, se puede pasar
+                directamente a <code class="methodname">getCalendarEntry()</code> para recuperar un evento
+                específico. En este caso, no se requiere ningún objeto de consulta ya que la
+                <acronym class="acronym">URL</acronym> del evento contiene toda la información necesaria para recuperarlo.
+            </p>
+<pre class="programlisting">
+$eventURL = "http://www.google.com/calendar/feeds/default/private"
+          . "/full/g829on5sq4ag12se91d10uumko";
+
+try {
+    $event = $service-&gt;getCalendarEventEntry($eventURL);
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar.creating_events"></a>37.6.4. Creación de eventos</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.creating_events.single"></a>37.6.4.1. Creación de eventos de ocurrencia única</h4></div></div></div>
+<p>
+                Los eventos se añaden a un calendario creando una instancia de
+                <code class="classname">Zend_Gdata_EventEntry</code> y rellenándola con los datos
+                adecuados. La instancia del servicio de calendario (<code class="classname">Zend_Gdata_Calendar</code>) se
+                utiliza entonces para convertir de forma transparente el evento a <acronym class="acronym">XML</acronym> y
+                enviarlo (POST) al servidor de calendario. Crear eventos requiere una conexión autenticada mediante
+                AuthSub o ClientAuth con el servidor de calendario.
+            </p>
+<p>Como mínimo, deben establecerse los siguientes atributos:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <em class="firstterm">Title</em>
+                        proporciona el titular que aparecerá encima del evento
+                        dentro de la interfaz de Google Calendar.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">When</em>
+                        indica la duración del evento y, opcionalmente,
+                        los recordatorios asociados a él. Consulte la siguiente
+                        sección para obtener más información sobre este atributo.
+                    </p></li>
+</ul></div>
+<p>Otros atributos útiles que se pueden establecer opcionalmente incluyen:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <em class="firstterm">Author</em>
+                        proporciona información sobre el usuario que creó el
+                        evento.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Content</em>
+                        proporciona información adicional sobre el evento que
+                        aparece cuando se solicitan los detalles del evento desde
+                        dentro de Google Calendar.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">EventStatus</em>
+                        indica si el evento está confirmado, es provisional o
+                        está cancelado.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Transparency</em>
+                        indica si el evento debe consumir tiempo en
+                        la lista de disponibilidad del usuario.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">WebContent</em>
+                        permite proporcionar enlaces a contenido externo dentro de
+                        un evento.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Where</em>
+                        indica la ubicación del evento.
+                    </p></li>
+<li class="listitem"><p>
+                        <em class="firstterm">Visibility</em>
+                        permite ocultar el evento de las listas de eventos públicas.
+                    </p></li>
+</ul></div>
+<p>
+                Para obtener una lista completa de los atributos de evento, consulte la
+                <a class="ulink" href="http://framework.zend.com/apidoc/core/" target="_top">documentación de la
+                    <acronym class="acronym">API</acronym> de Zend Framework</a> y la <a class="ulink" href="http://code.google.com/apis/gdata/reference.html" target="_top">Referencia del protocolo de
+                    Calendar</a>. Los atributos que pueden contener múltiples valores, como where,
+                se implementan como arrays y deben crearse en consecuencia. Tenga en cuenta que todos
+                estos atributos requieren objetos como parámetros. Intentar rellenarlos
+                usando cadenas o valores primitivos dará como resultado errores durante la conversión a
+                <acronym class="acronym">XML</acronym>.
+            </p>
+<p>
+                Una vez rellenado el evento, se puede cargar en el servidor de calendario
+                pasándolo como argumento a la función <code class="methodname">insertEvent()</code>
+                del servicio de calendario.
+            </p>
+<pre class="programlisting">
+// Create a new entry using the calendar service's magic factory method
+$event= $service-&gt;newEventEntry();
+
+// Populate the event with the desired information
+// Note that each attribute is crated as an instance of a matching class
+$event-&gt;title = $service-&gt;newTitle("My Event");
+$event-&gt;where = array($service-&gt;newWhere("Mountain View, California"));
+$event-&gt;content =
+    $service-&gt;newContent(" This is my awesome event. RSVP required.");
+
+// Set the date using RFC 3339 format.
+$startDate = "2008-01-20";
+$startTime = "14:00";
+$endDate = "2008-01-20";
+$endTime = "16:00";
+$tzOffset = "-08";
+
+$when = $service-&gt;newWhen();
+$when-&gt;startTime = "{$startDate}T{$startTime}:00.000{$tzOffset}:00";
+$when-&gt;endTime = "{$endDate}T{$endTime}:00.000{$tzOffset}:00";
+$event-&gt;when = array($when);
+
+// Upload the event to the calendar server
+// A copy of the event as it is recorded on the server is returned
+$newEvent = $service-&gt;insertEvent($event);
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.creating_events.schedulers_reminders"></a>37.6.4.2. Horarios y recordatorios de eventos</h4></div></div></div>
+<p>
+                La hora de inicio y la duración de un evento vienen determinadas por el valor de su
+                propiedad <span class="property">when</span>, que contiene las propiedades
+                <span class="property">startTime</span>, <span class="property">endTime</span>, y
+                <span class="property">valueString</span>. <span class="emphasis"><em>StartTime</em></span> y
+                <span class="emphasis"><em>EndTime</em></span> controlan la duración del
+                evento, mientras que la propiedad <span class="property">valueString</span> no se utiliza actualmente.
+            </p>
+<p>
+                Los eventos de todo el día se pueden programar especificando solo la fecha y omitiendo la hora al
+                establecer <span class="property">startTime</span> y <span class="property">endTime</span>. Del mismo modo,
+                los eventos de duración cero pueden especificarse omitiendo <span class="property">endTime</span>.
+                En todos los casos, los valores de fecha y hora deben proporcionarse en el formato
+                <a class="ulink" href="http://www.ietf.org/rfc/rfc3339.txt" target="_top">RFC3339</a>.
+            </p>
+<pre class="programlisting">
+// Schedule the event to occur on December 05, 2007 at 2 PM PST (UTC-8)
+// with a duration of one hour.
+$when = $service-&gt;newWhen();
+$when-&gt;startTime = "2007-12-05T14:00:00-08:00";
+$when-&gt;endTime="2007-12-05T15:00:00:00-08:00";
+
+// Apply the when property to an event
+$event-&gt;when = array($when);
+</pre>
+<p>
+                El atributo <span class="property">when</span> también controla cuándo se envían los recordatorios a un
+                usuario. Los recordatorios se almacenan en un array y cada evento puede tener hasta cinco recordatorios
+                asociados.
+            </p>
+<p>
+                Para que un <span class="emphasis"><em>recordatorio</em></span> sea válido, debe tener dos atributos
+                establecidos: <span class="property">method</span> y una hora. <span class="emphasis"><em>Method</em></span> puede aceptar
+                una de las siguientes cadenas: "alert", "email", o "sms". La hora debe introducirse
+                como un entero y puede establecerse con la propiedad <span class="property">minutes</span>,
+                <span class="property">hours</span>, <span class="property">days</span>, o
+                <span class="property">absoluteTime</span>. Sin embargo, una solicitud válida solo puede tener uno de
+                estos atributos establecido. Si se desea un tiempo mixto, conviértalo a la unidad más precisa
+                disponible. Por ejemplo, 1 hora y 30 minutos deben introducirse como 90 minutos.
+            </p>
+<pre class="programlisting">
+// Create a new reminder object. It should be set to send an email
+// to the user 10 minutes beforehand.
+$reminder = $service-&gt;newReminder();
+$reminder-&gt;method = "email";
+$reminder-&gt;minutes = "10";
+
+// Apply the reminder to an existing event's when property
+$when = $event-&gt;when[0];
+$when-&gt;reminders = array($reminder);
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.creating_events.recurring"></a>37.6.4.3. Creación de eventos recurrentes</h4></div></div></div>
+<p>
+                Los eventos recurrentes se crean de la misma forma que los eventos de ocurrencia única, salvo que
+                debe proporcionarse un atributo de recurrencia en lugar de un atributo where. El
+                atributo de recurrencia debe contener una cadena que describa el patrón de recurrencia del evento
+                utilizando propiedades definidas en el estándar iCalendar (<a class="ulink" href="http://www.ietf.org/rfc/rfc2445.txt" target="_top">RFC 2445</a>).
+            </p>
+<p>
+                Las excepciones al patrón de recurrencia se suelen especificar mediante un atributo distinto
+                <span class="property">recurrenceException</span>. Sin embargo, el estándar iCalendar
+                proporciona un formato secundario para definir recurrencias, y debe tenerse en cuenta la
+                posibilidad de que se utilice cualquiera de los dos.
+            </p>
+<p>
+                Debido a la complejidad de analizar los patrones de recurrencia, más información sobre este
+                tema queda fuera del alcance de este documento. Sin embargo, se puede encontrar más información
+                en la <a class="ulink" href="http://code.google.com/apis/gdata/elements.html#gdRecurrence" target="_top">sección de elementos
+                    comunes de la guía del desarrollador de las <acronym class="acronym">API</acronym>s de Google
+                    Data</a>, así como en <acronym class="acronym">RFC</acronym> 2445.
+            </p>
+<pre class="programlisting">
+ // Create a new entry using the calendar service's magic factory method
+$event= $service-&gt;newEventEntry();
+
+// Populate the event with the desired information
+// Note that each attribute is crated as an instance of a matching class
+$event-&gt;title = $service-&gt;newTitle("My Recurring Event");
+$event-&gt;where = array($service-&gt;newWhere("Palo Alto, California"));
+$event-&gt;content =
+    $service-&gt;newContent(' This is my other awesome event, ' .
+                         ' occurring all-day every Tuesday from ' .
+                         '2007-05-01 until 207-09-04. No RSVP required.');
+
+// Set the duration and frequency by specifying a recurrence pattern.
+
+$recurrence = "DTSTART;VALUE=DATE:20070501\r\n" .
+        "DTEND;VALUE=DATE:20070502\r\n" .
+        "RRULE:FREQ=WEEKLY;BYDAY=Tu;UNTIL=20070904\r\n";
+
+$event-&gt;recurrence = $service-&gt;newRecurrence($recurrence);
+
+// Upload the event to the calendar server
+// A copy of the event as it is recorded on the server is returned
+$newEvent = $service-&gt;insertEvent($event);
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.calendar.creating_events.quickadd"></a>37.6.4.4. Uso de QuickAdd</h4></div></div></div>
+<p>
+                QuickAdd es una funcionalidad que permite crear eventos utilizando texto libre.
+                Por ejemplo, la cadena "Dinner at Joe's Diner on Thursday" crearía un evento
+                con el título "Dinner", la ubicación "Joe's Diner" y la fecha "Thursday". Para aprovechar
+                QuickAdd, cree una nueva propiedad <span class="property">QuickAdd</span> establecida en
+                <code class="constant">TRUE</code> y almacene el texto libre como una
+                propiedad <span class="property">content</span>.
+            </p>
+<pre class="programlisting">
+// Create a new entry using the calendar service's magic factory method
+$event= $service-&gt;newEventEntry();
+
+// Populate the event with the desired information
+$event-&gt;content= $service-&gt;newContent("Dinner at Joe's Diner on Thursday");
+$event-&gt;quickAdd = $service-&gt;newQuickAdd("true");
+
+// Upload the event to the calendar server
+// A copy of the event as it is recorded on the server is returned
+$newEvent = $service-&gt;insertEvent($event);
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar.modifying_events"></a>37.6.5. Modificación de eventos</h3></div></div></div>
+<p>
+            Una vez obtenida una instancia de un evento, sus atributos se pueden
+            modificar localmente de la misma forma que al crear un evento. Una vez completadas todas
+            las modificaciones, llamar al método <code class="methodname">save()</code> del evento cargará los
+            cambios en el servidor de calendario y devolverá una copia del evento tal y como se creó en el
+            servidor.
+        </p>
+<p>
+            En caso de que otro usuario haya modificado el evento desde que se recuperó la copia local,
+            <code class="methodname">save()</code> fallará y el servidor devolverá un código de estado 409 (Conflict).
+            Para resolver esto, debe recuperarse una copia actualizada del evento desde el servidor
+            antes de intentar volver a enviar cualquier modificación.
+        </p>
+<pre class="programlisting">
+// Get the first event in the user's event list
+$event = $eventFeed[0];
+
+// Change the title to a new value
+$event-&gt;title = $service-&gt;newTitle("Woof!");
+
+// Upload the changes to the server
+try {
+    $event-&gt;save();
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar.deleting_events"></a>37.6.6. Eliminación de eventos</h3></div></div></div>
+<p>
+            Los eventos de calendario se pueden eliminar llamando al método
+            <code class="methodname">delete()</code> del servicio de calendario y proporcionando la <acronym class="acronym">URL</acronym>
+            de edición de un evento, o bien llamando al propio método
+            <code class="methodname">delete()</code> de un evento existente.
+        </p>
+<p>
+            En cualquier caso, el evento eliminado seguirá apareciendo en el feed de eventos privado de un usuario si
+            se proporciona un parámetro de consulta <span class="property">updateMin</span>. Los eventos eliminados se pueden
+            distinguir de los eventos normales porque su propiedad
+            <span class="property">eventStatus</span> se establecerá en
+            "http://schemas.google.com/g/2005#event.canceled".
+        </p>
+<pre class="programlisting">
+// Option 1: Events can be deleted directly
+$event-&gt;delete();
+</pre>
+<pre class="programlisting">
+// Option 2: Events can be deleted supplying the edit URL of the event
+// to the calendar service, if known
+$service-&gt;delete($event-&gt;getEditLink()-&gt;href);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.calendar.comments"></a>37.6.7. Acceso a los comentarios de eventos</h3></div></div></div>
+<p>
+            Cuando se utiliza la vista de evento completa, los comentarios no se almacenan directamente dentro de una entrada.
+            En su lugar, cada evento contiene una <acronym class="acronym">URL</acronym> a su feed de comentarios asociado,
+            que debe solicitarse manualmente.
+        </p>
+<p>
+            Trabajar con comentarios es fundamentalmente similar a trabajar con eventos, siendo la única
+            diferencia significativa que debe utilizarse un feed y una clase de evento diferentes y
+            que los metadatos adicionales de los eventos, como where y when, no existen para los
+            comentarios. En concreto, el autor del comentario se almacena en la
+            propiedad <span class="property">author</span>, y el texto del comentario se almacena en la
+            propiedad <span class="property">content</span>.
+        </p>
+<pre class="programlisting">
+// Extract the comment URL from the first event in a user's feed list
+$event = $eventFeed[0];
+$commentUrl = $event-&gt;comments-&gt;feedLink-&gt;url;
+
+// Retrieve the comment list for the event
+try {
+$commentFeed = $service-&gt;getFeed($commentUrl);
+} catch (Zend_Gdata_App_Exception $e) {
+    echo "Error: " . $e-&gt;getMessage();
+}
+
+// Output each comment as an HTML list
+echo "&lt;ul&gt;";
+foreach ($commentFeed as $comment) {
+    echo "&lt;li&gt;&lt;em&gt;Comment By: " . $comment-&gt;author-&gt;name "&lt;/em&gt;&lt;br/&gt;" .
+         $comment-&gt;content . "&lt;/li&gt;";
+}
+echo "&lt;/ul&gt;";
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.gdata.clientlogin.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.gdata.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.gdata.docs.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">37.5. Autenticación con ClientLogin </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 37.7. Uso de la API de datos de Google Documents List</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

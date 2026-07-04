@@ -1,0 +1,95 @@
+<?php $title = '46.3. Analizadores de Zend_Markup'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">46.3. Analizadores de Zend_Markup</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.markup.getting-started.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 46. Zend_Markup</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.markup.renderers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.markup.parsers"></a>46.3. Analizadores de Zend_Markup</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Markup</code> se distribuye actualmente con un analizador, un analizador de BBCode.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.markup.parsers.theory"></a>46.3.1. Teoría del análisis</h3></div></div></div>
+<p>
+            Los analizadores de <code class="classname">Zend_Markup</code> son clases que convierten texto con
+            marcado en un árbol de tokens. Aunque aquí usamos el analizador de BBCode como ejemplo, la
+            idea del árbol de tokens sigue siendo la misma en todos los analizadores. Comenzaremos con este
+            fragmento de BBCode como ejemplo:
+        </p>
+<pre class="programlisting">
+[b]foo[i]bar[/i][/b]baz
+</pre>
+<p>
+            Entonces el analizador de BBCode tomará ese valor, lo descompondrá y creará el siguiente
+            árbol:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>[b]</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>foo</p></li>
+<li class="listitem">
+<p>[i]</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem"><p>bar</p></li></ul></div>
+</li>
+</ul></div>
+</li>
+<li class="listitem"><p>baz</p></li>
+</ul></div>
+<p>
+            Notará que las etiquetas de cierre desaparecen, no aparecen como contenido en la
+            estructura del árbol. Esto se debe a que la etiqueta de cierre no forma parte del contenido
+            real. Sin embargo, esto no significa que la etiqueta de cierre simplemente se pierda; se
+            almacena dentro de la información de la etiqueta para la propia etiqueta. Además, tenga en cuenta
+            que esta es solo una vista simplificada del árbol en sí. El árbol real contiene mucha más
+            información, como los atributos de la etiqueta y su nombre.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.markup.parsers.bbcode"></a>46.3.2. El analizador BBCode</h3></div></div></div>
+<p>
+            El analizador de BBCode es un analizador de <code class="classname">Zend_Markup</code> que convierte BBCode en
+            un árbol de tokens. La sintaxis de todas las etiquetas de BBCode es:
+        </p>
+<pre class="programlisting">
+[name(=(value|"value"))( attribute=(value|"value"))*]
+</pre>
+<p>
+            Algunos ejemplos de etiquetas de BBCode válidas son:
+        </p>
+<pre class="programlisting">
+[b]
+[list=1]
+[code file=Zend/Markup.php]
+[url="http://framework.zend.com/" title="Zend Framework!"]
+</pre>
+<p>
+            De forma predeterminada, todas las etiquetas se cierran usando el formato '[/tagname]'.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.markup.getting-started.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.markup.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.markup.renderers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">46.2. Primeros pasos con Zend_Markup </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 46.4. Renderizadores de Zend_Markup</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

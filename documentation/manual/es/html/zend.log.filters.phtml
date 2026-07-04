@@ -1,0 +1,88 @@
+<?php $title = '44.4. Filtros'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">44.4. Filtros</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.log.formatters.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 44. Zend_Log</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.log.factory.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.log.filters"></a>44.4. Filtros</h2></div></div></div>
+<p>
+        Un objeto Filtro bloquea que un mensaje se escriba en el log.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.filters.all-writers"></a>44.4.1. Filtrado para todos los escritores</h3></div></div></div>
+<p>
+            Para filtrar antes de todos los escritores, se puede añadir cualquier número de Filtros a un
+            objeto Log usando el método <code class="methodname">addFilter()</code>:
+        </p>
+<pre class="programlisting">
+$logger = new Zend_Log();
+
+$writer = new Zend_Log_Writer_Stream('php://output');
+$logger-&gt;addWriter($writer);
+
+$filter = new Zend_Log_Filter_Priority(Zend_Log::CRIT);
+$logger-&gt;addFilter($filter);
+
+// blocked
+$logger-&gt;info('Informational message');
+
+// logged
+$logger-&gt;emerg('Emergency message');
+</pre>
+<p>
+            Cuando se añade uno o más Filtros al objeto Log, el mensaje debe pasar
+            por todos los Filtros antes de que cualquier Escritor lo reciba.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.filters.single-writer"></a>44.4.2. Filtrado para una instancia de escritor</h3></div></div></div>
+<p>
+            Para filtrar únicamente en una instancia específica de Escritor, utilice el
+            método <code class="methodname">addFilter()</code> de ese Escritor:
+        </p>
+<pre class="programlisting">
+$logger = new Zend_Log();
+
+$writer1 = new Zend_Log_Writer_Stream('/path/to/first/logfile');
+$logger-&gt;addWriter($writer1);
+
+$writer2 = new Zend_Log_Writer_Stream('/path/to/second/logfile');
+$logger-&gt;addWriter($writer2);
+
+// add a filter only to writer2
+$filter = new Zend_Log_Filter_Priority(Zend_Log::CRIT);
+$writer2-&gt;addFilter($filter);
+
+// logged to writer1, blocked from writer2
+$logger-&gt;info('Informational message');
+
+// logged by both writers
+$logger-&gt;emerg('Emergency message');
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.log.formatters.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.log.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.log.factory.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">44.3. Formateadores </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 44.5. Uso de la fábrica para crear un Log</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

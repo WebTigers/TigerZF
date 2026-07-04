@@ -1,0 +1,418 @@
+<?php $title = 'B.3. Zend Framework 1.9'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">B.3. Zend Framework 1.9</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="migration.110.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice B. Notas de migración de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="migration.18.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="migration.19"></a>B.3. Zend Framework 1.9</h2></div></div></div>
+<p>
+        Al actualizar desde una versión de Zend Framework anterior a la 1.9.0 a cualquier versión 1.9, debe
+        tener en cuenta las siguientes notas de migración.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.zend.file.transfer"></a>B.3.1. Zend_File_Transfer</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.zend.file.transfer.mimetype"></a>B.3.1.1. Validación de MimeType</h4></div></div></div>
+<p>
+                Por razones de seguridad hemos tenido que desactivar el mecanismo de reserva por defecto de los
+                validadores <code class="classname">MimeType</code>, <code class="classname">ExcludeMimeType</code>,
+                <code class="classname">IsCompressed</code> e <code class="classname">IsImage</code>.
+                Esto significa que si no se encuentran las extensiones <span class="emphasis"><em>fileInfo</em></span> o
+                <span class="emphasis"><em>magicMime</em></span>, la validación
+                siempre fallará.
+            </p>
+<p>
+                Si necesita realizar la validación usando los campos <acronym class="acronym">HTTP</acronym> proporcionados
+                por el usuario, puede activar esta funcionalidad mediante el
+                método <code class="methodname">enableHeaderCheck()</code>.
+            </p>
+<div class="note"><table border="0" summary="Note: Security hint">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Consejo de seguridad</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Debe tener en cuenta que confiar en los campos <acronym class="acronym">HTTP</acronym> proporcionados
+                    por su usuario supone un riesgo de seguridad. Estos pueden modificarse fácilmente y podrían
+                    permitir a su usuario proporcionar un archivo malicioso.
+                </p></td></tr>
+</table></div>
+<div class="example">
+<a name="migration.19.zend.file.transfer.example"></a><p class="title"><b>Ejemplo B.1. Permitir el uso de los campos HTTP</b></p>
+<div class="example-contents"><pre class="programlisting">
+// at initiation
+$valid = new Zend_File_Transfer_Adapter_Http(array('headerCheck' =&gt; true);
+
+// or afterwards
+$valid-&gt;enableHeaderCheck();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.zend.filter"></a>B.3.2. Zend_Filter</h3></div></div></div>
+<p>
+            Antes de la versión 1.9, <code class="classname">Zend_Filter</code> permitía
+            el uso del método estático <code class="methodname">get()</code>. A partir de la
+            versión 1.9 este método ha sido renombrado a
+            <code class="methodname">filterStatic()</code> para ser más descriptivo. El
+            antiguo método <code class="methodname">get()</code> queda marcado como obsoleto.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.zend.http.client"></a>B.3.3. Zend_Http_Client</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.zend.http.client.fileuploadsarray"></a>B.3.3.1. Cambios en el almacenamiento interno de información de archivos subidos</h4></div></div></div>
+<p>
+                En la versión 1.9 de Zend Framework, se ha producido un cambio en la forma en que
+                <code class="classname">Zend_Http_Client</code> almacena internamente la información sobre
+                los archivos que se van a subir, establecida mediante el
+                método <code class="methodname">Zend_Http_Client::setFileUpload()</code>.
+            </p>
+<p>
+                Este cambio se introdujo para permitir la subida de múltiples archivos
+                con el mismo nombre de formulario, como un array de archivos. Puede encontrar más información sobre este asunto
+                en <a class="ulink" href="http://framework.zend.com/issues/browse/ZF-5744" target="_top">este informe de error</a>.
+            </p>
+<div class="example">
+<a name="migration.19.zend.http.client.fileuploadsarray.example"></a><p class="title"><b>Ejemplo B.2. Almacenamiento interno de información de archivos subidos</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Upload two files with the same form element name, as an array
+$client = new Zend_Http_Client();
+$client-&gt;setFileUpload('file1.txt',
+                       'userfile[]',
+                       'some raw data',
+                       'text/plain');
+$client-&gt;setFileUpload('file2.txt',
+                       'userfile[]',
+                       'some other data',
+                       'application/octet-stream');
+
+// In Zend Framework 1.8 or older, the value of
+// the protected member $client-&gt;files is:
+// $client-&gt;files = array(
+//     'userfile[]' =&gt; array('file2.txt',
+                             'application/octet-stream',
+                             'some other data')
+// );
+
+// In Zend Framework 1.9 or newer, the value of $client-&gt;files is:
+// $client-&gt;files = array(
+//     array(
+//         'formname' =&gt; 'userfile[]',
+//         'filename' =&gt; 'file1.txt,
+//         'ctype'    =&gt; 'text/plain',
+//         'data'     =&gt; 'some raw data'
+//     ),
+//     array(
+//         'formname' =&gt; 'userfile[]',
+//         'filename' =&gt; 'file2.txt',
+//         'formname' =&gt; 'application/octet-stream',
+//         'formname' =&gt; 'some other data'
+//     )
+// );
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Como puede ver, este cambio permite el uso del mismo nombre de elemento de formulario con
+                más de un archivo; sin embargo, introduce un cambio sutil de compatibilidad con versiones anteriores
+                que conviene tener en cuenta.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.zend.http.client.getparamsrecursize"></a>B.3.3.2. Obsolescencia de Zend_Http_Client::_getParametersRecursive()</h4></div></div></div>
+<p>
+                A partir de la versión 1.9, el método protegido
+                <code class="methodname">_getParametersRecursive()</code> ya no es utilizado por
+                <code class="classname">Zend_Http_Client</code> y queda obsoleto. Su uso provocará que
+                <acronym class="acronym">PHP</acronym> emita un mensaje <code class="constant">E_NOTICE</code>.
+            </p>
+<p>
+                Si extiende <code class="classname">Zend_Http_Client</code> y llama a este método, debería
+                considerar el uso del método estático
+                <code class="methodname">Zend_Http_Client::_flattenParametersArray()</code>
+                en su lugar.
+            </p>
+<p>
+                De nuevo, dado que <code class="methodname">_getParametersRecursive()</code> es un método
+                protegido, este cambio solo afectará a los usuarios que extiendan
+                <code class="classname">Zend_Http_Client</code>.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.zend.locale"></a>B.3.4. Zend_Locale</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.zend.locale.deprecated"></a>B.3.4.1. Métodos obsoletos</h4></div></div></div>
+<p>
+                Algunos métodos de traducción especializados han quedado obsoletos porque duplican
+                un comportamiento ya existente. Tenga en cuenta que los métodos antiguos seguirán funcionando, pero se
+                activará un aviso de usuario que describe la nueva llamada. Los métodos se eliminarán en la versión 2.0.
+                Consulte la siguiente lista para conocer la llamada de método antigua y la nueva.
+            </p>
+<div class="table">
+<a name="migration.19.zend.locale.deprecated.table-1"></a><p class="title"><b>Tabla B.3. Lista de tipos de medida</b></p>
+<div class="table-contents"><table class="table" summary="List of measurement types" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Llamada antigua</th>
+<th>Llamada nueva</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                                <code class="methodname">getLanguageTranslationList($locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslationList('language', $locale)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getScriptTranslationList($locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslationList('script', $locale)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getCountryTranslationList($locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslationList('territory', $locale, 2)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getTerritoryTranslationList($locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslationList('territory', $locale, 1)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getLanguageTranslation($value, $locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslation($value, 'language', $locale)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getScriptTranslation($value, $locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslation($value, 'script', $locale)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getCountryTranslation($value, $locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslation($value, 'country', $locale)</code>
+                            </td>
+</tr>
+<tr>
+<td>
+                                <code class="methodname">getTerritoryTranslation($value, $locale)</code>
+                            </td>
+<td>
+                                <code class="methodname">getTranslation($value, 'territory',
+                                    $locale)</code>
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.zend.view.helper.navigation"></a>B.3.5. Zend_View_Helper_Navigation</h3></div></div></div>
+<p>
+            Antes de la versión 1.9, el helper de menú
+            (<code class="classname">Zend_View_Helper_Navigation_Menu</code>) no
+            renderizaba correctamente los submenús. Cuando <span class="property">onlyActiveBranch</span>
+            era <code class="constant">TRUE</code> y la opción <span class="property">renderParents</span>
+            era <code class="constant">FALSE</code>, no se renderizaba nada si la
+            página activa más profunda se encontraba a una profundidad inferior a la de la opción <span class="property">minDepth</span>.
+        </p>
+<p>
+            Dicho de forma más sencilla; si <span class="property">minDepth</span> se establecía en '1'
+            y la página activa estaba en una de las páginas de primer nivel, no
+            se renderizaría nada, como muestra el siguiente ejemplo.
+        </p>
+<p>
+            Considere la siguiente configuración de contenedor:
+        </p>
+<pre class="programlisting">
+&lt;?php
+$container = new Zend_Navigation(array(
+    array(
+        'label' =&gt; 'Home',
+        'uri'   =&gt; '#'
+    ),
+    array(
+        'label'  =&gt; 'Products',
+        'uri'    =&gt; '#',
+        'active' =&gt; true,
+        'pages'  =&gt; array(
+            array(
+                'label' =&gt; 'Server',
+                'uri'   =&gt; '#'
+            ),
+            array(
+                'label' =&gt; 'Studio',
+                'uri'   =&gt; '#'
+            )
+        )
+    ),
+    array(
+        'label' =&gt; 'Solutions',
+        'uri'   =&gt; '#'
+    )
+));
+</pre>
+<p>
+            El siguiente código se utiliza en un script de vista:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;navigation()-&gt;menu()-&gt;renderMenu($container, array(
+    'minDepth'         =&gt; 1,
+    'onlyActiveBranch' =&gt; true,
+    'renderParents'    =&gt; false
+)); ?&gt;
+</pre>
+<p>
+            Antes de la versión 1.9, el fragmento de código anterior no generaba ninguna salida.
+        </p>
+<p>
+            Desde la versión 1.9, el método <code class="methodname">_renderDeepestMenu()</code> en
+            <code class="classname">Zend_View_Helper_Navigation_Menu</code> aceptará
+            páginas activas a un nivel por debajo de <span class="property">minDepth</span>, siempre que
+            la página tenga hijos.
+        </p>
+<p>
+            El mismo fragmento de código ahora generará lo siguiente:
+        </p>
+<pre class="programlisting">
+&lt;ul class="navigation"&gt;
+    &lt;li&gt;
+        &lt;a href="#"&gt;Server&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a href="#"&gt;Studio&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.19.security"></a>B.3.6. Correcciones de seguridad a partir de la versión 1.9.7</h3></div></div></div>
+<p>
+            Adicionalmente, los usuarios de la serie 1.9 pueden verse afectados por otros cambios a partir de la
+            versión 1.9.7. Todas ellas son correcciones de seguridad que también tienen
+            posibles implicaciones de compatibilidad con versiones anteriores.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.security.zend.dojo.editor"></a>B.3.6.1. Zend_Dojo_View_Helper_Editor</h4></div></div></div>
+<p>
+                Se realizó un pequeño cambio en la serie 1.9 para modificar el uso por defecto del dijit Editor
+                para que utilice etiquetas <acronym class="acronym">div</acronym> en lugar de una etiqueta <acronym class="acronym">textarea</acronym>;
+                este último uso tiene <a class="ulink" href="http://api.dojotoolkit.org/jsdoc/HEAD/dijit._editor.RichText" target="_top">implicaciones
+                de seguridad</a>, y el uso de etiquetas <acronym class="acronym">div</acronym> es lo recomendado por el
+                proyecto Dojo.
+            </p>
+<p>
+                Con el fin de seguir permitiendo la degradación elegante, se añadió una nueva opción
+                <code class="varname">degrade</code> al helper de vista; esto permitía a los desarrolladores usar opcionalmente
+                una etiqueta <acronym class="acronym">textarea</acronym> en su lugar. Sin embargo, esto exponía a las aplicaciones desarrolladas con
+                dicho uso a vectores de <acronym class="acronym">XSS</acronym>. En la versión 1.9.7, hemos eliminado esta opción.
+                La degradación elegante sigue estando soportada, no obstante, mediante una etiqueta <acronym class="acronym">noscript</acronym>
+                que incluye una <acronym class="acronym">textarea</acronym>. Esta solución resuelve todos los problemas
+                de seguridad.
+            </p>
+<p>
+                La conclusión es que si estaba utilizando la marca <code class="varname">degrade</code>, esta
+                simplemente se ignorará a partir de ahora.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.security.zend.filter.html-entities"></a>B.3.6.2. Zend_Filter_HtmlEntities</h4></div></div></div>
+<p>
+                Para utilizar por defecto una codificación de caracteres más segura,
+                <code class="classname">Zend_Filter_HtmlEntities</code> ahora usa por defecto
+                <acronym class="acronym">UTF-8</acronym> en lugar de <acronym class="acronym">ISO-8859-1</acronym>.
+            </p>
+<p>
+                Adicionalmente, dado que el mecanismo real trata con codificaciones de caracteres y
+                no con conjuntos de caracteres, se han añadido dos nuevos métodos,
+                <code class="methodname">setEncoding()</code> y <code class="methodname">getEncoding()</code>.
+                Los métodos anteriores <code class="methodname">setCharSet()</code> y
+                <code class="methodname">setCharSet()</code> ahora están obsoletos y actúan como proxy hacia los nuevos
+                métodos. Por último, en lugar de usar los miembros protegidos directamente dentro del
+                método <code class="methodname">filter()</code>, estos miembros se obtienen a través de sus
+                accesores explícitos. Si estaba extendiendo el filtro anteriormente, revise su
+                código y sus pruebas unitarias para asegurarse de que todo sigue funcionando correctamente.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="migration.19.security.zend.filter.strip-tags"></a>B.3.6.3. Zend_Filter_StripTags</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Filter_StripTags</code> contiene una marca,
+                <code class="varname">commentsAllowed</code>, que, en versiones anteriores, permitía
+                incluir opcionalmente en una lista blanca los comentarios <acronym class="acronym">HTML</acronym> en el texto
+                <acronym class="acronym">HTML</acronym> filtrado por la clase. Sin embargo, esto exponía al código que activaba esta marca a
+                ataques de <acronym class="acronym">XSS</acronym>, en particular en Internet Explorer (que permite
+                especificar funcionalidad condicional mediante comentarios <acronym class="acronym">HTML</acronym>). A partir
+                de la versión 1.9.7 (y aplicado retroactivamente a las versiones 1.8.5 y 1.7.9), la
+                marca <code class="varname">commentsAllowed</code> ya no tiene ningún efecto, y todos
+                los comentarios <acronym class="acronym">HTML</acronym>, incluidos aquellos que contienen otras
+                etiquetas <acronym class="acronym">HTML</acronym> o comentarios anidados, se eliminarán de la salida final
+                del filtro.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="migration.110.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="migration.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="migration.18.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">B.2. Zend Framework 1.10 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> B.4. Zend Framework 1.8</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

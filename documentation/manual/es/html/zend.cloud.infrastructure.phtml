@@ -1,0 +1,454 @@
+<?php $title = '19.4. Zend_Cloud_Infrastructure'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">19.4. Zend_Cloud_Infrastructure</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cloud.storageservice.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 19. SimpleCloud API: Zend_Cloud</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cloud.infrastructure.adapter.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cloud.infrastructure"></a>19.4. Zend_Cloud_Infrastructure</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.infrastructure.intro"></a>19.4.1. Resumen</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Cloud_Infrastructure</code> es una clase para gestionar diferentes
+            infraestructuras de computación en la nube utilizando una <acronym class="acronym">API</acronym> común.
+        </p>
+<p>
+            Para proporcionar una API de clase común para diferentes proveedores de nube hemos implementado
+            un pequeño conjunto de operaciones básicas para la gestión de instancias (servidores) en una infraestructura en la nube.
+            Estas operaciones básicas son:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>crear una nueva instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>eliminar una instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>iniciar/detener una instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>reiniciar una instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>listado de las instancias disponibles</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>obtener el estado de una instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>esperar un cambio de estado de una instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>obtener la IP pública o el nombre DNS de la instancia</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>listar todas las imágenes disponibles para nuevas instancias</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>listar todas las zonas geográficas disponibles para nuevas instancias</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>monitorizar una instancia obteniendo la información del sistema (uso de CPU%, RAM%, DISCO%, RED%)</em></span>;
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>desplegar una instancia (ejecutar un script de shell arbitrario en una instancia)</em></span>;
+                </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note: Deployment of an instance">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Despliegue de una instancia</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Para las operaciones de despliegue hemos utilizado la <a class="ulink" href="http://www.php.net/manual/en/book.ssh2.php" target="_top">
+                extensión SSH2 de PHP (ext/ssh2)</a> para conectarnos a una instancia y ejecutar un script de shell.  Las extensiones SSH2
+                solo se pueden usar para conectarse a instancias (servidores) Gnu/Linux.
+            </p></td></tr>
+</table></div>
+<p>
+            Esta clase se gestiona mediante una factoría (factory) para inicializar adaptadores específicos de computación en la nube.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.infrastructure.quick-start"></a>19.4.2. Inicio rápido</h3></div></div></div>
+<p>
+            Para usar esta clase debe inicializar la factoría con un adaptador específico.  Puede
+            consultar los adaptadores soportados en el capítulo específico <a class="link" href="zend.cloud.infrastructure.adapter.phtml" title="19.5. Zend_Cloud_Infrastructure_Adapter">Zend_Cloud_Infrastructure_Adapter</a>.
+            Estamos planeando soportar otros proveedores de computación en la nube muy pronto.
+        </p>
+<p>
+            Por ejemplo, para trabajar con el adaptador de AMAZON EC2 debe inicializar la clase con
+            los siguientes parámetros:
+        </p>
+<pre class="programlisting">
+$key    = 'key';
+$secret = 'secret';
+$region = 'region';
+
+$infrastructure = Zend_Cloud_Infrastructure_Factory::getAdapter(array(
+    Zend_Cloud_Infrastructure_Factory::INFRASTRUCTURE_ADAPTER_KEY =&gt; 'Zend_Cloud_Infrastructure_Adapter_Ec2',
+    Zend_Cloud_Infrastructure_Adapter_Ec2::AWS_ACCESS_KEY =&gt; $key,
+    Zend_Cloud_Infrastructure_Adapter_Ec2::AWS_SECRET_KEY =&gt; $secret,
+    Zend_Cloud_Infrastructure_Adapter_Ec2::AWS_REGION     =&gt; $region,
+));
+</pre>
+<p>
+            <code class="classname">Zend_Cloud_Infrastructure</code> tiene solo un par de métodos que son específicos del proveedor.
+            Estos métodos son la creación de una nueva instancia y la monitorización de una instancia.
+            Por ejemplo, a continuación se muestra un ejemplo que ilustra cómo crear una nueva instancia usando el adaptador de Amazon EC2:
+        </p>
+<pre class="programlisting">
+$param= array (
+    'imageId'      =&gt; 'your-image-id',
+    'instanceType' =&gt; 'your-instance-type',
+);
+
+$instance= $infrastructure-&gt;createInstance('name of the instance', $param);
+
+printf ("Name of the instance: %s\n", $instance-&gt;getName());
+printf ("ID of the instance  : %s\n", $instance-&gt;getId());
+</pre>
+<p>
+            La interfaz de <code class="methodname">createInstance</code> es siempre la misma, solo
+            el contenido de <span class="emphasis"><em>$param</em></span> es específico del adaptador.  Para más
+            información sobre los adaptadores soportados por Zend_Cloud_Infrastructure vaya a la
+            <a class="link" href="zend.cloud.infrastructure.adapter.phtml" title="19.5. Zend_Cloud_Infrastructure_Adapter">página específica del manual</a>.
+        </p>
+<p>
+            <code class="classname">Zend_Cloud_Infrastructure</code> utiliza las clases
+            <code class="classname">Zend_Cloud_Infrastructure_Instance</code> y
+            <code class="classname">Zend_Cloud_Infrastructure_Image</code> para gestionar las instancias (servidores)
+            y las imágenes de una instancia.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.infrastructure.methods"></a>19.4.3. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.cloud.infrastructure.methods.create-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">createInstance</span>(<span class="methodparam">string $name, array $options</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Crea una instancia.
+                        El valor de retorno es una instancia de <code class="classname">Zend_Cloud_Infrastructure_Instance</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$name</em></span> es el nombre de la instancia a crear
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options</em></span> es el array que contiene el parámetro específico para el adaptador de nube.
+                        Para más información lea el capítulo de <a class="link" href="zend.cloud.infrastructure.adapter.phtml" title="19.5. Zend_Cloud_Infrastructure_Adapter">Zend_Cloud_Infrastructure_Adapter</a>.
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.deploy-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deployInstance</span>(<span class="methodparam">string $id, array $param, string|array $cmd</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Ejecuta scripts de shell arbitrarios en una instancia.
+                        Devuelve una cadena o un array que contiene toda la salida estándar (incluyendo errores) de los scripts ejecutados en la instancia.
+                        </p>
+<div class="note"><table border="0" summary="Note: Requirement">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Requisito</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                                Para usar el método deployInstance debe instalar la extensión SSH2 (ext/ssh2) de PHP.
+                                Las extensiones SSH2 solo se pueden usar para conectarse a instancias (servidores) Gnu/Linux.
+                                Para más información sobre la extensión SSH2, <a class="ulink" href="http://www.php.net/manual/en/book.ssh2.php" target="_top">haga clic aquí</a>.
+                            </p></td></tr>
+</table></div>
+<p>
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+<p>
+                        <span class="emphasis"><em>$param</em></span> es un array que contiene el nombre de usuario y la contraseña a usar para la conexión SSH.
+                        El nombre de usuario y la contraseña deben especificarse usando las siguientes constantes clave de <code class="classname">Zend_Cloud_Infrastructure_Instance</code>:
+                        SSH_USERNAME, SSH_PASSWORD.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$cmd</em></span> es una cadena (o un array) que contiene las líneas de comando a ejecutar en la instancia.
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.destroy-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">destroyInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Destruye una instancia.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.get-adapter"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getAdapter</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve el objeto adaptador.
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.get-adapter-result"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getAdapterResult</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve el resultado original del adaptador.
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.get-last-http-request"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getLastHttpRequest</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve la última petición HTTP del adaptador.
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.get-last-http-response"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getLastHttpResponse</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve la última respuesta HTTP del adaptador.
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.images-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">imagesInstance</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve todas las imágenes disponibles para usar en una instancia.
+                        El valor de retorno es una instancia de <code class="classname">Zend_Cloud_Infrastructure_ImageList</code>
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.list-instances"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">listInstances</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve la lista de las instancias disponibles.
+                        El retorno es una instancia de <code class="classname">Zend_Cloud_Infrastructure_InstanceList</code>.
+                    </p></dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.monitor-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">monitorInstance</span>(<span class="methodparam">string $id,string $metric,array $options=null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Monitoriza una instancia. Devuelve la información del sistema sobre la métrica de una instancia.
+                        El valor de retorno es un array que contiene muestras de valores, marca de tiempo y el cálculo del valor medio.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia;
+                    </p>
+<p>
+                        <span class="emphasis"><em>$metric</em></span> es la métrica a monitorizar. Las métricas permitidas se indican como constantes de la
+                        clase <code class="classname">Zend_Cloud_Infrastructure_Instance</code>: MONITOR_CPU, MONITOR_RAM,
+                        MONITOR_NETWORK_IN, MONITOR_NETWORK_OUT, MONITOR_DISK, MONITOR_DISK_WRITE, MONITOR_DISK_READ.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options</em></span> es el array opcional que contiene las opciones específicas del adaptador.
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.public-dns-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">publicDnsInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve el nombre DNS público o la dirección IP de la instancia. El valor de retorno es una cadena.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.reboot-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">rebootInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Reinicia una instancia.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.start-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">startInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Inicia una instancia.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.status-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">statusInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Obtiene el estado de una instancia. El valor de retorno es una cadena.
+                        Los estados disponibles se indican en las siguientes constantes de la clase <code class="classname">Zend_Cloud_Infrastructure_Instance</code>:
+                        STATUS_STOPPED, STATUS_RUNNING, STATUS_SHUTTING_DOWN, STATUS_REBOOTING,
+                        STATUS_TERMINATED, STATUS_PENDING, STATUS_REBUILD.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.stop-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">stopInstance</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Detiene una instancia.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.wait-status-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">waitStatusInstance</span>(<span class="methodparam">string $id, string $status,integer $timeout=30</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Espera el cambio de estado de una instancia durante un tiempo máximo de <span class="emphasis"><em>n</em></span> segundos.
+                        Devuelve <span class="emphasis"><em>true</em></span> si el estado cambia como se esperaba, <span class="emphasis"><em>false</em></span> si no.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID de la instancia;
+                    </p>
+<p>
+                        <span class="emphasis"><em>$status</em></span> es el estado a esperar;
+                    </p>
+<p>
+                        <span class="emphasis"><em>$timeout</em></span> es el tiempo máximo, en segundos, a esperar para el cambio de estado. Este parámetro es opcional y el valor por defecto es 30 segundos.
+                    </p>
+</dd>
+<dt>
+<a name="zend.cloud.infrastructure.methods.zones-instance"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">zonesInstance</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve todas las zonas disponibles para una instancia.
+                        El valor de retorno es un array.
+                    </p></dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.infrastructure.examples"></a>19.4.4. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.cloud.infrastructure.examples.authenticate"></a><p class="title"><b>Ejemplo 19.40. Obtener la información del sistema de fecha y hora de una instancia</b></p>
+<div class="example-contents">
+<p>Obtiene el resultado del comando <span class="emphasis"><em>date</em></span>.</p>
+<pre class="programlisting">
+$param = array (
+    Instance::SSH_USERNAME =&gt; 'username',
+    Instance::SSH_PASSWORD =&gt; 'password',
+);
+
+$cmd    = 'date';
+$output = $infrastructure-&gt;deployInstance('instance-id', $param, $cmd);
+
+echo $output;
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.cloud.infrastructure.examples.get-datetime"></a><p class="title"><b>Ejemplo 19.41. Obtener la información del sistema de fecha y hora de una instancia</b></p>
+<div class="example-contents">
+<p>Obtiene el resultado del comando <span class="emphasis"><em>date</em></span>.</p>
+<pre class="programlisting">
+$param = array (
+    Instance::SSH_USERNAME =&gt; 'username',
+    Instance::SSH_PASSWORD =&gt; 'password',
+);
+
+$cmd    = 'date';
+$output = $infrastructure-&gt;deployInstance('instance-id', $param, $cmd);
+
+echo $output;
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.cloud.infrastructure.examples.reboot"></a><p class="title"><b>Ejemplo 19.42. Reiniciar una instancia y esperar el estado de ejecución</b></p>
+<div class="example-contents">
+<p>Reinicia una instancia y espera 60 segundos por el estado de ejecución.</p>
+<pre class="programlisting">
+if (!$infrastructure-&gt;rebootInstance('instance-id')) {
+    die ('Error in the execution of the reboot command');
+}
+echo 'Reboot command executed successfully';
+
+if ($rackspace-&gt;waitStatusInstance('instance-id', Zend_Cloud_Infrastructure_Instance::STATUS_RUNNING, 60)) {
+    echo 'The instance is ready';
+} else {
+    echo 'The instance is not ready yet';
+}
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cloud.storageservice.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cloud.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cloud.infrastructure.adapter.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">19.3. Introducción a StorageService </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 19.5. Zend_Cloud_Infrastructure_Adapter</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,375 @@
+<?php $title = 'Capítulo 44. Zend_Log'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 44. Zend_Log</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.locale.appendix.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.log.writers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.log"></a>Capítulo 44. Zend_Log</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.log.phtml#zend.log.overview">44.1. Resumen</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.creating-a-logger">44.1.1. Creación de un Log</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.logging-messages">44.1.2. Registro de mensajes</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.destroying-a-logger">44.1.3. Destrucción de un Log</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.builtin-priorities">44.1.4. Uso de prioridades integradas</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.user-defined-priorities">44.1.5. Añadir prioridades definidas por el usuario</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.understanding-fields">44.1.6. Entender los eventos de registro</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.phtml#zend.log.overview.as-errorHandler">44.1.7. Registrar errores de PHP</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.log.writers.phtml">44.2. Writers</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.stream">44.2.1. Escritura en Streams</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.database">44.2.2. Escritura en bases de datos</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.firebug">44.2.3. Escritura en Firebug</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.firebug.priority-styles">44.2.3.1. Establecer estilos para prioridades</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.firebug.preparing-data">44.2.3.2. Preparación de datos para el registro</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.firebug.preparing-data.exception">44.2.3.3. Registro de excepciones</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.firebug.preparing-data.table">44.2.3.4. Registro de tablas</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.mail">44.2.4. Escritura por correo electrónico</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.mail.layoutusage">44.2.4.1. Uso de Zend_Layout</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.mail.dynamicsubjectline">44.2.4.2. Resumen del nivel de error en la línea de asunto</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.writers.phtml#zend.log.writers.mail.caveats">44.2.4.3. Advertencias</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.syslog">44.2.5. Escritura en el log del sistema</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.zendmonitor">44.2.6. Escritura en el Zend Server Monitor</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.null">44.2.7. Anular el Writer (stub)</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.mock">44.2.8. Pruebas con el Mock</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.writers.phtml#zend.log.writers.compositing">44.2.9. Composición de Writers</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.log.formatters.phtml">44.3. Formatters</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.log.formatters.phtml#zend.log.formatters.simple">44.3.1. Formato simple</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.formatters.phtml#zend.log.formatters.xml">44.3.2. Formato a XML</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.log.filters.phtml">44.4. Filters</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.log.filters.phtml#zend.log.filters.all-writers">44.4.1. Filtrado para todos los Writers</a></span></dt>
+<dt><span class="sect2"><a href="zend.log.filters.phtml#zend.log.filters.single-writer">44.4.2. Filtrado para una instancia de Writer</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.log.factory.phtml">44.5. Uso de la Factory para crear un Log</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.log.factory.phtml#zend.log.factory.writer-options">44.5.1. Opciones de Writer</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.db">44.5.1.1. Opciones de Zend_Log_Writer_Db</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.firebug">44.5.1.2. Opciones de Zend_Log_Writer_Firebug</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.mail">44.5.1.3. Opciones de Zend_Log_Writer_Mail</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.mock">44.5.1.4. Opciones de Zend_Log_Writer_Mock</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.null">44.5.1.5. Opciones de Zend_Log_Writer_Null</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.stream">44.5.1.6. Opciones de Zend_Log_Writer_Stream</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.syslog">44.5.1.7. Opciones de Zend_Log_Writer_Syslog</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.writer-options.zendmonitor">44.5.1.8. Opciones de Zend_Log_Writer_ZendMonitor</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.log.factory.phtml#zend.log.factory.filter-options">44.5.2. Opciones de Filter</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.filter-options.message">44.5.2.1. Opciones de Zend_Log_Filter_Message</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.filter-options.priority">44.5.2.2. Opciones de Zend_Log_Filter_Priority</a></span></dt>
+<dt><span class="sect3"><a href="zend.log.factory.phtml#zend.log.factory.filter-options.suppress">44.5.2.3. Opciones de Zend_Log_Filter_Suppress</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.log.factory.phtml#zend.log.factory.custom">44.5.3. Creación de Writers y Filters configurables</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.log.overview"></a>44.1. Resumen</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Log</code> es un componente para el registro de propósito general.
+        Soporta múltiples backends de log, formatea los mensajes enviados al log,
+        y filtra los mensajes para que no se registren. Estas funciones se dividen
+        en los siguientes objetos:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Un Log (instancia de <code class="classname">Zend_Log</code>) es el objeto que su
+                    aplicación usa con más frecuencia. Puede tener tantos objetos Log como
+                    desee; no interactúan entre sí. Un objeto Log debe contener al
+                    menos un Writer, y opcionalmente puede contener uno o más Filters.
+                </p></li>
+<li class="listitem"><p>
+                    Un Writer (hereda de <code class="classname">Zend_Log_Writer_Abstract</code>) es
+                    responsable de guardar los datos en el almacenamiento.
+                </p></li>
+<li class="listitem"><p>
+                    Un Filter (implementa <code class="classname">Zend_Log_Filter_Interface</code>)
+                    bloquea que los datos de log se guarden. Un filtro puede aplicarse a un
+                    Writer individual, o a un Log, donde se aplica antes que todos
+                    los Writers. En cualquier caso, los filtros pueden encadenarse.
+                </p></li>
+<li class="listitem"><p>
+                    Un Formatter (implementa <code class="classname">Zend_Log_Formatter_Interface</code>)
+                    puede formatear los datos del log antes de que sean escritos por un Writer. Cada
+                    Writer tiene exactamente un Formatter.
+                </p></li>
+</ul></div>
+<p>
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.creating-a-logger"></a>44.1.1. Creación de un Log</h3></div></div></div>
+<p>
+            Para empezar a registrar, instancie un Writer y luego páselo a una instancia de Log:
+        </p>
+<pre class="programlisting">
+$logger = new Zend_Log();
+$writer = new Zend_Log_Writer_Stream('php://output');
+
+$logger-&gt;addWriter($writer);
+</pre>
+<p>
+            Es importante señalar que el Log debe
+            tener al menos un Writer. Puede añadir cualquier número de Writers usando el
+            método <code class="methodname">addWriter()</code> del Log.
+        </p>
+<p>
+            Alternativamente, puede pasar un Writer directamente al constructor del Log como
+            un atajo:
+        </p>
+<pre class="programlisting">
+$writer = new Zend_Log_Writer_Stream('php://output');
+$logger = new Zend_Log($writer);
+</pre>
+<p>
+            El Log ya está listo para usarse.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.logging-messages"></a>44.1.2. Registro de mensajes</h3></div></div></div>
+<p>
+            Para registrar un mensaje, llame al método <code class="methodname">log()</code> de una instancia de Log
+            y páselo el mensaje con una prioridad correspondiente:
+        </p>
+<pre class="programlisting">
+$logger-&gt;log('Informational message', Zend_Log::INFO);
+</pre>
+<p>
+            El primer parámetro del método <code class="methodname">log()</code> es un
+            <span class="property">message</span> de tipo string y el segundo parámetro es una
+            <span class="property">priority</span> de tipo entero. La prioridad debe ser una de las prioridades reconocidas por
+            la instancia de Log. Esto se explica en la siguiente sección.
+        </p>
+<p>
+            También está disponible un atajo. En lugar de llamar al método
+            <code class="methodname">log()</code>, puede llamar a un método con el mismo nombre que la prioridad:
+        </p>
+<pre class="programlisting">
+$logger-&gt;log('Informational message', Zend_Log::INFO);
+$logger-&gt;info('Informational message');
+
+$logger-&gt;log('Emergency message', Zend_Log::EMERG);
+$logger-&gt;emerg('Emergency message');
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.destroying-a-logger"></a>44.1.3. Destrucción de un Log</h3></div></div></div>
+<p>
+            Si el objeto Log ya no es necesario, asigne <code class="constant">NULL</code> a la
+            variable que lo contiene para destruirlo. Esto llamará automáticamente al
+            método de instancia <code class="methodname">shutdown()</code> de cada Writer adjunto antes de
+            que el objeto Log sea destruido:
+        </p>
+<pre class="programlisting">
+$logger = null;
+</pre>
+<p>
+            Destruir el log explícitamente de esta manera es opcional y se realiza
+            automáticamente al finalizar <acronym class="acronym">PHP</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.builtin-priorities"></a>44.1.4. Uso de prioridades integradas</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Log</code> define las siguientes prioridades:
+        </p>
+<pre class="programlisting">
+EMERG   = 0;  // Emergency: system is unusable
+ALERT   = 1;  // Alert: action must be taken immediately
+CRIT    = 2;  // Critical: critical conditions
+ERR     = 3;  // Error: error conditions
+WARN    = 4;  // Warning: warning conditions
+NOTICE  = 5;  // Notice: normal but significant condition
+INFO    = 6;  // Informational: informational messages
+DEBUG   = 7;  // Debug: debug messages
+</pre>
+<p>
+            Estas prioridades siempre están disponibles, y un método de conveniencia con el mismo nombre
+            está disponible para cada una de ellas.
+        </p>
+<p>
+            Las prioridades no son arbitrarias. Provienen del protocolo BSD syslog,
+            que se describe en <a class="ulink" href="http://tools.ietf.org/html/rfc3164" target="_top">RFC-3164</a>.
+            Los nombres y los números de prioridad correspondientes también son
+            compatibles con otro sistema de registro de <acronym class="acronym">PHP</acronym>,
+            <a class="ulink" href="http://pear.php.net/package/log" target="_top">PEAR Log</a>,
+            lo que quizás promueve la interoperabilidad entre este y <code class="classname">Zend_Log</code>.
+        </p>
+<p>
+            Los números de prioridad descienden en orden de importancia. <code class="constant">EMERG</code> (0)
+            es la prioridad más importante. <code class="constant">DEBUG</code> (7) es la prioridad menos
+            importante de las prioridades integradas. Puede definir prioridades
+            de menor importancia que <code class="constant">DEBUG</code>. Al
+            seleccionar la prioridad para su mensaje de log, tenga en cuenta esta jerarquía
+            de prioridades y elija apropiadamente.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.user-defined-priorities"></a>44.1.5. Añadir prioridades definidas por el usuario</h3></div></div></div>
+<p>
+            Las prioridades definidas por el usuario pueden añadirse en tiempo de ejecución usando el
+            método <code class="methodname">addPriority()</code> del Log:
+        </p>
+<pre class="programlisting">
+$logger-&gt;addPriority('FOO', 8);
+</pre>
+<p>
+            El fragmento anterior crea una nueva prioridad, <code class="constant">FOO</code>, cuyo
+            valor es '8'. La nueva prioridad está entonces disponible para registrar:
+        </p>
+<pre class="programlisting">
+$logger-&gt;log('Foo message', 8);
+$logger-&gt;foo('Foo Message');
+</pre>
+<p>
+            Las nuevas prioridades no pueden sobrescribir las existentes.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.understanding-fields"></a>44.1.6. Entender los eventos de registro</h3></div></div></div>
+<p>
+            Cuando llama al método <code class="methodname">log()</code> o a uno de sus atajos, se
+            crea un evento de log. Esto es simplemente un array asociativo con datos
+            que describen el evento y que se pasa a los writers. Las siguientes claves
+            se crean siempre en este array: <span class="property">timestamp</span>,
+            <span class="property">message</span>, <span class="property">priority</span>, y
+            <span class="property">priorityName</span>.
+        </p>
+<p>
+            La creación del array <span class="property">event</span> es completamente transparente.
+            Sin embargo, se requiere conocimiento del array <span class="property">event</span> para añadir un
+            elemento que no exista en el conjunto predeterminado anterior.
+        </p>
+<p>
+            Para añadir un nuevo elemento a cada evento futuro, llame al
+            método <code class="methodname">setEventItem()</code> proporcionando una clave y un valor:
+        </p>
+<pre class="programlisting">
+$logger-&gt;setEventItem('pid', getmypid());
+</pre>
+<p>
+            El ejemplo anterior establece un nuevo elemento llamado <span class="property">pid</span> y lo
+            rellena con el PID del proceso actual. Una vez que se ha establecido un nuevo
+            elemento, está disponible automáticamente para todos los writers junto con todos los
+            demás datos del evento durante el registro. Un elemento puede sobrescribirse en cualquier
+            momento llamando de nuevo al método <code class="methodname">setEventItem()</code>.
+        </p>
+<p>
+            Establecer un nuevo elemento de evento con <code class="methodname">setEventItem()</code> hace que el
+            nuevo elemento se envíe a todos los writers del logger. Sin embargo, esto no
+            garantiza que los writers realmente registren el elemento. Esto es
+            porque los writers no sabrán qué hacer con él a menos que un objeto
+            formatter sea informado del nuevo elemento. Consulte la sección sobre Formatters
+            para obtener más información.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.overview.as-errorHandler"></a>44.1.7. Registrar errores de PHP</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Log</code> también se puede usar para registrar errores de <acronym class="acronym">PHP</acronym>.
+            Llamar a <code class="methodname">registerErrorHandler()</code> añadirá
+            <code class="classname">Zend_Log</code> antes del manejador de errores actual, y también pasará el
+            error consigo.
+        </p>
+<p>
+            Los eventos de Zend_Log provenientes de errores de PHP tienen los campos adicionales que coinciden con
+            <code class="methodname">handler  ( int $errno  , string $errstr  [, string $errfile  [, int
+                $errline  [, array $errcontext  ]]] )</code> de <a class="ulink" href="http://us3.php.net/manual/en/function.set-error-handler.php" target="_top">set_error_handler</a>
+        </p>
+<div class="table">
+<a name="zend.log.overview.as-errorHandler.properties.table-1"></a><p class="title"><b>Tabla 44.1. Campos adicionales para los eventos de Zend_Log provenientes de errores de PHP</b></p>
+<div class="table-contents"><table class="table" summary="Additional fields for Zend_Log events from PHP errors" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Parámetro del manejador de errores</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>message</td>
+<td>errstr</td>
+<td>Contiene el mensaje de error, como una cadena.</td>
+</tr>
+<tr>
+<td>errno</td>
+<td>errno</td>
+<td>Contiene el nivel del error generado, como un entero.</td>
+</tr>
+<tr>
+<td>file</td>
+<td>errfile</td>
+<td>
+                            Contiene el nombre de archivo en el que se generó el error, como una cadena.
+                        </td>
+</tr>
+<tr>
+<td>line</td>
+<td>errline</td>
+<td>
+                            Contiene el número de línea en el que se generó el error, como un entero.
+                        </td>
+</tr>
+<tr>
+<td>context</td>
+<td>errcontext</td>
+<td>
+                            (opcional) Un array que apunta a la tabla de símbolos activa en el punto
+                            en que se produjo el error. En otras palabras, errcontext contendrá un array de
+                            cada variable que existía en el ámbito en el que se activó el error.
+                            El manejador de errores del usuario no debe modificar el contexto del error.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.locale.appendix.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.log.writers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">43.5. Configuraciones regionales soportadas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 44.2. Writers</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

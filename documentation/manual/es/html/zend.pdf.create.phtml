@@ -1,0 +1,99 @@
+<?php $title = '55.2. Creando y cargando documentos PDF'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">55.2. Creando y cargando documentos PDF</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.pdf.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 55. Zend_Pdf</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.pdf.save.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.pdf.create"></a>55.2. Creando y cargando documentos PDF</h2></div></div></div>
+<p>
+        La clase <code class="classname">Zend_Pdf</code> representa documentos <acronym class="acronym">PDF</acronym> y
+        proporciona operaciones a nivel de documento.
+    </p>
+<p>
+        Para crear un nuevo documento, primero se debe crear un nuevo objeto
+        <code class="classname">Zend_Pdf</code>.
+    </p>
+<p>
+        La clase <code class="classname">Zend_Pdf</code> también proporciona dos métodos estáticos para cargar un documento
+        <acronym class="acronym">PDF</acronym> existente. Estos son los métodos <code class="methodname">Zend_Pdf::load()</code> y
+        <code class="methodname">Zend_Pdf::parse()</code>. Ambos devuelven
+        objetos <code class="classname">Zend_Pdf</code> como resultado o lanzan una excepción si ocurre
+        un error.
+    </p>
+<div class="example">
+<a name="zend.pdf.create.example-1"></a><p class="title"><b>Ejemplo 55.1. Crear un nuevo documento PDF o cargar uno existente</b></p>
+<div class="example-contents"><pre class="programlisting">
+...
+// Create a new PDF document
+$pdf1 = new Zend_Pdf();
+
+// Load a PDF document from a file
+$pdf2 = Zend_Pdf::load($fileName);
+
+// Load a PDF document from a string
+$pdf3 = Zend_Pdf::parse($pdfString);
+...
+</pre></div>
+</div>
+<br class="example-break"><p>
+        El formato de archivo <acronym class="acronym">PDF</acronym> admite la actualización incremental de documentos. Por lo tanto, cada vez
+        que se actualiza un documento, se crea una nueva revisión del documento.
+        El componente <code class="classname">Zend_Pdf</code> admite la recuperación de una revisión especificada.
+    </p>
+<p>
+        Se puede especificar una revisión como segundo parámetro de los métodos
+        <code class="methodname">Zend_Pdf::load()</code> y <code class="methodname">Zend_Pdf::parse()</code>
+        o solicitarla llamando al método <code class="methodname">Zend_Pdf::rollback()</code>.
+
+        <a href="#ftn.id43903" class="footnote" name="id43903"><sup class="footnote">[9]</sup></a>
+
+        llamada.
+    </p>
+<div class="example">
+<a name="zend.pdf.create.example-2"></a><p class="title"><b>Ejemplo 55.2. Solicitando revisiones específicas de un documento PDF</b></p>
+<div class="example-contents"><pre class="programlisting">
+...
+// Load the previous revision of the PDF document
+$pdf1 = Zend_Pdf::load($fileName, 1);
+
+// Load the previous revision of the PDF document
+$pdf2 = Zend_Pdf::parse($pdfString, 1);
+
+// Load the first revision of the PDF document
+$pdf3 = Zend_Pdf::load($fileName);
+$revisions = $pdf3-&gt;revisions();
+$pdf3-&gt;rollback($revisions - 1);
+...
+</pre></div>
+</div>
+<br class="example-break"><div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id43903" class="footnote"><p><a href="#id43903" class="para"><sup class="para">[9] </sup></a>
+                El método <code class="methodname">Zend_Pdf::rollback()</code> debe invocarse antes de que se apliquen
+                cambios al documento, de lo contrario el comportamiento no está definido.
+            </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.pdf.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.pdf.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.pdf.save.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 55. Zend_Pdf </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 55.3. Guardar cambios en documentos PDF</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

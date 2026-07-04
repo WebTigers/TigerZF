@@ -1,0 +1,455 @@
+<?php $title = '74.2. Adaptadores para Zend_Translate'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">74.2. Adaptadores para Zend_Translate</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.translate.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 74. Zend_Translate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.translate.using.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.translate.adapter"></a>74.2. Adaptadores para Zend_Translate</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Translate</code> puede manejar diferentes adaptadores para traducción.
+        Cada adaptador tiene sus propias ventajas y desventajas.
+        A continuación se muestra una lista completa de todos los adaptadores soportados
+        para archivos de origen de traducción.
+    </p>
+<div class="table">
+<a name="zend.translate.adapter.table"></a><p class="title"><b>Tabla 74.1. Adaptadores para Zend_Translate</b></p>
+<div class="table-contents"><table class="table" summary="Adapters for Zend_Translate" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Adaptador</th>
+<th>Descripción</th>
+<th>Uso</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Array</td>
+<td>Usa arrays de <acronym class="acronym">PHP</acronym></td>
+<td>Páginas pequeñas; uso más simple; solo para programadores</td>
+</tr>
+<tr>
+<td>Csv</td>
+<td>Usa archivos separados por comas (*.csv/*.txt)</td>
+<td>
+                        Formato de archivo de texto simple; rápido; posibles problemas con caracteres unicode
+                    </td>
+</tr>
+<tr>
+<td>Gettext</td>
+<td>Usa archivos binarios gettext (*.mo)</td>
+<td>Estándar de GNU para linux; seguro para hilos (thread-safe); necesita herramientas para traducir</td>
+</tr>
+<tr>
+<td>Ini</td>
+<td>Usa archivos simples <acronym class="acronym">INI</acronym> (*.ini)</td>
+<td>
+                        Formato de archivo de texto simple; rápido; posibles problemas con caracteres unicode
+                    </td>
+</tr>
+<tr>
+<td>Tbx</td>
+<td>Usa archivos termbase exchange (*.tbx/*.xml)</td>
+<td>
+                        Estándar de la industria para cadenas de terminología entre aplicaciones;
+                        formato <acronym class="acronym">XML</acronym>
+                    </td>
+</tr>
+<tr>
+<td>Tmx</td>
+<td>Usa archivos tmx (*.tmx/*.xml)</td>
+<td>
+                        Estándar de la industria para traducción entre aplicaciones; formato <acronym class="acronym">XML</acronym>;
+                        legible por humanos
+                    </td>
+</tr>
+<tr>
+<td>Qt</td>
+<td>Usa archivos qt linguist (*.ts)</td>
+<td>
+                        Framework de aplicaciones multiplataforma; formato <acronym class="acronym">XML</acronym>; legible
+                        por humanos
+                    </td>
+</tr>
+<tr>
+<td>Xliff</td>
+<td>Usa archivos xliff (*.xliff/*.xml)</td>
+<td>
+                        Un formato más simple que <code class="constant">TMX</code> pero relacionado con él;
+                        formato <acronym class="acronym">XML</acronym>; legible por humanos
+                    </td>
+</tr>
+<tr>
+<td>XmlTm</td>
+<td>Usa archivos xmltm (*.xml)</td>
+<td>
+                        Estándar de la industria para memoria de traducción de documentos <acronym class="acronym">XML</acronym>;
+                        formato <acronym class="acronym">XML</acronym>; legible por humanos
+                    </td>
+</tr>
+<tr>
+<td>Otros</td>
+<td>*.sql</td>
+<td>Otros adaptadores diferentes podrían implementarse en el futuro</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.adapter.decision"></a>74.2.1. Cómo decidir qué adaptador de traducción usar</h3></div></div></div>
+<p>
+            Debería decidir qué adaptador desea usar para
+            <code class="classname">Zend_Translate</code>. Con frecuencia, criterios externos como un requisito
+            del proyecto o un requisito del cliente determinan esto por usted, pero si está en
+            la posición de hacerlo usted mismo, las siguientes indicaciones pueden simplificar
+            su decisión.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Al decidir su adaptador también debería tener en cuenta la codificación
+                utilizada. Aunque Zend Framework declara UTF-8 como codificación
+                predeterminada, a veces necesitará otra codificación.
+                <code class="classname">Zend_Translate</code> no cambiará ninguna codificación que esté definida
+                dentro del archivo de origen, lo que significa que si su origen Gettext
+                está construido sobre ISO-8859-1 también devolverá las cadenas en esa codificación
+                sin convertirlas. Solo hay una restricción:
+            </p>
+<p>
+                Cuando use un formato de origen basado en <acronym class="acronym">XML</acronym> como TMX o XLIFF debe
+                definir la codificación dentro de la cabecera de los archivos <acronym class="acronym">XML</acronym> porque
+                los archivos <acronym class="acronym">XML</acronym> sin codificación definida serán tratados como UTF-8 por
+                cualquier analizador <acronym class="acronym">XML</acronym> de forma predeterminada. También debería tener en cuenta que en realidad
+                la codificación de los archivos <acronym class="acronym">XML</acronym> está limitada a las codificaciones soportadas
+                por <acronym class="acronym">PHP</acronym>, que son UTF-8, ISO-8859-1 y US-ASCII.
+            </p>
+</td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.array"></a>74.2.1.1. Zend_Translate_Adapter_Array</h4></div></div></div>
+<p>
+                El adaptador Array es el adaptador más simple de usar para
+                los programadores.
+                Pero cuando tenga numerosas cadenas de traducción o muchos
+                idiomas, debería pensar en otro adaptador.
+                Por ejemplo, si tiene 5000 cadenas de traducción,
+                el adaptador Array posiblemente no sea la mejor opción para usted.
+            </p>
+<p>
+                Solo debería usar este adaptador para sitios pequeños con un puñado
+                de idiomas, y si usted o su equipo de programadores crea las
+                traducciones ustedes mismos.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.csv"></a>74.2.1.2. Zend_Translate_Adapter_Csv</h4></div></div></div>
+<p>
+                El adaptador Csv es el adaptador más simple de usar para
+                los clientes.
+                Los archivos CSV son legibles por editores de texto estándar, pero
+                los editores de texto a menudo no soportan conjuntos de caracteres utf8.
+            </p>
+<p>
+                Solo debería usar este adaptador si su cliente quiere hacer
+                las traducciones él mismo.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Tenga en cuenta que el adaptador Csv tiene problemas cuando sus archivos Csv están codificados
+                    de forma diferente a la configuración regional de su entorno. Esto se debe a un error de
+                    <acronym class="acronym">PHP</acronym> que no se corregirá antes de
+                    <acronym class="acronym">PHP</acronym> 6.0 (http://bugs.php.net/bug.php?id=38471). Por lo tanto, debería
+                    tener en cuenta que el adaptador Csv, debido a restricciones de <acronym class="acronym">PHP</acronym>, no
+                    tiene en cuenta la configuración regional.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.gettext"></a>74.2.1.3. Zend_Translate_Adapter_Gettext</h4></div></div></div>
+<p>
+                El adaptador Gettext es el adaptador que se usa con más
+                frecuencia. Gettext es un formato de origen de traducción que fue
+                introducido por GNU, y ahora se usa en todo el mundo.
+                No es legible por humanos, pero hay varias herramientas gratuitas
+                (por ejemplo, <a class="ulink" href="http://sourceforge.net/projects/poedit/" target="_top">POEdit</a>),
+                que son muy útiles. El adaptador Gettext de <code class="classname">Zend_Translate</code> no
+                está implementado usando la extensión gettext de <acronym class="acronym">PHP</acronym>.
+                Puede usar el adaptador Gettext incluso si no tiene
+                instalada la extensión gettext de <acronym class="acronym">PHP</acronym>.
+                Además, el adaptador es seguro para hilos (thread-safe) y la extensión gettext de <acronym class="acronym">PHP</acronym>
+                actualmente no es segura para hilos.
+            </p>
+<p>
+                La mayoría de las personas usarán este adaptador.
+                Con las herramientas disponibles, la traducción profesional es
+                muy simple. Pero los datos de gettext se almacenan en un
+                formato legible por máquina, que no es legible sin herramientas.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.ini"></a>74.2.1.4. Zend_Translate_Adapter_Ini</h4></div></div></div>
+<p>
+                El adaptador Ini es un adaptador muy simple que incluso puede ser usado
+                directamente por los clientes.
+                Los archivos <acronym class="acronym">INI</acronym> son legibles por editores de texto estándar, pero
+                los editores de texto a menudo no soportan conjuntos de caracteres utf8.
+            </p>
+<p>
+                Solo debería usar este adaptador cuando su cliente quiera hacer las traducciones
+                él mismo. No use este adaptador como origen de traducción genérico.
+            </p>
+<div class="warning"><table border="0" summary="Warning: Regression in PHP 5.3">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Regresión en PHP 5.3</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Antes de <acronym class="acronym">PHP</acronym> 5.3, <code class="methodname">parse_ini_file()</code>
+                    y <code class="methodname">parse_ini_string()</code> manejaban sin problemas los caracteres no ASCII
+                    dentro de las claves de opciones <acronym class="acronym">INI</acronym>. Sin embargo,
+                    a partir de <acronym class="acronym">PHP</acronym> 5.3, dichas claves ahora se eliminarán silenciosamente
+                    del array devuelto por cualquiera de las dos funciones. Si tenía claves que utilizaban
+                    caracteres UTF-8 o Latin-1, es posible que sus traducciones ya no funcionen al
+                    usar el adaptador <acronym class="acronym">INI</acronym>. Si este es el caso, recomendamos
+                    utilizar un adaptador diferente.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.tbx"></a>74.2.1.5. Zend_Translate_Adapter_Tbx</h4></div></div></div>
+<p>
+                El adaptador Tbx es un adaptador que será usado por clientes
+                que ya usan el formato TBX para su sistema de traducción interno. Tbx no es un
+                formato de traducción estándar sino más bien una colección
+                de cadenas de origen ya traducidas y pretraducidas. Cuando
+                use este adaptador debe asegurarse de que todas las cadenas de origen
+                necesarias estén traducidas.
+                TBX es un formato basado en archivos <acronym class="acronym">XML</acronym> y un formato completamente nuevo.
+                Los archivos <acronym class="acronym">XML</acronym> son legibles por humanos, pero el análisis no es tan rápido
+                como con los archivos gettext.
+            </p>
+<p>
+                Este adaptador es perfecto para empresas cuando ya existen
+                archivos de origen pretraducidos.
+                Los archivos son legibles por humanos e independientes del sistema.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.tmx"></a>74.2.1.6. Zend_Translate_Adapter_Tmx</h4></div></div></div>
+<p>
+                El adaptador Tmx es el adaptador que usarán la mayoría de los
+                clientes que tienen múltiples sistemas que usan el mismo
+                origen de traducción, o cuando el origen de traducción debe ser
+                independiente del sistema.
+                TMX es un formato basado en archivos <acronym class="acronym">XML</acronym>, que se anuncia como el
+                próximo estándar de la industria.
+                Los archivos <acronym class="acronym">XML</acronym> son legibles por humanos, pero el análisis no es tan rápido
+                como con los archivos gettext.
+            </p>
+<p>
+                La mayoría de las empresas medianas y grandes usan este adaptador.
+                Los archivos son legibles por humanos e independientes del sistema.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.qt"></a>74.2.1.7. Zend_Translate_Adapter_Qt</h4></div></div></div>
+<p>
+                El adaptador Qt es para todos los clientes que tienen archivos TS como su
+                origen de traducción, generados por QtLinguist.
+                QT es un formato basado en archivos <acronym class="acronym">XML</acronym>.
+                Los archivos <acronym class="acronym">XML</acronym> son legibles por humanos, pero el análisis no es tan rápido
+                como con los archivos gettext.
+            </p>
+<p>
+                Varios actores importantes han construido software sobre el framework QT.
+                Los archivos son legibles por humanos e independientes del sistema.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.xliff"></a>74.2.1.8. Zend_Translate_Adapter_Xliff</h4></div></div></div>
+<p>
+                El adaptador Xliff es el adaptador que usará la mayoría de los clientes que
+                quieren tener archivos <acronym class="acronym">XML</acronym> pero no tienen herramientas para TMX.
+                XLIFF es un formato basado en archivos <acronym class="acronym">XML</acronym>, relacionado con TMX pero
+                más simple, ya que no soporta todas sus posibilidades.
+                Los archivos <acronym class="acronym">XML</acronym> son legibles por humanos, pero el análisis no es tan rápido
+                como con los archivos gettext.
+            </p>
+<p>
+                La mayoría de las empresas medianas usan este adaptador.
+                Los archivos son legibles por humanos e independientes del sistema.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.adapter.xmltm"></a>74.2.1.9. Zend_Translate_Adapter_XmlTm</h4></div></div></div>
+<p>
+                El adaptador XmlTm es el adaptador que usarán los clientes
+                que hacen su propio maquetado. XmlTm es un formato que permite que la
+                fuente <acronym class="acronym">HTML</acronym> completa se incluya en el origen de traducción, de modo que
+                la traducción está acoplada con el maquetado.
+                XLIFF es un formato basado en archivos <acronym class="acronym">XML</acronym>, relacionado con XLIFF pero
+                no tan simple de leer.
+            </p>
+<p>
+                Este adaptador solo debería usarse cuando ya existen archivos de origen.
+                Los archivos son legibles por humanos e independientes del sistema.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.adapter.selfwritten"></a>74.2.2. Integrar adaptadores escritos por uno mismo</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Translate</code> le permite integrar y usar clases de adaptador
+            escritas por usted mismo. Pueden usarse como las clases de adaptador estándar que
+            ya están incluidas dentro de <code class="classname">Zend_Translate</code>.
+        </p>
+<p>
+            Cualquier clase de adaptador que quiera usar con <code class="classname">Zend_Translate</code> debe ser una
+            subclase de <code class="classname">Zend_Translate_Adapter</code>.
+            <code class="classname">Zend_Translate_Adapter</code> es una clase abstracta que ya define
+            todo lo necesario para la traducción. Lo que usted debe hacer es la definición del
+            lector de los datos de traducción.
+        </p>
+<p>
+            El uso del prefijo "Zend" debería limitarse a Zend Framework.
+            Si extiende <code class="classname">Zend_Translate</code> con su propio adaptador, debería
+            nombrarlo como "Company_Translate_Adapter_MyFormat". El siguiente código muestra un
+            ejemplo de cómo podría implementarse una clase de adaptador escrita por uno mismo:
+        </p>
+<pre class="programlisting">
+try {
+    $translate = new Zend_Translate(
+        array(
+            'adapter' =&gt; 'Company_Translate_Adapter_MyFormat',
+            'content' =&gt; '/path/to/translate.xx',
+            'locale'  =&gt; 'en',
+            'myoption' =&gt; 'myvalue'
+        )
+    );
+} catch (Exception $e) {
+    // File not found, no adapter class...
+    // General failure
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.adapter.caching"></a>74.2.3. Acelerar todos los adaptadores</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Translate</code> le permite usar internamente
+            <code class="classname">Zend_Cache</code> para acelerar la carga de los orígenes de traducción. Esto
+            resulta muy útil si usa muchos orígenes de traducción o formatos de origen extensos como
+            los archivos basados en <acronym class="acronym">XML</acronym>.
+        </p>
+<p>
+            Para usar el cache solo tiene que dar un objeto de cache al
+            método <code class="methodname">Zend_Translate::setCache()</code>. Este toma una instancia de
+            <code class="classname">Zend_Cache</code> como único parámetro. Además, si usa cualquier adaptador directamente
+            puede usar el método <code class="methodname">setCache()</code>. Por conveniencia también están
+            los métodos estáticos <code class="methodname">getCache()</code>,
+            <code class="methodname">hasCache()</code>, <code class="methodname">clearCache()</code> y
+            <code class="methodname">removeCache()</code>.
+        </p>
+<pre class="programlisting">
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+Zend_Translate::setCache($cache);
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/translate.mo',
+        'locale'  =&gt; 'en'
+    )
+);
+
+// to clear the cache somewhere later in your code
+Zend_Translate::clearCache();
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Debe establecer el cache <span class="emphasis"><em>antes</em></span> de usar o iniciar
+                cualquier adaptador o instancia de <code class="classname">Zend_Translate</code>. De lo contrario, su
+                origen de traducción no se almacenará en cache hasta que agregue un nuevo origen con el
+                método <code class="methodname">addTranslation()</code>.
+            </p></td></tr>
+</table></div>
+<p>
+            Cuando el cache adjunto admite etiquetado, puede establecer una cadena de etiqueta propia usando la
+            opción <span class="property">tag</span>. Esto le permite eliminar solo el cache de esta
+            instancia única de <code class="classname">Zend_Translate</code>. Cuando no usa esta
+            opción, se utiliza la etiqueta predeterminada <code class="classname">Zend_Translate</code>.
+        </p>
+<p>
+            Usando la opción <span class="property">tag</span> debe indicar la etiqueta usada a
+            <code class="methodname">clearCache()</code> para declarar qué etiqueta quiere eliminar.
+        </p>
+<pre class="programlisting">
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+Zend_Translate::setCache($cache);
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/translate.mo',
+        'locale'  =&gt; 'en',
+        'tag'     =&gt; 'MyTag'
+    )
+);
+
+// somewhere later in your code
+Zend_Translate::clearCache('MyTag');
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.translate.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.translate.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.translate.using.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 74. Zend_Translate </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 74.3. Uso de adaptadores de traducción</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

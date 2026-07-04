@@ -1,0 +1,1916 @@
+<?php $title = '29.4. Elementos de formulario y decoradores de Dojo'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">29.4. Elementos de formulario y decoradores de Dojo</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.dojo.view.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 29. Zend_Dojo</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.dojo.build-layers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.dojo.form"></a>29.4. Elementos de formulario y decoradores de Dojo</h2></div></div></div>
+<p>
+        Partiendo de <a class="link" href="zend.dojo.view.phtml#zend.dojo.view.dijit" title="29.3.2. Dijit-Specific View Helpers">los helpers de vista
+        específicos de dijit</a>, la familia de clases <code class="classname">Zend_Dojo_Form</code>
+        proporciona la capacidad de utilizar Dijits de forma nativa dentro de sus formularios.
+    </p>
+<p>
+        Hay tres opciones para utilizar los elementos de formulario de Dojo con sus
+        formularios:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Usar <code class="methodname">Zend_Dojo::enableForm()</code>. Esto añadirá rutas de plugin
+                para decoradores y elementos a todos los elementos de formulario adjuntos,
+                de forma recursiva. Además, habilitará Dojo en el objeto de vista.
+                Tenga en cuenta, sin embargo, que cualquier subformulario que adjunte
+                <span class="emphasis"><em>después</em></span> de esta llamada también necesitará ser
+                pasado por <code class="methodname">Zend_Dojo::enableForm()</code>.
+            </p></li>
+<li class="listitem"><p>
+                Usar las implementaciones de formulario y subformulario específicas de Dojo,
+                <code class="classname">Zend_Dojo_Form</code> y
+                <code class="classname">Zend_Dojo_Form_SubForm</code> respectivamente. Estas se pueden
+                usar como reemplazos directos de <code class="classname">Zend_Form</code> y
+                <code class="classname">Zend_Form_SubForm</code>, contienen todas las rutas apropiadas
+                de decoradores y elementos, establecen una clase DisplayGroup por defecto
+                específica de Dojo, y habilitan Dojo en la vista.
+            </p></li>
+<li class="listitem"><p>
+                Por último, y lo más tedioso, puede establecer usted mismo las rutas apropiadas
+                de decoradores y elementos, establecer la clase DisplayGroup por defecto,
+                y habilitar Dojo en la vista. Dado que
+                <code class="methodname">Zend_Dojo::enableForm()</code> ya hace esto, hay
+                poca razón para tomar este camino.
+            </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.enable"></a><p class="title"><b>Ejemplo 29.12. Habilitar Dojo en sus formularios existentes</b></p>
+<div class="example-contents">
+<p>
+            "Pero espera," dirá usted, "¡Ya estoy extendiendo <code class="classname">Zend_Form</code> con mi
+            propia clase de formulario personalizada! ¿Cómo puedo habilitar Dojo en ella?'"
+        </p>
+<p>
+            Primero, y lo más fácil, simplemente cambie de extender
+            <code class="classname">Zend_Form</code> a extender <code class="classname">Zend_Dojo_Form</code>,
+            y actualice cualquier lugar donde instancie
+            <code class="classname">Zend_Form_SubForm</code> para instanciar
+            <code class="classname">Zend_Dojo_Form_SubForm</code>.
+        </p>
+<p>
+            Un segundo enfoque es llamar a <code class="methodname">Zend_Dojo::enableForm()</code>
+            dentro del método <code class="methodname">init()</code> de su formulario personalizado; cuando la
+            definición del formulario esté completa, recorra todos los SubForms para habilitar
+            Dojo en ellos:
+        </p>
+<pre class="programlisting">
+class My_Form_Custom extends Zend_Form
+{
+    public function init()
+    {
+        // Dojo-enable the form:
+        Zend_Dojo::enableForm($this);
+
+        // ... continue form definition from here
+
+        // Dojo-enable all sub forms:
+        foreach ($this-&gt;getSubForms() as $subForm) {
+            Zend_Dojo::enableForm($subForm);
+        }
+    }
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+        El uso de los decoradores y elementos de formulario específicos de dijit es igual que
+        usar cualquier otro decorador o elemento de formulario.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.form.decorators"></a>29.4.1. Decoradores de formulario específicos de Dijit</h3></div></div></div>
+<p>
+        La mayoría de los elementos de formulario pueden usar el decorador DijitElement, que tomará
+        los parámetros de dijit de los elementos, y pasará estos y otros
+        metadatos al helper de vista especificado por el elemento. Para decorar
+        formularios, subformularios y grupos de visualización, sin embargo, hay un conjunto de
+        decoradores correspondientes a los diversos dijits de disposición.
+    </p>
+<p>
+        Todos los decoradores de dijit buscan la propiedad <span class="property">dijitParams</span> del
+        elemento que se está decorando, y las pasan como el
+        array <code class="varname">$params</code> al helper de vista de dijit que se está usando; estas
+        se separan luego de cualquier otra propiedad para que no se produzca duplicación de
+        información.
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.decorators.dijitElement"></a>29.4.1.1. Decorador DijitElement</h4></div></div></div>
+<p>
+            Al igual que <a class="link" href="zend.form.standardDecorators.phtml#zend.form.standardDecorators.viewHelper" title="36.7.16. Zend_Form_Decorator_ViewHelper">el
+                decorador ViewHelper</a>, DijitElement espera una propiedad
+            <span class="property">helper</span> en el elemento, la cual usará después
+            como el helper de vista al renderizar. Los parámetros de dijit típicamente
+            se obtendrán directamente del elemento, pero también pueden pasarse como
+            opciones a través de la clave <span class="property">dijitParams</span> (el valor de esa clave
+            debe ser un array asociativo de opciones).
+        </p>
+<p>
+            Es importante que cada elemento tenga un ID único (obtenido del
+            método <code class="methodname">getId()</code> del elemento). Si se detectan duplicados dentro
+            del helper de vista <code class="methodname">dojo()</code>, el decorador
+            activará un aviso, pero luego creará un ID único añadiendo el
+            retorno de <code class="methodname">uniqid()</code> al identificador.
+        </p>
+<p>
+            El uso estándar es simplemente asociar este decorador como el primero
+            en su cadena de decoradores, sin opciones adicionales.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.decorators.dijitElement.usage"></a><p class="title"><b>Ejemplo 29.13. Uso del decorador DijitElement</b></p>
+<div class="example-contents"><pre class="programlisting">
+$element-&gt;setDecorators(array(
+    'DijitElement',
+    'Errors',
+    'Label',
+    'ContentPane',
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.decorators.dijitForm"></a>29.4.1.2. Decorador DijitForm</h4></div></div></div>
+<p>
+            El decorador DijitForm es muy similar al <a class="link" href="zend.form.standardDecorators.phtml#zend.form.standardDecorators.form" title="36.7.8. Zend_Form_Decorator_Form">decorador
+                Form</a>; de hecho, puede usarse básicamente
+            de forma intercambiable con él, ya que utiliza el mismo nombre de
+            helper de vista ('form').
+        </p>
+<p>
+            Dado que <span class="command"><strong>dijit.form.Form</strong></span> no requiere ningún parámetro de dijit para
+            su configuración, la principal diferencia es que el helper de vista de formulario dijit
+            requiere que se pase un ID de <acronym class="acronym">DOM</acronym> para garantizar que la creación
+            programática de dijit pueda funcionar. El decorador se asegura de esto, pasando el
+            nombre del formulario como identificador.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.decorators.dijitContainer"></a>29.4.1.3. Decoradores basados en DijitContainer</h4></div></div></div>
+<p>
+            El decorador <code class="classname">DijitContainer</code> es en realidad una clase
+            abstracta de la que derivan otros decoradores. Ofrece
+            la misma funcionalidad que <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.decorators.dijitElement" title="29.4.1.1. DijitElement Decorator">DijitElement</a>,
+            con la adición de soporte de título. Muchos dijits de disposición requieren o
+            pueden utilizar un título; DijitContainer utilizará la propiedad legend del
+            elemento, si está disponible, y también puede utilizar la opción de decorador
+            'legend' o 'title', si se pasa. El título se
+            traducirá si hay presente un adaptador de traducción con una
+            traducción correspondiente.
+        </p>
+<p>
+            La siguiente es una lista de decoradores que heredan de
+            <code class="classname">DijitContainer</code>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>AccordionContainer</p></li>
+<li class="listitem"><p>AccordionPane</p></li>
+<li class="listitem"><p>BorderContainer</p></li>
+<li class="listitem"><p>ContentPane</p></li>
+<li class="listitem"><p>SplitContainer</p></li>
+<li class="listitem"><p>StackContainer</p></li>
+<li class="listitem"><p>TabContainer</p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.decorators.dijitContainer.usage"></a><p class="title"><b>Ejemplo 29.14. Uso del decorador DijitContainer</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Use a TabContainer for your form:
+$form-&gt;setDecorators(array(
+    'FormElements',
+    array('TabContainer', array(
+        'id'          =&gt; 'tabContainer',
+        'style'       =&gt; 'width: 600px; height: 500px;',
+        'dijitParams' =&gt; array(
+            'tabPosition' =&gt; 'top'
+        ),
+    )),
+    'DijitForm',
+));
+
+// Use a ContentPane in your sub form (which can be used with all but
+// AccordionContainer):
+$subForm-&gt;setDecorators(array(
+    'FormElements',
+    array('HtmlTag', array('tag' =&gt; 'dl')),
+    'ContentPane',
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.form.elements"></a>29.4.2. Elementos de formulario específicos de Dijit</h3></div></div></div>
+<p>
+        Cada dijit de formulario para el cual se proporciona un helper de vista tiene un
+        elemento <code class="classname">Zend_Form</code> correspondiente. Todos ellos tienen los siguientes métodos
+        disponibles para manipular los parámetros de dijit:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="methodname">setDijitParam($key, $value)</code>: establece un único parámetro
+                de dijit. Si el parámetro de dijit ya existe, será
+                sobrescrito.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">setDijitParams(array $params)</code>: establece varios parámetros
+                de dijit a la vez. Cualquier parámetro pasado que coincida con uno
+                ya presente lo sobrescribirá.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">hasDijitParam($key)</code>: si un parámetro de dijit dado
+                está definido y presente, devuelve <code class="constant">TRUE</code>, de lo contrario devuelve
+                <code class="constant">FALSE</code>.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">getDijitParam($key)</code>: recupera el parámetro de dijit
+                dado. Si no está disponible, se devuelve un valor <code class="constant">NULL</code>.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">getDijitParams()</code>: recupera todos los parámetros de dijit.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">removeDijitParam($key)</code>: elimina el parámetro de dijit dado.
+            </p></li>
+<li class="listitem"><p>
+                <code class="methodname">clearDijitParams()</code>: elimina todos los parámetros de dijit
+                actualmente definidos.
+            </p></li>
+</ul></div>
+<p>
+        Los parámetros de dijit se almacenan en la propiedad pública
+        <span class="property">dijitParams</span>. Por lo tanto, puede habilitar dijit en un elemento de
+        formulario existente simplemente estableciendo esta propiedad en el elemento; simplemente no
+        tendrá los accesores anteriores para facilitar la manipulación de los parámetros.
+    </p>
+<p>
+        Además, los elementos específicos de dijit implementan una lista diferente de
+        decoradores, correspondiente a lo siguiente:
+    </p>
+<pre class="programlisting">
+$element-&gt;addDecorator('DijitElement')
+        -&gt;addDecorator('Errors')
+        -&gt;addDecorator('HtmlTag', array('tag' =&gt; 'dd'))
+        -&gt;addDecorator('Label', array('tag' =&gt; 'dt'));
+</pre>
+<p>
+        En efecto, el decorador DijitElement se usa en lugar del decorador estándar
+        ViewHelper.
+    </p>
+<p>
+        Finalmente, el elemento Dijit base se asegura de que la ruta del helper de vista
+        Dojo esté establecida en la vista.
+    </p>
+<p>
+        Una variante de DijitElement, DijitMulti, proporciona la funcionalidad del
+        elemento de formulario abstracto <code class="classname">Multi</code>, permitiendo al desarrollador
+        especificar 'multiOptions' -- típicamente opciones de select u opciones de radio.
+    </p>
+<p>
+        Los siguientes elementos de dijit se distribuyen en la distribución estándar de Zend
+        Framework.
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.button"></a>29.4.2.1. Button</h4></div></div></div>
+<p>
+            Aunque no deriva de <a class="link" href="zend.form.standardElements.phtml#zend.form.standardElements.button" title="36.6.1. Zend_Form_Element_Button">el
+                elemento Button estándar</a>, implementa la misma funcionalidad, y
+            puede usarse como un reemplazo directo del mismo. Se expone la siguiente
+            funcionalidad:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getLabel()</code> utilizará el nombre del elemento como la
+                    etiqueta del botón si no se proporciona ningún nombre. Además, traducirá
+                    el nombre si hay disponible un adaptador de traducción con un
+                    mensaje de traducción coincidente.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">isChecked()</code> determina si el valor enviado
+                    coincide con la etiqueta; si es así, devuelve <code class="constant">TRUE</code>. Esto es útil
+                    para determinar qué botón se usó cuando se envió un formulario.
+                </p></li>
+</ul></div>
+<p>
+            Además, solo se utilizan los decoradores <code class="classname">DijitElement</code> y
+            <code class="classname">DtDdWrapper</code> para los elementos Button.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.button.example"></a><p class="title"><b>Ejemplo 29.15. Ejemplo de uso del elemento dijit Button</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'Button',
+    'foo',
+    array(
+        'label' =&gt; 'Button Label',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.checkBox"></a>29.4.2.2. CheckBox</h4></div></div></div>
+<p>
+            Aunque no deriva de <a class="link" href="zend.form.standardElements.phtml#zend.form.standardElements.checkbox" title="36.6.3. Zend_Form_Element_Checkbox">el elemento
+                Checkbox estándar</a>, implementa la misma
+            funcionalidad. Esto significa que se exponen los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setCheckedValue($value)</code>: establece el valor a usar cuando
+                    el elemento está marcado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getCheckedValue()</code>: obtiene el valor del elemento a
+                    usar cuando está marcado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setUncheckedValue($value)</code>: establece el valor del
+                    elemento a usar cuando no está marcado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getUncheckedValue()</code>: obtiene el valor del elemento a
+                    usar cuando no está marcado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setChecked($flag)</code>: marca el elemento como marcado o
+                    no marcado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">isChecked()</code>: determina si el elemento está actualmente
+                    marcado.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.checkBox.example"></a><p class="title"><b>Ejemplo 29.16. Ejemplo de uso del elemento dijit CheckBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'CheckBox',
+    'foo',
+    array(
+        'label'          =&gt; 'A check box',
+        'checkedValue'   =&gt; 'foo',
+        'uncheckedValue' =&gt; 'bar',
+        'checked'        =&gt; true,
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.comboBox"></a>29.4.2.3. ComboBox y FilteringSelect</h4></div></div></div>
+<p>
+            Como se indica en la documentación del helper de vista de dijit ComboBox <a class="link" href="zend.dojo.view.phtml#zend.dojo.view.dijit.form" title="29.3.2.2. Dijit Form Elements">documentación del helper de vista
+                dijit</a>, los ComboBox son un híbrido entre select
+            y entrada de texto, que permiten autocompletar y la capacidad de
+            especificar una alternativa a las opciones proporcionadas. Los FilteringSelect son
+            lo mismo, pero no permiten entrada arbitraria.
+        </p>
+<div class="note"><table border="0" summary="Note: ComboBoxes return the label values">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Los ComboBox devuelven los valores de la etiqueta</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los ComboBox devuelven los valores de la etiqueta, y no los valores de la opción,
+                lo cual puede llevar a una desconexión en las expectativas. Por esta razón, los
+                ComboBox no auto-registran un validador <code class="classname">InArray</code>
+                (aunque los FilteringSelect sí lo hacen).
+            </p></td></tr>
+</table></div>
+<p>
+            Los elementos de formulario ComboBox y FilteringSelect proporcionan accesores y mutadores para
+            examinar y establecer las opciones de select, así como especificar un
+            almacén de datos <span class="command"><strong>dojo.data</strong></span> (si se usa). Derivan de DijitMulti, lo que
+            le permite especificar opciones de select mediante los métodos
+            <code class="methodname">setMultiOptions()</code> y <code class="methodname">setMultiOption()</code>.
+            Además, están disponibles los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getStoreInfo()</code>: obtiene toda la información del almacén de datos
+                    actualmente establecida. Devuelve un array vacío si actualmente no hay ningún dato establecido.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setStoreId($identifier)</code>: establece la variable
+                    identificadora del almacén (normalmente referida por el atributo 'jsId' en Dojo).
+                    Esto debe ser un nombre de variable de javascript válido.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getStoreId()</code>: recupera el nombre de la variable
+                    identificadora del almacén.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setStoreType($dojoType)</code>: establece la clase del
+                    almacén de datos a usar; por ejemplo, "<span class="command"><strong>dojo.data.ItemFileReadStore</strong></span>".
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getStoreType()</code>: obtiene la clase de almacén de datos de dojo a usar.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setStoreParams(array $params)</code>: establece cualquier parámetro
+                    usado para configurar el objeto de almacén de datos. Como
+                    ejemplo, el almacén de datos <span class="command"><strong>dojo.data.ItemFileReadStore</strong></span> esperaría un
+                    parámetro 'url' que apunte a una ubicación que devolvería el
+                    objeto <span class="command"><strong>dojo.data</strong></span>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getStoreParams()</code>: obtiene cualquier parámetro del almacén de datos
+                    actualmente establecido; si no hay ninguno, se devuelve un array vacío.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setAutocomplete($flag)</code>: indica si el elemento
+                    seleccionado se usará o no cuando el usuario abandone el elemento.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getAutocomplete()</code>: obtiene el valor del indicador de
+                    autocompletar.
+                </p></li>
+</ul></div>
+<p>
+            Por defecto, si no se registra ningún almacén <span class="command"><strong>dojo.data</strong></span> con el elemento,
+            este elemento registra un validador <code class="classname">InArray</code> que
+            valida contra las claves del array de opciones registradas. Puede
+            deshabilitar este comportamiento llamando a
+            <code class="methodname">setRegisterInArrayValidator(false)</code>, o pasando un
+            valor <code class="constant">FALSE</code> a la clave de configuración
+            <span class="property">registerInArrayValidator</span>.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.comboBox.selectExample"></a><p class="title"><b>Ejemplo 29.17. Uso del elemento dijit ComboBox como entrada select</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'ComboBox',
+    'foo',
+    array(
+        'label'        =&gt; 'ComboBox (select)',
+        'value'        =&gt; 'blue',
+        'autocomplete' =&gt; false,
+        'multiOptions' =&gt; array(
+            'red'    =&gt; 'Rouge',
+            'blue'   =&gt; 'Bleu',
+            'white'  =&gt; 'Blanc',
+            'orange' =&gt; 'Orange',
+            'black'  =&gt; 'Noir',
+            'green'  =&gt; 'Vert',
+        ),
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.dojo.form.elements.comboBox.datastoreExample"></a><p class="title"><b>Ejemplo 29.18. Uso del elemento dijit ComboBox con almacén de datos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'ComboBox',
+    'foo',
+    array(
+        'label'       =&gt; 'ComboBox (datastore)',
+        'storeId'     =&gt; 'stateStore',
+        'storeType'   =&gt; 'dojo.data.ItemFileReadStore',
+        'storeParams' =&gt; array(
+            'url' =&gt; '/js/states.txt',
+        ),
+        'dijitParams' =&gt; array(
+            'searchAttr' =&gt; 'name',
+        ),
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Los ejemplos anteriores también podrían utilizar <code class="classname">FilteringSelect</code>
+            en lugar de <code class="classname">ComboBox</code>.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.currencyTextBox"></a>29.4.2.4. CurrencyTextBox</h4></div></div></div>
+<p>
+            CurrencyTextBox está pensado principalmente para soportar entrada de moneda. La
+            moneda puede estar localizada, y puede soportar valores tanto fraccionarios como
+            no fraccionarios.
+        </p>
+<p>
+            Internamente, CurrencyTextBox deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.numberTextBox" title="29.4.2.9. NumberTextBox">NumberTextBox</a>,
+            <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.validationTextBox" title="29.4.2.18. ValidationTextBox">ValidationTextBox</a>,
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>;
+            todos los métodos disponibles para esas clases están disponibles. Además,
+            se pueden usar los siguientes métodos de restricción:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setCurrency($currency)</code>: establece el tipo de moneda a
+                    usar; debe seguir la especificación <a class="ulink" href="http://en.wikipedia.org/wiki/ISO_4217" target="_top">ISO-4217</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getCurrency()</code>: recupera el tipo de moneda actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSymbol($symbol)</code>: establece el símbolo de moneda
+                    <a class="ulink" href="http://en.wikipedia.org/wiki/ISO_4217" target="_top">ISO-4217</a> de 3 letras a usar.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getSymbol()</code>: obtiene el símbolo de moneda actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setFractional($flag)</code>: establece si la
+                    moneda debe permitir o no valores fraccionarios.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getFractional()</code>: recupera el estado del
+                    indicador fraccionario.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.currencyTextBox.example"></a><p class="title"><b>Ejemplo 29.19. Ejemplo de uso del elemento dijit CurrencyTextBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'CurrencyTextBox',
+    'foo',
+    array(
+        'label'          =&gt; 'Currency:',
+        'required'       =&gt; true,
+        'currency'       =&gt; 'USD',
+        'invalidMessage' =&gt; 'Invalid amount. ' .
+                            'Include dollar sign, commas, and cents.',
+        'fractional'     =&gt; false,
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.dateTextBox"></a>29.4.2.5. DateTextBox</h4></div></div></div>
+<p>
+            DateTextBox proporciona un desplegable de calendario para seleccionar una fecha, así
+            como validación y formateo de fecha en el lado del cliente.
+        </p>
+<p>
+            Internamente, DateTextBox deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.validationTextBox" title="29.4.2.18. ValidationTextBox">ValidationTextBox</a>
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>;
+            todos los métodos disponibles para esas clases están disponibles. Además,
+            los siguientes métodos se pueden usar para establecer restricciones individuales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setAmPm($flag)</code> y <code class="methodname">getAmPm()</code>:
+                    si se deben usar o no las cadenas AM o PM en las horas.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setStrict($flag)</code> y
+                    <code class="methodname">getStrict()</code>: si se debe usar o no una coincidencia estricta
+                    de expresión regular al validar la entrada. Si es <code class="constant">FALSE</code>, que
+                    es el valor por defecto, será indulgente con los espacios en blanco y algunas abreviaturas.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setLocale($locale)</code> y
+                    <code class="methodname">getLocale()</code>: establece y recupera la configuración regional a usar con
+                    este elemento específico.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setDatePattern($pattern)</code> y
+                    <code class="methodname">getDatePattern()</code>: proporciona y recupera el <a class="ulink" href="http://www.unicode.org/reports/tr35/#Date_Format_Patterns" target="_top">patrón unicode
+                        de formato de fecha</a> para formatear la fecha.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setFormatLength($formatLength)</code> y
+                    <code class="methodname">getFormatLength()</code>: proporciona y recupera el tipo de longitud de
+                    formato a usar; debe ser uno de "long", "short", "medium" o "full".
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSelector($selector)</code> y
+                    <code class="methodname">getSelector()</code>: proporciona y recupera el estilo del
+                    selector; debe ser "date" o "time".
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.dateTextBox.example"></a><p class="title"><b>Ejemplo 29.20. Ejemplo de uso del elemento dijit DateTextBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'DateTextBox',
+    'foo',
+    array(
+        'label'          =&gt; 'Date:',
+        'required'       =&gt; true,
+        'invalidMessage' =&gt; 'Invalid date specified.',
+        'formatLength'   =&gt; 'long',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.editor"></a>29.4.2.6. Editor</h4></div></div></div>
+<p>
+            Editor proporciona un editor <acronym class="acronym">WYSIWYG</acronym> que se puede usar tanto para crear como
+            editar contenido <acronym class="acronym">HTML</acronym> enriquecido. <span class="command"><strong>dijit.Editor</strong></span> es conectable
+            y se puede extender con plugins personalizados si se desea; consulte <a class="ulink" href="http://dojotoolkit.org/reference-guide/dijit/Editor.html" target="_top">la
+                documentación de dijit.Editor</a> para más detalles.
+        </p>
+<p>
+            El elemento de formulario Editor proporciona varios accesores y mutadores
+            para manipular varios parámetros de dijit, de la siguiente manera:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    Los <span class="emphasis"><em>captureEvents</em></span> son eventos que se conectan
+                    al área de edición misma. Los siguientes accesores y
+                    mutadores están disponibles para manipular eventos de captura:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p><code class="methodname">addCaptureEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">addCaptureEvents(array $events)</code></p></li>
+<li class="listitem"><p><code class="methodname">setCaptureEvents(array $events)</code></p></li>
+<li class="listitem"><p><code class="methodname">getCaptureEvents()</code></p></li>
+<li class="listitem"><p><code class="methodname">hasCaptureEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">removeCaptureEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">clearCaptureEvents()</code></p></li>
+</ul></div>
+</li>
+<li class="listitem">
+<p>
+                    Los <span class="emphasis"><em>events</em></span> son eventos <acronym class="acronym">DOM</acronym> estándar, como
+                    onClick, onKeyUp, etc. Los siguientes accesores y mutadores
+                    están disponibles para manipular eventos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p><code class="methodname">addEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">addEvents(array $events)</code></p></li>
+<li class="listitem"><p><code class="methodname">setEvents(array $events)</code></p></li>
+<li class="listitem"><p><code class="methodname">getEvents()</code></p></li>
+<li class="listitem"><p><code class="methodname">hasEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">removeEvent($event)</code></p></li>
+<li class="listitem"><p><code class="methodname">clearEvents()</code></p></li>
+</ul></div>
+</li>
+<li class="listitem">
+<p>
+                    Los <span class="emphasis"><em>plugins</em></span> añaden funcionalidad al
+                    Editor -- herramientas adicionales para la barra de herramientas, estilos
+                    adicionales permitidos, etc. Los siguientes accesores y mutadores
+                    están disponibles para manipular plugins:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p><code class="methodname">addPlugin($plugin)</code></p></li>
+<li class="listitem"><p><code class="methodname">addPlugins(array $plugins)</code></p></li>
+<li class="listitem"><p><code class="methodname">setPlugins(array $plugins)</code></p></li>
+<li class="listitem"><p><code class="methodname">getPlugins()</code></p></li>
+<li class="listitem"><p><code class="methodname">hasPlugin($plugin)</code></p></li>
+<li class="listitem"><p><code class="methodname">removePlugin($plugin)</code></p></li>
+<li class="listitem"><p><code class="methodname">clearPlugins()</code></p></li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>editActionInterval</em></span> se usa para agrupar
+                    eventos para operaciones de deshacer. Por defecto, este valor es 3
+                    segundos. El método
+                    <code class="methodname">setEditActionInterval($interval)</code> se puede usar para
+                    establecer el valor, mientras que <code class="methodname">getEditActionInterval()</code>
+                    lo recuperará.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>focusOnLoad</em></span> se usa para determinar
+                    si este editor en particular recibirá el foco cuando la
+                    página se haya cargado. Por defecto, esto es <code class="constant">FALSE</code>. El método
+                    <code class="methodname">setFocusOnLoad($flag)</code> se puede usar para
+                    establecer el valor, mientras que <code class="methodname">getFocusOnLoad()</code>
+                    lo recuperará.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>height</em></span> especifica la altura del
+                    editor; por defecto, esto es 300px. El método
+                    <code class="methodname">setHeight($height)</code> se puede usar para establecer el
+                    valor, mientras que <code class="methodname">getHeight()</code> lo recuperará.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>inheritWidth</em></span> se usa para determinar
+                    si el editor usará el ancho del contenedor padre o simplemente
+                    tomará por defecto el 100% del ancho. Por defecto, esto es <code class="constant">FALSE</code>
+                    (es decir, llenará el ancho de la ventana). El método
+                    <code class="methodname">setInheritWidth($flag)</code> se puede usar para establecer el
+                    valor, mientras que <code class="methodname">getInheritWidth()</code> lo recuperará.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>minHeight</em></span> indica la altura mínima
+                    del editor; por defecto, esto es 1em. El método
+                    <code class="methodname">setMinHeight($height)</code> se puede usar para establecer el
+                    valor, mientras que <code class="methodname">getMinHeight()</code> lo recuperará.
+                </p></li>
+<li class="listitem">
+<p>
+                    Las <span class="emphasis"><em>styleSheets</em></span> indican qué hojas de estilo
+                    <acronym class="acronym">CSS</acronym> adicionales se deben usar para afectar la visualización del
+                    Editor. Por defecto, no se registra ninguna, y hereda los estilos de
+                    la página. Los siguientes accesores y mutadores están
+                    disponibles para manipular las hojas de estilo del editor:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p><code class="methodname">addStyleSheet($styleSheet)</code></p></li>
+<li class="listitem"><p><code class="methodname">addStyleSheets(array $styleSheets)</code></p></li>
+<li class="listitem"><p><code class="methodname">setStyleSheets(array $styleSheets)</code></p></li>
+<li class="listitem"><p><code class="methodname">getStyleSheets()</code></p></li>
+<li class="listitem"><p><code class="methodname">hasStyleSheet($styleSheet)</code></p></li>
+<li class="listitem"><p><code class="methodname">removeStyleSheet($styleSheet)</code></p></li>
+<li class="listitem"><p><code class="methodname">clearStyleSheets()</code></p></li>
+</ul></div>
+</li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.editor.example"></a><p class="title"><b>Ejemplo 29.21. Ejemplo de uso del elemento dijit Editor</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement('editor', 'content', array(
+    'plugins'            =&gt; array('undo', '|', 'bold', 'italic'),
+    'editActionInterval' =&gt; 2,
+    'focusOnLoad'        =&gt; true,
+    'height'             =&gt; '250px',
+    'inheritWidth'       =&gt; true,
+    'styleSheets'        =&gt; array('/js/custom/editor.css'),
+));
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Editor Dijit uses div by default">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">El Dijit Editor usa div por defecto</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                El dijit Editor usa un <acronym class="acronym">DIV</acronym> <acronym class="acronym">HTML</acronym> por defecto.
+                La documentación de <span class="command"><strong>dijit._editor.RichText</strong></span> indica que
+                construirlo sobre un <acronym class="acronym">TEXTAREA</acronym> <acronym class="acronym">HTML</acronym> puede
+                tener potencialmente implicaciones de seguridad.
+            </p>
+<p>
+                Dicho esto, puede haber ocasiones en las que desee un widget Editor que pueda degradarse
+                elegantemente a un <acronym class="acronym">TEXTAREA</acronym>. En tales situaciones, puede hacerlo
+                estableciendo la propiedad <span class="property">degrade</span> a <code class="constant">TRUE</code>:
+            </p>
+<pre class="programlisting">
+// At instantiation:
+$editor = new Zend_Dojo_Form_Element_Editor('foo', array(
+    'degrade' =&gt; true,
+));
+
+// Construction via the form:
+$form-&gt;addElement('editor', 'content', array(
+    'degrade' =&gt; true,
+));
+
+// Or after instantiation:
+$editor-&gt;degrade = true;
+</pre>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.horizontalSlider"></a>29.4.2.7. HorizontalSlider</h4></div></div></div>
+<p>
+            HorizontalSlider proporciona un widget deslizante de interfaz para seleccionar un
+            valor numérico dentro de un rango. Internamente, establece el valor de un elemento
+            oculto que se envía con el formulario.
+        </p>
+<p>
+            HorizontalSlider deriva del <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.slider" title="29.4.2.13. Slider abstract element">elemento
+                dijit Slider abstracto</a>. Además, tiene una variedad de métodos para
+            establecer y configurar reglas y etiquetas de reglas del deslizador.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setTopDecorationDijit($dijit)</code> y
+                    <code class="methodname">setBottomDecorationDijit($dijit)</code>: establece el nombre
+                    del dijit a usar para la parte superior o inferior del
+                    deslizador. Esto no debe incluir el prefijo "dijit.form.",
+                    sino solo el nombre final -- uno de "HorizontalRule"
+                    o "HorizontalRuleLabels".
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTopDecorationContainer($container)</code> y
+                    <code class="methodname">setBottomDecorationContainer($container)</code>:
+                    especifica el nombre a usar para el elemento contenedor de las
+                    reglas; por ejemplo, 'topRule', 'topContainer', etc.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTopDecorationLabels(array $labels)</code> y
+                    <code class="methodname">setBottomDecorationLabels(array $labels)</code>: establece
+                    las etiquetas a usar para uno de los tipos de dijit RuleLabels.
+                    Estos deben ser un array indexado; especifique un único espacio
+                    vacío para omitir una posición de etiqueta dada (como el principio
+                    o el final).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTopDecorationParams(array $params)</code> y
+                    <code class="methodname">setBottomDecorationParams(array $params)</code>:
+                    parámetros de dijit a usar al configurar el dijit Rule o
+                    RuleLabels dado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTopDecorationAttribs(array $attribs)</code> y
+                    <code class="methodname">setBottomDecorationAttribs(array $attribs)</code>:
+                    atributos <acronym class="acronym">HTML</acronym> a especificar para el contenedor de elemento
+                    <acronym class="acronym">HTML</acronym> Rule o RuleLabels dado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getTopDecoration()</code> y
+                    <code class="methodname">getBottomDecoration()</code>: recupera todos los metadatos
+                    para una definición Rule o RuleLabels dada, tal como se proporciona
+                    con los mutadores anteriores.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.horizontalSlider.example"></a><p class="title"><b>Ejemplo 29.22. Ejemplo de uso del elemento dijit HorizontalSlider</b></p>
+<div class="example-contents">
+<p>
+                Lo siguiente creará una selección de deslizador horizontal con
+                valores enteros que van de -10 a 10. La parte superior tendrá etiquetas
+                en las marcas del 20%, 40%, 60% y 80%. La parte inferior tendrá reglas
+                en 0, 50% y 100%. Cada vez que se cambia el valor, el elemento oculto
+                que almacena el valor se actualizará.
+            </p>
+<pre class="programlisting">
+$form-&gt;addElement(
+    'HorizontalSlider',
+    'horizontal',
+    array(
+        'label'                     =&gt; 'HorizontalSlider',
+        'value'                     =&gt; 5,
+        'minimum'                   =&gt; -10,
+        'maximum'                   =&gt; 10,
+        'discreteValues'            =&gt; 11,
+        'intermediateChanges'       =&gt; true,
+        'showButtons'               =&gt; true,
+        'topDecorationDijit'        =&gt; 'HorizontalRuleLabels',
+        'topDecorationContainer'    =&gt; 'topContainer',
+        'topDecorationLabels'       =&gt; array(
+                ' ',
+                '20%',
+                '40%',
+                '60%',
+                '80%',
+                ' ',
+        ),
+        'topDecorationParams'      =&gt; array(
+            'container' =&gt; array(
+                'style' =&gt; 'height:1.2em; font-size=75%;color:gray;',
+            ),
+            'list' =&gt; array(
+                'style' =&gt; 'height:1em; font-size=75%;color:gray;',
+            ),
+        ),
+        'bottomDecorationDijit'     =&gt; 'HorizontalRule',
+        'bottomDecorationContainer' =&gt; 'bottomContainer',
+        'bottomDecorationLabels'    =&gt; array(
+                '0%',
+                '50%',
+                '100%',
+        ),
+        'bottomDecorationParams'   =&gt; array(
+            'list' =&gt; array(
+                'style' =&gt; 'height:1em; font-size=75%;color:gray;',
+            ),
+        ),
+    )
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.numberSpinner"></a>29.4.2.8. NumberSpinner</h4></div></div></div>
+<p>
+            Un number spinner es un elemento de texto para introducir valores numéricos; también
+            incluye elementos para incrementar y decrementar el valor
+            en una cantidad determinada.
+        </p>
+<p>
+            Están disponibles los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setDefaultTimeout($timeout)</code> y
+                    <code class="methodname">getDefaultTimeout()</code>: establece y recupera el
+                    tiempo de espera por defecto, en milisegundos, entre el momento en que se mantiene
+                    presionado el botón y el momento en que se cambia el valor.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTimeoutChangeRate($rate)</code> y
+                    <code class="methodname">getTimeoutChangeRate()</code>: establece y recupera la
+                    velocidad, en milisegundos, a la que se realizarán cambios cuando un
+                    botón se mantiene presionado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setLargeDelta($delta)</code> y
+                    <code class="methodname">getLargeDelta()</code>: establece y recupera la cantidad por
+                    la que debe cambiar el valor numérico cuando se mantiene presionado un botón.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSmallDelta($delta)</code> y
+                    <code class="methodname">getSmallDelta()</code>: establece y recupera el delta por
+                    el cual debe cambiar el número cuando se presiona un botón una vez.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setIntermediateChanges($flag)</code> y
+                    <code class="methodname">getIntermediateChanges()</code>: establece y recupera el
+                    indicador que señala si cada cambio de valor debe
+                    mostrarse o no cuando se mantiene presionado un botón.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setRangeMessage($message)</code> y
+                    <code class="methodname">getRangeMessage()</code>: establece y recupera el mensaje
+                    que indica el rango de valores disponibles.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setMin($value)</code> y <code class="methodname">getMin()</code>:
+                    establece y recupera el valor mínimo posible.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setMax($value)</code> y <code class="methodname">getMax()</code>:
+                    establece y recupera el valor máximo posible.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.numberSpinner.example"></a><p class="title"><b>Ejemplo 29.23. Ejemplo de uso del elemento dijit NumberSpinner</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'NumberSpinner',
+    'foo',
+    array(
+        'value'             =&gt; '7',
+        'label'             =&gt; 'NumberSpinner',
+        'smallDelta'        =&gt; 5,
+        'largeDelta'        =&gt; 25,
+        'defaultTimeout'    =&gt; 500,
+        'timeoutChangeRate' =&gt; 100,
+        'min'               =&gt; 9,
+        'max'               =&gt; 1550,
+        'places'            =&gt; 0,
+        'maxlength'         =&gt; 20,
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.numberTextBox"></a>29.4.2.9. NumberTextBox</h4></div></div></div>
+<p>
+            Un number text box es un elemento de texto para introducir valores numéricos;
+            a diferencia de NumberSpinner, los números se introducen manualmente. Se pueden proporcionar
+            validaciones y restricciones para garantizar que el número permanezca dentro de un
+            rango o formato particular.
+        </p>
+<p>
+            Internamente, NumberTextBox deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.validationTextBox" title="29.4.2.18. ValidationTextBox">ValidationTextBox</a>
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>;
+            todos los métodos disponibles para esas clases están disponibles. Además,
+            los siguientes métodos se pueden usar para establecer restricciones individuales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setLocale($locale)</code> y
+                    <code class="methodname">getLocale()</code>: especifica y recupera una configuración regional
+                    específica o alternativa a usar con este dijit.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPattern($pattern)</code> y
+                    <code class="methodname">getPattern()</code>: establece y recupera un <a class="ulink" href="http://www.unicode.org/reports/tr35/#Number_Format_Patterns" target="_top">formato
+                        de patrón numérico</a> a usar para formatear el número.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setType($type)</code> y <code class="methodname">getType()</code>:
+                    establece y recupera el tipo de formato numérico a usar (debe ser uno de
+                    'decimal', 'percent' o 'currency').
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPlaces($places)</code> y
+                    <code class="methodname">getPlaces()</code>: establece y recupera el número de decimales
+                    a soportar.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setStrict($flag)</code> y
+                    <code class="methodname">getStrict()</code>: establece y recupera el valor del indicador strict,
+                    que indica cuánta flexibilidad se permite en relación a los espacios en blanco y
+                    los caracteres no numéricos.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.numberTextBox.example"></a><p class="title"><b>Ejemplo 29.24. Ejemplo de uso del elemento dijit NumberTextBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'NumberTextBox',
+    'elevation',
+    array(
+        'label'          =&gt; 'NumberTextBox',
+        'required'       =&gt; true,
+        'invalidMessage' =&gt; 'Invalid elevation.',
+        'places'         =&gt; 0,
+        'constraints'    =&gt; array(
+            'min'    =&gt; -20000,
+            'max'    =&gt; 20000,
+        ),
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.passwordTextBox"></a>29.4.2.10. PasswordTextBox</h4></div></div></div>
+<p>
+            PasswordTextBox es simplemente un ValidationTextBox que está vinculado a una
+            entrada de contraseña; su único propósito es permitir una entrada de texto con
+            tema dijit para contraseñas que también proporciona validación en el lado del cliente.
+        </p>
+<p>
+            Internamente, PasswordTextBox deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.validationTextBox" title="29.4.2.18. ValidationTextBox">ValidationTextBox</a>
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>;
+            todos los métodos disponibles para esas clases están disponibles.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.passwordTextBox.example"></a><p class="title"><b>Ejemplo 29.25. Ejemplo de uso del elemento dijit PasswordTextBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'PasswordTextBox',
+    'password',
+    array(
+        'label'          =&gt; 'Password',
+        'required'       =&gt; true,
+        'trim'           =&gt; true,
+        'lowercase'      =&gt; true,
+        'regExp'         =&gt; '^[a-z0-9]{6,}$',
+        'invalidMessage' =&gt; 'Invalid password; ' .
+                            'must be at least 6 alphanumeric characters',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.radioButton"></a>29.4.2.11. RadioButton</h4></div></div></div>
+<p>
+            RadioButton envuelve elementos de entrada radio estándar para proporcionar una
+            apariencia consistente con otros dijits de dojo.
+        </p>
+<p>
+            RadioButton deriva de DijitMulti, lo que
+            le permite especificar opciones de select mediante los métodos
+            <code class="methodname">setMultiOptions()</code> y <code class="methodname">setMultiOption()</code>.
+        </p>
+<p>
+            Por defecto, este elemento registra un validador <code class="classname">InArray</code>
+            que valida contra las claves del array de opciones registradas. Puede
+            deshabilitar este comportamiento llamando a
+            <code class="methodname">setRegisterInArrayValidator(false)</code>, o pasando un
+            valor <code class="constant">FALSE</code> a la clave de configuración
+            <span class="property">registerInArrayValidator</span>.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.radioButton.example"></a><p class="title"><b>Ejemplo 29.26. Ejemplo de uso del elemento dijit RadioButton</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'RadioButton',
+    'foo',
+    array(
+        'label' =&gt; 'RadioButton',
+        'multiOptions'  =&gt; array(
+            'foo' =&gt; 'Foo',
+            'bar' =&gt; 'Bar',
+            'baz' =&gt; 'Baz',
+        ),
+        'value' =&gt; 'bar',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.simpletextarea"></a>29.4.2.12. SimpleTextarea</h4></div></div></div>
+<p>
+            SimpleTextarea actúa principalmente como un textarea <acronym class="acronym">HTML</acronym> estándar. Sin embargo,
+            no soporta ni la configuración rows ni cols. En su lugar, el ancho
+            del textarea debe especificarse usando medidas <acronym class="acronym">CSS</acronym> estándar.
+            A diferencia de Textarea, no crecerá automáticamente
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.simpletextarea.example"></a><p class="title"><b>Ejemplo 29.27. Ejemplo de uso del elemento dijit SimpleTextarea</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'SimpleTextarea',
+    'simpletextarea',
+    array(
+        'label'    =&gt; 'SimpleTextarea',
+        'required' =&gt; true,
+        'style'    =&gt; 'width: 80em; height: 25em;',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.slider"></a>29.4.2.13. Elemento abstracto Slider</h4></div></div></div>
+<p>
+            Slider es un elemento abstracto del cual derivan
+            <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.horizontalSlider" title="29.4.2.7. HorizontalSlider">HorizontalSlider</a>
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.verticalSlider" title="29.4.2.19. VerticalSlider">VerticalSlider</a>.
+            Expone varios métodos comunes para configurar
+            sus deslizadores, incluyendo:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setClickSelect($flag)</code> y
+                    <code class="methodname">getClickSelect()</code>: establece y recupera el indicador
+                    que señala si al hacer clic en el deslizador se cambia o no el valor.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setIntermediateChanges($flag)</code> y
+                    <code class="methodname">getIntermediateChanges()</code>: establece y recupera el
+                    indicador que señala si el dijit enviará o no una
+                    notificación en cada evento de cambio del deslizador.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setShowButtons($flag)</code> y
+                    <code class="methodname">getShowButtons()</code>: establece y recupera el indicador
+                    que señala si se mostrarán o no botones en cada extremo;
+                    si es así, el usuario puede hacer clic en ellos para cambiar el
+                    valor del deslizador.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setDiscreteValues($value)</code> y
+                    <code class="methodname">getDiscreteValues()</code>: establece y recupera el número
+                    de valores discretos representados por el deslizador.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setMaximum($value)</code> y
+                    <code class="methodname">getMaximum()</code>: establece el valor máximo del deslizador.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setMinimum($value)</code> y
+                    <code class="methodname">getMinimum()</code>: establece el valor mínimo del deslizador.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPageIncrement($value)</code> y
+                    <code class="methodname">getPageIncrement()</code>: establece la cantidad por la que el
+                    deslizador cambiará con eventos de teclado.
+                </p></li>
+</ul></div>
+<p>
+            Se proporciona un ejemplo de uso con cada clase concreta que lo extiende.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.submitButton"></a>29.4.2.14. SubmitButton</h4></div></div></div>
+<p>
+            Aunque no hay ningún Dijit llamado SubmitButton, incluimos uno aquí para
+            proporcionar un dijit de botón capaz de enviar un formulario sin
+            requerir ningún enlace javascript adicional. Funciona exactamente igual que
+            el <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.button" title="29.4.2.1. Button">dijit Button</a>.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.submitButton.example"></a><p class="title"><b>Ejemplo 29.28. Ejemplo de uso del elemento dijit SubmitButton</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'SubmitButton',
+    'foo',
+    array(
+        'required'   =&gt; false,
+        'ignore'     =&gt; true,
+        'label'      =&gt; 'Submit Button!',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.textBox"></a>29.4.2.15. TextBox</h4></div></div></div>
+<p>
+            TextBox se incluye principalmente para proporcionar una entrada de texto con
+            apariencia consistente con los demás dijits. Sin embargo, también
+            incluye algunas capacidades menores de filtrado y validación,
+            representadas en los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setLowercase($flag)</code> y
+                    <code class="methodname">getLowercase()</code>: establece y recupera el indicador
+                    que señala si la entrada debe convertirse o no a minúsculas.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPropercase($flag)</code> y
+                    <code class="methodname">getPropercase()</code>: establece y recupera el indicador
+                    que señala si la entrada debe convertirse o no a mayúscula inicial (Proper Case).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setUppercase($flag)</code> y
+                    <code class="methodname">getUppercase()</code>: establece y recupera
+                    el indicador que señala si la entrada debe convertirse o no a
+                    <acronym class="acronym">MAYÚSCULAS</acronym>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTrim($flag)</code> y <code class="methodname">getTrim()</code>:
+                    establece y recupera el indicador que señala si se deben eliminar o no los
+                    espacios en blanco iniciales o finales.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setMaxLength($length)</code> y
+                    <code class="methodname">getMaxLength()</code>: establece y recupera la longitud máxima
+                    de la entrada.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.textBox.example"></a><p class="title"><b>Ejemplo 29.29. Ejemplo de uso del elemento dijit TextBox</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'TextBox',
+    'foo',
+    array(
+        'value'      =&gt; 'some text',
+        'label'      =&gt; 'TextBox',
+        'trim'       =&gt; true,
+        'propercase' =&gt; true,
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.textarea"></a>29.4.2.16. Textarea</h4></div></div></div>
+<p>
+            Textarea actúa principalmente como un textarea <acronym class="acronym">HTML</acronym> estándar. Sin embargo,
+            no soporta ni la configuración rows ni cols. En su lugar, el ancho
+            del textarea debe especificarse usando medidas <acronym class="acronym">CSS</acronym> estándar;
+            rows debe omitirse por completo. El textarea entonces crecerá
+            verticalmente a medida que se añade texto.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.textarea.example"></a><p class="title"><b>Ejemplo 29.30. Ejemplo de uso del elemento dijit Textarea</b></p>
+<div class="example-contents"><pre class="programlisting">
+$form-&gt;addElement(
+    'Textarea',
+    'textarea',
+    array(
+        'label'    =&gt; 'Textarea',
+        'required' =&gt; true,
+        'style'    =&gt; 'width: 200px;',
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.timeTextBox"></a>29.4.2.17. TimeTextBox</h4></div></div></div>
+<p>
+            TimeTextBox es una entrada de texto que proporciona un desplegable para seleccionar
+            una hora. El desplegable puede configurarse para mostrar una determinada ventana de
+            tiempo, con incrementos especificados.
+        </p>
+<p>
+            Internamente, TimeTextBox deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.dateTextBox" title="29.4.2.5. DateTextBox">DateTextBox</a>,
+            <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.validationTextBox" title="29.4.2.18. ValidationTextBox">ValidationTextBox</a>
+            y <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>;
+            todos los métodos disponibles para esas clases están disponibles. Además,
+            los siguientes métodos se pueden usar para establecer restricciones individuales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setTimePattern($pattern)</code> y
+                    <code class="methodname">getTimePattern()</code>: establece y recupera el <a class="ulink" href="http://www.unicode.org/reports/tr35/#Date_Format_Patterns" target="_top">patrón unicode
+                        de formato de hora</a> para formatear la hora.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setClickableIncrement($format)</code> y
+                    <code class="methodname">getClickableIncrement()</code>: establece la cadena <a class="ulink" href="http://en.wikipedia.org/wiki/ISO_8601" target="_top">ISO_8601</a>
+                    que representa la cantidad en que se incrementa cada elemento clicable
+                    en el selector de hora.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setVisibleIncrement($format)</code> y
+                    <code class="methodname">getVisibleIncrement()</code>: establece el incremento visible
+                    en el selector de hora; debe seguir los formatos <code class="constant">ISO_8601</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setVisibleRange($format)</code> y
+                    <code class="methodname">getVisibleRange()</code>: establece y recupera el rango de
+                    tiempo visible en el selector de hora en un momento dado; debe
+                    seguir los formatos <code class="constant">ISO_8601</code>.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.timeTextBox.example"></a><p class="title"><b>Ejemplo 29.31. Ejemplo de uso del elemento dijit TimeTextBox</b></p>
+<div class="example-contents">
+<p>
+                Lo siguiente creará un TimeTextBox que muestra 2 horas
+                a la vez, con incrementos de 10 minutos.
+            </p>
+<pre class="programlisting">
+$form-&gt;addElement(
+    'TimeTextBox',
+    'foo',
+    array(
+        'label'              =&gt; 'TimeTextBox',
+        'required'           =&gt; true,
+        'visibleRange'       =&gt; 'T04:00:00',
+        'visibleIncrement'   =&gt; 'T00:10:00',
+        'clickableIncrement' =&gt; 'T00:10:00',
+    )
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.validationTextBox"></a>29.4.2.18. ValidationTextBox</h4></div></div></div>
+<p>
+            ValidationTextBox proporciona la capacidad de añadir validaciones y restricciones a una entrada
+            de texto. Internamente, deriva de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.textBox" title="29.4.2.15. TextBox">TextBox</a>, y añade los siguientes
+            accesores y mutadores para manipular parámetros de dijit:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setInvalidMessage($message)</code> y
+                    <code class="methodname">getInvalidMessage()</code>: establece y recupera el mensaje
+                    emergente a mostrar cuando el valor no valida.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPromptMessage($message)</code> y
+                    <code class="methodname">getPromptMessage()</code>: establece y recupera el mensaje
+                    emergente a mostrar para el uso del elemento.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setRegExp($regexp)</code> y
+                    <code class="methodname">getRegExp()</code>: establece y recupera la expresión regular a
+                    usar para validar el elemento. La expresión regular no necesita delimitadores
+                    (a diferencia de la familia de funciones preg* de <acronym class="acronym">PHP</acronym>).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setConstraint($key, $value)</code> y
+                    <code class="methodname">getConstraint($key)</code>: establece y recupera restricciones
+                    adicionales a usar al validar el elemento; usado principalmente
+                    con subclases. Las restricciones se almacenan en la clave 'constraints'
+                    de los parámetros de dijit.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setConstraints(array $constraints)</code> y
+                    <code class="methodname">getConstraints()</code>: establece y recupera restricciones
+                    individuales a usar al validar el elemento; usado principalmente con subclases.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">hasConstraint($key)</code>: comprueba si existe una restricción
+                    dada.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">removeConstraint($key)</code> y
+                    <code class="methodname">clearConstraints()</code>: elimina una restricción individual o
+                    todas las restricciones del elemento.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.dojo.form.elements.validationTextBox.example"></a><p class="title"><b>Ejemplo 29.32. Ejemplo de uso del elemento dijit ValidationTextBox</b></p>
+<div class="example-contents">
+<p>
+                Lo siguiente creará un ValidationTextBox que requiere una
+                única cadena formada solo por caracteres de palabra (es decir, sin
+                espacios, la mayoría de la puntuación no es válida).
+            </p>
+<pre class="programlisting">
+$form-&gt;addElement(
+    'ValidationTextBox',
+    'foo',
+    array(
+        'label'          =&gt; 'ValidationTextBox',
+        'required'       =&gt; true,
+        'regExp'         =&gt; '[\w]+',
+        'invalidMessage' =&gt; 'Invalid non-space text.',
+    )
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.form.elements.verticalSlider"></a>29.4.2.19. VerticalSlider</h4></div></div></div>
+<p>
+            VerticalSlider es el hermano de <a class="link" href="zend.dojo.form.phtml#zend.dojo.form.elements.horizontalSlider" title="29.4.2.7. HorizontalSlider">HorizontalSlider</a>,
+            y funciona en todos los aspectos como ese elemento. La única diferencia real
+            es que los métodos 'top*' y 'bottom*' se reemplazan por
+            'left*' y 'right*', y en lugar de usar HorizontalRule y
+            HorizontalRuleLabels, se deben usar VerticalRule y VerticalRuleLabels.
+        </p>
+<div class="example">
+<a name="zend.dojo.form.elements.verticalSlider.example"></a><p class="title"><b>Ejemplo 29.33. Ejemplo de uso del elemento dijit VerticalSlider</b></p>
+<div class="example-contents">
+<p>
+                Lo siguiente creará una selección de deslizador vertical con
+                valores enteros que van de -10 a 10. La izquierda tendrá etiquetas
+                en las marcas del 20%, 40%, 60% y 80%. La derecha tendrá reglas
+                en 0, 50% y 100%. Cada vez que se cambia el valor, el elemento oculto
+                que almacena el valor se actualizará.
+            </p>
+<pre class="programlisting">
+$form-&gt;addElement(
+    'VerticalSlider',
+    'foo',
+    array(
+        'label'                    =&gt; 'VerticalSlider',
+        'value'                    =&gt; 5,
+        'style'                    =&gt; 'height: 200px; width: 3em;',
+        'minimum'                  =&gt; -10,
+        'maximum'                  =&gt; 10,
+        'discreteValues'           =&gt; 11,
+        'intermediateChanges'      =&gt; true,
+        'showButtons'              =&gt; true,
+        'leftDecorationDijit'      =&gt; 'VerticalRuleLabels',
+        'leftDecorationContainer'  =&gt; 'leftContainer',
+        'leftDecorationLabels'     =&gt; array(
+                ' ',
+                '20%',
+                '40%',
+                '60%',
+                '80%',
+                ' ',
+        ),
+        'rightDecorationDijit' =&gt; 'VerticalRule',
+        'rightDecorationContainer' =&gt; 'rightContainer',
+        'rightDecorationLabels' =&gt; array(
+                '0%',
+                '50%',
+                '100%',
+        ),
+    )
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.form.examples"></a>29.4.3. Ejemplos de formulario Dojo</h3></div></div></div>
+<div class="example">
+<a name="zend.dojo.form.examples.dojoform"></a><p class="title"><b>Ejemplo 29.34. Uso de Zend_Dojo_Form</b></p>
+<div class="example-contents">
+<p>
+            La forma más fácil de utilizar Dojo con <code class="classname">Zend_Form</code> es
+            utilizar <code class="classname">Zend_Dojo_Form</code>, ya sea mediante uso directo o
+            extendiéndolo. Este ejemplo muestra la extensión de <code class="classname">Zend_Dojo_Form</code>, y
+            muestra el uso de todos los elementos de dijit. Crea cuatro subformularios, y
+            decora el formulario para utilizar un TabContainer, mostrando cada subformulario
+            en su propia pestaña.
+        </p>
+<pre class="programlisting">
+class My_Form_Test extends Zend_Dojo_Form
+{
+    /**
+     * Options to use with select elements
+     */
+    protected $_selectOptions = array(
+        'red'    =&gt; 'Rouge',
+        'blue'   =&gt; 'Bleu',
+        'white'  =&gt; 'Blanc',
+        'orange' =&gt; 'Orange',
+        'black'  =&gt; 'Noir',
+        'green'  =&gt; 'Vert',
+    );
+
+    /**
+     * Form initialization
+     *
+     * @return void
+     */
+    public function init()
+    {
+        $this-&gt;setMethod('post');
+        $this-&gt;setAttribs(array(
+            'name'  =&gt; 'masterForm',
+        ));
+        $this-&gt;setDecorators(array(
+            'FormElements',
+            array('TabContainer', array(
+                'id' =&gt; 'tabContainer',
+                'style' =&gt; 'width: 600px; height: 500px;',
+                'dijitParams' =&gt; array(
+                    'tabPosition' =&gt; 'top'
+                ),
+            )),
+            'DijitForm',
+        ));
+        $textForm = new Zend_Dojo_Form_SubForm();
+        $textForm-&gt;setAttribs(array(
+            'name'   =&gt; 'textboxtab',
+            'legend' =&gt; 'Text Elements',
+            'dijitParams' =&gt; array(
+                'title' =&gt; 'Text Elements',
+            ),
+        ));
+        $textForm-&gt;addElement(
+                'TextBox',
+                'textbox',
+                array(
+                    'value'      =&gt; 'some text',
+                    'label'      =&gt; 'TextBox',
+                    'trim'       =&gt; true,
+                    'propercase' =&gt; true,
+                )
+            )
+            -&gt;addElement(
+                'DateTextBox',
+                'datebox',
+                array(
+                    'value' =&gt; '2008-07-05',
+                    'label' =&gt; 'DateTextBox',
+                    'required'  =&gt; true,
+                )
+            )
+            -&gt;addElement(
+                'TimeTextBox',
+                'timebox',
+                array(
+                    'label' =&gt; 'TimeTextBox',
+                    'required'  =&gt; true,
+                )
+            )
+            -&gt;addElement(
+                'CurrencyTextBox',
+                'currencybox',
+                array(
+                    'label' =&gt; 'CurrencyTextBox',
+                    'required'  =&gt; true,
+                    // 'currency' =&gt; 'USD',
+                    'invalidMessage' =&gt; 'Invalid amount. ' .
+                                        'Include dollar sign, commas, ' .
+                                        'and cents.',
+                    // 'fractional' =&gt; true,
+                    // 'symbol' =&gt; 'USD',
+                    // 'type' =&gt; 'currency',
+                )
+            )
+            -&gt;addElement(
+                'NumberTextBox',
+                'numberbox',
+                array(
+                    'label' =&gt; 'NumberTextBox',
+                    'required'  =&gt; true,
+                    'invalidMessage' =&gt; 'Invalid elevation.',
+                    'constraints' =&gt; array(
+                        'min' =&gt; -20000,
+                        'max' =&gt; 20000,
+                        'places' =&gt; 0,
+                    )
+                )
+            )
+            -&gt;addElement(
+                'ValidationTextBox',
+                'validationbox',
+                array(
+                    'label' =&gt; 'ValidationTextBox',
+                    'required'  =&gt; true,
+                    'regExp' =&gt; '[\w]+',
+                    'invalidMessage' =&gt; 'Invalid non-space text.',
+                )
+            )
+            -&gt;addElement(
+                'Textarea',
+                'textarea',
+                array(
+                    'label'    =&gt; 'Textarea',
+                    'required' =&gt; true,
+                    'style'    =&gt; 'width: 200px;',
+                )
+            );
+        $editorForm = new Zend_Dojo_Form_SubForm();
+        $editorForm-&gt;setAttribs(array(
+            'name'   =&gt; 'editortab',
+            'legend' =&gt; 'Editor',
+            'dijitParams' =&gt; array(
+                'title' =&gt; 'Editor'
+            ),
+        ))
+        $editorForm-&gt;addElement(
+            'Editor',
+            'wysiwyg',
+            array(
+                'label'        =&gt; 'Editor',
+                'inheritWidth' =&gt; 'true',
+            )
+        );
+
+        $toggleForm = new Zend_Dojo_Form_SubForm();
+        $toggleForm-&gt;setAttribs(array(
+            'name'   =&gt; 'toggletab',
+            'legend' =&gt; 'Toggle Elements',
+        ));
+        $toggleForm-&gt;addElement(
+                'NumberSpinner',
+                'ns',
+                array(
+                    'value'             =&gt; '7',
+                    'label'             =&gt; 'NumberSpinner',
+                    'smallDelta'        =&gt; 5,
+                    'largeDelta'        =&gt; 25,
+                    'defaultTimeout'    =&gt; 1000,
+                    'timeoutChangeRate' =&gt; 100,
+                    'min'               =&gt; 9,
+                    'max'               =&gt; 1550,
+                    'places'            =&gt; 0,
+                    'maxlength'         =&gt; 20,
+                )
+            )
+            -&gt;addElement(
+                'Button',
+                'dijitButton',
+                array(
+                    'label' =&gt; 'Button',
+                )
+            )
+            -&gt;addElement(
+                'CheckBox',
+                'checkbox',
+                array(
+                    'label' =&gt; 'CheckBox',
+                    'checkedValue'  =&gt; 'foo',
+                    'uncheckedValue'  =&gt; 'bar',
+                    'checked' =&gt; true,
+                )
+            )
+            -&gt;addElement(
+                'RadioButton',
+                'radiobutton',
+                array(
+                    'label' =&gt; 'RadioButton',
+                    'multiOptions'  =&gt; array(
+                        'foo' =&gt; 'Foo',
+                        'bar' =&gt; 'Bar',
+                        'baz' =&gt; 'Baz',
+                    ),
+                    'value' =&gt; 'bar',
+                )
+            );
+        $selectForm = new Zend_Dojo_Form_SubForm();
+        $selectForm-&gt;setAttribs(array(
+            'name'   =&gt; 'selecttab',
+            'legend' =&gt; 'Select Elements',
+        ));
+        $selectForm-&gt;addElement(
+                'ComboBox',
+                'comboboxselect',
+                array(
+                    'label' =&gt; 'ComboBox (select)',
+                    'value' =&gt; 'blue',
+                    'autocomplete' =&gt; false,
+                    'multiOptions' =&gt; $this-&gt;_selectOptions,
+                )
+            )
+            -&gt;addElement(
+                'ComboBox',
+                'comboboxremote',
+                array(
+                    'label' =&gt; 'ComboBox (remoter)',
+                    'storeId' =&gt; 'stateStore',
+                    'storeType' =&gt; 'dojo.data.ItemFileReadStore',
+                    'storeParams' =&gt; array(
+                        'url' =&gt; '/js/states.txt',
+                    ),
+                    'dijitParams' =&gt; array(
+                        'searchAttr' =&gt; 'name',
+                    ),
+                )
+            )
+            -&gt;addElement(
+                'FilteringSelect',
+                'filterselect',
+                array(
+                    'label' =&gt; 'FilteringSelect (select)',
+                    'value' =&gt; 'blue',
+                    'autocomplete' =&gt; false,
+                    'multiOptions' =&gt; $this-&gt;_selectOptions,
+                )
+            )
+            -&gt;addElement(
+                'FilteringSelect',
+                'filterselectremote',
+                array(
+                    'label' =&gt; 'FilteringSelect (remoter)',
+                    'storeId' =&gt; 'stateStore',
+                    'storeType' =&gt; 'dojo.data.ItemFileReadStore',
+                    'storeParams' =&gt; array(
+                        'url' =&gt; '/js/states.txt',
+                    ),
+                    'dijitParams' =&gt; array(
+                        'searchAttr' =&gt; 'name',
+                    ),
+                )
+            );
+        $sliderForm = new Zend_Dojo_Form_SubForm();
+        $sliderForm-&gt;setAttribs(array(
+            'name'   =&gt; 'slidertab',
+            'legend' =&gt; 'Slider Elements',
+        ));
+        $sliderForm-&gt;addElement(
+                'HorizontalSlider',
+                'horizontal',
+                array(
+                    'label' =&gt; 'HorizontalSlider',
+                    'value' =&gt; 5,
+                    'minimum' =&gt; -10,
+                    'maximum' =&gt; 10,
+                    'discreteValues' =&gt; 11,
+                    'intermediateChanges' =&gt; true,
+                    'showButtons' =&gt; true,
+                    'topDecorationDijit' =&gt; 'HorizontalRuleLabels',
+                    'topDecorationContainer' =&gt; 'topContainer',
+                    'topDecorationLabels' =&gt; array(
+                            ' ',
+                            '20%',
+                            '40%',
+                            '60%',
+                            '80%',
+                            ' ',
+                    ),
+                    'topDecorationParams' =&gt; array(
+                        'container' =&gt; array(
+                            'style' =&gt; 'height:1.2em; ' .
+                                       'font-size=75%;color:gray;',
+                        ),
+                        'list' =&gt; array(
+                            'style' =&gt; 'height:1em; ' .
+                                       'font-size=75%;color:gray;',
+                        ),
+                    ),
+                    'bottomDecorationDijit' =&gt; 'HorizontalRule',
+                    'bottomDecorationContainer' =&gt; 'bottomContainer',
+                    'bottomDecorationLabels' =&gt; array(
+                            '0%',
+                            '50%',
+                            '100%',
+                    ),
+                    'bottomDecorationParams' =&gt; array(
+                        'list' =&gt; array(
+                            'style' =&gt; 'height:1em; ' .
+                                       'font-size=75%;color:gray;',
+                        ),
+                    ),
+                )
+            )
+            -&gt;addElement(
+                'VerticalSlider',
+                'vertical',
+                array(
+                    'label' =&gt; 'VerticalSlider',
+                    'value' =&gt; 5,
+                    'style' =&gt; 'height: 200px; width: 3em;',
+                    'minimum' =&gt; -10,
+                    'maximum' =&gt; 10,
+                    'discreteValues' =&gt; 11,
+                    'intermediateChanges' =&gt; true,
+                    'showButtons' =&gt; true,
+                    'leftDecorationDijit' =&gt; 'VerticalRuleLabels',
+                    'leftDecorationContainer' =&gt; 'leftContainer',
+                    'leftDecorationLabels' =&gt; array(
+                            ' ',
+                            '20%',
+                            '40%',
+                            '60%',
+                            '80%',
+                            ' ',
+                    ),
+                    'rightDecorationDijit' =&gt; 'VerticalRule',
+                    'rightDecorationContainer' =&gt; 'rightContainer',
+                    'rightDecorationLabels' =&gt; array(
+                            '0%',
+                            '50%',
+                            '100%',
+                    ),
+                )
+            );
+
+        $this-&gt;addSubForm($textForm, 'textboxtab')
+             -&gt;addSubForm($editorForm, 'editortab')
+             -&gt;addSubForm($toggleForm, 'toggletab')
+             -&gt;addSubForm($selectForm, 'selecttab')
+             -&gt;addSubForm($sliderForm, 'slidertab');
+    }
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.dojo.form.examples.decorating"></a><p class="title"><b>Ejemplo 29.35. Modificar un formulario existente para utilizar Dojo</b></p>
+<div class="example-contents">
+<p>
+            Los formularios existentes también se pueden modificar para utilizar Dojo, mediante
+            el método estático <code class="methodname">Zend_Dojo::enableForm()</code>.
+        </p>
+<p>
+            Este primer ejemplo muestra cómo decorar una instancia de formulario existente:
+        </p>
+<pre class="programlisting">
+$form = new My_Custom_Form();
+Zend_Dojo::enableForm($form);
+$form-&gt;addElement(
+'ComboBox',
+'query',
+array(
+    'label'        =&gt; 'Color:',
+    'value'        =&gt; 'blue',
+    'autocomplete' =&gt; false,
+    'multiOptions' =&gt; array(
+        'red'    =&gt; 'Rouge',
+        'blue'   =&gt; 'Bleu',
+        'white'  =&gt; 'Blanc',
+        'orange' =&gt; 'Orange',
+        'black'  =&gt; 'Noir',
+        'green'  =&gt; 'Vert',
+    ),
+)
+);
+</pre>
+<p>
+            Alternativamente, puede hacer un ligero ajuste en la
+            inicialización de su formulario:
+        </p>
+<pre class="programlisting">
+class My_Custom_Form extends Zend_Form
+{
+    public function init()
+    {
+        Zend_Dojo::enableForm($this);
+
+        // ...
+    }
+}
+</pre>
+<p>
+            Por supuesto, si puede hacer eso... podría y debería simplemente modificar
+            la clase para que herede de <code class="classname">Zend_Dojo_Form</code>, que es un reemplazo directo
+            de <code class="classname">Zend_Form</code> que ya está habilitado para Dojo...
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.dojo.view.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.dojo.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.dojo.build-layers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">29.3. Helpers de vista de Dojo </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 29.5. Soporte de capas de compilación de Zend_Dojo</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

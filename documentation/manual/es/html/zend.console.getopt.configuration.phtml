@@ -1,0 +1,265 @@
+<?php $title = '23.4. Configurar Zend_Console_Getopt'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">23.4. Configurar Zend_Console_Getopt</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.console.getopt.fetching.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 23. Zend_Console_Getopt</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.controller.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.console.getopt.configuration"></a>23.4. Configurar Zend_Console_Getopt</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.configuration.addrules"></a>23.4.1. Añadir reglas de opciones</h3></div></div></div>
+<p>
+            Puede añadir más reglas de opciones además de las especificadas
+            en el constructor de <code class="classname">Zend_Console_Getopt</code>, usando el
+            método <code class="methodname">addRules()</code>. El argumento de
+            <code class="methodname">addRules()</code> es el mismo que el primer argumento del
+            constructor de la clase. Es una cadena en el formato de la
+            especificación de opciones de sintaxis corta, o bien un array
+            asociativo en el formato de una especificación de opciones de sintaxis larga.
+            Consulte <a class="link" href="zend.console.getopt.rules.phtml" title="23.2. Declaring Getopt Rules">Declarar reglas de Getopt</a>
+            para más detalles sobre la sintaxis para especificar opciones.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.addrules.example"></a><p class="title"><b>Ejemplo 23.7. Uso de addRules()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;addRules(
+  array(
+    'verbose|v' =&gt; 'Print verbose output'
+  )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El ejemplo anterior muestra cómo añadir la opción <span class="command"><strong>--verbose</strong></span>
+            con un alias <span class="command"><strong>-v</strong></span> a un conjunto de opciones
+            definidas en la llamada al constructor. Observe que puede mezclar
+            opciones de formato corto y opciones de formato largo en la misma instancia
+            de <code class="classname">Zend_Console_Getopt</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.configuration.addhelp"></a>23.4.2. Añadir mensajes de ayuda</h3></div></div></div>
+<p>
+            Además de especificar las cadenas de ayuda al declarar reglas de opciones
+            en el formato largo, puede asociar cadenas de ayuda
+            con las reglas de opciones usando el método <code class="methodname">setHelp()</code>.
+            El argumento del método <code class="methodname">setHelp()</code> es un array
+            asociativo, en el que la clave es un flag y el valor es una
+            cadena de ayuda correspondiente.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.addhelp.example"></a><p class="title"><b>Ejemplo 23.8. Uso de setHelp()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;setHelp(
+    array(
+        'a' =&gt; 'apple option, with no parameter',
+        'b' =&gt; 'banana option, with required integer parameter',
+        'p' =&gt; 'pear option, with optional string parameter'
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Si declaró opciones con alias, puede usar cualquiera de los
+            alias como clave del array asociativo.
+        </p>
+<p>
+            El método <code class="methodname">setHelp()</code> es la única forma de definir cadenas
+            de ayuda si declaró las opciones usando la sintaxis corta.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.configuration.addaliases"></a>23.4.3. Añadir alias de opciones</h3></div></div></div>
+<p>
+            Puede declarar alias para las opciones usando el método <code class="methodname">setAliases()</code>.
+            El argumento es un array asociativo, cuya clave es
+            una cadena de flag declarada previamente, y cuyo valor es un nuevo
+            alias para ese flag. Estos alias se combinan con los alias
+            existentes. En otras palabras, los alias que declaró anteriormente
+            siguen en vigor.
+        </p>
+<p>
+            Un alias solo puede declararse una vez. Si intenta redefinir
+            un alias, se lanza una <code class="classname">Zend_Console_Getopt_Exception</code>.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.addaliases.example"></a><p class="title"><b>Ejemplo 23.9. Uso de setAliases()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;setAliases(
+    array(
+        'a' =&gt; 'apple',
+        'a' =&gt; 'apfel',
+        'p' =&gt; 'pear'
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            En el ejemplo anterior, tras declarar estos alias,
+            <span class="command"><strong>-a</strong></span>, <span class="command"><strong>--apple</strong></span> y
+            <span class="command"><strong>--apfel</strong></span> son alias entre sí.
+            Del mismo modo, <span class="command"><strong>-p</strong></span> y <span class="command"><strong>--pear</strong></span> son alias
+            entre sí.
+        </p>
+<p>
+            El método <code class="methodname">setAliases()</code> es la única forma de definir alias
+            si declaró las opciones usando la sintaxis corta.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.configuration.addargs"></a>23.4.4. Añadir listas de argumentos</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Console_Getopt</code> usa
+            <code class="varname">$_SERVER['argv']</code> como el array de argumentos de línea de
+            comandos a analizar. Alternativamente, puede especificar el array de
+            argumentos como segundo argumento del constructor. Finalmente, puede
+            añadir más argumentos a los ya usados mediante el
+            método <code class="methodname">addArguments()</code>, o puede reemplazar el array
+            actual de argumentos usando el método <code class="methodname">setArguments()</code>.
+            En ambos casos, el parámetro de estos métodos es un simple array de
+            cadenas. El primer método añade el array a los argumentos
+            actuales, y el segundo método sustituye el array por los
+            argumentos actuales.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.addargs.example"></a><p class="title"><b>Ejemplo 23.10. Uso de addArguments() y setArguments()</b></p>
+<div class="example-contents"><pre class="programlisting">
+// By default, the constructor uses $_SERVER['argv']
+$opts = new Zend_Console_Getopt('abp:');
+
+// Append an array to the existing arguments
+$opts-&gt;addArguments(array('-a', '-p', 'p_parameter', 'non_option_arg'));
+
+// Substitute a new array for the existing arguments
+$opts-&gt;setArguments(array('-a', '-p', 'p_parameter', 'non_option_arg'));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.console.getopt.configuration.config"></a>23.4.5. Añadir configuración</h3></div></div></div>
+<p>
+            El tercer parámetro del constructor de <code class="classname">Zend_Console_Getopt</code>
+            es un array de opciones de configuración que afectan
+            al comportamiento de la instancia de objeto devuelta. También puede
+            especificar opciones de configuración usando el método <code class="methodname">setOptions()</code>,
+            o puede establecer una opción individual usando el
+            método <code class="methodname">setOption()</code>.
+        </p>
+<div class="note"><table border="0" summary='Note: Clarifying the Term "option"'>
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Aclarando el término "opción"</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El término "opción" se usa para la configuración de la
+                clase <code class="classname">Zend_Console_Getopt</code> para coincidir con la terminología
+                usada en otras partes de Zend Framework. Estas no son las mismas
+                cosas que las opciones de línea de comandos analizadas por
+                la clase <code class="classname">Zend_Console_Getopt</code>.
+            </p></td></tr>
+</table></div>
+<p>
+            Las opciones actualmente admitidas
+            tienen definiciones de constantes en la clase. Las opciones,
+            sus identificadores de constante (con valores literales entre paréntesis)
+            se enumeran a continuación:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="constant">Zend_Console_Getopt::CONFIG_DASHDASH</code> ("dashDash"),
+                    si es <code class="constant">TRUE</code>, habilita el flag especial <span class="command"><strong>--</strong></span> para
+                    indicar el final de los flags. Los argumentos de línea de comandos posteriores
+                    al indicador de doble guion no se interpretan como opciones,
+                    incluso si los argumentos comienzan con un guion. Esta opción de
+                    configuración es <code class="constant">TRUE</code> por defecto.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="constant">Zend_Console_Getopt::CONFIG_IGNORECASE</code> ("ignoreCase"),
+                    si es <code class="constant">TRUE</code>, hace que los flags sean alias entre sí si difieren
+                    solo en mayúsculas y minúsculas. Es decir, <span class="command"><strong>-a</strong></span> y
+                    <span class="command"><strong>-A</strong></span> se considerarán flags sinónimos.
+                    Esta opción de configuración es <code class="constant">FALSE</code> por defecto.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="constant">Zend_Console_Getopt::CONFIG_RULEMODE</code>
+                    ("ruleMode") puede tener los valores
+                    <code class="constant">Zend_Console_Getopt::MODE_ZEND</code> ("zend") y
+                    <code class="constant">Zend_Console_Getopt::MODE_GNU</code> ("gnu"). No debería ser
+                    necesario usar esta opción a menos que extienda la clase con formas de
+                    sintaxis adicionales. Los dos modos admitidos en la clase base
+                    <code class="classname">Zend_Console_Getopt</code> no son ambiguos. Si el
+                    especificador es una cadena, la clase asume <code class="constant">MODE_GNU</code>,
+                    de lo contrario asume <code class="constant">MODE_ZEND</code>. Pero si extiende la
+                    clase y añade más formas de sintaxis, puede necesitar especificar el modo
+                    usando esta opción.
+                </p></li>
+</ul></div>
+<p>
+            Pueden añadirse más opciones de configuración como futuras mejoras
+            de esta clase.
+        </p>
+<p>
+            Los dos argumentos del método <code class="methodname">setOption()</code> son
+            un nombre de opción de configuración y un valor de opción.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.config.example.setoption"></a><p class="title"><b>Ejemplo 23.11. Uso de setOption()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;setOption('ignoreCase', true);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El argumento del método <code class="methodname">setOptions()</code> es
+            un array asociativo. Las claves de este array son los nombres de las opciones
+            de configuración, y los valores son los valores de configuración.
+            Este es también el formato de array usado en el constructor de la clase.
+            Los valores de configuración que especifique se combinan con la
+            configuración actual; no es necesario listar todas las opciones.
+        </p>
+<div class="example">
+<a name="zend.console.getopt.configuration.config.example.setoptions"></a><p class="title"><b>Ejemplo 23.12. Uso de setOptions()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$opts = new Zend_Console_Getopt('abp:');
+$opts-&gt;setOptions(
+    array(
+        'ignoreCase' =&gt; true,
+        'dashDash'   =&gt; false
+    )
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.console.getopt.fetching.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.console.getopt.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.controller.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">23.3. Obtener opciones y argumentos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 24. Zend_Controller</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

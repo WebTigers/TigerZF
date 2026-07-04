@@ -1,0 +1,115 @@
+<?php $title = 'Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.form.decorators.conclusion.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte II. Aprendiendo Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.multiuser.sessions.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="learning.multiuser"></a>Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="learning.multiuser.phtml#learning.multiuser.intro">9.1. Construyendo aplicaciones multiusuario con Zend Framework</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="learning.multiuser.phtml#learning.multiuser.intro.zf">9.1.1. Zend Framework</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="learning.multiuser.sessions.phtml">9.2. Gestión de sesiones de usuario en ZF</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="learning.multiuser.sessions.phtml#learning.multiuser.sessions.intro">9.2.1. Introducción a las sesiones</a></span></dt>
+<dt><span class="sect2"><a href="learning.multiuser.sessions.phtml#learning.multiuser.sessions.basic-usage">9.2.2. Uso básico de Zend_Session</a></span></dt>
+<dt><span class="sect2"><a href="learning.multiuser.sessions.phtml#learning.multiuser.sessions.advanced-usage">9.2.3. Uso avanzado de Zend_Session</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="learning.multiuser.authentication.phtml">9.3. Autenticando usuarios en Zend Framework</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="learning.multiuser.authentication.phtml#learning.multiuser.authentication.intro">9.3.1. Introducción a la autenticación</a></span></dt>
+<dt><span class="sect2"><a href="learning.multiuser.authentication.phtml#learning.multiuser.authentication.basic-usage">9.3.2. Uso básico de Zend_Auth</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="learning.multiuser.authorization.phtml">9.4. Construyendo un sistema de autorización en Zend Framework</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="learning.multiuser.authorization.phtml#learning.multiuser.authorization.intro">9.4.1. Introducción a la autorización</a></span></dt>
+<dt><span class="sect2"><a href="learning.multiuser.authorization.phtml#learning.multiuser.authorization.basic-usage">9.4.2. Uso básico de Zend_Acl</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.multiuser.intro"></a>9.1. Construyendo aplicaciones multiusuario con Zend Framework</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.intro.zf"></a>9.1.1. Zend Framework</h3></div></div></div>
+<p>
+            Cuando se creó la "web" original, se diseñó para ser una plataforma de publicación
+            de contenido predominantemente estático. A medida que crecía la demanda de contenido en la web, así como
+            el número de consumidores de contenido web en internet, también creció la
+            demanda de usar la web como plataforma de aplicaciones. Dado que la web es intrínsecamente buena
+            entregando una experiencia simultánea a muchos consumidores desde una única ubicación,
+            esto la convierte en un entorno ideal para construir sistemas dinámicos, multiusuario,
+            y, más comúnmente hoy en día, sociales.
+        </p>
+<p>
+            <acronym class="acronym">HTTP</acronym> es el protocolo de la web: un protocolo de petición y respuesta
+            sin estado, típicamente de corta duración. Este protocolo se diseñó así porque
+            la intención original de la web era servir o publicar contenido estático. Es este
+            mismo diseño el que ha hecho a la web tan inmensamente exitosa como es. También es
+            exactamente este diseño el que plantea nuevas preocupaciones a los desarrolladores que desean usar la
+            web como plataforma de aplicaciones.
+        </p>
+<p>
+            Estas preocupaciones y responsabilidades pueden resumirse eficazmente en tres preguntas:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    ¿Cómo distingue a un consumidor de la aplicación de otro?
+                </p></li>
+<li class="listitem"><p>
+                    ¿Cómo identifica a un consumidor como auténtico?
+                </p></li>
+<li class="listitem"><p>
+                    ¿Cómo controla a qué tiene acceso un consumidor?
+                </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note: Consumer Vs. User">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Consumidor frente a usuario</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Observe que usamos el término "consumidor" en lugar de persona. Cada vez más, las aplicaciones web
+                se orientan a servicios. Esto significa que no solo hay personas reales ("usuarios") con
+                navegadores web reales consumiendo y usando su aplicación, sino también otras aplicaciones
+                web a través de tecnologías de servicios automáticos como <acronym class="acronym">REST</acronym>,
+                <acronym class="acronym">SOAP</acronym>, y <acronym class="acronym">XML-RPC</acronym>. En este sentido,
+                las personas, así como otras aplicaciones consumidoras, deben tratarse todas por igual con
+                respecto a las preocupaciones descritas anteriormente.
+            </p></td></tr>
+</table></div>
+<p>
+            En los siguientes capítulos, examinaremos en detalle estos problemas comunes relacionados con
+            la autenticación y la autorización. Descubriremos cómo 3 componentes principales:
+            <code class="classname">Zend_Session</code>, <code class="classname">Zend_Auth</code>, y
+            <code class="classname">Zend_Acl</code>; proporcionan una solución lista para usar, así como los
+            puntos de extensión que cada uno tiene para adaptarse a una solución más personalizada.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.form.decorators.conclusion.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.multiuser.sessions.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">8.6. Conclusión </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 9.2. Gestión de sesiones de usuario en ZF</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

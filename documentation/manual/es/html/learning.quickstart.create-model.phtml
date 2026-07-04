@@ -1,0 +1,731 @@
+<?php $title = '3.4. Crear un modelo y una tabla de base de datos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">3.4. Crear un modelo y una tabla de base de datos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.quickstart.create-layout.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 3. Inicio rápido de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.quickstart.create-form.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.quickstart.create-model"></a>3.4. Crear un modelo y una tabla de base de datos</h2></div></div></div>
+<p>
+        Antes de comenzar, consideremos algo: ¿dónde vivirán estas clases, y cómo
+        las encontraremos? El proyecto por defecto que creamos instancia un autoloader. Podemos adjuntarle otros
+        autoloaders para que sepa dónde encontrar diferentes clases. Normalmente, queremos que nuestras
+        distintas clases MVC estén agrupadas bajo el mismo árbol -- en este caso,
+        <code class="filename">application/</code> -- y casi siempre usando un prefijo común.
+    </p>
+<p>
+        <code class="classname">Zend_Controller_Front</code> tiene una noción de "módulos", que son
+        mini-aplicaciones individuales. Los módulos imitan la estructura de directorios que la herramienta
+        <span class="command"><strong>zf</strong></span> configura bajo <code class="filename">application/</code>, y se asume que todas las
+        clases dentro de ellos comienzan con un prefijo común, el nombre del módulo. <code class="filename">application/</code>
+        es en sí mismo un módulo -- el módulo "default" o "application". Como tal, querremos configurar
+        el autoloading para los recursos dentro de este directorio.
+    </p>
+<p>
+        <code class="classname">Zend_Application_Module_Autoloader</code> proporciona la funcionalidad necesaria
+        para mapear los distintos recursos bajo un módulo a los directorios apropiados, y también proporciona un
+        mecanismo de nomenclatura estándar. Se crea una instancia de la clase por defecto durante la
+        inicialización del objeto bootstrap; el bootstrap de su aplicación usará por defecto el
+        prefijo de módulo "Application". Como tal, nuestros modelos, formularios y clases de tabla comenzarán todos
+        con el prefijo de clase "Application_".
+    </p>
+<p>
+        Ahora, consideremos qué compone un libro de visitas. Normalmente, son simplemente una lista de entradas
+        con un <span class="emphasis"><em>comentario</em></span>, una <span class="emphasis"><em>marca de tiempo</em></span>, y, a menudo,
+        una <span class="emphasis"><em>dirección de correo electrónico</em></span>. Suponiendo que las almacenamos en una base de datos, también podríamos querer un
+        <span class="emphasis"><em>identificador único</em></span> para cada entrada. Probablemente querremos poder guardar
+        una entrada, obtener entradas individuales y recuperar todas las entradas. Como tal, una <acronym class="acronym">API</acronym>
+        simple de modelo de libro de visitas podría verse algo así:
+    </p>
+<pre class="programlisting">
+// application/models/Guestbook.php
+
+class Application_Model_Guestbook
+{
+    protected $_comment;
+    protected $_created;
+    protected $_email;
+    protected $_id;
+
+    public function __set($name, $value);
+    public function __get($name);
+
+    public function setComment($text);
+    public function getComment();
+
+    public function setEmail($email);
+    public function getEmail();
+
+    public function setCreated($ts);
+    public function getCreated();
+
+    public function setId($id);
+    public function getId();
+}
+
+class Application_Model_GuestbookMapper
+{
+    public function save(Application_Model_Guestbook $guestbook);
+    public function find($id);
+    public function fetchAll();
+}
+</pre>
+<p>
+        <code class="methodname">__get()</code> y <code class="methodname">__set()</code> nos proporcionarán un
+        mecanismo de conveniencia para acceder a las propiedades individuales de la entrada, y delegarán a
+        los demás getters y setters. También ayudarán a asegurar que solo las propiedades que incluyamos en la lista blanca
+        estarán disponibles en el objeto.
+    </p>
+<p>
+        <code class="methodname">find()</code> y <code class="methodname">fetchAll()</code> proporcionan la capacidad
+        de obtener una única entrada o todas las entradas, mientras que <code class="methodname">save()</code> se encarga de
+        guardar una entrada en el almacén de datos.
+    </p>
+<p>
+        Ahora, desde aquí, podemos empezar a pensar en configurar nuestra base de datos.
+    </p>
+<p>
+        Primero necesitamos inicializar nuestro recurso <code class="classname">Db</code>. Al igual que con los recursos
+        <code class="classname">Layout</code> y <code class="classname">View</code>, podemos proporcionar
+        configuración para el recurso <code class="classname">Db</code>. Podemos hacer esto con el
+        comando <span class="command"><strong>zf configure db-adapter</strong></span>:
+    </p>
+<pre class="programlisting">
+% zf configure db-adapter \
+&gt; 'adapter=PDO_SQLITE&amp;dbname=APPLICATION_PATH "/../data/db/guestbook.db"' \
+&gt; production
+A db configuration for the production has been written to the application config file.
+
+% zf configure db-adapter \
+&gt; 'adapter=PDO_SQLITE&amp;dbname=APPLICATION_PATH "/../data/db/guestbook-testing.db"' \
+&gt; testing
+A db configuration for the production has been written to the application config file.
+
+% zf configure db-adapter \
+&gt; 'adapter=PDO_SQLITE&amp;dbname=APPLICATION_PATH "/../data/db/guestbook-dev.db"' \
+&gt; development
+A db configuration for the production has been written to the application config file.
+</pre>
+<p>
+        Ahora edite su archivo <code class="filename">application/configs/application.ini</code>, donde verá
+        que se agregaron las siguientes líneas en las secciones apropiadas.
+    </p>
+<pre class="programlisting">
+; application/configs/application.ini
+
+[production]
+; ...
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook.db"
+
+[testing : production]
+; ...
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook-testing.db"
+
+[development : production]
+; ...
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook-dev.db"
+</pre>
+<p>
+        Su archivo de configuración final debería verse como el siguiente:
+    </p>
+<pre class="programlisting">
+; application/configs/application.ini
+
+[production]
+phpSettings.display_startup_errors = 0
+phpSettings.display_errors = 0
+bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
+bootstrap.class = "Bootstrap"
+appnamespace = "Application"
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+resources.frontController.params.displayExceptions = 0
+resources.layout.layoutPath = APPLICATION_PATH "/layouts/scripts"
+resources.view[] =
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook.db"
+
+[staging : production]
+
+[testing : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook-testing.db"
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.db.adapter = "PDO_SQLITE"
+resources.db.params.dbname = APPLICATION_PATH "/../data/db/guestbook-dev.db"
+</pre>
+<p>
+        Tenga en cuenta que la(s) base(s) de datos se almacenarán en <code class="filename">data/db/</code>. Cree esos
+        directorios, y hágalos escribibles por todos. En sistemas tipo unix, puede hacerlo de la
+        siguiente manera:
+    </p>
+<pre class="programlisting">
+% mkdir -p data/db; chmod -R a+rwX data
+</pre>
+<p>
+        En Windows, necesitará crear los directorios en el Explorador y establecer los permisos para
+        permitir que cualquiera escriba en el directorio.
+    </p>
+<p>
+        Llegados a este punto tenemos una conexión a una base de datos; en nuestro caso, es una conexión a una base de datos
+        Sqlite ubicada dentro de nuestro directorio <code class="filename">application/data/</code>. Así que, diseñemos
+        una tabla simple que contendrá las entradas de nuestro libro de visitas.
+    </p>
+<pre class="programlisting">
+-- scripts/schema.sqlite.sql
+--
+-- You will need load your database schema with this SQL.
+
+CREATE TABLE guestbook (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(32) NOT NULL DEFAULT 'noemail@test.com',
+    comment TEXT NULL,
+    created DATETIME NOT NULL
+);
+
+CREATE INDEX "id" ON "guestbook" ("id");
+</pre>
+<p>
+        Y, para que tengamos algunos datos de trabajo desde el principio, creemos algunas filas de
+        información para hacer que nuestra aplicación sea interesante.
+    </p>
+<pre class="programlisting">
+-- scripts/data.sqlite.sql
+--
+-- You can begin populating the database with the following SQL statements.
+
+INSERT INTO guestbook (email, comment, created) VALUES
+    ('ralph.schindler@zend.com',
+    'Hello! Hope you enjoy this sample zf application!',
+    DATETIME('NOW'));
+INSERT INTO guestbook (email, comment, created) VALUES
+    ('foo@bar.com',
+    'Baz baz baz, baz baz Baz baz baz - baz baz baz.',
+    DATETIME('NOW'));
+</pre>
+<p>
+        Ahora que tenemos definidos tanto el esquema como algunos datos. Preparemos un script que podamos
+        ahora ejecutar para construir esta base de datos. Naturalmente, esto no es necesario en producción, pero
+        este script ayudará a los desarrolladores a construir los requisitos de la base de datos localmente para que puedan
+        tener la aplicación completamente funcional. Cree el script como
+        <code class="filename">scripts/load.sqlite.php</code> con el siguiente contenido:
+    </p>
+<pre class="programlisting">
+// scripts/load.sqlite.php
+
+/**
+ * Script for creating and loading database
+ */
+
+// Initialize the application path and autoloading
+defined('APPLICATION_PATH')
+    || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
+set_include_path(implode(PATH_SEPARATOR, array(
+    APPLICATION_PATH . '/../library',
+    get_include_path(),
+)));
+require_once 'Zend/Loader/Autoloader.php';
+Zend_Loader_Autoloader::getInstance();
+
+// Define some CLI options
+$getopt = new Zend_Console_Getopt(array(
+    'withdata|w' =&gt; 'Load database with sample data',
+    'env|e-s'    =&gt; 'Application environment for which to create database (defaults to development)',
+    'help|h'     =&gt; 'Help -- usage message',
+));
+try {
+    $getopt-&gt;parse();
+} catch (Zend_Console_Getopt_Exception $e) {
+    // Bad options passed: report usage
+    echo $e-&gt;getUsageMessage();
+    return false;
+}
+
+// If help requested, report usage message
+if ($getopt-&gt;getOption('h')) {
+    echo $getopt-&gt;getUsageMessage();
+    return true;
+}
+
+// Initialize values based on presence or absence of CLI options
+$withData = $getopt-&gt;getOption('w');
+$env      = $getopt-&gt;getOption('e');
+defined('APPLICATION_ENV')
+    || define('APPLICATION_ENV', (null === $env) ? 'development' : $env);
+
+// Initialize Zend_Application
+$application = new Zend_Application(
+    APPLICATION_ENV,
+    APPLICATION_PATH . '/configs/application.ini'
+);
+
+// Initialize and retrieve DB resource
+$bootstrap = $application-&gt;getBootstrap();
+$bootstrap-&gt;bootstrap('db');
+$dbAdapter = $bootstrap-&gt;getResource('db');
+
+// let the user know whats going on (we are actually creating a
+// database here)
+if ('testing' != APPLICATION_ENV) {
+    echo 'Writing Database Guestbook in (control-c to cancel): ' . PHP_EOL;
+    for ($x = 5; $x &gt; 0; $x--) {
+        echo $x . "\r"; sleep(1);
+    }
+}
+
+// Check to see if we have a database file already
+$options = $bootstrap-&gt;getOption('resources');
+$dbFile  = $options['db']['params']['dbname'];
+if (file_exists($dbFile)) {
+    unlink($dbFile);
+}
+
+// this block executes the actual statements that were loaded from
+// the schema file.
+try {
+    $schemaSql = file_get_contents(dirname(__FILE__) . '/schema.sqlite.sql');
+    // use the connection directly to load sql in batches
+    $dbAdapter-&gt;getConnection()-&gt;exec($schemaSql);
+    chmod($dbFile, 0666);
+
+    if ('testing' != APPLICATION_ENV) {
+        echo PHP_EOL;
+        echo 'Database Created';
+        echo PHP_EOL;
+    }
+
+    if ($withData) {
+        $dataSql = file_get_contents(dirname(__FILE__) . '/data.sqlite.sql');
+        // use the connection directly to load sql in batches
+        $dbAdapter-&gt;getConnection()-&gt;exec($dataSql);
+        if ('testing' != APPLICATION_ENV) {
+            echo 'Data Loaded.';
+            echo PHP_EOL;
+        }
+    }
+
+} catch (Exception $e) {
+    echo 'AN ERROR HAS OCCURED:' . PHP_EOL;
+    echo $e-&gt;getMessage() . PHP_EOL;
+    return false;
+}
+
+// generally speaking, this script will be run from the command line
+return true;
+</pre>
+<p>
+        Ahora, ejecutemos este script. Desde una terminal o la línea de comandos de DOS, haga lo siguiente:
+    </p>
+<pre class="programlisting">
+% php scripts/load.sqlite.php --withdata
+</pre>
+<p>
+        Debería ver una salida como la siguiente:
+    </p>
+<pre class="programlisting">
+path/to/ZendFrameworkQuickstart/scripts$ php load.sqlite.php --withdata
+Writing Database Guestbook in (control-c to cancel):
+1
+Database Created
+Data Loaded.
+</pre>
+<p>
+        Ahora tenemos una base de datos y tabla completamente funcionales para nuestra aplicación de libro de visitas. Nuestros próximos
+        pasos son construir el código de nuestra aplicación. Esto incluye construir una fuente de datos (en nuestro
+        caso, usaremos <code class="classname">Zend_Db_Table</code>), y un data mapper para conectar esa
+        fuente de datos a nuestro modelo de dominio. Finalmente también crearemos el controlador que interactuará
+        con este modelo tanto para mostrar las entradas existentes como para procesar entradas nuevas.
+    </p>
+<p>
+        Usaremos un <a class="ulink" href="http://martinfowler.com/eaaCatalog/tableDataGateway.html" target="_top">Table Data
+            Gateway</a> para conectarnos a nuestra fuente de datos; <code class="classname">Zend_Db_Table</code>
+        proporciona esta funcionalidad. Para empezar, creemos una clase de tabla basada en
+        <code class="classname">Zend_Db_Table</code>. Al igual que hicimos para los layouts y
+        el adaptador de base de datos, podemos usar la herramienta <span class="command"><strong>zf</strong></span> para ayudarnos, usando el comando
+        <span class="command"><strong>create db-table</strong></span>. Esto toma como mínimo dos argumentos, el nombre por el cual
+        desea referirse a la clase, y la tabla de base de datos a la que se mapea.
+    </p>
+<pre class="programlisting">
+% zf create db-table Guestbook guestbook
+Creating a DbTable at application/models/DbTable/Guestbook.php
+Updating project profile 'zfproject.xml'
+</pre>
+<p>
+        Al mirar su árbol de directorios, ahora verá que se creó un nuevo directorio,
+        <code class="filename">application/models/DbTable/</code>, con el archivo
+        <code class="filename">Guestbook.php</code>. Si abre ese archivo, verá el siguiente
+        contenido:
+    </p>
+<pre class="programlisting">
+// application/models/DbTable/Guestbook.php
+
+/**
+ * This is the DbTable class for the guestbook table.
+ */
+class Application_Model_DbTable_Guestbook extends Zend_Db_Table_Abstract
+{
+    /** Table name */
+    protected $_name    = 'guestbook';
+}
+</pre>
+<p>
+        Observe el prefijo de la clase: <code class="classname">Application_Model_DbTable</code>. El prefijo de clase
+        para nuestro módulo, "Application", es el primer segmento, y luego tenemos el componente,
+        "Model_DbTable"; este último se mapea al directorio <code class="filename">models/DbTable/</code>
+        del módulo.
+    </p>
+<p>
+        Todo lo que es realmente necesario al extender <code class="classname">Zend_Db_Table</code> es
+        proporcionar un nombre de tabla y opcionalmente la clave primaria (si no es "id").
+    </p>
+<p>
+        Ahora creemos un <a class="ulink" href="http://martinfowler.com/eaaCatalog/dataMapper.html" target="_top">Data
+            Mapper</a>. Un <span class="emphasis"><em>Data Mapper</em></span> mapea un objeto de dominio a la base de datos.
+        En nuestro caso, mapeará nuestro modelo, <code class="classname">Application_Model_Guestbook</code>, a
+        nuestra fuente de datos, <code class="classname">Application_Model_DbTable_Guestbook</code>. Una
+        <acronym class="acronym">API</acronym> típica para un data mapper es la siguiente:
+    </p>
+<pre class="programlisting">
+// application/models/GuestbookMapper.php
+
+class Application_Model_GuestbookMapper
+{
+    public function save($model);
+    public function find($id, $model);
+    public function fetchAll();
+}
+</pre>
+<p>
+        Además de estos métodos, agregaremos métodos para establecer y recuperar el Table Data
+        Gateway. Para crear la clase inicial, use la herramienta CLI <span class="command"><strong>zf</strong></span>:
+    </p>
+<pre class="programlisting">
+% zf create model GuestbookMapper
+Creating a model at application/models/GuestbookMapper.php
+Updating project profile '.zfproject.xml'
+</pre>
+<p>
+        Ahora, edite la clase <code class="classname">Application_Model_GuestbookMapper</code> que se encuentra en
+        <code class="filename">application/models/GuestbookMapper.php</code> para que quede de la siguiente manera:
+    </p>
+<pre class="programlisting">
+// application/models/GuestbookMapper.php
+
+class Application_Model_GuestbookMapper
+{
+    protected $_dbTable;
+
+    public function setDbTable($dbTable)
+    {
+        if (is_string($dbTable)) {
+            $dbTable = new $dbTable();
+        }
+        if (!$dbTable instanceof Zend_Db_Table_Abstract) {
+            throw new Exception('Invalid table data gateway provided');
+        }
+        $this-&gt;_dbTable = $dbTable;
+        return $this;
+    }
+
+    public function getDbTable()
+    {
+        if (null === $this-&gt;_dbTable) {
+            $this-&gt;setDbTable('Application_Model_DbTable_Guestbook');
+        }
+        return $this-&gt;_dbTable;
+    }
+
+    public function save(Application_Model_Guestbook $guestbook)
+    {
+        $data = array(
+            'email'   =&gt; $guestbook-&gt;getEmail(),
+            'comment' =&gt; $guestbook-&gt;getComment(),
+            'created' =&gt; date('Y-m-d H:i:s'),
+        );
+
+        if (null === ($id = $guestbook-&gt;getId())) {
+            unset($data['id']);
+            $this-&gt;getDbTable()-&gt;insert($data);
+        } else {
+            $this-&gt;getDbTable()-&gt;update($data, array('id = ?' =&gt; $id));
+        }
+    }
+
+    public function find($id, Application_Model_Guestbook $guestbook)
+    {
+        $result = $this-&gt;getDbTable()-&gt;find($id);
+        if (0 == count($result)) {
+            return;
+        }
+        $row = $result-&gt;current();
+        $guestbook-&gt;setId($row-&gt;id)
+                  -&gt;setEmail($row-&gt;email)
+                  -&gt;setComment($row-&gt;comment)
+                  -&gt;setCreated($row-&gt;created);
+    }
+
+    public function fetchAll()
+    {
+        $resultSet = $this-&gt;getDbTable()-&gt;fetchAll();
+        $entries   = array();
+        foreach ($resultSet as $row) {
+            $entry = new Application_Model_Guestbook();
+            $entry-&gt;setId($row-&gt;id)
+                  -&gt;setEmail($row-&gt;email)
+                  -&gt;setComment($row-&gt;comment)
+                  -&gt;setCreated($row-&gt;created);
+            $entries[] = $entry;
+        }
+        return $entries;
+    }
+}
+</pre>
+<p>
+        Ahora es momento de crear nuestra clase de modelo. Lo haremos, una vez más, usando el
+        comando <span class="command"><strong>zf create model</strong></span>:
+    </p>
+<pre class="programlisting">
+% zf create model Guestbook
+Creating a model at application/models/Guestbook.php
+Updating project profile '.zfproject.xml'
+</pre>
+<p>
+        Modificaremos esta clase <acronym class="acronym">PHP</acronym> vacía para facilitar la población del modelo
+        pasando un array de datos ya sea al constructor o a un método
+        <code class="methodname">setOptions()</code>. La clase de modelo final, ubicada en
+        <code class="filename">application/models/Guestbook.php</code>, debería verse así:
+    </p>
+<pre class="programlisting">
+// application/models/Guestbook.php
+
+class Application_Model_Guestbook
+{
+    protected $_comment;
+    protected $_created;
+    protected $_email;
+    protected $_id;
+
+    public function __construct(array $options = null)
+    {
+        if (is_array($options)) {
+            $this-&gt;setOptions($options);
+        }
+    }
+
+    public function __set($name, $value)
+    {
+        $method = 'set' . $name;
+        if (('mapper' == $name) || !method_exists($this, $method)) {
+            throw new Exception('Invalid guestbook property');
+        }
+        $this-&gt;$method($value);
+    }
+
+    public function __get($name)
+    {
+        $method = 'get' . $name;
+        if (('mapper' == $name) || !method_exists($this, $method)) {
+            throw new Exception('Invalid guestbook property');
+        }
+        return $this-&gt;$method();
+    }
+
+    public function setOptions(array $options)
+    {
+        $methods = get_class_methods($this);
+        foreach ($options as $key =&gt; $value) {
+            $method = 'set' . ucfirst($key);
+            if (in_array($method, $methods)) {
+                $this-&gt;$method($value);
+            }
+        }
+        return $this;
+    }
+
+    public function setComment($text)
+    {
+        $this-&gt;_comment = (string) $text;
+        return $this;
+    }
+
+    public function getComment()
+    {
+        return $this-&gt;_comment;
+    }
+
+    public function setEmail($email)
+    {
+        $this-&gt;_email = (string) $email;
+        return $this;
+    }
+
+    public function getEmail()
+    {
+        return $this-&gt;_email;
+    }
+
+    public function setCreated($ts)
+    {
+        $this-&gt;_created = $ts;
+        return $this;
+    }
+
+    public function getCreated()
+    {
+        return $this-&gt;_created;
+    }
+
+    public function setId($id)
+    {
+        $this-&gt;_id = (int) $id;
+        return $this;
+    }
+
+    public function getId()
+    {
+        return $this-&gt;_id;
+    }
+}
+</pre>
+<p>
+        Por último, para conectar todos estos elementos, creemos un controlador de libro de visitas que
+        liste las entradas que actualmente están dentro de la base de datos.
+    </p>
+<p>
+        Para crear un nuevo controlador, use el comando <span class="command"><strong>zf create controller</strong></span>:
+    </p>
+<pre class="programlisting">
+% zf create controller Guestbook
+Creating a controller at
+    application/controllers/GuestbookController.php
+Creating an index action method in controller Guestbook
+Creating a view script for the index action method at
+    application/views/scripts/guestbook/index.phtml
+Creating a controller test file at
+    tests/application/controllers/GuestbookControllerTest.php
+Updating project profile '.zfproject.xml'
+</pre>
+<p>
+        Esto creará un nuevo controlador, <code class="classname">GuestbookController</code>, en
+        <code class="filename">application/controllers/GuestbookController.php</code>, con un único método de
+        acción, <code class="methodname">indexAction()</code>. También creará un directorio de scripts de vista
+        para el controlador, <code class="filename">application/views/scripts/guestbook/</code>, con un script
+        de vista para la acción index.
+    </p>
+<p>
+        Usaremos la acción "index" como página de aterrizaje para ver todas las entradas del libro de visitas.
+    </p>
+<p>
+        Ahora, desarrollemos la lógica básica de la aplicación. Al acceder a
+        <code class="methodname">indexAction()</code>, mostraremos todas las entradas del libro de visitas. Esto se vería
+        de la siguiente manera:
+    </p>
+<pre class="programlisting">
+// application/controllers/GuestbookController.php
+
+class GuestbookController extends Zend_Controller_Action
+{
+    public function indexAction()
+    {
+        $guestbook = new Application_Model_GuestbookMapper();
+        $this-&gt;view-&gt;entries = $guestbook-&gt;fetchAll();
+    }
+}
+</pre>
+<p>
+        Y, por supuesto, necesitamos un script de vista que lo acompañe. Edite
+        <code class="filename">application/views/scripts/guestbook/index.phtml</code> para que quede de la siguiente manera:
+    </p>
+<pre class="programlisting">
+&lt;!-- application/views/scripts/guestbook/index.phtml --&gt;
+
+&lt;p&gt;&lt;a href="&lt;?php echo $this-&gt;url(
+    array(
+        'controller' =&gt; 'guestbook',
+        'action'     =&gt; 'sign'
+    ),
+    'default',
+    true) ?&gt;"&gt;Sign Our Guestbook&lt;/a&gt;&lt;/p&gt;
+
+Guestbook Entries: &lt;br /&gt;
+&lt;dl&gt;
+    &lt;?php foreach ($this-&gt;entries as $entry): ?&gt;
+    &lt;dt&gt;&lt;?php echo $this-&gt;escape($entry-&gt;email) ?&gt;&lt;/dt&gt;
+    &lt;dd&gt;&lt;?php echo $this-&gt;escape($entry-&gt;comment) ?&gt;&lt;/dd&gt;
+    &lt;?php endforeach ?&gt;
+&lt;/dl&gt;
+</pre>
+<div class="note"><table border="0" summary="Note: Checkpoint">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Punto de control</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Ahora navegue a "http://localhost/guestbook". Debería ver lo siguiente en su
+            navegador:
+        </p>
+<p>
+            <img src="figures/learning.quickstart.create-model.png" align="middle">
+        </p>
+</td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Using the data loader script">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Uso del script de carga de datos</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            El script de carga de datos introducido en esta sección
+            (<code class="filename">scripts/load.sqlite.php</code>) puede usarse para crear la base de datos para
+            cada entorno que haya definido, así como para cargarla con datos de ejemplo. Internamente,
+            utiliza <code class="classname">Zend_Console_Getopt</code>, lo que le permite proporcionar
+            varios modificadores de línea de comandos. Si pasa el modificador "-h" o "--help", le dará
+            las opciones disponibles:
+        </p>
+<pre class="programlisting">
+Usage: load.sqlite.php [ options ]
+--withdata|-w         Load database with sample data
+--env|-e [  ]         Application environment for which to create database
+                      (defaults to development)
+--help|-h             Help -- usage message)]]
+</pre>
+<p>
+            El modificador "-e" le permite especificar el valor a usar para la constante
+            <code class="constant">APPLICATION_ENV</code> -- lo que a su vez le permite crear una base de datos SQLite
+            para cada entorno que defina. Asegúrese de ejecutar el script para el entorno
+            que elija para su aplicación al desplegarla.
+        </p>
+</td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.quickstart.create-layout.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.quickstart.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.quickstart.create-form.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">3.3. Crear un diseño </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 3.5. Crear un formulario</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,554 @@
+<?php $title = '36.2. Inicio rápido de Zend_Form'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">36.2. Inicio rápido de Zend_Form</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.form.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 36. Zend_Form</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.form.elements.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.form.quickstart"></a>36.2. Inicio rápido de Zend_Form</h2></div></div></div>
+<p>
+        Esta guía de inicio rápido cubre los fundamentos de la creación,
+        validación y renderizado de formularios con <code class="classname">Zend_Form</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.create"></a>36.2.1. Crear un objeto de formulario</h3></div></div></div>
+<p>
+            Crear un objeto de formulario es muy sencillo: simplemente instancie
+            <code class="classname">Zend_Form</code>:
+        </p>
+<pre class="programlisting">
+$form = new Zend_Form;
+</pre>
+<p>
+            Para casos de uso avanzados, quizá desee crear una
+            subclase de <code class="classname">Zend_Form</code>, pero para formularios simples, puede
+            crear un formulario de forma programática utilizando un objeto
+            <code class="classname">Zend_Form</code>.
+        </p>
+<p>
+            Si desea especificar la acción y el método del formulario (siempre es buena
+            idea), puede hacerlo con los accesores <code class="methodname">setAction()</code> y
+            <code class="methodname">setMethod()</code>:
+        </p>
+<pre class="programlisting">
+$form-&gt;setAction('/resource/process')
+     -&gt;setMethod('post');
+</pre>
+<p>
+            El código anterior establece la acción del formulario a la <acronym class="acronym">URL</acronym> parcial
+            "<code class="filename">/resource/process</code>" y el método del formulario a <acronym class="acronym">HTTP</acronym>
+            <acronym class="acronym">POST</acronym>. Esto se reflejará durante el renderizado final.
+        </p>
+<p>
+            Puede establecer atributos <acronym class="acronym">HTML</acronym> adicionales para la
+            etiqueta <span class="emphasis"><em>&lt;form&gt;</em></span> utilizando los métodos <code class="methodname">setAttrib()</code>
+            o <code class="methodname">setAttribs()</code>. Por ejemplo, si desea establecer el
+            id, establezca el atributo "<span class="property">id</span>":
+        </p>
+<pre class="programlisting">
+$form-&gt;setAttrib('id', 'login');
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.elements"></a>36.2.2. Añadir elementos al formulario</h3></div></div></div>
+<p>
+            Un formulario no es nada sin sus elementos. <code class="classname">Zend_Form</code>
+            incluye algunos elementos por defecto que se renderizan como <acronym class="acronym">XHTML</acronym> mediante
+            ayudantes (helpers) de <code class="classname">Zend_View</code>. Estos son los siguientes:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>button</p></li>
+<li class="listitem"><p>checkbox (o varios checkboxes a la vez con multiCheckbox)</p></li>
+<li class="listitem"><p>hidden</p></li>
+<li class="listitem"><p>image</p></li>
+<li class="listitem"><p>password</p></li>
+<li class="listitem"><p>radio</p></li>
+<li class="listitem"><p>reset</p></li>
+<li class="listitem"><p>select (tanto el tipo normal como el de selección múltiple)</p></li>
+<li class="listitem"><p>submit</p></li>
+<li class="listitem"><p>text</p></li>
+<li class="listitem"><p>textarea</p></li>
+</ul></div>
+<p>
+            Tiene dos opciones para añadir elementos a un formulario: puede
+            instanciar elementos concretos y pasar esos objetos, o puede
+            pasar simplemente el tipo de elemento y dejar que <code class="classname">Zend_Form</code>
+            instancie un objeto del tipo correcto por usted.
+        </p>
+<p>
+            Algunos ejemplos:
+        </p>
+<pre class="programlisting">
+// Instantiating an element and passing to the form object:
+$form-&gt;addElement(new Zend_Form_Element_Text('username'));
+
+// Passing a form element type to the form object:
+$form-&gt;addElement('text', 'username');
+</pre>
+<p>
+            Por defecto, estos no tienen ningún validador ni filtro. Esto significa que
+            deberá configurar sus elementos con al menos validadores,
+            y potencialmente filtros. Puede hacer esto (a) antes de pasar
+            el elemento al formulario, (b) mediante opciones de configuración pasadas
+            al crear un elemento a través de <code class="classname">Zend_Form</code>, o (c) obteniendo
+            el elemento del objeto formulario y configurándolo después
+            de eso.
+        </p>
+<p>
+            Veamos primero cómo crear validadores para una instancia
+            concreta de elemento. Puede pasar objetos <code class="classname">Zend_Validate_*</code>,
+            o el nombre de un validador a utilizar:
+        </p>
+<pre class="programlisting">
+$username = new Zend_Form_Element_Text('username');
+
+// Passing a Zend_Validate_* object:
+$username-&gt;addValidator(new Zend_Validate_Alnum());
+
+// Passing a validator name:
+$username-&gt;addValidator('alnum');
+</pre>
+<p>
+            Al usar esta segunda opción, puede pasar argumentos del constructor en un array como el
+            tercer parámetro si el validador puede aceptarlos:
+        </p>
+<pre class="programlisting">
+// Pass a pattern
+$username-&gt;addValidator('regex', false, array('/^[a-z]/i'));
+</pre>
+<p>
+            (El segundo parámetro se utiliza para indicar si el fallo de
+            este validador debe impedir o no que se ejecuten validadores posteriores; por
+            defecto, es <code class="constant">FALSE</code>.)
+        </p>
+<p>
+            También puede querer especificar un elemento como requerido. Esto puede
+            hacerse mediante un accesor o pasando una opción al crear
+            el elemento. En el primer caso:
+        </p>
+<pre class="programlisting">
+// Make this element required:
+$username-&gt;setRequired(true);
+</pre>
+<p>
+            Cuando un elemento es requerido, se añade un validador 'NotEmpty' al
+            principio de la cadena de validadores, asegurando que el elemento tenga un valor
+            cuando sea requerido.
+        </p>
+<p>
+            Los filtros se registran básicamente de la misma manera que los validadores. Con fines
+            ilustrativos, añadamos un filtro para convertir a minúsculas el valor
+            final:
+        </p>
+<pre class="programlisting">
+$username-&gt;addFilter('StringtoLower');
+</pre>
+<p>
+            La configuración final del elemento podría verse así:
+        </p>
+<pre class="programlisting">
+$username-&gt;addValidator('alnum')
+         -&gt;addValidator('regex', false, array('/^[a-z]/'))
+         -&gt;setRequired(true)
+         -&gt;addFilter('StringToLower');
+
+// or, more compactly:
+$username-&gt;addValidators(array('alnum',
+        array('regex', false, '/^[a-z]/i')
+    ))
+    -&gt;setRequired(true)
+    -&gt;addFilters(array('StringToLower'));
+</pre>
+<p>
+            Por simple que sea, repetir esto para cada elemento de un formulario
+            puede resultar un poco tedioso. Probemos la opción (b) mencionada anteriormente. Cuando
+            creamos un nuevo elemento usando <code class="methodname">Zend_Form::addElement()</code> como
+            fábrica, podemos pasar opcionalmente opciones de configuración. Estas
+            pueden incluir validadores y filtros. Para hacer todo lo
+            anterior de forma implícita, pruebe lo siguiente:
+        </p>
+<pre class="programlisting">
+$form-&gt;addElement('text', 'username', array(
+    'validators' =&gt; array(
+        'alnum',
+        array('regex', false, '/^[a-z]/i')
+    ),
+    'required' =&gt; true,
+    'filters'  =&gt; array('StringToLower'),
+));
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si observa que configura elementos usando las mismas opciones en
+                muchos lugares, quizá quiera considerar crear su propia
+                subclase de <code class="classname">Zend_Form_Element</code> y utilizar esa clase
+                en su lugar; esto le ahorrará escritura a largo plazo.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.render"></a>36.2.3. Renderizar un formulario</h3></div></div></div>
+<p>
+            Renderizar un formulario es sencillo. La mayoría de los elementos utilizan un
+            ayudante (helper) de <code class="classname">Zend_View</code> para renderizarse a sí mismos, y por tanto necesitan un
+            objeto de vista para renderizar. Aparte de eso, tiene dos
+            opciones: usar el método render() del formulario, o simplemente hacer un echo de él.
+        </p>
+<pre class="programlisting">
+// Explicitly calling render(), and passing an optional view object:
+echo $form-&gt;render($view);
+
+// Assuming a view object has been previously set via setView():
+echo $form;
+</pre>
+<p>
+            Por defecto, <code class="classname">Zend_Form</code> y
+            <code class="classname">Zend_Form_Element</code> intentarán utilizar el objeto de vista
+            inicializado en el <code class="classname">ViewRenderer</code>, lo que significa que no
+            necesitará establecer la vista manualmente cuando use el <acronym class="acronym">MVC</acronym> de Zend Framework.
+            Para renderizar un formulario en una vista, simplemente debe hacer lo siguiente:
+        </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;form ?&gt;
+</pre>
+<p>
+            Internamente, <code class="classname">Zend_Form</code> utiliza "decoradores" para llevar a cabo
+            el renderizado. Estos decoradores pueden reemplazar contenido, añadir contenido al final, o
+            añadir contenido al principio, y pueden inspeccionar completamente el elemento pasado
+            a ellos. Como resultado, puede combinar múltiples decoradores para
+            lograr efectos personalizados. Por defecto, <code class="classname">Zend_Form_Element</code>
+            de hecho combina cuatro decoradores para lograr su salida; la configuración
+            se ve algo así:
+        </p>
+<pre class="programlisting">
+$element-&gt;addDecorators(array(
+    'ViewHelper',
+    'Errors',
+    array('HtmlTag', array('tag' =&gt; 'dd')),
+    array('Label', array('tag' =&gt; 'dt')),
+));
+</pre>
+<p>
+            (Donde &lt;HELPERNAME&gt; es el nombre de un ayudante de vista a utilizar, y varía
+            según el elemento.)
+        </p>
+<p>
+            Lo anterior crea una salida como la siguiente:
+        </p>
+<pre class="programlisting">
+&lt;dt&gt;&lt;label for="username" class="required"&gt;Username&lt;/dt&gt;
+&lt;dd&gt;
+    &lt;input type="text" name="username" value="123-abc" /&gt;
+    &lt;ul class="errors"&gt;
+        &lt;li&gt;'123-abc' has not only alphabetic and digit characters&lt;/li&gt;
+        &lt;li&gt;'123-abc' does not match against pattern '/^[a-z]/i'&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/dd&gt;
+</pre>
+<p>
+            (Aunque no con el mismo formato.)
+        </p>
+<p>
+            Puede cambiar los decoradores utilizados por un elemento si desea
+            obtener una salida diferente; consulte la sección sobre decoradores para más
+            información.
+        </p>
+<p>
+            El propio formulario simplemente recorre los elementos, y los envuelve
+            en un <acronym class="acronym">HTML</acronym> <span class="emphasis"><em>&lt;form&gt;</em></span>. La acción y el método
+            que proporcionó al configurar el formulario se pasan a la
+            etiqueta <span class="emphasis"><em>&lt;form&gt;</em></span>, al igual que cualquier atributo que haya establecido mediante
+            <code class="methodname">setAttribs()</code> y similares.
+        </p>
+<p>
+            Los elementos se recorren en el orden en que fueron
+            registrados, o, si su elemento contiene un atributo de orden, se utilizará
+            ese orden. Puede establecer el orden de un elemento usando:
+        </p>
+<pre class="programlisting">
+$element-&gt;setOrder(10);
+</pre>
+<p>
+            O, al crear un elemento, pasándolo como opción:
+        </p>
+<pre class="programlisting">
+$form-&gt;addElement('text', 'username', array('order' =&gt; 10));
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.validate"></a>36.2.4. Comprobar si un formulario es válido</h3></div></div></div>
+<p>
+            Después de enviar un formulario, deberá comprobar si
+            pasa las validaciones. Cada elemento se comprueba contra los datos
+            proporcionados; si una clave que coincide con el nombre del elemento no está presente, y
+            el elemento está marcado como requerido, las validaciones se ejecutan con un valor
+            <code class="constant">NULL</code>.
+        </p>
+<p>
+            ¿De dónde vienen los datos? Puede usar <code class="varname">$_POST</code> o
+            <code class="varname">$_GET</code>, o cualquier otra fuente de datos que tenga a mano
+            (peticiones de servicios web, por ejemplo):
+        </p>
+<pre class="programlisting">
+if ($form-&gt;isValid($_POST)) {
+    // success!
+} else {
+    // failure!
+}
+</pre>
+<p>
+            Con peticiones <acronym class="acronym">AJAX</acronym>, a veces puede permitirse validar
+            un único elemento, o grupos de elementos.
+            <code class="methodname">isValidPartial()</code> validará un formulario parcial. A diferencia de
+            <code class="methodname">isValid()</code>, sin embargo, si una clave en particular no está
+            presente, no ejecutará validaciones para ese elemento en particular:
+        </p>
+<pre class="programlisting">
+if ($form-&gt;isValidPartial($_POST)) {
+    // elements present all passed validations
+} else {
+    // one or more elements tested failed validations
+}
+</pre>
+<p>
+            Se puede usar un método adicional, <code class="methodname">processAjax()</code>, para
+            validar formularios parciales. A diferencia de <code class="methodname">isValidPartial()</code>,
+            devuelve una cadena en formato <acronym class="acronym">JSON</acronym> que contiene mensajes de error en caso de
+            fallo.
+        </p>
+<p>
+            Suponiendo que sus validaciones han pasado, ahora puede obtener los
+            valores filtrados:
+        </p>
+<pre class="programlisting">
+$values = $form-&gt;getValues();
+</pre>
+<p>
+            Si necesita los valores sin filtrar en algún momento, use:
+        </p>
+<pre class="programlisting">
+$unfiltered = $form-&gt;getUnfilteredValues();
+</pre>
+<p>
+            Si, por el contrario, necesita todos los valores válidos y filtrados de un
+            formulario parcialmente válido, puede llamar a:
+        </p>
+<pre class="programlisting">
+$values = $form-&gt;getValidValues($_POST);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.errorstatus"></a>36.2.5. Obtener el estado de error</h3></div></div></div>
+<p>
+            ¿Su formulario tuvo validaciones fallidas al enviarlo? En la mayoría de los casos, puede simplemente
+            volver a renderizar el formulario, y los errores se mostrarán al usar
+            los decoradores por defecto:
+        </p>
+<pre class="programlisting">
+if (!$form-&gt;isValid($_POST)) {
+    echo $form;
+
+    // or assign to the view object and render a view...
+    $this-&gt;view-&gt;form = $form;
+    return $this-&gt;render('form');
+}
+</pre>
+<p>
+            Si desea inspeccionar los errores, dispone de dos métodos.
+            <code class="methodname">getErrors()</code> devuelve un array asociativo de
+            nombres de elemento / códigos (donde codes es un array de códigos de error).
+            <code class="methodname">getMessages()</code> devuelve un array asociativo de
+            nombres de elemento / mensajes (donde messages es un array asociativo de pares
+            código de error / mensaje de error). Si un elemento dado no tiene ningún
+            error, no se incluirá en el array.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.puttingtogether"></a>36.2.6. Uniéndolo todo</h3></div></div></div>
+<p>
+            Construyamos un formulario de acceso simple. Necesitará elementos
+            que representen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>username</p></li>
+<li class="listitem"><p>password</p></li>
+<li class="listitem"><p>submit</p></li>
+</ul></div>
+<p>
+            Para nuestros propósitos, supongamos que un nombre de usuario válido debe contener
+            solo caracteres alfanuméricos, comenzar con una letra, tener una longitud
+            mínima de 6, y máxima de 20; se normalizarán a
+            minúsculas. Las contraseñas deben tener un mínimo de 6 caracteres. Simplemente
+            descartaremos el valor de submit cuando terminemos, para que pueda quedar
+            sin validar.
+        </p>
+<p>
+            Usaremos el poder de las opciones de configuración de <code class="classname">Zend_Form</code>
+            para construir el formulario:
+        </p>
+<pre class="programlisting">
+$form = new Zend_Form();
+$form-&gt;setAction('/user/login')
+     -&gt;setMethod('post');
+
+// Create and configure username element:
+$username = $form-&gt;createElement('text', 'username');
+$username-&gt;addValidator('alnum')
+         -&gt;addValidator('regex', false, array('/^[a-z]+/'))
+         -&gt;addValidator('stringLength', false, array(6, 20))
+         -&gt;setRequired(true)
+         -&gt;addFilter('StringToLower');
+
+// Create and configure password element:
+$password = $form-&gt;createElement('password', 'password');
+$password-&gt;addValidator('StringLength', false, array(6))
+         -&gt;setRequired(true);
+
+// Add elements to form:
+$form-&gt;addElement($username)
+     -&gt;addElement($password)
+     // use addElement() as a factory to create 'Login' button:
+     -&gt;addElement('submit', 'login', array('label' =&gt; 'Login'));
+</pre>
+<p>
+            A continuación, crearemos un controlador para gestionar esto:
+        </p>
+<pre class="programlisting">
+class UserController extends Zend_Controller_Action
+{
+    public function getForm()
+    {
+        // create form as above
+        return $form;
+    }
+
+    public function indexAction()
+    {
+        // render user/form.phtml
+        $this-&gt;view-&gt;form = $this-&gt;getForm();
+        $this-&gt;render('form');
+    }
+
+    public function loginAction()
+    {
+        if (!$this-&gt;getRequest()-&gt;isPost()) {
+            return $this-&gt;_forward('index');
+        }
+        $form = $this-&gt;getForm();
+        if (!$form-&gt;isValid($_POST)) {
+            // Failed validation; redisplay form
+            $this-&gt;view-&gt;form = $form;
+            return $this-&gt;render('form');
+        }
+
+        $values = $form-&gt;getValues();
+        // now try and authenticate....
+    }
+}
+</pre>
+<p>
+            Y un script de vista para mostrar el formulario:
+        </p>
+<pre class="programlisting">
+&lt;h2&gt;Please login:&lt;/h2&gt;
+&lt;?php echo $this-&gt;form ?&gt;
+</pre>
+<p>
+            Como notará en el código del controlador, aún hay más trabajo por hacer:
+            aunque el envío pueda ser válido, es posible que todavía necesite realizar cierta autenticación
+            usando <code class="classname">Zend_Auth</code> u otro mecanismo de autorización.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.config"></a>36.2.7. Usar un objeto Zend_Config</h3></div></div></div>
+<p>
+            Todas las clases de <code class="classname">Zend_Form</code> son configurables mediante
+            <code class="classname">Zend_Config</code>; puede pasar un objeto
+            <code class="classname">Zend_Config</code> al constructor o pasarlo
+            con <code class="methodname">setConfig()</code>. Veamos cómo podríamos crear el
+            formulario anterior utilizando un archivo <acronym class="acronym">INI</acronym>. Primero, sigamos las
+            recomendaciones, y coloquemos nuestras configuraciones en secciones
+            que reflejen la ubicación de publicación, y centrémonos en la sección
+            'development'. A continuación, configuraremos una sección para el controlador dado
+            ('user'), y una clave para el formulario ('login'):
+        </p>
+<pre class="programlisting">
+[development]
+; general form metainformation
+user.login.action = "/user/login"
+user.login.method = "post"
+
+; username element
+user.login.elements.username.type = "text"
+user.login.elements.username.options.validators.alnum.validator = "alnum"
+user.login.elements.username.options.validators.regex.validator = "regex"
+user.login.elements.username.options.validators.regex.options.pattern = "/^[a-z]/i"
+user.login.elements.username.options.validators.strlen.validator = "StringLength"
+user.login.elements.username.options.validators.strlen.options.min = "6"
+user.login.elements.username.options.validators.strlen.options.max = "20"
+user.login.elements.username.options.required = true
+user.login.elements.username.options.filters.lower.filter = "StringToLower"
+
+; password element
+user.login.elements.password.type = "password"
+user.login.elements.password.options.validators.strlen.validator = "StringLength"
+user.login.elements.password.options.validators.strlen.options.min = "6"
+user.login.elements.password.options.required = true
+
+; submit element
+user.login.elements.submit.type = "submit"
+</pre>
+<p>
+            Luego pasaría esto al constructor del formulario:
+        </p>
+<pre class="programlisting">
+$config = new Zend_Config_Ini($configFile, 'development');
+$form   = new Zend_Form($config-&gt;user-&gt;login);
+</pre>
+<p>
+            y todo el formulario quedará definido.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.quickstart.conclusion"></a>36.2.8. Conclusión</h3></div></div></div>
+<p>
+            Con suerte, gracias a este pequeño tutorial, ahora estará bien encaminado hacia
+            aprovechar el poder y la flexibilidad de
+            <code class="classname">Zend_Form</code>. ¡Siga leyendo para obtener información más detallada!
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.form.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.form.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.form.elements.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 36. Zend_Form </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 36.3. Creación de elementos de formulario usando Zend_Form_Element</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

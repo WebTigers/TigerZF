@@ -1,0 +1,125 @@
+<?php $title = '33.5. Consumo de un feed Atom'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.5. Consumo de un feed Atom</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.consuming-rss.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.feed.consuming-atom-single-entry.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.consuming-atom"></a>33.5. Consumo de un feed Atom</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Feed_Atom</code> se utiliza de manera muy similar a
+        <code class="classname">Zend_Feed_Rss</code>. Proporciona el mismo acceso a las propiedades a nivel de feed
+        y la iteración sobre las entradas del feed. La principal diferencia está en la estructura del propio
+        protocolo Atom. Atom es un sucesor de <acronym class="acronym">RSS</acronym>; es un protocolo más
+        generalizado y está diseñado para tratar más fácilmente los feeds que proporcionan su contenido
+        completo dentro del feed, dividiendo la etiqueta <span class="property">description</span> de
+        <acronym class="acronym">RSS</acronym> en dos elementos, <span class="property">summary</span> y <span class="property">content</span>, con ese
+        propósito.
+    </p>
+<div class="example">
+<a name="zend.feed.consuming-atom.example.usage"></a><p class="title"><b>Ejemplo 33.2. Uso básico de un feed Atom</b></p>
+<div class="example-contents">
+<p>
+            Leer un feed Atom e imprimir el <span class="property">title</span> y el
+            <span class="property">summary</span> de cada entrada:
+        </p>
+<pre class="programlisting">
+$feed = new Zend_Feed_Atom('http://atom.example.com/feed/');
+echo 'The feed contains ' . $feed-&gt;count() . ' entries.' . "\n\n";
+foreach ($feed as $entry) {
+    echo 'Title: ' . $entry-&gt;title() . "\n";
+    echo 'Summary: ' . $entry-&gt;summary() . "\n\n";
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+        En un feed Atom se pueden esperar encontrar las siguientes propiedades del feed:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="property">title</span> - El título del feed, igual que el título del canal
+                 en <acronym class="acronym">RSS</acronym>
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">id</span> - Cada feed y entrada en Atom tiene un identificador único
+            </p></li>
+<li class="listitem">
+<p>
+                <span class="property">link</span> - Los feeds pueden tener múltiples enlaces, que se
+                distinguen por un atributo <span class="property">type</span>
+            </p>
+<p>
+                El equivalente al enlace del canal de <acronym class="acronym">RSS</acronym> sería
+                <span class="command"><strong>type="text/html"</strong></span>. Si el enlace es a una versión alternativa del
+                mismo contenido que está en el feed, tendría un
+                atributo <span class="command"><strong>rel="alternate"</strong></span>.
+            </p>
+</li>
+<li class="listitem">
+<p>
+                <span class="property">subtitle</span> - La descripción del feed, equivalente a
+                la descripción del canal en <acronym class="acronym">RSS</acronym>
+            </p>
+<p><span class="property">author-&gt;name()</span> - El nombre del autor del feed</p>
+<p><span class="property">author-&gt;email()</span> - La dirección de correo electrónico del autor del feed</p>
+</li>
+</ul></div>
+<p>
+        Las entradas de Atom comúnmente tienen las siguientes propiedades:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="property">id</span> - El identificador único de la entrada</p></li>
+<li class="listitem"><p>
+                <span class="property">title</span> - El título de la entrada, igual que los títulos de los
+                elementos en <acronym class="acronym">RSS</acronym>
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">link</span> - Un enlace a otro formato o a una vista alternativa de
+                esta entrada
+            </p></li>
+<li class="listitem"><p><span class="property">summary</span> - Un resumen del contenido de esta entrada</p></li>
+<li class="listitem"><p>
+                <span class="property">content</span> - El contenido completo de la entrada; puede omitirse si
+                el feed solo contiene resúmenes
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">author</span> - con las subetiquetas <span class="property">name</span> y
+                <span class="property">email</span>, igual que en los feeds
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">published</span> - la fecha en que se publicó la entrada, en
+                formato <acronym class="acronym">RFC</acronym> 3339
+            </p></li>
+<li class="listitem"><p>
+                <span class="property">updated</span> - la fecha en que se actualizó por última vez la entrada, en
+                formato <acronym class="acronym">RFC</acronym> 3339
+            </p></li>
+</ul></div>
+<p>
+        Para más información sobre Atom y numerosos recursos, vea
+        <a class="ulink" href="http://www.atomenabled.org/" target="_top">http://www.atomenabled.org/</a>.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.consuming-rss.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.feed.consuming-atom-single-entry.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">33.4. Consumo de un feed RSS </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 33.6. Consumo de una entrada Atom individual</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

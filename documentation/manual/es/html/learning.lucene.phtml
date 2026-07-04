@@ -1,0 +1,133 @@
+<?php $title = 'Capítulo 10. Primeros pasos con Zend_Search_Lucene'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 10. Primeros pasos con Zend_Search_Lucene</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.multiuser.authorization.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte II. Aprendiendo Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.lucene.index-structure.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="learning.lucene"></a>Capítulo 10. Primeros pasos con Zend_Search_Lucene</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="learning.lucene.phtml#learning.lucene.intro">10.1. Introducción a Zend_Search_Lucene</a></span></dt>
+<dt><span class="sect1"><a href="learning.lucene.index-structure.phtml">10.2. Estructura del índice Lucene</a></span></dt>
+<dt><span class="sect1"><a href="learning.lucene.index-opening.phtml">10.3. Apertura y creación del índice</a></span></dt>
+<dt><span class="sect1"><a href="learning.lucene.indexing.phtml">10.4. Indexación</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="learning.lucene.indexing.phtml#learning.lucene.indexing.policy">10.4.1. Política de indexación</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="learning.lucene.searching.phtml">10.5. Búsqueda</a></span></dt>
+<dt><span class="sect1"><a href="learning.lucene.queries.phtml">10.6. Consultas soportadas</a></span></dt>
+<dt><span class="sect1"><a href="learning.lucene.pagination.phtml">10.7. Paginación de resultados de búsqueda</a></span></dt>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.lucene.intro"></a>10.1. Introducción a Zend_Search_Lucene</h2></div></div></div>
+<p>
+        El componente <code class="classname">Zend_Search_Lucene</code> está pensado para proporcionar una
+        solución de búsqueda de texto completo lista para usar. No requiere ninguna extensión de <acronym class="acronym">PHP</acronym><a href="#ftn.id3274" class="footnote" name="id3274"><sup class="footnote">[1]</sup></a> ni software adicional para ser instalado, y puede usarse
+        inmediatamente después de la instalación de Zend Framework.
+    </p>
+<p>
+        <code class="classname">Zend_Search_Lucene</code> es una adaptación (port) en <acronym class="acronym">PHP</acronym> puro del
+        popular motor de búsqueda de texto completo de código abierto conocido como Apache Lucene. Consulte <a class="ulink" href="http://lucene.apache.org" target="_top">http://lucene.apache.org/</a> para más detalles.
+    </p>
+<p>
+        La información debe ser indexada para estar disponible para la búsqueda.
+        <code class="classname">Zend_Search_Lucene</code> y Java Lucene usan un concepto de documento conocido como
+        "elemento atómico de indexación."
+    </p>
+<p>
+        Cada documento es un conjunto de campos: pares &lt;nombre, valor&gt; donde el nombre y el valor son
+        cadenas <acronym class="acronym">UTF-8</acronym><a href="#ftn.id3286" class="footnote" name="id3286"><sup class="footnote">[2]</sup></a>. Cualquier subconjunto de los campos del documento puede marcarse
+        como "indexado" para incluir los datos del campo en el proceso de indexación de texto.
+    </p>
+<p>
+        Los valores de los campos pueden ser tokenizados o no durante la indexación. Si un campo no es tokenizado, entonces
+        el valor del campo se almacena como un único término; en caso contrario, se usa el analizador
+        actual para la tokenización.
+    </p>
+<p>
+        El paquete <code class="classname">Zend_Search_Lucene</code> proporciona varios analizadores.
+        El analizador por defecto funciona con texto <acronym class="acronym">ASCII</acronym> (ya que el
+        analizador <acronym class="acronym">UTF-8</acronym> necesita que la extensión <span class="emphasis"><em>mbstring</em></span> esté
+        activada). No distingue entre mayúsculas y minúsculas, y omite los números. Use otros analizadores o cree su
+        propio analizador si necesita cambiar este comportamiento.
+    </p>
+<div class="note"><table border="0" summary="Note: Using analyzers during indexing and searching">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Uso de analizadores durante la indexación y la búsqueda</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            ¡Nota importante! Las consultas de búsqueda también se tokenizan usando el "analizador actual", por lo que
+            debe establecerse el mismo analizador por defecto tanto durante el proceso de indexación como el de búsqueda.
+            Esto garantizará que el texto original y el texto buscado se transformen en términos de la
+            misma manera.
+        </p></td></tr>
+</table></div>
+<p>
+        Los valores de los campos se almacenan opcionalmente dentro de un índice. Esto permite que los datos originales del campo
+        se recuperen del índice durante la búsqueda. Esta es la única forma de asociar los resultados de
+        búsqueda con los datos originales (los IDs internos de documento pueden cambiar tras la
+        optimización del índice o la auto-optimización).
+    </p>
+<p>
+        Lo que debe recordarse es que un índice Lucene no es una base de datos. No
+        proporciona mecanismos de respaldo de índice salvo la copia de seguridad del directorio del sistema de archivos. No
+        proporciona mecanismos transaccionales, aunque sí se admiten la actualización concurrente del índice, así como la actualización
+        y lectura concurrentes. No se compara con las bases de datos en cuanto a velocidad de recuperación de datos.
+    </p>
+<p>
+        Así que es buena idea:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em>No</em></span> usar el índice Lucene como almacenamiento, ya que puede disminuir
+                drásticamente el rendimiento de recuperación de resultados de búsqueda. Almacene dentro de un índice solo identificadores
+                únicos de documento (rutas de documento, <acronym class="acronym">URL</acronym>s, IDs únicos de base de datos) y los datos
+                asociados. Por ejemplo, título, anotación, categoría, información de idioma, avatar. (Nota: un campo
+                puede incluirse en la indexación, pero no almacenarse, o almacenarse, pero no indexarse).
+            </p></li>
+<li class="listitem"><p>
+                Escribir funcionalidad que pueda reconstruir un índice por completo si se corrompe por
+                cualquier motivo.
+            </p></li>
+</ul></div>
+<p>
+        Los documentos individuales en el índice pueden tener conjuntos de campos completamente diferentes. Los mismos
+        campos en distintos documentos no necesitan tener los mismos atributos. Por ejemplo, un campo puede estar
+        indexado para un documento y omitido de la indexación para otro. Lo mismo aplica para el
+        almacenamiento, la tokenización, o el tratamiento del valor del campo como una cadena binaria.
+    </p>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id3274" class="footnote"><p><a href="#id3274" class="para"><sup class="para">[1] </sup></a>Aunque parte de la funcionalidad de procesamiento de <acronym class="acronym">UTF-8</acronym>
+                requiere que la extensión <span class="emphasis"><em>mbstring</em></span> esté
+                activada</p></div>
+<div id="ftn.id3286" class="footnote"><p><a href="#id3286" class="para"><sup class="para">[2] </sup></a>También se permite el uso de cadenas binarias
+                como valores de campo</p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.multiuser.authorization.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.lucene.index-structure.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">9.4. Construcción de un sistema de autorización en Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 10.2. Estructura del índice Lucene</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

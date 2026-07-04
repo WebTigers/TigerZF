@@ -1,0 +1,132 @@
+<?php $title = '25.10. Información adicional sobre Zend_Currency'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.10. Información adicional sobre Zend_Currency</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.exchange.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.date.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.additional"></a>25.10. Información adicional sobre Zend_Currency</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.additional.informations"></a>25.10.1. Información de la divisa</h3></div></div></div>
+<p>
+            A veces es necesario obtener información relacionada con una divisa.
+            <code class="classname">Zend_Currency</code> le proporciona varios métodos para obtener esta
+            información. Los métodos disponibles incluyen los siguientes:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getCurrencyList()</code></em></span>: Devuelve una lista
+                    de todas las divisas que se usan en la región indicada como array. Por defecto usa
+                    la configuración regional del objeto cuando no se ha indicado ninguna región.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getLocale()</code></em></span>: Devuelve la configuración
+                    regional establecida para la divisa actual.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getName()</code></em></span>: Devuelve el nombre completo
+                    de la divisa actual. Cuando no hay un nombre completo disponible para la divisa
+                    actual, devolverá la abreviatura de la misma.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getRegionList()</code></em></span>: Devuelve una lista
+                    de todas las regiones donde se usa esta divisa como array. Por defecto usa la
+                    divisa del objeto cuando no se ha indicado ninguna divisa.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getService()</code></em></span>: Devuelve el objeto de
+                    servicio de cambio establecido para la divisa actual.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getShortName()</code></em></span>: Devuelve la
+                    abreviatura de la divisa actual.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getSymbol()</code></em></span>: Devuelve el símbolo de
+                    divisa correspondiente a la divisa. Cuando la divisa no tiene símbolo, devolverá la
+                    abreviatura de la misma.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    <span class="emphasis"><em><code class="methodname">getValue()</code></em></span>: Devuelve el valor
+                    establecido para la divisa actual.
+                </p></li>
+</ul></div>
+<p>
+            Veamos algunos fragmentos de código como ejemplo:
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency();
+
+var_dump($currency-&gt;getValue());
+// returns 0
+
+var_dump($currency-&gt;getRegionList());
+// could return an array with all regions where USD is used
+
+var_dump($currency-&gt;getRegionList('EUR'));
+// returns an array with all regions where EUR is used
+
+var_dump($currency-&gt;getName());
+// could return 'US Dollar'
+
+var_dump($currency-&gt;getName('EUR'));
+// returns 'Euro'
+</pre>
+<p>
+            Como puede ver, varios métodos permiten usar parámetros adicionales para sustituir el
+            objeto actual y obtener información de otras divisas. Omitir estos parámetros
+            devolverá información de la divisa actualmente establecida.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.additional.cache"></a>25.10.2. Optimización del rendimiento de Currency</h3></div></div></div>
+<p>
+            El rendimiento de <code class="classname">Zend_Currency</code> se puede optimizar usando
+            <code class="classname">Zend_Cache</code>. El método estático
+            <code class="methodname">Zend_Currency::setCache($cache)</code> acepta una opción: un
+            adaptador de <code class="classname">Zend_Cache</code>. Si se establece el adaptador de caché, los
+            datos de localización que usa <code class="classname">Zend_Currency</code> se almacenarán en caché.
+            Además, existen algunos métodos estáticos para manipular la caché:
+            <code class="methodname">getCache()</code>, <code class="methodname">hasCache()</code>,
+            <code class="methodname">clearCache()</code> y <code class="methodname">removeCache()</code>.
+        </p>
+<div class="example">
+<a name="zend.currency.additional.cache.example"></a><p class="title"><b>Ejemplo 25.6. Almacenamiento en caché de divisas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// creating a cache object
+$cache = Zend_Cache::factory('Core',
+                             'File',
+                             array('lifetime' =&gt; 120,
+                                   'automatic_serialization' =&gt; true),
+                             array('cache_dir'
+                                       =&gt; dirname(__FILE__) . '/_files/'));
+Zend_Currency::setCache($cache);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.exchange.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.date.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.9. Intercambio de divisas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 26. Zend_Date</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

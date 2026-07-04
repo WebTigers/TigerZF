@@ -1,0 +1,186 @@
+<?php $title = 'Capítulo 20. Zend_CodeGenerator'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 20. Zend_CodeGenerator</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cloud.infrastructure.adapter.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.codegenerator.examples.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.codegenerator"></a>Capítulo 20. Zend_CodeGenerator</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.codegenerator.phtml#zend.codegenerator.introduction">20.1. Introducción</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="zend.codegenerator.phtml#zend.codegenerator.introduction.theory">20.1.1. Teoría de funcionamiento</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="zend.codegenerator.examples.phtml">20.2. Ejemplos de Zend_CodeGenerator</a></span></dt>
+<dt><span class="sect1"><a href="zend.codegenerator.reference.phtml">20.3. Referencia de Zend_CodeGenerator</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.abstracts">20.3.1. Clases abstractas e interfaces</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.abstracts.abstract">20.3.1.1. Zend_CodeGenerator_Abstract</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.abstracts.php-abstract">20.3.1.2. Zend_CodeGenerator_Php_Abstract</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.abstracts.php-member-abstract">20.3.1.3. Zend_CodeGenerator_Php_Member_Abstract</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete">20.3.2. Clases concretas de CodeGenerator</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-body">20.3.2.1. Zend_CodeGenerator_Php_Body</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-class">20.3.2.2. Zend_CodeGenerator_Php_Class</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-docblock">20.3.2.3. Zend_CodeGenerator_Php_Docblock</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-docblock-tag">20.3.2.4. Zend_CodeGenerator_Php_Docblock_Tag</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-docblock-tag-param">20.3.2.5. Zend_CodeGenerator_Php_DocBlock_Tag_Param</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-docblock-tag-return">20.3.2.6. Zend_CodeGenerator_Php_DocBlock_Tag_Return</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-file">20.3.2.7. Zend_CodeGenerator_Php_File</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-member-container">20.3.2.8. Zend_CodeGenerator_Php_Member_Container</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-method">20.3.2.9. Zend_CodeGenerator_Php_Method</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-parameter">20.3.2.10. Zend_CodeGenerator_Php_Parameter</a></span></dt>
+<dt><span class="sect3"><a href="zend.codegenerator.reference.phtml#zend.codegenerator.reference.concrete.php-property">20.3.2.11. Zend_CodeGenerator_Php_Property</a></span></dt>
+</dl></dd>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.codegenerator.introduction"></a>20.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_CodeGenerator</code> ofrece funciones para generar
+        código arbitrario mediante una interfaz orientada a objetos, tanto para crear
+        código nuevo como para actualizar código existente. Aunque la
+        implementación actual está limitada a generar código <acronym class="acronym">PHP</acronym>, se puede extender fácilmente
+        la clase base para ofrecer generación de código para otras tareas:
+        JavaScript, archivos de configuración, vhosts de apache, etc.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.codegenerator.introduction.theory"></a>20.1.1. Teoría de funcionamiento</h3></div></div></div>
+<p>
+            En el caso de uso más habitual, simplemente se instancia una clase
+            generadora de código y se le pasa la configuración apropiada, o
+            se configura después de la instanciación. Para generar el código, basta
+            con hacer un echo del objeto o llamar a su método <code class="methodname">generate()</code>.
+        </p>
+<pre class="programlisting">
+// Passing configuration to the constructor:
+$file = new Zend_CodeGenerator_Php_File(array(
+    'classes' =&gt; array(
+        new Zend_CodeGenerator_Php_Class(array(
+            'name'    =&gt; 'World',
+            'methods' =&gt; array(
+                new Zend_CodeGenerator_Php_Method(array(
+                    'name' =&gt; 'hello',
+                    'body' =&gt; 'echo \'Hello world!\';',
+                )),
+            ),
+        )),
+    )
+));
+
+// Configuring after instantiation
+$method = new Zend_CodeGenerator_Php_Method();
+$method-&gt;setName('hello')
+       -&gt;setBody('echo \'Hello world!\';');
+
+$class = new Zend_CodeGenerator_Php_Class();
+$class-&gt;setName('World')
+      -&gt;setMethod($method);
+
+$file = new Zend_CodeGenerator_Php_File();
+$file-&gt;setClass($class);
+
+// Render the generated file
+echo $file;
+
+// or write it to a file:
+file_put_contents('World.php', $file-&gt;generate());
+</pre>
+<p>
+            Ambos ejemplos anteriores generarán el mismo resultado:
+        </p>
+<pre class="programlisting">
+&lt;?php
+
+class World
+{
+
+    public function hello()
+    {
+        echo 'Hello world!';
+    }
+
+}
+</pre>
+<p>
+            Otro caso de uso habitual es actualizar código existente, por ejemplo,
+            para añadir un método a una clase. En tal caso, primero hay que inspeccionar
+            el código existente utilizando reflexión, y luego añadir el nuevo método.
+            <code class="classname">Zend_CodeGenerator</code> hace que esto sea extremadamente sencillo,
+            aprovechando <a class="link" href="zend.reflection.phtml" title="Chapter 58. Zend_Reflection">Zend_Reflection</a>.
+        </p>
+<p>
+            Como ejemplo, supongamos que hemos guardado lo anterior en el archivo
+            "<code class="filename">World.php</code>", y que ya lo hemos incluido. Podríamos entonces hacer lo
+            siguiente:
+        </p>
+<pre class="programlisting">
+$class = Zend_CodeGenerator_Php_Class::fromReflection(
+    new Zend_Reflection_Class('World')
+);
+
+$method = new Zend_CodeGenerator_Php_Method();
+$method-&gt;setName('mrMcFeeley')
+       -&gt;setBody('echo \'Hello, Mr. McFeeley!\';');
+$class-&gt;setMethod($method);
+
+$file = new Zend_CodeGenerator_Php_File();
+$file-&gt;setClass($class);
+
+// Render the generated file
+echo $file;
+
+// Or, better yet, write it back to the original file:
+file_put_contents('World.php', $file-&gt;generate());
+</pre>
+<p>
+            El archivo de clase resultante ahora se verá así:
+        </p>
+<pre class="programlisting">
+&lt;?php
+
+class World
+{
+
+    public function hello()
+    {
+        echo 'Hello world!';
+    }
+
+    public function mrMcFeeley()
+    {
+        echo 'Hellow Mr. McFeeley!';
+    }
+
+}
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cloud.infrastructure.adapter.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.codegenerator.examples.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">19.5. Zend_Cloud_Infrastructure_Adapter </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 20.2. Ejemplos de Zend_CodeGenerator</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

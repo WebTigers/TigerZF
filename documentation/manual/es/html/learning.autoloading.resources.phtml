@@ -1,0 +1,120 @@
+<?php $title = '4.4. Autocarga de recursos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">4.4. Autocarga de recursos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.autoloading.usage.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 4. Autocarga en Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.autoloading.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.autoloading.resources"></a>4.4. Autocarga de recursos</h2></div></div></div>
+<p>
+        A menudo, al desarrollar una aplicación, resulta difícil empaquetar las clases en el estándar 1:1
+        de nombreClase:nombreArchivo recomendado por Zend Framework, o es ventajoso por motivos de
+        empaquetado no hacerlo así. Sin embargo, esto significa que tus archivos de clase no serán encontrados por el
+        autoloader.
+    </p>
+<p>
+        Si lees <a class="link" href="learning.autoloading.design.phtml" title="4.2. Goals and Design">los objetivos de diseño</a> del
+        autoloader, el último punto de esa sección indicaba que la solución debía cubrir esta
+        situación. Zend Framework lo hace mediante
+        <code class="classname">Zend_Loader_Autoloader_Resource</code>.
+    </p>
+<p>
+        Un recurso es simplemente un nombre que corresponde a un espacio de nombres de componente (que
+        se añade al espacio de nombres del autoloader) y una ruta (que es relativa a
+        la ruta base del autoloader). En la práctica, harías algo como esto:
+    </p>
+<pre class="programlisting">
+$loader = new Zend_Application_Module_Autoloader(array(
+    'namespace' =&gt; 'Blog',
+    'basePath'  =&gt; APPLICATION_PATH . '/modules/blog',
+));
+</pre>
+<p>
+        Una vez que tienes el loader en su lugar, necesitas informarle de los diferentes tipos de recursos
+        de los que es consciente. Estos tipos de recursos son simplemente pares de subárbol y prefijo.
+    </p>
+<p>
+        Como ejemplo, considera el siguiente árbol:
+    </p>
+<pre class="programlisting">
+path/to/some/resources/
+|-- forms/
+|   `-- Guestbook.php        // Foo_Form_Guestbook
+|-- models/
+|   |-- DbTable/
+|   |   `-- Guestbook.php    // Foo_Model_DbTable_Guestbook
+|   |-- Guestbook.php        // Foo_Model_Guestbook
+|   `-- GuestbookMapper.php  // Foo_Model_GuestbookMapper
+</pre>
+<p>
+        Nuestro primer paso es crear el cargador de recursos:
+    </p>
+<pre class="programlisting">
+$loader = new Zend_Loader_Autoloader_Resource(array(
+    'basePath'  =&gt; 'path/to/some/resources/',
+    'namespace' =&gt; 'Foo',
+));
+</pre>
+<p>
+        A continuación, necesitamos definir algunos tipos de recursos.
+        <code class="methodname">Zend_Loader_Autoloader_Resourse::addResourceType()</code> tiene tres
+        argumentos: el "tipo" de recurso (una cadena arbitraria), la ruta bajo la ruta base en
+        la que se puede encontrar el tipo de recurso, y el prefijo de componente a usar para el tipo de recurso.
+        En el árbol anterior, tenemos tres tipos de recursos: form (en el subdirectorio "forms", con un
+        prefijo de componente "Form"), model (en el subdirectorio "models", con un prefijo de componente
+        "Model"), y dbtable (en el subdirectorio "<code class="filename">models/DbTable</code>",
+        con un prefijo de componente "<code class="classname">Model_DbTable</code>"). Los definiríamos de la siguiente
+        manera:
+    </p>
+<pre class="programlisting">
+$loader-&gt;addResourceType('form', 'forms', 'Form')
+       -&gt;addResourceType('model', 'models', 'Model')
+       -&gt;addResourceType('dbtable', 'models/DbTable', 'Model_DbTable');
+</pre>
+<p>
+        Una vez definidos, simplemente podemos usar estas clases:
+    </p>
+<pre class="programlisting">
+$form      = new Foo_Form_Guestbook();
+$guestbook = new Foo_Model_Guestbook();
+</pre>
+<div class="note"><table border="0" summary="Note: Module Resource Autoloading">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Autocarga de recursos de módulos</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            La capa <acronym class="acronym">MVC</acronym> de Zend Framework fomenta el uso de "módulos", que
+            son aplicaciones autocontenidas dentro de tu sitio. Los módulos típicamente tienen varios
+            tipos de recursos por defecto, y Zend Framework incluso
+            <a class="link" href="project-structure.filesystem.phtml" title="E.3. Module Structure">recomienda una estructura de directorios estándar
+                para los módulos</a>. Los autoloaders de recursos son por lo tanto
+            bastante útiles en este paradigma, tan útiles que están habilitados por defecto cuando
+            creas una clase de bootstrap para tu módulo que extiende
+            <code class="classname">Zend_Application_Module_Bootstrap</code>. Para más información, lee
+            la documentación de <a class="link" href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.module" title="42.3.2. The Module Resource Autoloader">Zend_Loader_Autoloader_Module</a>.
+        </p></td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.autoloading.usage.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.autoloading.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.autoloading.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">4.3. Uso básico del autoloader </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 4.5. Conclusión</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

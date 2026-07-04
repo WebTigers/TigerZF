@@ -1,0 +1,151 @@
+<?php $title = '25.2. Uso de Zend_Currency'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.2. Uso de Zend_Currency</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.currency.options.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.usage"></a>25.2. Uso de Zend_Currency</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.usage.generic"></a>25.2.1. Uso genérico</h3></div></div></div>
+<p>
+            El caso de uso más simple dentro de una aplicación es usar la configuración regional del
+            cliente. Cuando crea una instancia de <code class="classname">Zend_Currency</code> sin
+            proporcionar ninguna opción, se usará la configuración regional de su cliente para
+            establecer la moneda adecuada.
+        </p>
+<div class="example">
+<a name="zend.currency.usage.generic.example-1"></a><p class="title"><b>Ejemplo 25.1. Creación de una moneda con la configuración del cliente</b></p>
+<div class="example-contents">
+<p>
+                Supongamos que su cliente ha establecido "en_US" como idioma deseado en su navegador.
+                En este caso, <code class="classname">Zend_Currency</code> detectará automáticamente la
+                moneda que se debe usar.
+            </p>
+<pre class="programlisting">
+$currency = new Zend_Currency();
+
+// See the default settings which are depending on the client
+// var_dump($currency);
+</pre>
+<p>
+                El objeto creado ahora contendría la moneda "US Dollar", ya que esta es la moneda
+                asignada actualmente para US (Estados Unidos). También tiene otras opciones
+                establecidas, como "$" para el signo de la moneda o "USD" para la abreviatura.
+            </p>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Automatic locale detection does not always work">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">La detección automática de la configuración regional no siempre funciona</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Debe tener en cuenta que esta detección automática de la configuración regional no
+                siempre funciona correctamente. La razón de este comportamiento es que
+                <code class="classname">Zend_Currency</code> debe tener una configuración regional que
+                incluya una región. Cuando el cliente solo establece "en" como configuración regional,
+                <code class="classname">Zend_Currency</code> no sabría a cuál de los más de 30 países se
+                refería. En este caso se lanzaría una excepción.
+            </p>
+<p>
+                Un cliente también podría omitir la configuración regional en su navegador. Esto
+                llevaría al problema de que se usará la configuración de su entorno como alternativa y
+                también podría provocar una excepción.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.usage.locale"></a>25.2.2. Creación de una moneda basada en una configuración regional</h3></div></div></div>
+<p>
+            Para evitar los problemas con su cliente, simplemente podría establecer manualmente la
+            configuración regional deseada.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency('en_US');
+
+// You can also use the 'locale' option
+// $currency = new Zend_Currency(array('locale' =&gt; 'en_US'));
+
+// See the actual settings which are fixed to 'en_US'
+// var_dump($currency);
+</pre>
+<p>
+            Al igual que en nuestro primer ejemplo, la moneda usada será "US Dollar". Pero ahora ya no
+            dependemos de la configuración del cliente.
+        </p>
+<p>
+            <code class="classname">Zend_Currency</code> también soporta el uso de una configuración
+            regional a nivel de aplicación. Puede establecer una instancia de
+            <code class="classname">Zend_Locale</code> en el registro como se muestra a continuación. Con
+            esta notación puede evitar establecer la configuración regional manualmente para cada
+            instancia cuando quiera usar la misma configuración regional en toda la aplicación.
+        </p>
+<pre class="programlisting">
+// in your bootstrap file
+$locale = new Zend_Locale('de_AT');
+Zend_Registry::set('Zend_Locale', $locale);
+
+// somewhere in your application
+$currency = new Zend_Currency();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.usage.territory"></a>25.2.3. Creación de una moneda basada en un país</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Currency</code> también es capaz de funcionar con un país dado
+            usando internamente <code class="classname">Zend_Locale</code>.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency('US');
+
+// See the actual settings which are fixed to 'en_US'
+// var_dump($currency);
+</pre>
+<div class="note"><table border="0" summary="Note: Uppercase territories">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Territorios en mayúsculas</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Cuando sepa que está usando un territorio, debería escribirlo en mayúsculas. De lo
+                contrario, podría obtener a sus ojos una configuración regional falsa a cambio. Por
+                ejemplo, si proporciona "om" podría esperar que se devuelva "ar_OM". Pero en realidad
+                devuelve "om", ya que también es un idioma.
+            </p>
+<p>
+                Por lo tanto, siempre escriba en mayúsculas la entrada cuando sepa que se refiere a un
+                territorio.
+            </p>
+</td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.currency.options.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 25. Zend_Currency </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 25.3. Opciones para monedas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

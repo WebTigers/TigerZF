@@ -1,0 +1,190 @@
+<?php $title = 'E.2. Estructura de directorios de proyecto recomendada'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">E.2. Estructura de directorios de proyecto recomendada</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="project-structure.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice E. Estructura de proyecto recomendada para aplicaciones MVC de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="project-structure.filesystem.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="project-structure.project"></a>E.2. Estructura de directorios de proyecto recomendada</h2></div></div></div>
+<pre class="programlisting">
+&lt;project name&gt;/
+    application/
+        configs/
+            application.ini
+        controllers/
+            helpers/
+        forms/
+        layouts/
+            filters/
+            helpers/
+            scripts/
+        models/
+        modules/
+        services/
+        views/
+            filters/
+            helpers/
+            scripts/
+        Bootstrap.php
+    data/
+        cache/
+        indexes/
+        locales/
+        logs/
+        sessions/
+        uploads/
+    docs/
+    library/
+    public/
+        css/
+        images/
+        js/
+        .htaccess
+        index.php
+    scripts/
+        jobs/
+        build/
+    temp/
+    tests/
+</pre>
+<p>
+            A continuación se describen los casos de uso de cada directorio listado.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em><code class="filename">application/</code></em></span>: Este directorio contiene
+                    su aplicación. Alojará el sistema <acronym class="acronym">MVC</acronym>, así como
+                    las configuraciones, los servicios utilizados y su archivo de arranque.
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">configs/</code></em></span>: El
+                            directorio de configuración de toda la aplicación.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">controllers/</code></em></span>,
+                            <span class="emphasis"><em><code class="filename">models/</code></em></span> y
+                            <span class="emphasis"><em><code class="filename">views/</code></em></span>: Estos directorios
+                            sirven como los directorios predeterminados de controladores, modelos o vistas. Tener
+                            estos tres directorios dentro del directorio de aplicación proporciona el
+                            mejor diseño tanto para iniciar un proyecto sencillo como para iniciar un
+                            proyecto modular que tenga <code class="filename">controllers/models/views</code>
+                            globales.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">controllers/helpers/</code></em></span>: Estos
+                            directorios contendrán los helpers de acción. Los helpers de acción se
+                            asignarán al espacio de nombres "<code class="classname">Controller_Helper_</code>" para
+                            el módulo predeterminado o "&lt;Module&gt;_Controller_Helper" en otros
+                            módulos.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">layouts/</code></em></span>: Este directorio
+                            de layouts es para diseños basados en <acronym class="acronym">MVC</acronym>. Dado que
+                            <code class="classname">Zend_Layout</code> es capaz de gestionar diseños
+                            basados y no basados en <acronym class="acronym">MVC</acronym>,
+                            la ubicación de este directorio refleja que los layouts no tienen una
+                            relación de 1 a 1 con los controladores y son independientes de las plantillas
+                            dentro de <code class="filename">views/</code>.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">modules/</code></em></span>: Los módulos permiten a un
+                            desarrollador agrupar un conjunto de controladores relacionados en un grupo
+                            organizado lógicamente. La estructura bajo el directorio de módulos se
+                            asemejaría a la estructura bajo el directorio de aplicación.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">services/</code></em></span>: Este directorio es
+                            para los archivos de servicios web específicos de su aplicación que son proporcionados
+                            por su aplicación, o para implementar una <a class="ulink" href="http://www.martinfowler.com/eaaCatalog/serviceLayer.html" target="_top">capa de
+                                servicio</a> para sus modelos.
+                        </p></li>
+<li class="listitem"><p>
+                            <span class="emphasis"><em><code class="filename">Bootstrap.php</code></em></span>: Este archivo es
+                            el punto de entrada de su aplicación, y debería implementar
+                            <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>.
+                            El propósito de este archivo es arrancar la aplicación y poner los
+                            componentes a disposición de la aplicación inicializándolos.
+                        </p></li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">data/</code></em></span>: Este directorio proporciona un
+                    lugar para almacenar datos de la aplicación que son volátiles y posiblemente temporales. La
+                    alteración de los datos en este directorio podría provocar que la aplicación falle.
+                    Además, la información de este directorio puede o no ser confirmada en un
+                    repositorio de subversion. Ejemplos de cosas en este directorio son archivos de sesión,
+                    archivos de caché, bases de datos sqlite, registros e índices.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">docs/</code></em></span>: Este directorio contiene
+                    documentación, ya sea generada o redactada directamente.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">library/</code></em></span>: Este directorio es para
+                    las bibliotecas comunes de las que depende la aplicación, y debería estar en el
+                    <span class="property">include_path</span> de <acronym class="acronym">PHP</acronym>. Los desarrolladores deberían
+                    colocar el código de biblioteca de su aplicación bajo este directorio en un
+                    espacio de nombres único, siguiendo las directrices establecidas en la <a class="ulink" href="http://www.php.net/manual/en/userlandnaming.php" target="_top">Guía de nomenclatura
+                        de espacio de usuario</a> del manual de <acronym class="acronym">PHP</acronym>, así como
+                    las establecidas por Zend mismo. Este
+                    directorio también puede incluir Zend Framework en sí; en ese caso, lo alojaría en
+                    <code class="filename">library/Zend/</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">public/</code></em></span>: Este directorio contiene todos
+                    los archivos públicos de su aplicación. <code class="filename">index.php</code> configura e
+                    invoca <code class="classname">Zend_Application</code>, que a su vez invoca el
+                    archivo <code class="filename">application/Bootstrap.php</code>, lo que resulta en el despacho
+                    del controlador frontal. La raíz web de su servidor web normalmente se configuraría a
+                    este directorio.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">scripts/</code></em></span>: Este directorio contiene
+                    scripts de mantenimiento y/o compilación. Dichos scripts podrían incluir scripts de línea de comandos,
+                    cron, o de compilación de phing que no se ejecutan en tiempo de ejecución pero son parte
+                    del correcto funcionamiento de la aplicación.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">temp/</code></em></span>: La carpeta <code class="filename">temp/</code>
+                    está reservada para datos transitorios de la aplicación. Esta información normalmente no
+                    se confirmaría en el repositorio svn de la aplicación. Si los datos bajo el
+                    directorio <code class="filename">temp/</code> se eliminaran, la aplicación debería poder
+                    seguir funcionando con una posible disminución del rendimiento hasta que los datos se
+                    restauren o se vuelvan a cachear.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="filename">tests/</code></em></span>: Este directorio contiene
+                    las pruebas de la aplicación. Estas podrían estar escritas a mano, ser pruebas PHPUnit, pruebas
+                    basadas en Selenium-RC o basadas en algún otro framework de pruebas. Por defecto, el código de biblioteca
+                    puede probarse imitando la estructura de directorios de su directorio
+                    <code class="filename">library/</code>. Adicionalmente, las pruebas funcionales de
+                    su aplicación podrían escribirse imitando la estructura del directorio
+                    <code class="filename">application/</code> (incluyendo el subdirectorio de
+                    aplicación).
+                </p></li>
+</ul></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="project-structure.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="project-structure.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="project-structure.filesystem.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Apéndice E. Estructura de proyecto recomendada para aplicaciones MVC de Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> E.3. Estructura de módulos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

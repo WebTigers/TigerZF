@@ -1,0 +1,184 @@
+<?php $title = '39.4. Conversión de XML a JSON'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">39.4. Conversión de XML a JSON</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.json.advanced.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 39. Zend_Json</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.json.server.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.json.xml2json"></a>39.4. Conversión de XML a JSON</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Json</code> proporciona un método de conveniencia para transformar
+        datos con formato <acronym class="acronym">XML</acronym> a formato <acronym class="acronym">JSON</acronym>. Esta funcionalidad se
+        inspiró en un <a class="ulink" href="http://www.ibm.com/developerworks/xml/library/x-xml2jsonphp/" target="_top">
+        artículo de IBM developerWorks</a>.
+    </p>
+<p>
+        <code class="classname">Zend_Json</code> incluye una función estática llamada
+        <code class="methodname">Zend_Json::fromXml()</code>. Esta función genera
+        <acronym class="acronym">JSON</acronym> a partir de una entrada <acronym class="acronym">XML</acronym> dada. Esta función toma como parámetro de entrada cualquier
+        cadena <acronym class="acronym">XML</acronym> arbitraria. También toma un parámetro de entrada booleano opcional
+        para indicar a la lógica de conversión que ignore o no ignore los
+        atributos <acronym class="acronym">XML</acronym> durante el proceso de conversión. Si no se proporciona este parámetro
+        de entrada opcional, el comportamiento por defecto es ignorar los atributos <acronym class="acronym">XML</acronym>.
+        Esta llamada a la función se realiza como se muestra a continuación:
+    </p>
+<pre class="programlisting">
+// fromXml function simply takes a String containing XML contents
+// as input.
+$jsonContents = Zend_Json::fromXml($xmlStringContents, true);
+</pre>
+<p>
+        La función <code class="methodname">Zend_Json::fromXml()</code> realiza la conversión del
+        parámetro de entrada de cadena con formato <acronym class="acronym">XML</acronym> y devuelve la salida de cadena
+        equivalente con formato <acronym class="acronym">JSON</acronym>. En caso de cualquier error de formato de entrada
+        <acronym class="acronym">XML</acronym> o error en la lógica de conversión, esta función lanzará una excepción. La
+        lógica de conversión también utiliza técnicas recursivas para recorrer el árbol <acronym class="acronym">XML</acronym>.
+        Admite recursión hasta 25 niveles de profundidad. Más allá de esa profundidad, lanzará una
+        <code class="classname">Zend_Json_Exception</code>. Existen varios archivos <acronym class="acronym">XML</acronym>
+        con distintos grados de complejidad proporcionados en el directorio de pruebas de Zend Framework. Pueden
+        usarse para probar la funcionalidad de xml2json.
+    </p>
+<p>
+        A continuación se muestra un ejemplo sencillo que presenta tanto la cadena de entrada <acronym class="acronym">XML</acronym>
+        pasada a la función <code class="methodname">Zend_Json::fromXml()</code> como la cadena de salida
+        <acronym class="acronym">JSON</acronym> devuelta como resultado. Este ejemplo utilizó el parámetro de función
+        opcional para no ignorar los atributos <acronym class="acronym">XML</acronym> durante la
+        conversión. Por lo tanto, puede observar que la cadena <acronym class="acronym">JSON</acronym> resultante incluye
+        una representación de los atributos <acronym class="acronym">XML</acronym> presentes en la
+        cadena de entrada <acronym class="acronym">XML</acronym>.
+    </p>
+<p>
+        Cadena de entrada <acronym class="acronym">XML</acronym> pasada a la función <code class="methodname">Zend_Json::fromXml()</code>:
+    </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;books&gt;
+    &lt;book id="1"&gt;
+        &lt;title&gt;Code Generation in Action&lt;/title&gt;
+        &lt;author&gt;&lt;first&gt;Jack&lt;/first&gt;&lt;last&gt;Herrington&lt;/last&gt;&lt;/author&gt;
+        &lt;publisher&gt;Manning&lt;/publisher&gt;
+    &lt;/book&gt;
+
+    &lt;book id="2"&gt;
+        &lt;title&gt;PHP Hacks&lt;/title&gt;
+        &lt;author&gt;&lt;first&gt;Jack&lt;/first&gt;&lt;last&gt;Herrington&lt;/last&gt;&lt;/author&gt;
+        &lt;publisher&gt;O'Reilly&lt;/publisher&gt;
+    &lt;/book&gt;
+
+    &lt;book id="3"&gt;
+        &lt;title&gt;Podcasting Hacks&lt;/title&gt;
+        &lt;author&gt;&lt;first&gt;Jack&lt;/first&gt;&lt;last&gt;Herrington&lt;/last&gt;&lt;/author&gt;
+        &lt;publisher&gt;O'Reilly&lt;/publisher&gt;
+    &lt;/book&gt;
+&lt;/books&gt;
+</pre>
+<p>
+        Cadena de salida <acronym class="acronym">JSON</acronym> devuelta por la
+        función <code class="methodname">Zend_Json::fromXml()</code>:
+    </p>
+<pre class="programlisting">
+{
+   "books" : {
+      "book" : [ {
+         "@attributes" : {
+            "id" : "1"
+         },
+         "title" : "Code Generation in Action",
+         "author" : {
+            "first" : "Jack", "last" : "Herrington"
+         },
+         "publisher" : "Manning"
+      }, {
+         "@attributes" : {
+            "id" : "2"
+         },
+         "title" : "PHP Hacks", "author" : {
+            "first" : "Jack", "last" : "Herrington"
+         },
+         "publisher" : "O'Reilly"
+      }, {
+         "@attributes" : {
+            "id" : "3"
+         },
+         "title" : "Podcasting Hacks", "author" : {
+            "first" : "Jack", "last" : "Herrington"
+         },
+         "publisher" : "O'Reilly"
+      }
+   ]}
+}
+</pre>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.json.xml2json.changes"></a>39.4.1. Cambios</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.json.xml2json.changes.1-11-6"></a>39.4.1.1. Cambios en la versión 1.11.6</h4></div></div></div>
+<p>
+            A partir de la versión 1.11.6, la función <code class="methodname">Zend_Json::fromXml()</code>
+            ha sido reescrita desde cero para gestionar elementos XML con atributos, valor de texto
+            y subelementos (véase <a class="ulink" href="http://framework.zend.com/issues/browse/ZF-3257" target="_top">ZF-3257</a>).
+        </p>
+<p>
+            Por ejemplo, si tiene un documento XML como este:
+        </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;a&gt;
+    &lt;b id="foo"/&gt;
+    bar
+&lt;/a&gt;
+</pre>
+<p>
+                La cadena de salida <acronym class="acronym">JSON</acronym> devuelta por
+                <code class="methodname">Zend_Json::fromXml()</code> es:
+            </p>
+<pre class="programlisting">
+{
+   "a" : {
+      "b" : {
+         "@attributes" : {
+            "id" : "foo"
+         }
+      },
+      "@text" : "bar"
+   }
+}
+</pre>
+<p>
+                La idea es utilizar un valor de clave especial (@text) para almacenar el valor de texto de un elemento XML,
+                solo si dicho elemento contiene atributos o subelementos (como en los ejemplos anteriores).
+                Si tiene un elemento XML simple con solo un valor de texto, como este:
+            </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;a&gt;foo&lt;/a&gt;
+</pre>
+<p>
+                el JSON será {"a":"foo"}, lo cual es bastante intuitivo, en lugar de {"a":{"@text":"foo"}}.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.json.advanced.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.json.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.json.server.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">39.3. Uso avanzado de Zend_Json </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 39.5. Zend_Json_Server - servidor JSON-RPC</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

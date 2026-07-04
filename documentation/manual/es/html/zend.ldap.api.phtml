@@ -1,0 +1,2973 @@
+<?php $title = '41.2. Resumen de la API'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">41.2. Resumen de la API</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.ldap.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 41. Zend_Ldap</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.ldap.usage.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.ldap.api"></a>41.2. Resumen de la API</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.api.configuration"></a>41.2.1. Configuración / opciones</h3></div></div></div>
+<p>
+            El componente <code class="classname">Zend_Ldap</code> acepta un array de opciones,
+            ya sea suministrado al constructor o mediante el método
+            <code class="methodname">setOptions()</code>. Las opciones permitidas son las siguientes:
+        </p>
+<div class="table">
+<a name="zend.ldap.api.configuration.table"></a><p class="title"><b>Tabla 41.2. Opciones de Zend_Ldap</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap Options" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="property">host</span></td>
+<td>
+                            El nombre de host por defecto del servidor <acronym class="acronym">LDAP</acronym> si no se
+                            suministra a <code class="methodname">connect()</code> (también puede usarse
+                            al intentar canonicalizar nombres de usuario en
+                            <code class="methodname">bind()</code>).
+                        </td>
+</tr>
+<tr>
+<td><span class="property">port</span></td>
+<td>
+                            El puerto por defecto del servidor <acronym class="acronym">LDAP</acronym> si no se suministra a
+                            <code class="methodname">connect()</code>.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">useStartTls</span></td>
+<td>
+                            Indica si el cliente <acronym class="acronym">LDAP</acronym> debe usar
+                            transporte cifrado <acronym class="acronym">TLS</acronym> (también conocido como <acronym class="acronym">SSLv2</acronym>).
+                            Se recomienda encarecidamente un valor <code class="constant">TRUE</code>
+                            en entornos de producción para evitar que las contraseñas se transmitan en
+                            texto claro. El valor por defecto es <code class="constant">FALSE</code>, ya que los servidores
+                            frecuentemente requieren que un certificado se instale por separado después de
+                            la instalación. Las opciones <span class="emphasis"><em>useSsl</em></span> y
+                            <span class="emphasis"><em>useStartTls</em></span> son mutuamente excluyentes.
+                            Se debe favorecer la opción <span class="emphasis"><em>useStartTls</em></span>
+                            sobre <span class="emphasis"><em>useSsl</em></span>, pero no todos los servidores admiten
+                            este mecanismo más reciente.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">useSsl</span></td>
+<td>
+                            Indica si el cliente <acronym class="acronym">LDAP</acronym> debe usar
+                            transporte cifrado <acronym class="acronym">SSL</acronym>. Las opciones
+                            <span class="emphasis"><em>useSsl</em></span> y <span class="emphasis"><em>useStartTls</em></span>
+                            son mutuamente excluyentes.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">username</span></td>
+<td>
+                            El nombre de usuario de credenciales por defecto. Algunos servidores requieren que
+                            esto esté en forma de DN. Debe darse en forma de DN si el
+                            servidor <acronym class="acronym">LDAP</acronym> requiere un DN para enlazar y el enlace
+                            debería ser posible con nombres de usuario simples.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">password</span></td>
+<td>
+                            La contraseña de credenciales por defecto (usada solo con el username
+                            anterior).
+                        </td>
+</tr>
+<tr>
+<td><span class="property">bindRequiresDn</span></td>
+<td>
+                            Si es <code class="constant">TRUE</code>, esta opción indica a
+                            <code class="classname">Zend_Ldap</code> que recupere el DN de la
+                            cuenta usada para enlazar si el nombre de usuario no está
+                            ya en forma de DN. El valor por defecto es <code class="constant">FALSE</code>.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">baseDn</span></td>
+<td>
+                            El DN base por defecto usado para búsquedas (p. ej., de cuentas).
+                            Esta opción es necesaria para la mayoría de las operaciones relacionadas con cuentas y debe
+                            indicar el DN bajo el cual se ubican las cuentas.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">accountCanonicalForm</span></td>
+<td>
+                            Un entero pequeño que indica la forma a la cual los nombres de cuenta
+                            deben canonicalizarse. Consulte la sección <a class="link" href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations.account-name-canonicalization" title="41.1.1.2. Account Name Canonicalization"><span class="emphasis"><em>Canonicalización
+                                del nombre de cuenta</em></span></a>
+                            más abajo.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">accountDomainName</span></td>
+<td>
+                            El dominio <acronym class="acronym">FQDN</acronym> para el cual el servidor
+                            <acronym class="acronym">LDAP</acronym> de destino es una autoridad (p. ej., example.com).
+                        </td>
+</tr>
+<tr>
+<td><span class="property">accountDomainNameShort</span></td>
+<td>
+                            El dominio "corto" para el cual el servidor <acronym class="acronym">LDAP</acronym> de destino
+                            es una autoridad. Esto se usa habitualmente para especificar el nombre de dominio
+                            NetBIOS para redes Windows, pero también puede ser usado por servidores que no son AD.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">accountFilterFormat</span></td>
+<td>
+                            El filtro de búsqueda <acronym class="acronym">LDAP</acronym> usado para buscar cuentas.
+                            Esta cadena es una expresión al estilo de <a class="ulink" href="http://php.net/sprintf" target="_top"><code class="methodname">sprintf()</code></a>
+                            que debe contener un '<span class="emphasis"><em>%s</em></span>' para
+                            dar cabida al nombre de usuario. El valor por defecto es
+                            '<span class="emphasis"><em>(&amp;(objectClass=user)(sAMAccountName=%s))</em></span>'
+                            a menos que <span class="emphasis"><em>bindRequiresDn</em></span> esté establecido a
+                            <code class="constant">TRUE</code>, en cuyo caso el valor por defecto es
+                            '<span class="emphasis"><em>(&amp;(objectClass=posixAccount)(uid=%s))</em></span>'.
+                            Los usuarios de esquemas personalizados pueden necesitar cambiar esta opción.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">allowEmptyPassword</span></td>
+<td>
+                            Algunos servidores <acronym class="acronym">LDAP</acronym> pueden configurarse para aceptar una
+                            contraseña de cadena vacía como un enlace anónimo. Este comportamiento es casi
+                            siempre indeseable. Por esta razón, las contraseñas vacías están explícitamente
+                            deshabilitadas. Establezca este valor a <code class="constant">TRUE</code> para permitir que se
+                            envíe una contraseña de cadena vacía durante el enlace.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">optReferrals</span></td>
+<td>
+                            Si se establece a <code class="constant">TRUE</code>, esta opción indica al
+                            cliente <acronym class="acronym">LDAP</acronym> que se deben seguir los referrals.
+                            El valor por defecto es <code class="constant">FALSE</code>.
+                        </td>
+</tr>
+<tr>
+<td><span class="property">tryUsernameSplit</span></td>
+<td>
+                            Si se establece a <code class="constant">FALSE</code>, esta opción indica que el
+                            nombre de usuario dado no debe dividirse en el primer carácter <span class="emphasis"><em>@</em></span>
+                            o <span class="emphasis"><em>\</em></span> para separar el nombre de usuario del
+                            dominio durante el procedimiento de enlace. Esto permite al usuario
+                            usar nombres de usuario que contengan un carácter <span class="emphasis"><em>@</em></span> o
+                            <span class="emphasis"><em>\</em></span> que no
+                            hereden información de dominio, p. ej. usando direcciones de correo para
+                            el enlace. El valor por defecto es <code class="constant">TRUE</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.api.reference"></a>41.2.2. Referencia de la API</h3></div></div></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>Los nombres de métodos en <span class="emphasis"><em>cursiva</em></span> son métodos estáticos.</p></td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap"></a>41.2.2.1. Zend_Ldap</h4></div></div></div>
+<p>
+        <code class="classname">Zend_Ldap</code> es la interfaz base hacia un servidor
+        <acronym class="acronym">LDAP</acronym>. Proporciona métodos de conexión y enlace, así como métodos para operar sobre el
+        árbol <acronym class="acronym">LDAP</acronym>.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap.table"></a><p class="title"><b>Tabla 41.3. API de Zend_Ldap</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">string filterEscape(string $str)</code></td>
+<td>
+                        Escapa un valor para su uso en un filtro <acronym class="acronym">LDAP</acronym> según la
+                        <acronym class="acronym">RFC</acronym> 2254. Este método está <span class="emphasis"><em>obsoleto</em></span>,
+                        use en su lugar <code class="methodname">Zend_Ldap_Filter_Abstract::escapeValue()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean explodeDn($dn, array &amp;$keys = null, array &amp;$vals =
+                            null)</code>
+                    </td>
+<td>
+                        Comprueba si un DN dado <code class="varname">$dn</code> está mal formado. Si
+                        se proporcionan <code class="varname">$keys</code> o <code class="varname">$keys</code> y
+                        <code class="varname">$vals</code>, estos arrays se rellenarán con las
+                        claves y valores de DN correspondientes. Este método está
+                        <span class="emphasis"><em>obsoleto</em></span>, use en su lugar
+                        <code class="methodname">Zend_Ldap_Dn::checkDn()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">__construct($options)</code></td>
+<td>
+                        Constructor. El parámetro <code class="varname">$options</code> es opcional
+                        y puede establecerse como un array o una instancia de <code class="classname">Zend_Config</code>.
+                        Si no se proporcionan opciones en la instanciación, los parámetros de conexión
+                        deben pasarse a la instancia usando
+                        <code class="methodname">Zend_Ldap::setOptions()</code>. Las opciones permitidas se
+                        especifican en <a class="link" href="zend.ldap.api.phtml#zend.ldap.api.configuration.table" title="Table 41.2. Zend_Ldap Options">Opciones de Zend_Ldap</a>
+                    </td>
+</tr>
+<tr>
+<td><code class="code">resource getResource()</code></td>
+<td>
+                        Devuelve el recurso <acronym class="acronym">LDAP</acronym> nativo de la extensión (ext/ldap).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer getLastErrorCode()</code></td>
+<td>
+                        Devuelve el número de error <acronym class="acronym">LDAP</acronym> del último
+                        comando <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">string getLastError(integer &amp;$errorCode, array
+                            &amp;$errorMessages)</code>
+                    </td>
+<td>
+                        Devuelve el mensaje de error <acronym class="acronym">LDAP</acronym> del último
+                        comando <acronym class="acronym">LDAP</acronym>. El parámetro opcional <code class="varname">$errorCode</code>
+                        se establece con el número de error <acronym class="acronym">LDAP</acronym> si se proporciona. El
+                        array opcional <code class="varname">$errorMessages</code> se rellenará con los mensajes de
+                        error en bruto si se proporciona. Las diversas funciones de recuperación de errores
+                        <acronym class="acronym">LDAP</acronym> pueden devolver cosas diferentes, por lo que todas se recopilan
+                        si se proporciona <code class="varname">$errorMessages</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap setOptions($options)</code></td>
+<td>
+                        Establece los parámetros de conexión y enlace <acronym class="acronym">LDAP</acronym>.
+                        <code class="varname">$options</code> puede ser un array o una instancia de
+                        <code class="classname">Zend_Config</code>. Las opciones permitidas se especifican en
+                        <a class="link" href="zend.ldap.api.phtml#zend.ldap.api.configuration.table" title="Table 41.2. Zend_Ldap Options">Opciones de Zend_Ldap</a>
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getOptions()</code></td>
+<td>Devuelve los parámetros de conexión y enlace actuales.</td>
+</tr>
+<tr>
+<td><code class="code">string getBaseDn()</code></td>
+<td>
+                        Devuelve el DN base al que está enlazada esta conexión
+                        <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">string getCanonicalAccountName(string $acctname, integer $form)</code>
+                    </td>
+<td>
+                        Devuelve el nombre de cuenta canónico del nombre de cuenta dado
+                        <code class="varname">$acctname</code>. <code class="varname">$form</code> especifica el <a class="link" href="zend.ldap.phtml#zend.ldap.using.theory-of-operation.account-name-canonicalization.table" title="Table 41.1. Options for accountCanonicalForm">formato</a>
+                        en el cual el nombre de cuenta se canonicaliza. Consulte <a class="link" href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations.account-name-canonicalization" title="41.1.1.2. Account Name Canonicalization">Canonicalización
+                            del nombre de cuenta</a> para más detalles.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap disconnect()</code></td>
+<td>
+                        Desconecta la instancia <code class="classname">Zend_Ldap</code> del
+                        servidor <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap connect(string $host, integer $port, boolean $useSsl,
+                            boolean $useStartTls)</code>
+                    </td>
+<td>
+                        Conecta la instancia <code class="classname">Zend_Ldap</code> al servidor
+                        <acronym class="acronym">LDAP</acronym> dado. Todos los parámetros son opcionales y se
+                        tomarán de los parámetros de conexión y enlace <acronym class="acronym">LDAP</acronym>
+                        pasados a la instancia mediante el constructor o mediante
+                        <code class="methodname">Zend_Ldap::setOptions()</code> cuando se establezcan a
+                        <code class="constant">NULL</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap bind(string $username, string $password)</code>
+                    </td>
+<td>
+                        Autentica a <code class="varname">$username</code> con
+                        <code class="varname">$password</code> en el servidor <acronym class="acronym">LDAP</acronym>. Si ambos
+                        parámetros se omiten, el enlace se llevará a cabo con las credenciales
+                        proporcionadas en los parámetros de conexión y enlace. Si no se proporcionan
+                        credenciales en los parámetros de conexión y enlace, se realizará
+                        un enlace anónimo. Tenga en cuenta que esto requiere que se permitan enlaces anónimos
+                        en el servidor <acronym class="acronym">LDAP</acronym>. Se puede pasar una cadena vacía <code class="code">''</code>
+                        como <code class="varname">$password</code> junto con un nombre de usuario si, y
+                        solo si, <code class="code">allowEmptyPassword</code> está establecido a
+                        <code class="constant">TRUE</code> en los parámetros de conexión y enlace.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Collection search(string|Zend_Ldap_Filter_Abstract $filter,
+                            string|Zend_Ldap_Dn $basedn, integer $scope, array $attributes, string
+                            $sort, string $collectionClass)</code>
+                    </td>
+<td>
+                        Busca en el árbol <acronym class="acronym">LDAP</acronym> con el
+                        <code class="varname">$filter</code> dado y los parámetros de búsqueda dados.
+
+                        <div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="code">string|Zend_Ldap_Filter_Abstract $filter</code></span></dt>
+<dd><p>
+                                        La cadena de filtro a usar en la búsqueda, p. ej.
+                                        <code class="code">(objectClass=posixAccount)</code>.
+                                    </p></dd>
+<dt><span class="term"><code class="code">string|Zend_Ldap_Dn $basedn</code></span></dt>
+<dd><p>
+                                        La base de búsqueda para la búsqueda. Si se omite o es
+                                        <code class="constant">NULL</code>, se usa el <code class="code">baseDn</code> de los
+                                        parámetros de conexión y enlace.
+                                    </p></dd>
+<dt><span class="term"><code class="code">integer $scope</code></span></dt>
+<dd><p>
+                                        El ámbito de búsqueda.
+                                        <code class="constant">Zend_Ldap::SEARCH_SCOPE_SUB</code> busca
+                                        en todo el subárbol incluyendo el
+                                        nodo <code class="varname">$baseDn</code>.
+                                        <code class="constant">Zend_Ldap::SEARCH_SCOPE_ONE</code> restringe
+                                        la búsqueda a un nivel por debajo de <code class="varname">$baseDn</code>.
+                                        <code class="constant">Zend_Ldap::SEARCH_SCOPE_BASE</code> restringe
+                                        la búsqueda al propio <code class="varname">$baseDn</code>; esto puede
+                                        usarse para recuperar de forma eficiente una única entrada por su DN. El
+                                        valor por defecto es
+                                        <code class="constant">Zend_Ldap::SEARCH_SCOPE_SUB</code>.
+                                    </p></dd>
+<dt><span class="term"><code class="code">array $attributes</code></span></dt>
+<dd><p>
+                                        Especifica los atributos contenidos en las
+                                        entradas devueltas. Para incluir todos los atributos posibles (las
+                                        restricciones de ACL pueden impedir que un usuario dado recupere
+                                        ciertos atributos) pase un array vacío
+                                        <code class="methodname">array()</code> o
+                                        <code class="methodname">array('*')</code> al método. En algunos
+                                        servidores <acronym class="acronym">LDAP</acronym> puede recuperar atributos
+                                        internos especiales pasando
+                                        <code class="methodname">array('*', '+')</code> al método.
+                                    </p></dd>
+<dt><span class="term"><code class="code">string $sort</code></span></dt>
+<dd><p>
+                                        Si se proporciona, la colección de resultados se ordenará según el
+                                        atributo <code class="varname">$sort</code>. Los resultados solo pueden
+                                        ordenarse por un único atributo, ya que este parámetro usa
+                                        la función de ext/ldap <code class="methodname">ldap_sort()</code>.
+                                    </p></dd>
+<dt><span class="term"><code class="code">string $collectionClass</code></span></dt>
+<dd><p>
+                                        Si se proporciona, el resultado se envolverá en un objeto de tipo
+                                        <code class="varname">$collectionClass</code>. Por defecto se devolverá un
+                                        objeto de tipo <code class="classname">Zend_Ldap_Collection</code>. La
+                                        clase personalizada debe extender
+                                        <code class="classname">Zend_Ldap_Collection</code> y recibirá
+                                        un
+                                        <code class="classname">Zend_Ldap_Collection_Iterator_Default</code>
+                                        en su instanciación.
+                                    </p></dd>
+</dl></div>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">integer count(string|Zend_Ldap_Filter_Abstract
+                        $filter, string|Zend_Ldap_Dn $basedn, integer
+                        $scope)</code>
+                    </td>
+<td>
+                        Cuenta los elementos devueltos por los parámetros de búsqueda dados.
+                        Vea <code class="methodname">Zend_Ldap::search()</code> para una descripción detallada
+                        de los parámetros del método.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer countChildren(string|Zend_Ldap_Dn $dn)</code></td>
+<td>
+                        Cuenta los descendientes directos (hijos) de la entrada
+                        identificada por el <code class="varname">$dn</code> dado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean exists(string|Zend_Ldap_Dn $dn)</code></td>
+<td>
+                        Comprueba si existe la entrada identificada por el
+                        <code class="varname">$dn</code> dado.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array searchEntries(string|Zend_Ldap_Filter_Abstract
+                        $filter, string|Zend_Ldap_Dn $basedn, integer $scope, array
+                        $attributes, string $sort)</code>
+                    </td>
+<td>
+                        Realiza una operación de búsqueda y devuelve el resultado como un
+                        array de <acronym class="acronym">PHP</acronym>. Este es esencialmente el mismo método que
+                        <code class="methodname">Zend_Ldap::search()</code> excepto por el tipo de retorno. Vea
+                        <code class="methodname">Zend_Ldap::search()</code> para una descripción detallada de
+                        los parámetros del método.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array getEntry(string|Zend_Ldap_Dn $dn, array
+                        $attributes, boolean $throwOnNotFound)</code>
+                    </td>
+<td>
+                        Recupera la entrada <acronym class="acronym">LDAP</acronym> identificada por
+                        <code class="varname">$dn</code> con los atributos especificados en
+                        <code class="varname">$attributes</code>. Si se omite <code class="varname">$attributes</code>,
+                        se incluyen todos los atributos (<code class="methodname">array()</code>) en
+                        el resultado. <code class="varname">$throwOnNotFound</code> es
+                        <code class="constant">FALSE</code> por defecto, por lo que el método devolverá
+                        <code class="constant">NULL</code> si no se puede encontrar la entrada especificada. Si se establece a
+                        <code class="constant">TRUE</code>, se lanzará en su lugar una
+                        <code class="classname">Zend_Ldap_Exception</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void prepareLdapEntryArray(array
+                            &amp;$entry)</code></em></span>
+                    </td>
+<td>
+                        Prepara un array para su uso en operaciones de modificación
+                        <acronym class="acronym">LDAP</acronym>. Este método no necesita ser llamado por el usuario final,
+                        ya que se llama implícitamente en cada método de modificación
+                        de datos.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap add(string|Zend_Ldap_Dn $dn, array
+                        $entry)</code>
+                    </td>
+<td>
+                        Añade la entrada identificada por <code class="varname">$dn</code> con sus atributos
+                        <code class="varname">$entry</code> al árbol <acronym class="acronym">LDAP</acronym>. Lanza una
+                        <code class="classname">Zend_Ldap_Exception</code> si la entrada no pudo
+                        añadirse.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap update(string|Zend_Ldap_Dn $dn, array $entry)</code>
+                    </td>
+<td>
+                        Actualiza la entrada identificada por <code class="varname">$dn</code> con sus atributos
+                        <code class="varname">$entry</code> en el árbol <acronym class="acronym">LDAP</acronym>. Lanza una
+                        <code class="classname">Zend_Ldap_Exception</code> si la entrada no pudo
+                        modificarse.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap save(string|Zend_Ldap_Dn $dn, array $entry)</code>
+                    </td>
+<td>
+                        Guarda la entrada identificada por <code class="varname">$dn</code> con sus atributos
+                        <code class="varname">$entry</code> en el árbol <acronym class="acronym">LDAP</acronym>. Lanza una
+                        <code class="classname">Zend_Ldap_Exception</code> si la entrada no pudo guardarse.
+                        Este método decide, consultando el árbol <acronym class="acronym">LDAP</acronym>, si la
+                        entrada se añadirá o se actualizará.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap delete(string|Zend_Ldap_Dn $dn, boolean $recursively)</code>
+                    </td>
+<td>
+                        Elimina la entrada identificada por <code class="varname">$dn</code> del
+                        árbol <acronym class="acronym">LDAP</acronym>. Lanza una
+                        <code class="classname">Zend_Ldap_Exception</code> si la entrada no pudo
+                        eliminarse. <code class="varname">$recursively</code> es <code class="constant">FALSE</code> por
+                        defecto. Si se establece a <code class="constant">TRUE</code> la eliminación se llevará
+                        a cabo de forma recursiva y efectivamente eliminará un subárbol completo. La eliminación
+                        fallará si <code class="varname">$recursively</code> es <code class="constant">FALSE</code>
+                        y la entrada <code class="varname">$dn</code> no es una entrada hoja.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap moveToSubtree(string|Zend_Ldap_Dn $from,
+                        string|Zend_Ldap_Dn $to, boolean $recursively, boolean
+                        $alwaysEmulate)</code>
+                    </td>
+<td>
+                        Mueve la entrada identificada por <code class="varname">$from</code> a una ubicación bajo
+                        <code class="varname">$to</code> manteniendo su <acronym class="acronym">RDN</acronym> sin cambios.
+                        <code class="varname">$recursively</code> especifica si la operación se
+                        llevará a cabo de forma recursiva (<code class="constant">FALSE</code> por defecto) de modo que
+                        la entrada <code class="varname">$from</code> y todos sus descendientes se moverán.
+                        El movimiento fallará si <code class="varname">$recursively</code> es
+                        <code class="constant">FALSE</code> y la entrada <code class="varname">$from</code> no es una
+                        entrada hoja. <code class="varname">$alwaysEmulate</code> controla si se debe usar la
+                        función de ext/ldap <code class="methodname">ldap_rename()</code> si está disponible.
+                        Esto solo puede funcionar para entradas hoja y para servidores y para ext/ldap
+                        que admitan esta función. Establézcalo a <code class="constant">TRUE</code> para usar siempre una
+                        operación de renombrado emulada.
+
+                        <div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                                Todas las operaciones de movimiento se llevan a cabo copiando y luego eliminando las
+                                entradas correspondientes en el árbol <acronym class="acronym">LDAP</acronym>. Estas
+                                operaciones no son <span class="emphasis"><em>atómicas</em></span>, por lo que los fallos
+                                durante la operación resultarán en un estado
+                                <span class="emphasis"><em>inconsistente</em></span> en el
+                                servidor <acronym class="acronym">LDAP</acronym>. Lo mismo es cierto para todas las operaciones
+                                recursivas. Tampoco son atómicas en absoluto. Por favor téngalo en
+                                cuenta.
+                            </p></td></tr>
+</table></div>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap move(string|Zend_Ldap_Dn $from,
+                        string|Zend_Ldap_Dn $to, boolean $recursively, boolean
+                        $alwaysEmulate)</code>
+                    </td>
+<td>
+                        Este es un alias para <code class="methodname">Zend_Ldap::rename()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap rename(string|Zend_Ldap_Dn $from,
+                        string|Zend_Ldap_Dn $to, boolean $recursively, boolean
+                        $alwaysEmulate)</code>
+                    </td>
+<td>
+                        Renombra la entrada identificada por <code class="varname">$from</code> a
+                        <code class="varname">$to</code>. <code class="varname">$recursively</code> especifica si la
+                        operación se llevará a cabo de forma recursiva (<code class="constant">FALSE</code> por
+                        defecto) de modo que la entrada <code class="varname">$from</code> y todos sus
+                        descendientes se moverán. El movimiento fallará si
+                        <code class="varname">$recursively</code> es <code class="constant">FALSE</code> y la entrada
+                        <code class="varname">$from</code> no es una entrada hoja.
+                        <code class="varname">$alwaysEmulate</code> controla si se debe usar la función de ext/ldap
+                        <code class="methodname">ldap_rename()</code> si está disponible. Esto solo puede
+                        funcionar para entradas hoja y para servidores y para ext/ldap que admitan esta
+                        función. Establézcalo a <code class="constant">TRUE</code> para usar siempre una operación de
+                        renombrado emulada.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap copyToSubtree(string|Zend_Ldap_Dn $from,
+                        string|Zend_Ldap_Dn $to, boolean $recursively)</code>
+                    </td>
+<td>
+                        Copia la entrada identificada por <code class="varname">$from</code> a una ubicación bajo
+                        <code class="varname">$to</code> manteniendo su <acronym class="acronym">RDN</acronym> sin cambios.
+                        <code class="varname">$recursively</code> especifica si la operación se
+                        llevará a cabo de forma recursiva (<code class="constant">FALSE</code> por defecto) de modo que
+                        la entrada <code class="varname">$from</code> y todos sus descendientes se copiarán.
+                        La copia fallará si <code class="varname">$recursively</code> es
+                        <code class="constant">FALSE</code> y la entrada <code class="varname">$from</code> no es una
+                        entrada hoja.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap copy(string|Zend_Ldap_Dn $from,
+                        string|Zend_Ldap_Dn $to, boolean $recursively)</code>
+                    </td>
+<td>
+                        Copia la entrada identificada por <code class="varname">$from</code> a
+                        <code class="varname">$to</code>. <code class="varname">$recursively</code> especifica si la
+                        operación se llevará a cabo de forma recursiva (<code class="constant">FALSE</code> por
+                        defecto) de modo que la entrada <code class="varname">$from</code> y todos sus
+                        descendientes se copiarán. La copia fallará si
+                        <code class="varname">$recursively</code> es <code class="constant">FALSE</code> y la entrada
+                        <code class="varname">$from</code> no es una entrada hoja.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node getNode(string|Zend_Ldap_Dn $dn)</code></td>
+<td>
+                        Devuelve la entrada <code class="varname">$dn</code> envuelta en un
+                        <code class="classname">Zend_Ldap_Node</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node getBaseNode()</code></td>
+<td>
+                        Devuelve la entrada para el DN base <code class="varname">$baseDn</code>
+                        envuelta en un <code class="classname">Zend_Ldap_Node</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node_RootDse getRootDse()</code></td>
+<td>Devuelve el RootDSE para el servidor actual.</td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node_Schema getSchema()</code></td>
+<td>
+                        Devuelve el esquema <acronym class="acronym">LDAP</acronym> para el servidor actual.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap.zend-ldap-collection"></a>41.2.2.1.1. Zend_Ldap_Collection</h5></div></div></div>
+<p>
+            <code class="classname">Zend_Ldap_Collection</code> implementa <code class="code">Iterator</code> para
+            permitir el recorrido de elementos usando <code class="methodname">foreach()</code> y
+            <code class="code">Countable</code> para poder responder a <code class="methodname">count()</code>. Con
+            su método protegido <code class="methodname">_createEntry()</code> proporciona un punto de
+            extensión simple para los desarrolladores que necesiten objetos de resultado personalizados.
+        </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap.zend-ldap-collection.table"></a><p class="title"><b>Tabla 41.4. API de Zend_Ldap_Collection</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Collection API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                            <code class="code">__construct(Zend_Ldap_Collection_Iterator_Interface
+                            $iterator)</code>
+                        </td>
+<td>
+                            Constructor. El constructor debe recibir un
+                            <code class="classname">Zend_Ldap_Collection_Iterator_Interface</code> que
+                            realiza la iteración real de resultados.
+                            <code class="classname">Zend_Ldap_Collection_Iterator_Default</code> es la
+                            implementación por defecto para iterar resultados de ext/ldap.
+                        </td>
+</tr>
+<tr>
+<td><code class="code">boolean close()</code></td>
+<td>
+                            Cierra el iterador interno. Esto también se llama en el destructor.
+                        </td>
+</tr>
+<tr>
+<td><code class="code">array toArray()</code></td>
+<td>Devuelve todas las entradas como un array.</td>
+</tr>
+<tr>
+<td><code class="code">array getFirst()</code></td>
+<td>
+                            Devuelve la primera entrada de la colección o
+                            <code class="constant">NULL</code> si la colección está vacía.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-attribute"></a>41.2.2.2. Zend_Ldap_Attribute</h4></div></div></div>
+<p>
+        <code class="classname">Zend_Ldap_Attribute</code> es una clase auxiliar que proporciona únicamente
+        métodos estáticos para manipular arrays adecuados a la estructura usada en
+        los métodos de modificación de datos de <code class="classname">Zend_Ldap</code> y al formato de datos requerido
+        por el servidor <acronym class="acronym">LDAP</acronym>. Los tipos de datos <acronym class="acronym">PHP</acronym> se convierten
+        de la siguiente manera:
+    </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="code">string</code></span></dt>
+<dd><p>No se realizará ninguna conversión.</p></dd>
+<dt><span class="term"><code class="code">integer</code> y <code class="code">float</code></span></dt>
+<dd><p>El valor se convertirá a una cadena.</p></dd>
+<dt><span class="term"><code class="code">boolean</code></span></dt>
+<dd><p><code class="constant">TRUE</code> se convertirá a
+            <span class="emphasis"><em>'<code class="constant">TRUE</code>'</em></span> y <code class="constant">FALSE</code> a
+            <span class="emphasis"><em>'<code class="constant">FALSE</code>'</em></span></p></dd>
+<dt><span class="term"><code class="code">object</code> y <code class="code">array</code></span></dt>
+<dd><p>El valor se convertirá a una cadena usando
+            <code class="methodname">serialize()</code>.</p></dd>
+<dt><span class="term"><code class="code">resource</code></span></dt>
+<dd><p>Si se proporciona un recurso <code class="code">stream</code>, los datos se
+            obtendrán llamando a <code class="methodname">stream_get_contents()</code>.</p></dd>
+<dt><span class="term">otros</span></dt>
+<dd><p>Todos los demás tipos de datos (concretamente los recursos que no son stream) se
+            omitirán.</p></dd>
+</dl></div>
+<p>Al leer los valores de atributo se realizará la siguiente conversión:</p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><span class="emphasis"><em>'<code class="constant">TRUE</code>'</em></span></span></dt>
+<dd><p>Convertido a <code class="constant">TRUE</code>.</p></dd>
+<dt><span class="term"><span class="emphasis"><em>'<code class="constant">FALSE</code>'</em></span></span></dt>
+<dd><p>Convertido a <code class="constant">FALSE</code>.</p></dd>
+<dt><span class="term">otros</span></dt>
+<dd><p>Todas las demás cadenas no se convertirán automáticamente y se pasan
+            tal cual.</p></dd>
+</dl></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-attribute.table"></a><p class="title"><b>Tabla 41.5. API de Zend_Ldap_Attribute</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Attribute API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void setAttribute(array &amp;$data, string
+                        $attribName, mixed $value, boolean $append)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Establece el atributo <code class="varname">$attribName</code> en
+                        <code class="varname">$data</code> al valor <code class="varname">$value</code>. Si
+                        <code class="varname">$append</code> es <code class="constant">TRUE</code>
+                        (<code class="constant">FALSE</code> por defecto), <code class="varname">$value</code> se
+                        añadirá al atributo. <code class="varname">$value</code> puede ser un valor escalar
+                        o un array de valores escalares. Se aplicará la conversión.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array|mixed getAttribute(array $data,
+                        string $attribName, integer|null $index)</code> </em></span>
+                    </td>
+<td>
+                        Devuelve el atributo <code class="varname">$attribName</code> de
+                        <code class="varname">$data</code>. Si <code class="varname">$index</code> es
+                        <code class="constant">NULL</code> (por defecto), se devolverá un array conteniendo
+                        todos los valores del atributo dado. Se devolverá un array vacío si el
+                        atributo no existe en el array dado. Si se especifica un índice
+                        entero, se devolverá el valor correspondiente en dicho índice. Si el
+                        índice está fuera de rango, se devolverá <code class="constant">NULL</code>. Se aplicará la
+                        conversión.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">boolean attributeHasValue(array &amp;$data,
+                        string $attribName, mixed|array $value)</code> </em></span>
+                    </td>
+<td>
+                        Comprueba si el atributo <code class="varname">$attribName</code> en
+                        <code class="varname">$data</code> tiene el/los valor(es) dado(s) en
+                        <code class="varname">$value</code>. El método devuelve <code class="constant">TRUE</code> solo
+                        si todos los valores en <code class="varname">$value</code> están presentes en el atributo.
+                        La comparación se hace de forma estricta (respetando el tipo de dato).
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void removeDuplicatesFromAttribute(array
+                        &amp;$data, string $attribName)</code> </em></span>
+                    </td>
+<td>
+                        Elimina todos los duplicados del atributo
+                        <code class="varname">$attribName</code> en <code class="varname">$data</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void removeFromAttribute(array &amp;$data,
+                        string $attribName, mixed|array $value)</code> </em></span>
+                    </td>
+<td>
+                        Elimina el/los valor(es) dado(s) en <code class="varname">$value</code> del
+                        atributo <code class="varname">$attribName</code> en
+                        <code class="varname">$data</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string|null convertToLdapValue(mixed
+                        $value)</code> </em></span>
+                    </td>
+<td>
+                        Convierte un tipo de dato <acronym class="acronym">PHP</acronym> a su representación
+                        <acronym class="acronym">LDAP</acronym>. Consulte la introducción para más detalles.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">mixed convertFromLdapValue(string
+                        $value)</code> </em></span>
+                    </td>
+<td>
+                        Convierte un valor <acronym class="acronym">LDAP</acronym> a su tipo de dato
+                        <acronym class="acronym">PHP</acronym>. Consulte la introducción para más detalles.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string|null
+                        convertToLdapDateTimeValue(integer $value, boolean $utc)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Convierte una marca de tiempo a su representación de fecha/hora
+                        <acronym class="acronym">LDAP</acronym>. Si <code class="varname">$utc</code> es <code class="constant">TRUE</code>
+                        (<code class="constant">FALSE</code> por defecto), la cadena de fecha/hora
+                        <acronym class="acronym">LDAP</acronym> resultante estará en <acronym class="acronym">UTC</acronym>,
+                        de lo contrario se devolverá una cadena de fecha/hora local.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">integer|null
+                        convertFromLdapDateTimeValue(string $value)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Convierte la representación de fecha/hora <acronym class="acronym">LDAP</acronym> en una marca de tiempo.
+                        El método devuelve <code class="constant">NULL</code> si <code class="varname">$value</code>
+                        no se puede reconvertir a una marca de tiempo <acronym class="acronym">PHP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void setPassword(array &amp;$data, string
+                        $password, string $hashType, string $attribName)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Establece una contraseña <acronym class="acronym">LDAP</acronym> para el atributo
+                        <code class="varname">$attribName</code> en <code class="varname">$data</code>.
+                        <code class="varname">$attribName</code> por defecto es <code class="code">'userPassword'</code>,
+                        que es el atributo de contraseña estándar. El hash de contraseña puede
+                        especificarse con <code class="varname">$hashType</code>. El valor por defecto aquí es
+                        <code class="constant">Zend_Ldap_Attribute::PASSWORD_HASH_MD5</code>, siendo
+                        <code class="constant">Zend_Ldap_Attribute::PASSWORD_HASH_SHA</code> la otra
+                        posibilidad.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string createPassword(string $password,
+                        string $hashType)</code> </em></span>
+                    </td>
+<td>
+                        Crea una contraseña <acronym class="acronym">LDAP</acronym>. El hash de contraseña puede
+                        especificarse con <code class="varname">$hashType</code>. El valor por defecto aquí es
+                        <code class="constant">Zend_Ldap_Attribute::PASSWORD_HASH_MD5</code>, siendo
+                        <code class="constant">Zend_Ldap_Attribute::PASSWORD_HASH_SHA</code> la otra
+                        posibilidad.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void setDateTimeAttribute(array &amp;$data,
+                        string $attribName, integer|array $value, boolean $utc, boolean
+                        $append)</code> </em></span>
+                    </td>
+<td>
+                        Establece el atributo <code class="varname">$attribName</code> en
+                        <code class="varname">$data</code> al valor de fecha/hora <code class="varname">$value</code>.
+                        Si <code class="varname">$append</code> es <code class="constant">TRUE</code>
+                        (<code class="constant">FALSE</code> por defecto), <code class="varname">$value</code> se
+                        añadirá al atributo. <code class="varname">$value</code> puede ser un valor entero
+                        o un array de enteros. Se aplicará la conversión de fecha/hora según
+                        <code class="methodname">Zend_Ldap_Attribute::convertToLdapDateTimeValue()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array|integer getDateTimeAttribute(array
+                        $data, string $attribName, integer|null $index)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Devuelve el atributo de fecha/hora <code class="varname">$attribName</code>
+                        de <code class="varname">$data</code>. Si <code class="varname">$index</code> es
+                        <code class="constant">NULL</code> (por defecto), se devolverá un array conteniendo
+                        todos los valores de fecha/hora del atributo dado. Se devolverá un array vacío
+                        si el atributo no existe en el array dado. Si se especifica un índice
+                        entero, se devolverá el valor de fecha/hora correspondiente en dicho índice. Si el
+                        índice está fuera de rango, se devolverá <code class="constant">NULL</code>. Se aplicará la
+                        conversión de fecha/hora según
+                        <code class="methodname">Zend_Ldap_Attribute::convertFromLdapDateTimeValue()</code>.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-dn"></a>41.2.2.3. Zend_Ldap_Dn</h4></div></div></div>
+<p>
+        <code class="classname">Zend_Ldap_Dn</code> proporciona una interfaz orientada a objetos para
+        manipular nombres distinguidos (DN) <acronym class="acronym">LDAP</acronym>. El parámetro
+        <code class="varname">$caseFold</code> que se usa en varios métodos determina la forma en que
+        se gestionan los atributos del DN en cuanto a su capitalización. Los valores permitidos para este
+        parámetro son:
+    </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="constant">Zend_Ldap_Dn::ATTR_CASEFOLD_NONE</code></span></dt>
+<dd><p>No se realizará ninguna conversión de capitalización.</p></dd>
+<dt><span class="term"><code class="constant">Zend_Ldap_Dn::ATTR_CASEFOLD_UPPER</code></span></dt>
+<dd><p>Todos los atributos se convertirán a mayúsculas.</p></dd>
+<dt><span class="term"><code class="constant">Zend_Ldap_Dn::ATTR_CASEFOLD_LOWER</code></span></dt>
+<dd><p>Todos los atributos se convertirán a minúsculas.</p></dd>
+</dl></div>
+<p>
+        La capitalización por defecto es <code class="constant">Zend_Ldap_Dn::ATTR_CASEFOLD_NONE</code> y
+        puede establecerse con <code class="methodname">Zend_Ldap_Dn::setDefaultCaseFold()</code>. Cada instancia
+        de <code class="classname">Zend_Ldap_Dn</code> puede tener su propia configuración de capitalización. Si se
+        omite el parámetro <code class="varname">$caseFold</code> en las llamadas a métodos, se usa por defecto
+        la configuración de capitalización de la instancia.
+    </p>
+<p>
+        La clase implementa <code class="code">ArrayAccess</code> para permitir el acceso mediante índice a las
+        distintas partes del DN. Los métodos de <code class="code">ArrayAccess</code> delegan en
+        <code class="methodname">Zend_Ldap_Dn::get($offset, 1, null)</code> para <code class="code">offsetGet(integer
+        $offset)</code>, en <code class="methodname">Zend_Ldap_Dn::set($offset, $value)</code> para
+        <code class="methodname">offsetSet()</code> y en
+        <code class="methodname">Zend_Ldap_Dn::remove($offset, 1)</code> para
+        <code class="methodname">offsetUnset()</code>. <code class="methodname">offsetExists()</code> simplemente
+        comprueba si el índice está dentro de los límites.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-dn.table"></a><p class="title"><b>Tabla 41.6. API de Zend_Ldap_Dn</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Dn API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Dn factory(string|array $dn,
+                        string|null $caseFold)</code> </em></span>
+                    </td>
+<td>
+                        Crea una instancia de <code class="classname">Zend_Ldap_Dn</code> a partir de un array
+                        o una cadena. El array debe ajustarse a la estructura de array detallada
+                        en <code class="methodname">Zend_Ldap_Dn::implodeDn()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Dn fromString(string $dn,
+                        string|null $caseFold)</code> </em></span>
+                    </td>
+<td>
+                        Crea una instancia de <code class="classname">Zend_Ldap_Dn</code> a partir de una
+                        cadena.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Dn fromArray(array $dn,
+                        string|null $caseFold)</code> </em></span>
+                    </td>
+<td>
+                        Crea una instancia de <code class="classname">Zend_Ldap_Dn</code> a partir de un array.
+                        El array debe ajustarse a la estructura de array detallada en
+                        <code class="methodname">Zend_Ldap_Dn::implodeDn()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getRdn(string|null $caseFold)</code></td>
+<td>
+                        Obtiene el <acronym class="acronym">RDN</acronym> del DN actual. El valor devuelto es un
+                        array con los nombres de atributos <acronym class="acronym">RDN</acronym> como claves y los
+                        valores de atributos <acronym class="acronym">RDN</acronym>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string getRdnString(string|null $caseFold)</code></td>
+<td>
+                        Obtiene el <acronym class="acronym">RDN</acronym> del DN actual. El valor devuelto es una
+                        cadena.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getParentDn(integer $levelUp)</code></td>
+<td>
+                        Obtiene el DN del ancestro del DN actual
+                        <code class="varname">$levelUp</code> niveles hacia arriba en el árbol. <code class="varname">$levelUp</code>
+                        por defecto es <code class="code">1</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array get(integer $index, integer $length, string|null
+                        $caseFold)</code>
+                    </td>
+<td>
+                        Devuelve un fragmento del DN actual determinado por
+                        <code class="varname">$index</code> y <code class="varname">$length</code>.
+                        <code class="varname">$index</code> comienza en <code class="code">0</code> en la parte del DN por la
+                        izquierda.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn set(integer $index, array $value)</code></td>
+<td>
+                        Reemplaza una parte del DN en el DN actual. Esta operación
+                        manipula la instancia actual.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn remove(integer $index, integer $length)</code></td>
+<td>
+                        Elimina una parte del DN del DN actual. Esta operación
+                        manipula la instancia actual. <code class="varname">$length</code> por defecto es
+                        <code class="code">1</code>
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn append(array $value)</code></td>
+<td>
+                        Añade una parte del DN al DN actual. Esta operación
+                        manipula la instancia actual.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn prepend(array $value)</code></td>
+<td>
+                        Antepone una parte del DN al DN actual. Esta operación
+                        manipula la instancia actual.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn insert(integer $index, array $value)</code></td>
+<td>
+                        Inserta una parte del DN después del índice <code class="varname">$index</code> en el
+                        DN actual. Esta operación manipula la instancia
+                        actual.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">void setCaseFold(string|null $caseFold)</code></td>
+<td>
+                        Establece la opción de capitalización en la instancia de DN actual. Si
+                        <code class="varname">$caseFold</code> es <code class="constant">NULL</code>, se establecerá para
+                        la instancia actual la configuración de capitalización por defecto
+                        (<code class="constant">Zend_Ldap_Dn::ATTR_CASEFOLD_NONE</code>
+                        por defecto o configurada mediante
+                        <code class="methodname">Zend_Ldap_Dn::setDefaultCaseFold()</code>).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string toString(string|null $caseFold)</code></td>
+<td>Devuelve el DN como una cadena.</td>
+</tr>
+<tr>
+<td><code class="code">array toArray(string|null $caseFold)</code></td>
+<td>Devuelve el DN como un array.</td>
+</tr>
+<tr>
+<td><code class="code">string __toString()</code></td>
+<td>
+                        Devuelve el DN como una cadena - delega en
+                        <code class="methodname">Zend_Ldap_Dn::toString(null)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">void setDefaultCaseFold(string
+                        $caseFold)</code> </em></span>
+                    </td>
+<td>
+                        Establece la opción de capitalización por defecto usada por todas las instancias
+                        en su creación por defecto. Las instancias ya existentes no se ven afectadas
+                        por esta configuración.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array escapeValue(string|array
+                        $values)</code> </em></span>
+                    </td>
+<td>Escapa un valor de DN según la <acronym class="acronym">RFC</acronym> 2253.</td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array unescapeValue(string|array
+                        $values)</code> </em></span>
+                    </td>
+<td>
+                        Deshace la conversión realizada por
+                        <code class="methodname">Zend_Ldap_Dn::escapeValue()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array explodeDn(string $dn, array
+                        &amp;$keys, array &amp;$vals, string|null $caseFold)</code>
+                        </em></span>
+                    </td>
+<td>
+                        <p>
+                            Descompone el DN <code class="varname">$dn</code> en un array conteniendo
+                            todas las partes del DN dado. <code class="varname">$keys</code> recibe opcionalmente las
+                            claves del DN (p. ej. CN, OU, DC, ...). <code class="varname">$vals</code> recibe opcionalmente
+                            los valores del DN. El array resultante será del tipo
+                        </p>
+
+                        <pre class="programlisting">
+array(
+array("cn" =&gt; "name1", "uid" =&gt; "user"),
+array("cn" =&gt; "name2"),
+array("dc" =&gt; "example"),
+array("dc" =&gt; "org")
+)
+</pre>
+
+                        <p>
+                            para un DN de <code class="code">cn=name1+uid=user,cn=name2,dc=example,dc=org</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">boolean checkDn(string $dn, array
+                        &amp;$keys, array &amp;$vals, string|null $caseFold)</code>
+                        </em></span>
+                    </td>
+<td>
+                        Comprueba si un DN dado <code class="varname">$dn</code> está mal formado. Si
+                        se proporcionan <code class="varname">$keys</code> o <code class="varname">$keys</code> y
+                        <code class="varname">$vals</code>, estos arrays se rellenarán con las
+                        claves y valores de DN correspondientes.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string implodeRdn(array $part, string|null
+                        $caseFold)</code> </em></span>
+                    </td>
+<td>
+                        Devuelve una parte del DN en la forma
+                        <code class="code">$attribute=$value</code>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string implodeDn(array $dnArray,
+                        string|null $caseFold, string $separator)</code>
+                        </em></span>
+                    </td>
+<td>
+                        <p>
+                            Une un array en la forma proporcionada por
+                            <code class="methodname">Zend_Ldap_Dn::explodeDn()</code> en una cadena de DN.
+                            <code class="varname">$separator</code> por defecto es <code class="code">','</code>, pero algunos servidores
+                            LDAP también entienden <code class="code">';'</code>. <code class="varname">$dnArray</code>
+                            debe ser de tipo
+                        </p>
+
+                        <pre class="programlisting">
+array(
+array("cn" =&gt; "name1", "uid" =&gt; "user"),
+array("cn" =&gt; "name2"),
+array("dc" =&gt; "example"),
+array("dc" =&gt; "org")
+)
+</pre>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">boolean isChildOf(string|Zend_Ldap_Dn
+                        $childDn, string|Zend_Ldap_Dn $parentDn)</code> </em></span>
+                    </td>
+<td>
+                        Comprueba si el <code class="varname">$childDn</code> dado está por debajo del
+                        subárbol de <code class="varname">$parentDn</code>.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-filter"></a>41.2.2.4. Zend_Ldap_Filter</h4></div></div></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-filter.table"></a><p class="title"><b>Tabla 41.7. API de Zend_Ldap_Filter</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Filter API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter equals(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'igualdad':
+                        <code class="code">(attr=value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter begins(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'comienza con':
+                        <code class="code">(attr=value*)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter ends(string $attr, string
+                        $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'termina con':
+                        <code class="code">(attr=*value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter contains(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'contiene':
+                        <code class="code">(attr=*value*)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter greater(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'mayor que':
+                        <code class="code">(attr&gt;value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter greaterOrEqual(string
+                        $attr, string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'mayor o igual que':
+                        <code class="code">(attr&gt;=value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter less(string $attr, string
+                        $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'menor que':
+                        <code class="code">(attr&lt;value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter lessOrEqual(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de 'menor o igual que':
+                        <code class="code">(attr&lt;=value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter approx(string $attr,
+                        string $value)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro 'aproximado':
+                        <code class="code">(attr~=value)</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter any(string $attr)</code>
+                        </em></span>
+                    </td>
+<td>Crea un filtro de 'cualquiera': <code class="code">(attr=*)</code>.</td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter string(string
+                        $filter)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro de cadena personalizado simple. El usuario es
+                        responsable de todo el escapado de valores, ya que el filtro se usa tal
+                        cual.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter mask(string $mask, string
+                        $value,...)</code> </em></span>
+                    </td>
+<td>
+                        Crea un filtro a partir de una máscara de cadena. Todos los parámetros
+                        <code class="varname">$value</code> se escaparán y sustituirán en <code class="varname">$mask</code>
+                        usando
+                        <a class="ulink" href="http://php.net/sprintf" target="_top">
+                        <code class="methodname">sprintf()</code></a>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter
+                        andFilter(Zend_Ldap_Filter_Abstract $filter,...)</code>
+                        </em></span>
+                    </td>
+<td>Crea un filtro 'and' a partir de todos los argumentos dados.</td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Filter
+                        orFilter(Zend_Ldap_Filter_Abstract $filter,...)</code>
+                        </em></span>
+                    </td>
+<td>Crea un filtro 'or' a partir de todos los argumentos dados.</td>
+</tr>
+<tr>
+<td>
+                        <code class="code">__construct(string $attr, string $value, string
+                        $filtertype, string|null $prepend, string|null
+                        $append)</code>
+                    </td>
+<td>
+                        Constructor. Crea un filtro arbitrario según los
+                        parámetros proporcionados. El filtro resultante será una concatenación
+                        <code class="code">$attr . $filtertype . $prepend . $value . $append</code>.
+                        Normalmente este constructor no es necesario, ya que todos los filtros pueden
+                        crearse usando los métodos de fábrica apropiados.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string toString()</code></td>
+<td>Devuelve una representación en cadena del filtro.</td>
+</tr>
+<tr>
+<td><code class="code">string __toString()</code></td>
+<td>
+                        Devuelve una representación en cadena del filtro. Delega en
+                        <code class="methodname">Zend_Ldap_Filter::toString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Filter_Abstract negate()</code></td>
+<td>Niega el filtro actual.</td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Filter_Abstract
+                        addAnd(Zend_Ldap_Filter_Abstract $filter,...)</code>
+                    </td>
+<td>
+                        Crea un filtro 'and' a partir del filtro actual y todos los
+                        filtros pasados como argumentos.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Filter_Abstract
+                        addOr(Zend_Ldap_Filter_Abstract $filter,...)</code>
+                    </td>
+<td>
+                        Crea un filtro 'or' a partir del filtro actual y todos los
+                        filtros pasados como argumentos.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string|array escapeValue(string|array
+                        $values)</code> </em></span>
+                    </td>
+<td>
+                        Escapa los <code class="varname">$values</code> dados según la
+                        <acronym class="acronym">RFC</acronym> 2254 para que puedan usarse de forma segura en
+                        filtros <acronym class="acronym">LDAP</acronym>. Si se proporciona una única cadena, se devuelve una cadena;
+                        en caso contrario se devuelve un array. Cualquier carácter de control con un
+                        código <acronym class="acronym">ASCII</acronym> &lt; 32, así como los caracteres con significado
+                        especial en los filtros <acronym class="acronym">LDAP</acronym> "*", "(", ")" y "\" (la
+                        barra invertida) se convierten en la representación de una barra invertida seguida de
+                        dos dígitos hexadecimales que representan el valor hexadecimal del carácter.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string|array unescapeValue(string|array
+                        $values)</code> </em></span>
+                    </td>
+<td>
+                        Deshace la conversión realizada por
+                        <code class="methodname">Zend_Ldap_Filter::escapeValue()</code>. Convierte cualquier
+                        secuencia de una barra invertida seguida de dos dígitos hexadecimales en el
+                        carácter correspondiente.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node"></a>41.2.2.5. Zend_Ldap_Node</h4></div></div></div>
+<p>
+        <code class="classname">Zend_Ldap_Node</code> incluye los accesores de propiedades mágicos
+        <code class="methodname">__set()</code>, <code class="methodname">__get()</code>,
+        <code class="methodname">__unset()</code> y <code class="methodname">__isset()</code> para acceder a los
+        atributos por su nombre. Delegan en
+        <code class="methodname">Zend_Ldap_Node::setAttribute()</code>,
+        <code class="methodname">Zend_Ldap_Node::getAttribute()</code>,
+        <code class="methodname">Zend_Ldap_Node::deleteAttribute()</code> y
+        <code class="methodname">Zend_Ldap_Node::existsAttribute()</code> respectivamente. Además, la
+        clase implementa <code class="code">ArrayAccess</code> para el acceso a los atributos al estilo de array.
+        <code class="classname">Zend_Ldap_Node</code> también implementa <code class="code">Iterator</code> y
+        <code class="code">RecursiveIterato</code> para permitir el recorrido recursivo del árbol.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node.table"></a><p class="title"><b>Tabla 41.8. API de Zend_Ldap_Node</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">Zend_Ldap getLdap()</code></td>
+<td>
+                        Devuelve la conexión <acronym class="acronym">LDAP</acronym> actual. Lanza
+                        <code class="classname">Zend_Ldap_Exception</code> si el nodo actual está en modo
+                        desvinculado (no conectado a una instancia de <code class="classname">Zend_Ldap</code>).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node attachLdap(Zend_Ldap $ldap)</code></td>
+<td>
+                        Vincula el nodo actual a la instancia <code class="varname">$ldap</code>
+                        de <code class="classname">Zend_Ldap</code>. Lanza
+                        <code class="classname">Zend_Ldap_Exception</code> si <code class="varname">$ldap</code>
+                        no es responsable del nodo actual (el nodo no es hijo del DN base de
+                        <code class="varname">$ldap</code>).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node detachLdap()</code></td>
+<td>Desvincula el nodo de la conexión <acronym class="acronym">LDAP</acronym>.</td>
+</tr>
+<tr>
+<td><code class="code">boolean isAttached()</code></td>
+<td>
+                        Comprueba si el nodo actual está vinculado a una conexión
+                        <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Node create(string|array|Zend_Ldap_Dn $dn, array
+                            $objectClass)</code></em></span>
+                    </td>
+<td>
+                        Método de fábrica para crear un nuevo <code class="classname">Zend_Ldap_Node</code>
+                        desvinculado para un DN dado. Crea un nuevo
+                        <code class="classname">Zend_Ldap_Node</code> con el DN <code class="varname">$dn</code> y
+                        las clases de objeto <code class="varname">$objectClass</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Node fromLdap(string|array|Zend_Ldap_Dn $dn,
+                            Zend_Ldap $ldap)</code></em></span>
+                    </td>
+<td>
+                        Método de fábrica para crear un <code class="classname">Zend_Ldap_Node</code>
+                        vinculado para un DN dado. Carga un
+                        <code class="classname">Zend_Ldap_Node</code> existente con el DN <code class="varname">$dn</code>
+                        desde la conexión <acronym class="acronym">LDAP</acronym> <code class="varname">$ldap</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Node fromArray((array $data,
+                            boolean $fromDataSource)</code></em></span>
+                    </td>
+<td>
+                        Método de fábrica para crear un <code class="classname">Zend_Ldap_Node</code> desvinculado
+                        a partir de los datos del array <code class="varname">$data</code>. Si
+                        <code class="varname">$fromDataSource</code> es <code class="constant">TRUE</code>
+                        (<code class="constant">FALSE</code> por defecto), los datos se tratan como si estuvieran
+                        presentes en un árbol <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean isNew()</code></td>
+<td>
+                        Indica si el nodo se considera nuevo (no presente en el
+                        servidor). Tenga en cuenta que esto no indica si el nodo está realmente
+                        presente en el servidor. Use <code class="methodname">Zend_Ldap_Node::exists()</code>
+                        para comprobar si un nodo ya existe.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean willBeDeleted()</code></td>
+<td>
+                        Indica si este nodo va a ser eliminado una vez se llame a
+                        <code class="methodname">Zend_Ldap_Node::update()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node delete()</code></td>
+<td>
+                        Marca este nodo para su eliminación. El nodo se eliminará al
+                        llamar a <code class="methodname">Zend_Ldap_Node::update()</code> si
+                        <code class="methodname">Zend_Ldap_Node::willBeDeleted()</code> es
+                        <code class="constant">TRUE</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean willBeMoved()</code></td>
+<td>
+                        Indica si este nodo va a ser movido una vez se llame a
+                        <code class="methodname">Zend_Ldap_Node::update()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node update(Zend_Ldap $ldap)</code></td>
+<td>
+                        Envía todos los cambios pendientes al servidor <acronym class="acronym">LDAP</acronym>. Si
+                        se omite <code class="varname">$ldap</code>, se usa la conexión <acronym class="acronym">LDAP</acronym>
+                        actual. Si el nodo actual está desvinculado de una conexión
+                        <acronym class="acronym">LDAP</acronym>, se lanzará una
+                        <code class="classname">Zend_Ldap_Exception</code>. Si se proporciona
+                        <code class="varname">$ldap</code>, el nodo actual se vinculará a
+                        la conexión <acronym class="acronym">LDAP</acronym> dada.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getCurrentDn()</code></td>
+<td>
+                        Obtiene el DN actual del nodo actual como un
+                        <code class="classname">Zend_Ldap_Dn</code>. Esto no refleja posibles
+                        operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getDn()</code></td>
+<td>
+                        Obtiene el DN original del nodo actual como un
+                        <code class="classname">Zend_Ldap_Dn</code>. Esto refleja posibles
+                        operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string getDnString(string $caseFold)</code></td>
+<td>
+                        Obtiene el DN original del nodo actual como una cadena. Esto
+                        refleja posibles operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getDnArray(string $caseFold)</code></td>
+<td>
+                        Obtiene el DN original del nodo actual como un array. Esto
+                        refleja posibles operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string getRdnString(string $caseFold)</code></td>
+<td>
+                        Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como una cadena. Esto
+                        refleja posibles operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getRdnArray(string $caseFold)</code></td>
+<td>
+                        Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como un array. Esto
+                        refleja posibles operaciones de renombrado.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node setDn(Zend_Ldap_Dn|string|array $newDn)</code>
+                    </td>
+<td>
+                        Establece el nuevo DN para este nodo, moviendo efectivamente el nodo
+                        una vez se llame a <code class="methodname">Zend_Ldap_Node::update()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node move(Zend_Ldap_Dn|string|array $newDn)</code>
+                    </td>
+<td>
+                        Este es un alias para <code class="methodname">Zend_Ldap_Node::setDn()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node rename(Zend_Ldap_Dn|string|array $newDn)</code>
+                    </td>
+<td>
+                        Este es un alias para <code class="methodname">Zend_Ldap_Node::setDn()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getObjectClass()</code></td>
+<td>Devuelve el objectClass del nodo.</td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node setObjectClass(array|string $value)</code></td>
+<td>Establece el atributo objectClass.</td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node appendObjectClass(array|string $value)</code>
+                    </td>
+<td>Añade al atributo objectClass.</td>
+</tr>
+<tr>
+<td><code class="code">string toLdif(array $options)</code></td>
+<td>
+                        Devuelve una representación <acronym class="acronym">LDIF</acronym> del nodo actual.
+                        <code class="varname">$options</code> se pasará al
+                        <code class="classname">Zend_Ldap_Ldif_Encoder</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getChangedData()</code></td>
+<td>
+                        Obtiene los datos modificados del nodo. El array contiene todos los
+                        atributos modificados. Este formato puede usarse en
+                        <code class="methodname">Zend_Ldap::add()</code> y
+                        <code class="methodname">Zend_Ldap::update()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getChanges()</code></td>
+<td>Devuelve todos los cambios realizados.</td>
+</tr>
+<tr>
+<td><code class="code">string toString()</code></td>
+<td>
+                        Devuelve el DN del nodo actual - delega en
+                        <code class="methodname">Zend_Ldap_Dn::getDnString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string __toString()</code></td>
+<td>
+                        Convierte a representación en cadena - delega en
+                        <code class="methodname">Zend_Ldap_Dn::toString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array toArray(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación en array del nodo actual. Si
+                        <code class="varname">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array. A diferencia de
+                        <code class="methodname">Zend_Ldap_Node::getAttributes()</code>, el array
+                        resultante contiene el DN con la clave <code class="code">'dn'</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string toJson(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación <acronym class="acronym">JSON</acronym> del nodo actual usando
+                        <code class="methodname">Zend_Ldap_Node::toArray()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getData(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve los atributos del nodo. El array contiene todos los
+                        atributos en su formato interno (sin conversión).
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean existsAttribute(string $name, boolean $emptyExists)</code>
+                    </td>
+<td>
+                        Comprueba si existe un atributo dado. Si
+                        <code class="varname">$emptyExists</code> es <code class="constant">FALSE</code>, los atributos
+                        vacíos (que contienen solo array()) se tratan como inexistentes, devolviendo
+                        <code class="constant">FALSE</code>. Si <code class="varname">$emptyExists</code> es
+                        <code class="constant">TRUE</code>, los atributos vacíos se tratan como existentes, devolviendo
+                        <code class="constant">TRUE</code>. En este caso el método devuelve
+                        <code class="constant">FALSE</code> solo si el nombre del atributo falta en la
+                        colección de claves.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean attributeHasValue(string $name, mixed|array $value)</code>
+                    </td>
+<td>
+                        Comprueba si el/los valor(es) dado(s) existen en el atributo. El
+                        método devuelve <code class="constant">TRUE</code> solo si todos los valores en
+                        <code class="varname">$value</code> están presentes en el atributo. La comparación se
+                        hace de forma estricta (respetando el tipo de dato).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer count()</code></td>
+<td>
+                        Devuelve el número de atributos en el nodo. Implementa Countable.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">mixed getAttribute(string $name, integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::getAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array getAttributes(boolean $includeSystemAttributes)</code>
+                    </td>
+<td>
+                        Obtiene todos los atributos del nodo. Si
+                        <code class="varname">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node setAttribute(string $name, mixed $value)</code>
+                    </td>
+<td>
+                        Establece un atributo <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::setAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node appendToAttribute(string $name, mixed $value)</code>
+                    </td>
+<td>
+                        Añade a un atributo <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de datos
+                        usando <code class="methodname">Zend_Ldap_Attribute::setAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array|integer getDateTimeAttribute(string $name,
+                            integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo de fecha/hora <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de
+                        datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::getDateTimeAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node setDateTimeAttribute(string $name,
+                            integer|array $value, boolean $utc)</code>
+                    </td>
+<td>
+                        Establece un atributo de fecha/hora <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de
+                        datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::setDateTimeAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node appendToDateTimeAttribute(string $name,
+                            integer|array $value, boolean $utc)</code>
+                    </td>
+<td>
+                        Añade a un atributo de fecha/hora <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de
+                        datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::setDateTimeAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node setPasswordAttribute(string $password,
+                            string $hashType, string $attribName)</code>
+                    </td>
+<td>
+                        Establece una contraseña <acronym class="acronym">LDAP</acronym> en <code class="varname">$attribName</code>
+                        (por defecto <code class="code">'userPassword'</code>) al valor <code class="varname">$password</code>
+                        con el tipo de hash <code class="varname">$hashType</code> (por defecto
+                        <code class="constant">Zend_Ldap_Attribute::PASSWORD_HASH_MD5</code>).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node deleteAttribute(string $name)</code></td>
+<td>Elimina un atributo <acronym class="acronym">LDAP</acronym>.</td>
+</tr>
+<tr>
+<td><code class="code">void removeDuplicatesFromAttribute(string$name)</code></td>
+<td>
+                        Elimina los valores duplicados de un atributo <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">void removeFromAttribute(string $attribName,
+                            mixed|array $value)</code>
+                    </td>
+<td>
+                        Elimina los valores dados de un atributo <acronym class="acronym">LDAP</acronym>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean exists(Zend_Ldap $ldap)</code></td>
+<td>
+                        Comprueba si el nodo actual existe en el servidor <acronym class="acronym">LDAP</acronym>
+                        dado (se usa el servidor actual si se pasa <code class="constant">NULL</code>).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node reload(Zend_Ldap $ldap)</code></td>
+<td>
+                        Recarga los atributos del nodo actual desde el servidor <acronym class="acronym">LDAP</acronym>
+                        dado (se usa el servidor actual si se pasa <code class="constant">NULL</code>).
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node_Collection
+                            searchSubtree(string|Zend_Ldap_Filter_Abstract $filter, integer
+                            $scope, string $sort)</code>
+                    </td>
+<td>
+                        Busca en el subárbol del nodo con el
+                        <code class="varname">$filter</code> dado y los parámetros de búsqueda dados. Vea
+                        <code class="methodname">Zend_Ldap::search()</code> para más detalles sobre los parámetros
+                        <code class="varname">$scope</code> y <code class="varname">$sort</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">integer countSubtree(string|Zend_Ldap_Filter_Abstract
+                            $filter, integer $scope)</code>
+                    </td>
+<td>
+                        Cuenta los elementos del subárbol del nodo que coinciden con el
+                        <code class="varname">$filter</code> dado y el ámbito de búsqueda dado. Vea
+                        <code class="methodname">Zend_Ldap::search()</code> para más detalles sobre el
+                        parámetro <code class="varname">$scope</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer countChildren()</code></td>
+<td>Cuenta los hijos del nodo.</td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node_Collection
+                            searchChildren(string|Zend_Ldap_Filter_Abstract $filter, string
+                            $sort)</code>
+                    </td>
+<td>
+                        Busca en los hijos del nodo que coincidan con el
+                        <code class="varname">$filter</code> dado. Vea <code class="methodname">Zend_Ldap::search()</code>
+                        para más detalles sobre el parámetro <code class="varname">$sort</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">boolean hasChildren()</code></td>
+<td>Devuelve si el nodo actual tiene hijos.</td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node_ChildrenIterator getChildren()</code></td>
+<td>Devuelve todos los hijos del nodo actual.</td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node getParent(Zend_Ldap $ldap)</code></td>
+<td>
+                        Devuelve el padre del nodo actual usando la conexión <acronym class="acronym">LDAP</acronym>
+                        <code class="varname">$ldap</code> (usa la conexión <acronym class="acronym">LDAP</acronym> actual
+                        si se omite).
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse"></a>41.2.2.6. Zend_Ldap_Node_RootDse</h4></div></div></div>
+<p>Los siguientes métodos están disponibles en todas las subclases específicas de proveedor.</p>
+<p>
+        <code class="classname">Zend_Ldap_Node_RootDse</code> incluye los accesores de propiedades mágicos
+        <code class="methodname">__get()</code> y <code class="methodname">__isset()</code> para acceder a los
+        atributos por su nombre. Delegan en
+        <code class="methodname">Zend_Ldap_Node_RootDse::getAttribute()</code> y
+        <code class="methodname">Zend_Ldap_Node_RootDse::existsAttribute()</code> respectivamente.
+        <code class="methodname">__set()</code> y <code class="methodname">__unset()</code> también están implementados,
+        pero lanzan una <code class="code">BadMethodCallException</code>, ya que no se permiten modificaciones en
+        los nodos RootDSE. Además, la clase implementa <code class="code">ArrayAccess</code> para el
+        acceso a los atributos al estilo de array. <code class="methodname">offsetSet()</code> y
+        <code class="methodname">offsetUnset()</code> también lanzan una <code class="code">BadMethodCallException</code> por
+        razones obvias.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.table"></a><p class="title"><b>Tabla 41.9. API de Zend_Ldap_Node_RootDse</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_RootDse API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getDn()</code></td>
+<td>
+                        Obtiene el DN del nodo actual como un <code class="classname">Zend_Ldap_Dn</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string getDnString(string $caseFold)</code></td>
+<td>Obtiene el DN del nodo actual como una cadena.</td>
+</tr>
+<tr>
+<td><code class="code">array getDnArray(string $caseFold)</code></td>
+<td>Obtiene el DN del nodo actual como un array.</td>
+</tr>
+<tr>
+<td><code class="code">string getRdnString(string $caseFold)</code></td>
+<td>Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como una cadena.</td>
+</tr>
+<tr>
+<td><code class="code">array getRdnArray(string $caseFold)</code></td>
+<td>Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como un array.</td>
+</tr>
+<tr>
+<td><code class="code">array getObjectClass()</code></td>
+<td>Devuelve el objectClass del nodo.</td>
+</tr>
+<tr>
+<td><code class="code">string toString()</code></td>
+<td>
+                        Devuelve el DN del nodo actual - delega en
+                        <code class="methodname">Zend_Ldap_Dn::getDnString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string __toString()</code></td>
+<td>
+                        Convierte a representación en cadena - delega en
+                        <code class="methodname">Zend_Ldap_Dn::toString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array toArray(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación en array del nodo actual. Si
+                        <code class="varname">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array. A diferencia de
+                        <code class="methodname">Zend_Ldap_Node_RootDse::getAttributes()</code>, el
+                        array resultante contiene el DN con la clave <code class="code">'dn'</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string toJson(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación <acronym class="acronym">JSON</acronym> del nodo actual usando
+                        <code class="methodname">Zend_Ldap_Node_RootDse::toArray()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getData(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve los atributos del nodo. El array contiene todos los
+                        atributos en su formato interno (sin conversión).
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean existsAttribute(string $name, boolean $emptyExists)</code>
+                    </td>
+<td>
+                        Comprueba si existe un atributo dado. Si
+                        <code class="varname">$emptyExists</code> es <code class="constant">FALSE</code>, los atributos
+                        vacíos (que contienen solo array()) se tratan como inexistentes, devolviendo
+                        <code class="constant">FALSE</code>. Si <code class="varname">$emptyExists</code> es
+                        <code class="constant">TRUE</code>, los atributos vacíos se tratan como existentes,
+                        devolviendo <code class="constant">TRUE</code>. En este caso el método devuelve
+                        <code class="constant">FALSE</code> solo si el nombre del atributo falta en la
+                        colección de claves.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean attributeHasValue(string $name, mixed|array $value)</code>
+                    </td>
+<td>
+                        Comprueba si el/los valor(es) dado(s) existen en el atributo. El
+                        método devuelve <code class="constant">TRUE</code> solo si todos los valores en
+                        <code class="varname">$value</code> están presentes en el atributo. La comparación se
+                        hace de forma estricta (respetando el tipo de dato).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer count()</code></td>
+<td>
+                        Devuelve el número de atributos en el nodo. Implementa Countable.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">mixed getAttribute(string $name, integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::getAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array getAttributes(boolean $includeSystemAttributes)</code>
+                    </td>
+<td>
+                        Obtiene todos los atributos del nodo. Si
+                        <code class="varname">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array|integer getDateTimeAttribute(string $name,
+                            integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo de fecha/hora <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de
+                        datos usando
+                        <code class="methodname">Zend_Ldap_Attribute::getDateTimeAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Node_RootDse reload(Zend_Ldap $ldap)</code></td>
+<td>
+                        Recarga los atributos del nodo actual desde el servidor <acronym class="acronym">LDAP</acronym>
+                        dado.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Node_RootDse create(Zend_Ldap
+                            $ldap)</code></em></span>
+                    </td>
+<td>Método de fábrica para crear el RootDSE.</td>
+</tr>
+<tr>
+<td><code class="code">array getNamingContexts()</code></td>
+<td>Obtiene los namingContexts.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getSubschemaSubentry()</code></td>
+<td>Obtiene el subschemaSubentry.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsVersion(string|int|array $versions)</code></td>
+<td>Determina si se admite la versión <acronym class="acronym">LDAP</acronym>.</td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean supportsSaslMechanism(string|array $mechlist)</code>
+                    </td>
+<td>Determina si se admite el mecanismo sasl.</td>
+</tr>
+<tr>
+<td><code class="code">integer getServerType()</code></td>
+<td>
+                        Obtiene el tipo de servidor. Devuelve
+
+                        <div class="variablelist"><dl class="variablelist">
+<dt><span class="term">
+                                    <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_GENERIC</code>
+                                </span></dt>
+<dd><p>para servidores <acronym class="acronym">LDAP</acronym> desconocidos</p></dd>
+<dt><span class="term">
+                                    <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_OPENLDAP</code>
+                                </span></dt>
+<dd><p>para servidores OpenLDAP</p></dd>
+<dt><span class="term">
+                                    <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_ACTIVEDIRECTORY</code>
+                                </span></dt>
+<dd><p>para servidores Microsoft ActiveDirectory</p></dd>
+<dt><span class="term">
+                                    <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_EDIRECTORY</code>
+                                </span></dt>
+<dd><p>Para servidores Novell eDirectory</p></dd>
+</dl></div>
+                    </td>
+</tr>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getSchemaDn()</code></td>
+<td>Devuelve el DN del esquema.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.openldap"></a>41.2.2.6.1. OpenLDAP</h5></div></div></div>
+<p>
+            Además, los métodos comunes anteriores se aplican a instancias de
+            <code class="classname">Zend_Ldap_Node_RootDse_OpenLdap</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Consulte
+                <a class="ulink" href="http://www.zytrax.com/books/ldap/ch3/#operational" target="_top">LDAP
+                Operational Attributes and Objects</a>para obtener información sobre los atributos
+                del RootDSE de OpenLDAP.
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.openldap.table"></a><p class="title"><b>Tabla 41.10. API de Zend_Ldap_Node_RootDse_OpenLdap</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_RootDse_OpenLdap API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">integer getServerType()</code></td>
+<td>
+                            Obtiene el tipo de servidor. Devuelve
+                            <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_OPENLDAP</code>
+                        </td>
+</tr>
+<tr>
+<td><code class="code">string|null getConfigContext()</code></td>
+<td>Obtiene el configContext.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getMonitorContext()</code></td>
+<td>Obtiene el monitorContext.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsControl(string|array $oids)</code></td>
+<td>Determina si se admite el control.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsExtension(string|array $oids)</code></td>
+<td>Determina si se admite la extensión.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsFeature(string|array $oids)</code></td>
+<td>Determina si se admite la característica.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.activedirectory"></a>41.2.2.6.2. ActiveDirectory</h5></div></div></div>
+<p>
+            Además, los métodos comunes anteriores se aplican a instancias de
+            <code class="classname">Zend_Ldap_Node_RootDse_ActiveDirectory</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Consulte
+                <a class="ulink" href="http://msdn.microsoft.com/en-us/library/ms684291(VS.85).aspx" target="_top">
+                RootDSE</a>para obtener información sobre los atributos del RootDSE de Microsoft
+                ActiveDirectory.
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.activedirectory.table"></a><p class="title"><b>Tabla 41.11. API de Zend_Ldap_Node_RootDse_ActiveDirectory</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_RootDse_ActiveDirectory API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">integer getServerType()</code></td>
+<td>
+                            Obtiene el tipo de servidor. Devuelve
+                            <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_ACTIVEDIRECTORY</code>
+                        </td>
+</tr>
+<tr>
+<td><code class="code">string|null getConfigurationNamingContext()</code></td>
+<td>Obtiene el configurationNamingContext.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getCurrentTime()</code></td>
+<td>Obtiene el currentTime.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDefaultNamingContext()</code></td>
+<td>Obtiene el defaultNamingContext.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDnsHostName()</code></td>
+<td>Obtiene el dnsHostName.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDomainControllerFunctionality()</code></td>
+<td>Obtiene el domainControllerFunctionality.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDomainFunctionality()</code></td>
+<td>Obtiene el domainFunctionality.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDsServiceName()</code></td>
+<td>Obtiene el dsServiceName.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getForestFunctionality()</code></td>
+<td>Obtiene el forestFunctionality.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getHighestCommittedUSN()</code></td>
+<td>Obtiene el highestCommittedUSN.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getIsGlobalCatalogReady()</code></td>
+<td>Obtiene el isGlobalCatalogReady.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getIsSynchronized()</code></td>
+<td>Obtiene el isSynchronized.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getLdapServiceName()</code></td>
+<td>Obtiene el ldapServiceName.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getRootDomainNamingContext()</code></td>
+<td>Obtiene el rootDomainNamingContext.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getSchemaNamingContext()</code></td>
+<td>Obtiene el schemaNamingContext.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getServerName()</code></td>
+<td>Obtiene el serverName.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsCapability(string|array $oids)</code></td>
+<td>Determina si se admite la capacidad.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsControl(string|array $oids)</code></td>
+<td>Determina si se admite el control.</td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsPolicy(string|array $policies)</code></td>
+<td>Determina si se admite la versión.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.edirectory"></a>41.2.2.6.3. eDirectory</h5></div></div></div>
+<p>
+            Además, los métodos comunes anteriores se aplican a instancias de
+            <code class="code">Zend_Ldap_Node_RootDse_eDirectory</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Consulte <a class="ulink" href="http://www.novell.com/documentation/edir88/edir88/index.html?page=/documentation/edir88/edir88/data/ah59jqq.html" target="_top">Getting
+                    Information about the <acronym class="acronym">LDAP</acronym> Server</a>para obtener información sobre
+                los atributos del RootDSE de Novell eDirectory.
+            </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-rootdse.edirectory.table"></a><p class="title"><b>Tabla 41.12. API de Zend_Ldap_Node_RootDse_eDirectory</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_RootDse_eDirectory API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">integer getServerType()</code></td>
+<td>
+                            Obtiene el tipo de servidor. Devuelve
+                            <code class="constant">Zend_Ldap_Node_RootDse::SERVER_TYPE_EDIRECTORY</code>
+                        </td>
+</tr>
+<tr>
+<td><code class="code">boolean supportsExtension(string|array $oids)</code></td>
+<td>Determina si se admite la extensión.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getVendorName()</code></td>
+<td>Obtiene el vendorName.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getVendorVersion()</code></td>
+<td>Obtiene el vendorVersion.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getDsaName()</code></td>
+<td>Obtiene el dsaName.</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsErrors()</code></td>
+<td>Obtiene la estadística de servidor "errors".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsSecurityErrors()</code></td>
+<td>Obtiene la estadística de servidor "securityErrors".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsChainings()</code></td>
+<td>Obtiene la estadística de servidor "chainings".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsReferralsReturned()</code></td>
+<td>Obtiene la estadística de servidor "referralsReturned".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsExtendedOps()</code></td>
+<td>Obtiene la estadística de servidor "extendedOps".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsAbandonOps()</code></td>
+<td>Obtiene la estadística de servidor "abandonOps".</td>
+</tr>
+<tr>
+<td><code class="code">string|null getStatisticsWholeSubtreeSearchOps()</code></td>
+<td>Obtiene la estadística de servidor "wholeSubtreeSearchOps".</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema"></a>41.2.2.7. Zend_Ldap_Node_Schema</h4></div></div></div>
+<p>Los siguientes métodos están disponibles en todas las subclases específicas de proveedor.</p>
+<p>
+        <code class="code">Zend_Ldap_Node_Schema</code> incluye los accesores de propiedades mágicos
+        <code class="code">__get()</code> y <code class="code">__isset()</code> para acceder a los atributos por su
+        nombre. Delegan en <code class="code">Zend_Ldap_Node_Schema::getAttribute()</code> y
+        <code class="code">Zend_Ldap_Node_Schema::existsAttribute()</code> respectivamente.
+        <code class="code">__set()</code> y <code class="code">__unset()</code> también están implementados, pero lanzan
+        una <code class="code">BadMethodCallException</code>, ya que no se permiten modificaciones en los nodos
+        RootDSE. Además, la clase implementa <code class="code">ArrayAccess</code> para el
+        acceso a los atributos al estilo de array. <code class="code">offsetSet()</code> y
+        <code class="code">offsetUnset()</code> también lanzan una <code class="code">BadMethodCallException</code> por
+        razones obvias.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.table"></a><p class="title"><b>Tabla 41.13. API de Zend_Ldap_Node_Schema</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">Zend_Ldap_Dn getDn()</code></td>
+<td>
+                        Obtiene el DN del nodo actual como un <code class="classname">Zend_Ldap_Dn</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string getDnString(string $caseFold)</code></td>
+<td>Obtiene el DN del nodo actual como una cadena.</td>
+</tr>
+<tr>
+<td><code class="code">array getDnArray(string $caseFold)</code></td>
+<td>Obtiene el DN del nodo actual como un array.</td>
+</tr>
+<tr>
+<td><code class="code">string getRdnString(string $caseFold)</code></td>
+<td>Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como una cadena.</td>
+</tr>
+<tr>
+<td><code class="code">array getRdnArray(string $caseFold)</code></td>
+<td>Obtiene el <acronym class="acronym">RDN</acronym> del nodo actual como un array.</td>
+</tr>
+<tr>
+<td><code class="code">array getObjectClass()</code></td>
+<td>Devuelve el objectClass del nodo.</td>
+</tr>
+<tr>
+<td><code class="code">string toString()</code></td>
+<td>
+                        Devuelve el DN del nodo actual - delega en
+                        <code class="code">Zend_Ldap_Dn::getDnString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string __toString()</code></td>
+<td>
+                        Convierte a representación en cadena - delega en
+                        <code class="code">Zend_Ldap_Dn::toString()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array toArray(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación en array del nodo actual. Si
+                        <code class="code">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array. A diferencia de
+                        <code class="code">Zend_Ldap_Node_Schema::getAttributes()</code>, el
+                        array resultante contiene el DN con la clave <code class="code">'dn'</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">string toJson(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve una representación <acronym class="acronym">JSON</acronym> del nodo actual usando
+                        <code class="code">Zend_Ldap_Node_Schema::toArray()</code>.
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getData(boolean $includeSystemAttributes)</code></td>
+<td>
+                        Devuelve los atributos del nodo. El array contiene todos los
+                        atributos en su formato interno (sin conversión).
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean existsAttribute(string $name, boolean $emptyExists)</code>
+                    </td>
+<td>
+                        Comprueba si existe un atributo dado. Si
+                        <code class="code">$emptyExists</code> es <code class="constant">FALSE</code>, los atributos
+                        vacíos (que contienen solo array()) se tratan como inexistentes, devolviendo
+                        <code class="constant">FALSE</code>. Si <code class="code">$emptyExists</code> es
+                        <code class="constant">TRUE</code>, los atributos vacíos se tratan como existentes,
+                        devolviendo <code class="constant">TRUE</code>. En este caso el método devuelve
+                        <code class="constant">FALSE</code> solo si el nombre del atributo falta en la
+                        colección de claves.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">boolean attributeHasValue(string $name, mixed|array $value)</code>
+                    </td>
+<td>
+                        Comprueba si el/los valor(es) dado(s) existen en el atributo. El
+                        método devuelve <code class="constant">TRUE</code> solo si todos los valores en
+                        <code class="code">$value</code> están presentes en el atributo. La comparación se
+                        hace de forma estricta (respetando el tipo de dato).
+                    </td>
+</tr>
+<tr>
+<td><code class="code">integer count()</code></td>
+<td>
+                        Devuelve el número de atributos en el nodo. Implementa Countable.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">mixed getAttribute(string $name, integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de datos usando
+                        <code class="code">Zend_Ldap_Attribute::getAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array getAttributes(boolean $includeSystemAttributes)</code>
+                    </td>
+<td>
+                        Obtiene todos los atributos del nodo. Si
+                        <code class="code">$includeSystemAttributes</code> es <code class="constant">FALSE</code>
+                        (por defecto <code class="constant">TRUE</code>), los atributos específicos del sistema se
+                        eliminan del array.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">array|integer getDateTimeAttribute(string $name,
+                        integer|null $index)</code>
+                    </td>
+<td>
+                        Obtiene un atributo de fecha/hora <acronym class="acronym">LDAP</acronym>. Se aplica la conversión de
+                        datos usando <code class="code">Zend_Ldap_Attribute::getDateTimeAttribute()</code>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="code">Zend_Ldap_Node_Schema reload(Zend_Ldap $ldap)</code>
+                    </td>
+<td>
+                        Recarga los atributos del nodo actual desde el servidor <acronym class="acronym">LDAP</acronym>
+                        dado.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">Zend_Ldap_Node_Schema create(Zend_Ldap
+                        $ldap)</code> </em></span>
+                    </td>
+<td>Método de fábrica para crear el nodo de Schema.</td>
+</tr>
+<tr>
+<td><code class="code">array getAttributeTypes()</code></td>
+<td>Obtiene los tipos de atributo como un array de <code class="code"></code>.</td>
+</tr>
+<tr>
+<td><code class="code">array getObjectClasses()</code></td>
+<td>
+                        Obtiene las clases de objeto como un array de
+                        <code class="code">Zend_Ldap_Node_Schema_ObjectClass_Interface</code>.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.attributetype-interface.table"></a><p class="title"><b>Tabla 41.14. API de Zend_Ldap_Node_Schema_AttributeType_Interface</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_AttributeType_Interface API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">string getName()</code></td>
+<td>Obtiene el nombre del atributo.</td>
+</tr>
+<tr>
+<td><code class="code">string getOid()</code></td>
+<td>Obtiene el <acronym class="acronym">OID</acronym> del atributo.</td>
+</tr>
+<tr>
+<td><code class="code">string getSyntax()</code></td>
+<td>Obtiene la sintaxis del atributo.</td>
+</tr>
+<tr>
+<td><code class="code">int|null getMaxLength()</code></td>
+<td>Obtiene la longitud máxima del atributo.</td>
+</tr>
+<tr>
+<td><code class="code">boolean isSingleValued()</code></td>
+<td>Devuelve si el atributo tiene un único valor.</td>
+</tr>
+<tr>
+<td><code class="code">string getDescription()</code></td>
+<td>Obtiene la descripción del atributo</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.objectclass-interface.table"></a><p class="title"><b>Tabla 41.15. API de Zend_Ldap_Node_Schema_ObjectClass_Interface</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_ObjectClass_Interface API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">string getName()</code></td>
+<td>Devuelve el nombre del objectClass.</td>
+</tr>
+<tr>
+<td><code class="code">string getOid()</code></td>
+<td>Devuelve el <acronym class="acronym">OID</acronym> del objectClass.</td>
+</tr>
+<tr>
+<td><code class="code">array getMustContain()</code></td>
+<td>Devuelve los atributos que este objectClass debe contener.</td>
+</tr>
+<tr>
+<td><code class="code">array getMayContain()</code></td>
+<td>Devuelve los atributos que este objectClass puede contener.</td>
+</tr>
+<tr>
+<td><code class="code">string getDescription()</code></td>
+<td>Devuelve la descripción del atributo</td>
+</tr>
+<tr>
+<td><code class="code">integer getType()</code></td>
+<td>
+                        Devuelve el tipo de objectClass. El método devuelve uno de los siguientes
+                        valores:
+
+                        <div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="code">Zend_Ldap_Node_Schema::OBJECTCLASS_TYPE_UNKNOWN</code></span></dt>
+<dd><p>para tipos de clase desconocidos</p></dd>
+<dt><span class="term"><code class="code">Zend_Ldap_Node_Schema::OBJECTCLASS_TYPE_STRUCTURAL</code></span></dt>
+<dd><p>para clases estructurales</p></dd>
+<dt><span class="term"><code class="code">Zend_Ldap_Node_Schema::OBJECTCLASS_TYPE_ABSTRACT</code></span></dt>
+<dd><p>para clases abstractas</p></dd>
+<dt><span class="term"><code class="code">Zend_Ldap_Node_Schema::OBJECTCLASS_TYPE_AUXILIARY</code></span></dt>
+<dd><p>para clases auxiliares</p></dd>
+</dl></div>
+                    </td>
+</tr>
+<tr>
+<td><code class="code">array getParentClasses()</code></td>
+<td>
+                        Devuelve las clases de objeto padre de esta clase. Esto
+                        incluye clases de objeto estructurales, abstractas y auxiliares.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+        Las clases que representan tipos de atributo y clases de objeto extienden
+        <code class="code">Zend_Ldap_Node_Schema_Item</code>, que proporciona algunos métodos básicos para acceder a
+        atributos arbitrarios en el nodo <acronym class="acronym">LDAP</acronym> subyacente.
+        <code class="code">Zend_Ldap_Node_Schema_Item</code> incluye los accesores de propiedades mágicos
+        <code class="code">__get()</code> y <code class="code">__isset()</code> para acceder a los atributos por su
+        nombre. Además, la clase implementa <code class="code">ArrayAccess</code> para el
+        acceso a los atributos al estilo de array. <code class="code">offsetSet()</code> y
+        <code class="code">offsetUnset()</code> lanzan una <code class="code">BadMethodCallException</code>, ya que
+        no se permiten modificaciones en los nodos de información de esquema.
+    </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.schema-item.table"></a><p class="title"><b>Tabla 41.16. API de Zend_Ldap_Node_Schema_Item</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_Item API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">array getData()</code></td>
+<td>Obtiene todos los datos subyacentes del nodo de información de esquema.</td>
+</tr>
+<tr>
+<td><code class="code">integer count()</code></td>
+<td>
+                        Devuelve el número de atributos en este nodo de información de
+                        esquema. Implementa Countable.
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.openldap"></a>41.2.2.7.1. OpenLDAP</h5></div></div></div>
+<p>
+            Además, los métodos comunes anteriores se aplican a instancias de
+            <code class="code">Zend_Ldap_Node_Schema_OpenLDAP</code>.
+        </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.openldap.table"></a><p class="title"><b>Tabla 41.17. API de Zend_Ldap_Node_Schema_OpenLDAP</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_OpenLDAP API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="code">array getLdapSyntaxes()</code></td>
+<td>Obtiene las sintaxis <acronym class="acronym">LDAP</acronym>.</td>
+</tr>
+<tr>
+<td><code class="code">array getMatchingRules()</code></td>
+<td>Obtiene las reglas de coincidencia.</td>
+</tr>
+<tr>
+<td><code class="code">array getMatchingRuleUse()</code></td>
+<td>Obtiene el uso de reglas de coincidencia.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.openldap.attributetype-interface.table"></a><p class="title"><b>Tabla 41.18. API de Zend_Ldap_Node_Schema_AttributeType_OpenLDAP</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_AttributeType_OpenLDAP API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td>
+                            <code class="code">Zend_Ldap_Node_Schema_AttributeType_OpenLdap|null
+                                getParent()</code>
+                        </td>
+<td>
+                            Devuelve el tipo de atributo padre en el árbol de herencia, si existe uno.
+                        </td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.openldap.objectclass-interface.table"></a><p class="title"><b>Tabla 41.19. API de Zend_Ldap_Node_Schema_ObjectClass_OpenLDAP</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_ObjectClass_OpenLDAP API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody><tr>
+<td><code class="code">array getParents()</code></td>
+<td>
+                            Devuelve las clases de objeto padre en el árbol de herencia,
+                            si existe uno. El array devuelto es un array de
+                            <code class="code">Zend_Ldap_Node_Schema_ObjectClass_OpenLdap</code>.
+                        </td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.activedirectory"></a>41.2.2.7.2. ActiveDirectory</h5></div></div></div>
+<div class="note"><table border="0" summary="Note: Schema browsing on ActiveDirectory servers">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Exploración de esquema en servidores ActiveDirectory</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Debido a las restricciones en los servidores Microsoft ActiveDirectory
+                sobre el número de entradas devueltas por las rutinas de búsqueda genéricas y debido a la
+                estructura del repositorio de esquema de ActiveDirectory, la exploración del esquema
+                actualmente <span class="emphasis"><em>no</em></span> está disponible para los servidores Microsoft ActiveDirectory.
+            </p></td></tr>
+</table></div>
+<p>
+            <code class="code">Zend_Ldap_Node_Schema_ActiveDirectory</code> no proporciona ningún
+            método adicional.
+        </p>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.activedirectory.attributetype-interface.table"></a><p class="title"><b>Tabla 41.20. API de Zend_Ldap_Node_Schema_AttributeType_ActiveDirectory</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_AttributeType_ActiveDirectory API" border="1">
+<colgroup><col></colgroup>
+<tbody><tr><td>
+                            <code class="code">Zend_Ldap_Node_Schema_AttributeType_ActiveDirectory</code>
+                            no proporciona ningún método adicional.
+                        </td></tr></tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-node-schema.activedirectory.objectclass-interface.table"></a><p class="title"><b>Tabla 41.21. API de Zend_Ldap_Node_Schema_ObjectClass_ActiveDirectory</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldap_Node_Schema_ObjectClass_ActiveDirectory API" border="1">
+<colgroup><col></colgroup>
+<tbody><tr><td>
+                            <code class="code">Zend_Ldap_Node_Schema_ObjectClass_ActiveDirectory</code>
+                            no proporciona ningún método adicional.
+                        </td></tr></tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.api.reference.zend-ldap-ldif-encoder"></a>41.2.2.8. Zend_Ldif_Encoder</h4></div></div></div>
+<div class="table">
+<a name="zend.ldap.api.reference.zend-ldap-ldif-encoder.table"></a><p class="title"><b>Tabla 41.22. API de Zend_Ldif_Encoder</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Ldif_Encoder API" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">array decode(string $string)</code></em></span>
+                    </td>
+<td>
+                        Decodifica la cadena <code class="varname">$string</code> en un array de
+                        elementos <acronym class="acronym">LDIF</acronym>.
+                    </td>
+</tr>
+<tr>
+<td>
+                        <span class="emphasis"><em><code class="code">string encode(scalar|array|Zend_Ldap_Node
+                        $value, array $options)</code> </em></span>
+                    </td>
+<td>
+                        Codifica <code class="varname">$value</code> en una representación
+                        <acronym class="acronym">LDIF</acronym>. <code class="varname">$options</code> es un array que puede contener las
+                        siguientes claves:
+
+                        <div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="code">'sort'</code></span></dt>
+<dd><p>
+                                        Ordena los atributos dados con <code class="code">dn</code>
+                                        seguido de <code class="code">objectClass</code> y seguido de todos los demás
+                                        atributos ordenados alfabéticamente. <code class="constant">TRUE</code>
+                                        por defecto.
+                                    </p></dd>
+<dt><span class="term"><code class="code">'version'</code></span></dt>
+<dd><p>
+                                        La versión del formato <acronym class="acronym">LDIF</acronym>. <code class="code">1</code>
+                                        por defecto.
+                                    </p></dd>
+<dt><span class="term"><code class="code">'wrap'</code></span></dt>
+<dd><p>
+                                        La longitud de línea. <code class="code">78</code> por defecto para
+                                        ajustarse a la especificación <acronym class="acronym">LDIF</acronym>.
+                                    </p></dd>
+</dl></div>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.ldap.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.ldap.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.ldap.usage.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 41. Zend_Ldap </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 41.3. Escenarios de uso</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

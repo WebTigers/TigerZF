@@ -1,0 +1,140 @@
+<?php $title = '64.7. Zend_Service_Amazon_Ec2: Instancias reservadas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.7. Zend_Service_Amazon_Ec2: Instancias reservadas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.windows.instance.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.cloudwatch.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.reserved.instance"></a>64.7. Zend_Service_Amazon_Ec2: Instancias reservadas</h2></div></div></div>
+<p>
+        Con las instancias reservadas de Amazon <acronym class="acronym">EC2</acronym>, puede realizar un
+        pago único bajo por cada instancia para reservarla y recibir un descuento
+        significativo en la tarifa de uso por hora de esa instancia.
+    </p>
+<p>
+        Las instancias reservadas de Amazon <acronym class="acronym">EC2</acronym> se basan en el tipo de
+        instancia y la ubicación (región y zona de disponibilidad) durante un
+        periodo de tiempo especificado (por ejemplo, 1 año o 3 años) y solo están
+        disponibles para instancias Linux o UNIX.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.reserved.instance.howitworks"></a>64.7.1. Cómo se aplican las instancias reservadas</h3></div></div></div>
+<p>
+            Las instancias reservadas se aplican a las instancias que cumplen con los
+            criterios de tipo/ubicación durante el periodo especificado. En este
+            ejemplo, un usuario está ejecutando las siguientes instancias:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>(4) instancias m1.small en la zona de disponibilidad us-east-1a</p></li>
+<li class="listitem"><p>(4) instancias c1.medium en la zona de disponibilidad us-east-1b</p></li>
+<li class="listitem"><p>(2) instancias c1.xlarge en la zona de disponibilidad us-east-1b</p></li>
+</ul></div>
+<p>
+            El usuario después compra las siguientes instancias reservadas.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>(2) instancias m1.small en la zona de disponibilidad us-east-1a</p></li>
+<li class="listitem"><p>(2) instancias c1.medium en la zona de disponibilidad us-east-1a</p></li>
+<li class="listitem"><p>(2) instancias m1.xlarge en la zona de disponibilidad us-east-1a</p></li>
+</ul></div>
+<p>
+            Amazon <acronym class="acronym">EC2</acronym> aplica las dos instancias reservadas m1.small a
+            dos de las instancias en la zona de disponibilidad us-east-1a. Amazon
+            <acronym class="acronym">EC2</acronym> no aplica las dos instancias reservadas c1.medium porque
+            las instancias c1.medium están en una zona de disponibilidad diferente, y no
+            aplica las instancias reservadas m1.xlarge porque no hay instancias
+            m1.xlarge en ejecución.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.reserved.instance.operations"></a>64.7.2. Uso de instancias reservadas</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.reserved.instance.operations.describe"></a><p class="title"><b>Ejemplo 64.25. Describir las instancias reservadas que ha comprado</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">describeInstances()</code> devolverá información sobre una
+                instancia reservada o instancias que ha comprado.
+            </p>
+<p>
+                <code class="methodname">describeInstances()</code> devuelve un array multidimensional
+                que contiene reservedInstancesId, instanceType, availabilityZone, duration,
+                fixedPrice, usagePrice, productDescription, instanceCount y state.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Reserved('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;describeInstances('instanceId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.reserved.instance.offerings.describe"></a><p class="title"><b>Ejemplo 64.26. Describir las ofertas de instancias reservadas disponibles actualmente</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">describeOfferings()</code> describe las ofertas de instancias
+                reservadas disponibles para compra. Con las instancias reservadas de Amazon
+                <acronym class="acronym">EC2</acronym>, usted compra el derecho de lanzar instancias de
+                Amazon <acronym class="acronym">EC2</acronym> durante un periodo de tiempo (sin obtener
+                errores de capacidad insuficiente) y paga una tarifa de uso más baja por el
+                tiempo real utilizado.
+            </p>
+<p>
+                <code class="methodname">describeOfferings()</code> devuelve un array multidimensional
+                que contiene reservedInstancesId, instanceType, availabilityZone, duration,
+                fixedPrice, usagePrice y productDescription.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Reserved('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;describeOfferings();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.reserved.instance.offerings.purchase"></a><p class="title"><b>Ejemplo 64.27. Desactivar la monitorización de CloudWatch en una o varias instancias</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">purchaseOffering()</code> compra una instancia reservada para
+                usarla con su cuenta. Con las instancias reservadas de Amazon
+                <acronym class="acronym">EC2</acronym>, usted compra el derecho de lanzar instancias de
+                Amazon <acronym class="acronym">EC2</acronym> durante un periodo de tiempo (sin obtener
+                errores de capacidad insuficiente) y paga una tarifa de uso más baja por el
+                tiempo real utilizado.
+            </p>
+<p>
+                <code class="methodname">purchaseOffering()</code> devuelve el reservedInstanceId.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Reserved('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;purchaseOffering('offeringId', 'instanceCount');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.windows.instance.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.cloudwatch.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.6. Zend_Service_Amazon_Ec2: Instancias Windows </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.8. Zend_Service_Amazon_Ec2: Monitorización con CloudWatch</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,82 @@
+<?php $title = '78.5. Zend_View_Abstract'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">78.5. Zend_View_Abstract</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.view.helpers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 78. Zend_View</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.wildfire.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.view.abstract"></a>78.5. Zend_View_Abstract</h2></div></div></div>
+<p>
+        <code class="classname">Zend_View_Abstract</code> es la clase base sobre la que se construye
+        <code class="classname">Zend_View</code>; <code class="classname">Zend_View</code> en sí simplemente
+        la extiende y declara una implementación concreta del método
+        <code class="methodname">_run()</code> (que es invocado por
+        <code class="methodname">render()</code>).
+    </p>
+<p>
+        Muchos desarrolladores descubren que quieren extender
+        <code class="classname">Zend_View_Abstract</code> para añadir funcionalidad personalizada, e
+        inevitablemente se encuentran con problemas debido a su diseño, que incluye una serie de
+        miembros privados. Este documento pretende explicar la razón detrás del
+        diseño.
+    </p>
+<p>
+        <code class="classname">Zend_View</code> es una especie de motor anti-plantillas en el sentido de que
+        usa <acronym class="acronym">PHP</acronym> de forma nativa para su plantillado. Como resultado, todo
+        <acronym class="acronym">PHP</acronym> está disponible, y los scripts de vista heredan el ámbito de su
+        objeto invocador.
+    </p>
+<p>
+        Es este último punto el que resulta relevante para las decisiones de diseño.
+        Internamente, <code class="methodname">Zend_View::_run()</code> hace lo siguiente:
+    </p>
+<pre class="programlisting">
+protected function _run()
+{
+    include func_get_arg(0);
+}
+</pre>
+<p>
+        Como tal, los scripts de vista tienen acceso al objeto actual
+        (<code class="varname">$this</code>), <span class="emphasis"><em>y a cualquier método o miembro de ese
+            objeto</em></span>. Dado que muchas operaciones dependen de miembros con
+        visibilidad limitada, esto plantea un problema: los scripts de vista podrían
+        potencialmente hacer llamadas a dichos métodos o modificar directamente propiedades
+        críticas. Imagine un script sobrescribiendo <code class="varname">$_path</code> o
+        <code class="varname">$_file</code> por accidente -- ¡cualquier llamada posterior a
+        <code class="methodname">render()</code> o a los helpers de vista se rompería!
+    </p>
+<p>
+        Afortunadamente, <acronym class="acronym">PHP</acronym> 5 tiene una respuesta a esto con sus
+        declaraciones de visibilidad: los miembros privados no son accesibles por objetos que extienden una
+        clase dada. Esto llevó al diseño actual: dado que
+        <code class="classname">Zend_View</code> <span class="emphasis"><em>extiende</em></span>
+        <code class="classname">Zend_View_Abstract</code>, los scripts de vista quedan así limitados solo a
+        los métodos y miembros protegidos o públicos de
+        <code class="classname">Zend_View_Abstract</code> -- limitando efectivamente las acciones que puede
+        realizar, y permitiéndonos proteger áreas críticas del abuso por parte de los scripts de
+        vista.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.view.helpers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.view.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.wildfire.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">78.4. Helpers de vista </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 79. Zend_Wildfire</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

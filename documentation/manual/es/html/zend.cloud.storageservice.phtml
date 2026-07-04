@@ -1,0 +1,625 @@
+<?php $title = '19.3. Introducción a StorageService'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">19.3. Introducción a StorageService</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cloud.queueservice.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 19. SimpleCloud API: Zend_Cloud</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cloud.infrastructure.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cloud.storageservice"></a>19.3. Introducción a StorageService</h2></div></div></div>
+<p>
+        El servicio de almacenamiento en la Simple Cloud API implementa una interfaz básica para el
+        almacenamiento de archivos en la nube. Los archivos no tienen estructura interna en lo que respecta
+        al servicio, y se identifican mediante una clave de tipo cadena análoga a una ruta de archivo en un
+        sistema de archivos.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.adapters"></a>19.3.1. Adaptadores de StorageService</h3></div></div></div>
+<p>
+            La interfaz <code class="classname">Zend_Cloud_StorageService_Adapter</code> define los métodos
+            que cada adaptador concreto de servicio de almacenamiento debe implementar. Los siguientes
+            adaptadores se distribuyen con la Simple Cloud API:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <a class="ulink" href="http://aws.amazon.com/s3/" target="_top"><code class="classname">Zend_Cloud_StorageService_Adapter_S3</code></a>
+                </p></li>
+<li class="listitem"><p>
+                    <a class="ulink" href="http://msdn.microsoft.com/en-us/library/dd179423.aspx" target="_top"><code class="classname">Zend_Cloud_StorageService_Adapter_WindowsAzure</code></a>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Cloud_StorageService_Adapter_FileSystem</code>
+                </p></li>
+</ul></div>
+<p>
+            Para crear el objeto de servicio, llame al método estático
+            <code class="methodname">Zend_Cloud_StorageService_Factory::getAdapter()</code>, que acepta
+            un array o un objeto <code class="classname">Zend_Config</code>. La clave llamada
+            <code class="varname">storage_adapter</code> debe especificar la clase del adaptador concreto.
+            También pueden pasarse en este parámetro de configuración claves específicas del adaptador.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.factory.example"></a><p class="title"><b>Ejemplo 19.27. Uso de StorageService Factory</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage = Zend_Cloud_StorageService_Factory::getAdapter(array(
+    Zend_Cloud_StorageService_Factory::STORAGE_ADAPTER_KEY =&gt; 'Zend_Cloud_StorageService_Adapter_S3',
+    Zend_Cloud_StorageService_Adapter_S3::AWS_ACCESS_KEY   =&gt; $amazonKey,
+    Zend_Cloud_StorageService_Adapter_S3::AWS_SECRET_KEY   =&gt; $amazonSecret,
+));
+</pre></div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.cloud.storageservice.adapters.options"></a>19.3.1.1. Opciones del adaptador de StorageService</h4></div></div></div>
+<div class="table">
+<a name="zend.cloud.storageservice.options.s3"></a><p class="title"><b>Tabla 19.7. Opciones de Zend_Cloud_StorageService_Adapter_S3</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_StorageService_Adapter_S3 options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>aws_accesskey</td>
+<td>Clave de acceso de Amazon AWS</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>aws_secretkey</td>
+<td>Clave secreta de Amazon AWS</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>bucket_name</td>
+<td>El nombre del bucket de S3 para este elemento</td>
+<td>
+                                Se usa en el constructor para establecer el bucket por defecto de la
+                                instancia del servicio. Esta opción también puede especificarse en
+                                cualquiera de las operaciones de acceso a elementos.
+                            </td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>bucket_as_domain</td>
+<td>
+                                Indica que el nombre del bucket forma parte del nombre de dominio
+                            </td>
+<td>
+                                Se usa en el constructor para establecer el comportamiento por defecto
+                                de la instancia del servicio. Esta opción también puede especificarse
+                                en cualquiera de las operaciones de acceso a elementos.
+                            </td>
+<td>No</td>
+<td>False</td>
+</tr>
+<tr>
+<td>metadata</td>
+<td>Array de metadatos a asociar con el elemento</td>
+<td><code class="methodname">storeItem()</code></td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>fetch_stream</td>
+<td>
+                                Indica si la respuesta es un stream, y no una cadena
+                                <div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                                        Consulte la documentación de <code class="classname">Zend_Service_Amazon_S3</code>
+                                        para más información sobre el manejo de respuestas en streaming)
+                                    </p></td></tr>
+</table></div>
+                            </td>
+<td><code class="methodname">fetchItem()</code></td>
+<td>No</td>
+<td>False</td>
+</tr>
+<tr>
+<td>http_adapter</td>
+<td>Adaptador HTTP a usar en todas las operaciones de acceso</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="classname">Zend_Http_Client_Adapter_Socket</code></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.cloud.storageservice.options.azure"></a><p class="title"><b>Tabla 19.8. Opciones de Zend_Cloud_StorageService_Adapter_WindowsAzure</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_StorageService_Adapter_WindowsAzure options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>storage_accountname</td>
+<td>Nombre de la cuenta de Windows Azure</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_accountkey</td>
+<td>Clave de la cuenta de Windows Azure</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_container</td>
+<td>Contenedor a usar para este objeto de almacenamiento</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_host</td>
+<td>Host de acceso de Windows Azure</td>
+<td>Constructor</td>
+<td>Sí</td>
+<td><code class="varname">blob.core.windows.net</code></td>
+</tr>
+<tr>
+<td>storage_proxy_host</td>
+<td>Nombre de host del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>storage_proxy_port</td>
+<td>Puerto del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>8080</td>
+</tr>
+<tr>
+<td>storage_proxy_credentials</td>
+<td>Credenciales del proxy</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Ninguno</td>
+</tr>
+<tr>
+<td>http_adapter</td>
+<td>Adaptador HTTP a usar en todas las operaciones de acceso</td>
+<td>Constructor</td>
+<td>No</td>
+<td><code class="classname">Zend_Http_Client_Adapter_Socket</code></td>
+</tr>
+<tr>
+<td>returntype</td>
+<td>
+                                Cómo devolver los resultados.
+                                <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>Para <code class="methodname">fetchItem()</code>:</p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="constant">RETURN_STRING</code></span></dt>
+<dd><p>
+                                                        Devuelve los datos como cadenas.
+                                                </p></dd>
+<dt><span class="term"><code class="constant">RETURN_PATH</code></span></dt>
+<dd><p>
+                                                        guarda los datos en disco en un archivo temporal, devuelve
+                                                        el nombre de la ruta
+                                                    </p></dd>
+<dt><span class="term"><code class="constant">RETURN_STREAM</code></span></dt>
+<dd><p>Por defecto: devuelve los datos como stream</p></dd>
+</dl></div>
+</li>
+<li class="listitem">
+<p>Para <code class="methodname">listItems()</code>:</p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="constant">RETURN_NAMES</code></span></dt>
+<dd><p>devuelve la lista de nombres de elementos (por defecto)</p></dd>
+<dt><span class="term"><code class="constant">RETURN_LIST</code></span></dt>
+<dd><p>devuelve la lista de objetos WindowsAzure</p></dd>
+</dl></div>
+</li>
+</ul></div>
+                            </td>
+<td>
+                                <code class="methodname">fetchItem()</code>,
+                                <code class="methodname">listItems()</code>
+                            </td>
+<td>No</td>
+<td>
+                                <code class="constant">RETURN_STREAM</code> para
+                                <code class="methodname">fetchItem()</code>;
+                                <code class="constant">RETURN_NAMES</code> para
+                                <code class="methodname">listItems()</code>
+                            </td>
+</tr>
+<tr>
+<td>return_path</td>
+<td>
+                                Ruta de retorno. Esta es la URL que puede usarse para acceder al elemento
+                                una vez que se ha subido.
+                            </td>
+<td><code class="methodname">fetchItem()</code></td>
+<td>No</td>
+<td>Directorio tmp del sistema</td>
+</tr>
+<tr>
+<td>return_openmode</td>
+<td>
+                                Modo de <code class="methodname">fopen()</code> usado para abrir el archivo
+                                al guardar los datos
+                            </td>
+<td><code class="methodname">fetchItem()</code></td>
+<td>No</td>
+<td>'r'</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="table">
+<a name="zend.cloud.storageservice.options.filesystem"></a><p class="title"><b>Tabla 19.9. Opciones de Zend_Cloud_StorageService_Adapter_Filesystem</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Cloud_StorageService_Adapter_Filesystem options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Clave de opción</th>
+<th>Descripción</th>
+<th>Usado en</th>
+<th>Requerido</th>
+<th>Por defecto</th>
+</tr></thead>
+<tbody><tr>
+<td>local_directory</td>
+<td>Directorio local donde se almacenarán los archivos</td>
+<td>Constructor</td>
+<td>No</td>
+<td>Directorio tmp del sistema</td>
+</tr></tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.concepts"></a>19.3.2. Conceptos básicos</h3></div></div></div>
+<p>
+            Los diferentes servicios de almacenamiento en la nube usan su propia terminología para
+            referirse a los conceptos de almacenamiento de documentos. La SimpleCloud API define una
+            serie de conceptos comunes compartidos entre todos los principales proveedores.
+        </p>
+<p>
+            El servicio de almacenamiento identifica los archivos mediante claves de tipo cadena, que
+            pueden ser rutas URL u otro identificador específico del servicio. Los elementos pueden
+            almacenarse y recuperarse usando esta clave. Cada elemento puede tener
+            <span class="emphasis"><em>metadatos</em></span> asociados. Estos metadatos contienen información
+            específica del servicio sobre el elemento, como el tamaño, el tipo, los permisos, etc.,
+            según lo definido en el adaptador de ese proveedor.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.exceptions"></a>19.3.3. Excepciones</h3></div></div></div>
+<p>
+            Si ocurre algún error dentro del servicio de almacenamiento, se lanza una
+            <code class="classname">Zend_Cloud_StorageService_Exception</code>. Si la excepción
+            fue causada por el controlador del servicio subyacente, puede usar el
+            método <code class="methodname">getClientException()</code> para recuperar la excepción original.
+        </p>
+<p>
+            Dado que los diferentes proveedores de nube implementan distintos conjuntos de servicios,
+            algunos adaptadores no implementan ciertas funcionalidades. En este caso, se lanza la
+            excepción <code class="classname">Zend_Cloud_OperationNotAvailableException</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.store"></a>19.3.4. Almacenar un elemento</h3></div></div></div>
+<p>
+            El método <code class="methodname">storeItem()</code> se usa para subir o añadir de otro
+            modo archivos al proveedor de almacenamiento.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.store.example"></a><p class="title"><b>Ejemplo 19.28. Almacenar un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = file_get_contents('/my/local/dir/picture.jpg');
+$returnedData = $storage-&gt;storeItem('/my/remote/path/picture.jpg', $data);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Un tercer parámetro opcional describe opciones específicas del servicio.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.store-options.example"></a><p class="title"><b>Ejemplo 19.29. Almacenar un elemento con opciones</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = file_get_contents("/my/local/dir/picture.jpg");
+
+// Use S3 bucket: myBucket
+// Make this item publicly readable
+$returnedData = $storage-&gt;storeItem(
+    '/my/remote/path/picture.jpg',
+    $data,
+    array(
+        Zend_Cloud_StorageService_Adapter_S3::BUCKET_NAME =&gt; "myBucket",
+        Zend_Cloud_StorageService_Adapter_S3::METADATA    =&gt; array(
+            Zend_Service_Amazon_S3::S3_ACL_HEADER =&gt; Zend_Service_Amazon_S3::S3_ACL_PUBLIC_READ,
+        )
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Para adaptadores de servicio que admiten streaming, los datos también pueden ser un
+            stream de PHP (es decir, un archivo abierto).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.fetch"></a>19.3.5. Recuperar un elemento</h3></div></div></div>
+<p>
+            La operación <code class="methodname">fetchItem()</code> recupera un elemento del almacenamiento.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.fetch.example"></a><p class="title"><b>Ejemplo 19.30. Recuperar un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$returnedData = $storage-&gt;fetchItem("/my/remote/path/picture.jpg");
+file_put_contents($localFilePath, $returnedData);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.delete"></a>19.3.6. Eliminar un elemento</h3></div></div></div>
+<p>
+            La operación <code class="methodname">deleteItem()</code> elimina un elemento del servicio de
+            almacenamiento.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.delete.example"></a><p class="title"><b>Ejemplo 19.31. Eliminar un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage-&gt;deleteItem("/my/remote/path/picture.jpg");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.copy"></a>19.3.7. Copiar un elemento</h3></div></div></div>
+<p>
+            La operación <code class="methodname">copyItem()</code> crea una copia del elemento en el
+            almacenamiento.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                No todos los servicios admiten la copia de forma nativa. Si este es el caso, el
+                adaptador simulará la operación, recuperando el elemento y almacenándolo en la ruta
+                de destino.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.cloud.storageservice.copy.example"></a><p class="title"><b>Ejemplo 19.32. Copiar un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage-&gt;copyItem(
+    '/my/remote/path/picture.jpg',
+    '/anothor/remote/dir/picturecopy.jpg'
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.move"></a>19.3.8. Mover un elemento</h3></div></div></div>
+<p>
+            La operación <code class="methodname">moveItem()</code> mueve un elemento de una clave (o
+            directorio) a otra.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                No todos los servicios admiten mover de forma nativa. Si este es el caso, el adaptador
+                simulará la operación, recuperando el elemento, almacenándolo en la ruta de destino y
+                luego eliminando el archivo original.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.cloud.storageservice.move.example"></a><p class="title"><b>Ejemplo 19.33. Mover un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage-&gt;moveItem(
+    '/my/remote/path/picture.jpg',
+    '/anothor/remote/dir/newpicture.jpg'
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.rename"></a>19.3.9. Renombrar un elemento</h3></div></div></div>
+<p>
+            La operación <code class="methodname">renameItem()</code> cambia el nombre del elemento. En
+            algunos servicios, esta operación puede ser equivalente a mover a su directorio original
+            con un nuevo nombre.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.rename.example"></a><p class="title"><b>Ejemplo 19.34. Renombrar un elemento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage-&gt;renameItem('/my/remote/path/picture.jpg', 'newpicture.jpg');
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.list"></a>19.3.10. Listar elementos</h3></div></div></div>
+<p>
+            Para listar los elementos almacenados en la ruta especificada, use el método
+            <code class="methodname">listItems()</code>. El método devuelve una lista de nombres que
+            identifican los elementos remotos coincidentes.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.list.example"></a><p class="title"><b>Ejemplo 19.35. Listar elementos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$objects = $storage-&gt;listItems('/my/remote/path/');
+foreach ($objects as $objname) {
+    echo "Found: $objname\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.fetch-metadata"></a>19.3.11. Recuperar metadatos</h3></div></div></div>
+<p>
+            Algunos servicios almacenan un conjunto de pares clave-valor junto con el elemento como
+            metadatos. Use el método <code class="methodname">fetchMetadata()</code> para recuperar los
+            metadatos de un elemento.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.fetch-metadata.example"></a><p class="title"><b>Ejemplo 19.36. Recuperar metadatos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = $storage-&gt;fetchMetadata('/my/remote/path/picture.jpg');
+foreach ($data as $key =&gt; $value) {
+    echo "Metadata $key: $value\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.store-metadata"></a>19.3.12. Almacenar metadatos</h3></div></div></div>
+<p>
+            Según el servicio, los metadatos pueden proporcionarse al almacenar el elemento o mediante
+            una solicitud independiente. En este último caso, use <code class="methodname">storeMetadata()</code>
+            para añadir o actualizar estos metadatos.
+        </p>
+<div class="example">
+<a name="zend.cloud.storageservice.store-metadata.example"></a><p class="title"><b>Ejemplo 19.37. Almacenar metadatos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = $storage-&gt;storeMetadata('/my/remote/path/picture.jpg', array(
+    'type'     =&gt; 'JPEG',
+    'category' =&gt; 'Portrait',
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.delete-metadata"></a>19.3.13. Eliminar metadatos</h3></div></div></div>
+<p>
+            El método <code class="methodname">deleteMetadata()</code> elimina todos los metadatos
+            proporcionados por el usuario de un elemento.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                No todos los servicios admiten la eliminación de metadatos.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.cloud.storageservice.delete-metadata.example"></a><p class="title"><b>Ejemplo 19.38. Eliminar metadatos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storage-&gt;deleteMetadata("/my/remote/path/picture.jpg");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cloud.storageservice.adapter"></a>19.3.14. Acceder a adaptadores concretos</h3></div></div></div>
+<p>
+            A veces es necesario recuperar el adaptador concreto del servicio con el que está
+            trabajando la Storage API. Esto puede lograrse usando el método
+            <code class="methodname">getAdapter()</code>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Acceder al adaptador subyacente rompe la portabilidad entre servicios, por lo que
+                debería reservarse solo para circunstancias excepcionales.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.cloud.storageservice.adapter.example"></a><p class="title"><b>Ejemplo 19.39. Uso de un adaptador concreto</b></p>
+<div class="example-contents"><pre class="programlisting">
+// the Simple Cloud Storage API doesn't support "clean bucket" operation
+// the concrete adapter can be used to access this feature
+$s3 = $storage-&gt;getClient();
+$s3-&gt;cleanBucket("oldBucket");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cloud.queueservice.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cloud.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cloud.infrastructure.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">19.2. Introducción a Queue Service </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 19.4. Zend_Cloud_Infrastructure</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

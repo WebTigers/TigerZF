@@ -1,0 +1,348 @@
+<?php $title = '64.34. Zend_Service_WindowsAzure_Storage_Blob'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.34. Zend_Service_WindowsAzure_Storage_Blob</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.windowsazure.diagnostics.manager.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.windowsazure.storage.blob"></a>64.34. Zend_Service_WindowsAzure_Storage_Blob</h2></div></div></div>
+<p>
+        Blob Storage almacena conjuntos de datos binarios. Blob Storage ofrece los siguientes tres
+        recursos: la cuenta de almacenamiento, los contenedores y los blobs. Dentro de su cuenta de almacenamiento,
+        los contenedores proporcionan una forma de organizar conjuntos de blobs dentro de su cuenta de almacenamiento.
+    </p>
+<p>
+        Blob Storage es ofrecido por Windows Azure como una <acronym class="acronym">API</acronym> <acronym class="acronym">REST</acronym>
+        que está envuelta por la clase <code class="classname">Zend_Service_WindowsAzure_Storage_Blob</code>
+        con el fin de proporcionar una interfaz nativa de <acronym class="acronym">PHP</acronym> para la cuenta de almacenamiento.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.blob.api"></a>64.34.1. Ejemplos de la API</h3></div></div></div>
+<p>
+            Este tema enumera algunos ejemplos del uso de la clase
+            <code class="classname">Zend_Service_WindowsAzure_Storage_Blob</code>. Otras funciones están
+            disponibles en el paquete de descarga, así como documentación detallada de la
+            <acronym class="acronym">API</acronym> de dichas funciones.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.create-container"></a>64.34.1.1. Creación de un contenedor de almacenamiento</h4></div></div></div>
+<p>
+                Utilizando el siguiente código, se puede crear un contenedor de blob storage en el
+                almacenamiento de desarrollo.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.create-container.example"></a><p class="title"><b>Ejemplo 64.151. Creación de un contenedor de almacenamiento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$result = $storageClient-&gt;createContainer('testcontainer');
+
+echo 'Container name is: ' . $result-&gt;Name;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.delete-container"></a>64.34.1.2. Eliminación de un contenedor de almacenamiento</h4></div></div></div>
+<p>
+                Utilizando el siguiente código, se puede eliminar un contenedor de blob storage del
+                almacenamiento de desarrollo.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.delete-container.example"></a><p class="title"><b>Ejemplo 64.152. Eliminación de un contenedor de almacenamiento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$storageClient-&gt;deleteContainer('testcontainer');
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.storing-blob"></a>64.34.1.3. Almacenar un blob</h4></div></div></div>
+<p>
+                Utilizando el siguiente código, se puede subir un blob a un contenedor de blob storage en el
+                almacenamiento de desarrollo. Tenga en cuenta que el contenedor ya se ha creado previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.storing-blob.example"></a><p class="title"><b>Ejemplo 64.153. Almacenar un blob</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+
+// upload /home/maarten/example.txt to Azure
+$result = $storageClient-&gt;putBlob(
+    'testcontainer', 'example.txt', '/home/maarten/example.txt'
+);
+
+echo 'Blob name is: ' . $result-&gt;Name;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.copy-blob"></a>64.34.1.4. Copiar un blob</h4></div></div></div>
+<p>
+                Utilizando el siguiente código, se puede copiar un blob dentro de la cuenta de almacenamiento. La
+                ventaja de utilizar este método es que la operación de copia se realiza en la nube de Azure
+                y no implica descargar el blob. Tenga en cuenta que el contenedor ya se ha
+                creado previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.copy-blob.example"></a><p class="title"><b>Ejemplo 64.154. Copiar un blob</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+
+// copy example.txt to example2.txt
+$result = $storageClient-&gt;copyBlob(
+    'testcontainer', 'example.txt', 'testcontainer', 'example2.txt'
+);
+
+echo 'Copied blob name is: ' . $result-&gt;Name;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.download-blob"></a>64.34.1.5. Descargar un blob</h4></div></div></div>
+<p>
+                Utilizando el siguiente código, se puede descargar un blob desde un contenedor de blob storage en el
+                almacenamiento de desarrollo. Tenga en cuenta que el contenedor ya se ha creado previamente y que se ha
+                subido un blob.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.download-blob.example"></a><p class="title"><b>Ejemplo 64.155. Descargar un blob</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+
+// download file to /home/maarten/example.txt
+$storageClient-&gt;getBlob(
+    'testcontainer', 'example.txt', '/home/maarten/example.txt'
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.api.public-blob"></a>64.34.1.6. Hacer que un blob esté disponible públicamente</h4></div></div></div>
+<p>
+                De forma predeterminada, los contenedores de blob storage en Windows Azure están protegidos de la
+                visualización pública. Si algún usuario de Internet debe tener acceso a un contenedor de blobs, su ACL
+                puede establecerse como público. Tenga en cuenta que esto se aplica a un contenedor completo y no a
+                un único blob.
+            </p>
+<p>
+                Utilizando el siguiente código, la ACL del contenedor de blob storage se puede establecer en el
+                almacenamiento de desarrollo. Tenga en cuenta que el contenedor ya se ha creado previamente.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.api.public-blob.example"></a><p class="title"><b>Ejemplo 64.156. Hacer que un blob esté disponible públicamente</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+
+// make container publicly available (enumerate all blobs and read blob data)
+$storageClient-&gt;setContainerAcl('testcontainer', Zend_Service_WindowsAzure_Storage_Blob::ACL_PUBLIC_CONTAINER);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.blob.root"></a>64.34.2. Contenedor raíz</h3></div></div></div>
+<p>
+            Windows Azure Blob Storage ofrece soporte para trabajar con un "contenedor raíz".
+            Esto significa que un blob puede almacenarse en la raíz de su cuenta de almacenamiento,
+            es decir, <code class="filename">http://myaccount.blob.core.windows.net/somefile.txt</code>.
+        </p>
+<p>
+            Para poder trabajar con el contenedor raíz, primero debe crearse utilizando el
+            método <code class="methodname">createContainer()</code>, nombrando el contenedor
+            <code class="varname">$root</code>. El resto de operaciones sobre el contenedor raíz deben realizarse
+            con el nombre del contenedor establecido en <code class="varname">$root</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.blob.wrapper"></a>64.34.3. Wrapper de stream para blob storage</h3></div></div></div>
+<p>
+            El <acronym class="acronym">SDK</acronym> de Windows Azure para <acronym class="acronym">PHP</acronym> ofrece soporte
+            para registrar un cliente de blob storage como un wrapper de stream de archivos de <acronym class="acronym">PHP</acronym>.
+            El wrapper de stream de blob storage ofrece soporte para usar operaciones de archivo habituales en
+            Windows Azure Blob Storage. Por ejemplo, se puede abrir un archivo desde Windows Azure Blob
+            Storage con la función <code class="methodname">fopen()</code>:
+        </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.wrapper.sample"></a><p class="title"><b>Ejemplo 64.157. Ejemplo de uso del wrapper de stream de blob storage</b></p>
+<div class="example-contents"><pre class="programlisting">
+$fileHandle = fopen('azure://mycontainer/myfile.txt', 'r');
+
+// ...
+
+fclose($fileHandle);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Para poder hacer esto, el cliente de blob storage del <acronym class="acronym">SDK</acronym> de Windows Azure
+            para <acronym class="acronym">PHP</acronym> debe registrarse como un wrapper de stream. Esto puede hacerse llamando
+            al método <code class="methodname">registerStreamWrapper()</code>:
+        </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.wrapper.register"></a><p class="title"><b>Ejemplo 64.158. Registro del wrapper de stream de blob storage</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+
+// registers azure:// on this storage client
+$storageClient-&gt;registerStreamWrapper();
+
+// or:
+
+// regiters blob:// on this storage client
+$storageClient-&gt;registerStreamWrapper('blob://');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Para anular el registro del wrapper de stream, puede utilizarse el método
+            <code class="methodname">unregisterStreamWrapper()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig"></a>64.34.4. Firma de acceso compartido</h3></div></div></div>
+<p>
+            Windows Azure Bob Storage ofrece una función llamada "Shared Access Signatures" (firmas de acceso
+            compartido). De forma predeterminada, solo hay un nivel de autorización posible en Windows Azure Blob
+            Storage: un contenedor es privado o público. Las Shared Access Signatures ofrecen
+            un método de autorización más granular: los permisos de lectura, escritura, eliminación y listado pueden
+            asignarse a un contenedor o a un blob y otorgarse a un cliente específico mediante un modelo
+            basado en URL.
+        </p>
+<p>
+            Un ejemplo sería la siguiente firma:
+        </p>
+<div class="literallayout"><p><br>
+http://phpstorage.blob.core.windows.net/phpazuretestshared1?st=2009-08-17T09%3A06%3A17Z&amp;se=2009-08-17T09%3A56%3A17Z&amp;sr=c&amp;sp=w&amp;sig=hscQ7Su1nqd91OfMTwTkxabhJSaspx%2BD%2Fz8UqZAgn9s%3D<br>
+        </p></div>
+<p>
+            La firma anterior otorga acceso de escritura al contenedor "phpazuretestshared1"
+            de la cuenta "phpstorage".
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig.generate"></a>64.34.4.1. Generación de una firma de acceso compartido</h4></div></div></div>
+<p>
+                Cuando usted es el propietario de una cuenta de Windows Azure Bob Storage, puede crear y
+                distribuir una clave de acceso compartido para cualquier tipo de recurso de su cuenta. Para ello,
+                puede utilizarse el método <code class="methodname">generateSharedAccessUrl()</code> del
+                cliente de almacenamiento <code class="classname">Zend_Service_WindowsAzure_Storage_Blob</code>.
+            </p>
+<p>
+                El siguiente ejemplo de código generará una firma de acceso compartido para acceso de escritura
+                en un contenedor llamado "container1", dentro de un plazo de 3000 segundos.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig.generate-2"></a><p class="title"><b>Ejemplo 64.159. Generación de una firma de acceso compartido para un contenedor</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient   = new Zend_Service_WindowsAzure_Storage_Blob();
+$sharedAccessUrl = $storageClient-&gt;generateSharedAccessUrl(
+    'container1',
+    '',
+    'c',
+    'w',
+    $storageClient -&gt;isoDate(time() - 500),
+    $storageClient -&gt;isoDate(time() + 3000)
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                El siguiente ejemplo de código generará una firma de acceso compartido para acceso de lectura
+                en un blob llamado <code class="filename">test.txt</code> en un contenedor llamado "container1"
+                dentro de un plazo de 3000 segundos.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig-generate-3"></a><p class="title"><b>Ejemplo 64.160. Generación de una firma de acceso compartido para un blob</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient   = new Zend_Service_WindowsAzure_Storage_Blob();
+$sharedAccessUrl = $storageClient-&gt;generateSharedAccessUrl(
+    'container1',
+    'test.txt',
+    'b',
+    'r',
+    $storageClient -&gt;isoDate(time() - 500),
+    $storageClient -&gt;isoDate(time() + 3000)
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig.consume"></a>64.34.4.2. Trabajar con firmas de acceso compartido de otros</h4></div></div></div>
+<p>
+                Cuando recibe una firma de acceso compartido de otra persona, puede utilizar el
+                <acronym class="acronym">SDK</acronym> de Windows Azure para <acronym class="acronym">PHP</acronym> para trabajar con el
+                recurso indicado. Por ejemplo, la siguiente firma puede obtenerse del
+                propietario de una cuenta de almacenamiento:
+            </p>
+<div class="literallayout"><p><br>
+http://phpstorage.blob.core.windows.net/phpazuretestshared1?st=2009-08-17T09%3A06%3A17Z&amp;se=2009-08-17T09%3A56%3A17Z&amp;sr=c&amp;sp=w&amp;sig=hscQ7Su1nqd91OfMTwTkxabhJSaspx%2BD%2Fz8UqZAgn9s%3D<br>
+            </p></div>
+<p>
+                La firma anterior otorga acceso de escritura al "contenedor" "phpazuretestshared1" de
+                la cuenta phpstorage. Dado que la clave compartida de la cuenta no se conoce, la
+                firma de acceso compartido puede utilizarse para trabajar con el recurso autorizado.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.storage.blob.sharedaccesssig.consuming"></a><p class="title"><b>Ejemplo 64.161. Uso de una firma de acceso compartido para un contenedor</b></p>
+<div class="example-contents"><pre class="programlisting">
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob(
+    'blob.core.windows.net', 'phpstorage', ''
+);
+$storageClient-&gt;setCredentials(
+    new Zend_Service_WindowsAzure_Credentials_SharedAccessSignature()
+);
+$storageClient-&gt;getCredentials()-&gt;setPermissionSet(array(
+    'http://phpstorage.blob.core.windows.net/phpazuretestshared1?st=2009-08-17T09%3A06%3A17Z&amp;se=2009-08-17T09%3A56%3A17Z&amp;sr=c&amp;sp=w&amp;sig=hscQ7Su1nqd91OfMTwTkxabhJSaspx%2BD%2Fz8UqZAgn9s%3D'
+));
+$storageClient-&gt;putBlob(
+    'phpazuretestshared1', 'NewBlob.txt', 'C:\Files\dataforazure.txt'
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Tenga en cuenta que no había un permiso explícito para escribir en un blob específico. En su lugar, el
+                <acronym class="acronym">SDK</acronym> de Windows Azure para <acronym class="acronym">PHP</acronym> determinó que se
+                requería un permiso ya sea para escribir en ese blob específico, o para escribir en su
+                contenedor. Dado que solo había una firma disponible para lo segundo, el
+                <acronym class="acronym">SDK</acronym> de Windows Azure para <acronym class="acronym">PHP</acronym> eligió esas credenciales para realizar
+                la solicitud en Windows Azure blob storage.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.windowsazure.diagnostics.manager.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.33. Zend_Service_WindowsAzure </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.35. Zend_Service_WindowsAzure_Diagnostics_Manager</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

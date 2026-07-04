@@ -1,0 +1,154 @@
+<?php $title = '15.6. Autenticación Open ID'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">15.6. Autenticación Open ID</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.auth.adapter.ldap.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 15. Zend_Auth</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.barcode.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.auth.adapter.openid"></a>15.6. Autenticación Open ID</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.openid.introduction"></a>15.6.1. Introducción</h3></div></div></div>
+<p>
+            El adaptador <code class="classname">Zend_Auth_Adapter_OpenId</code> se puede usar para autenticar
+            usuarios utilizando servidores OpenID remotos. Este método de autenticación asume que el usuario
+            envía únicamente su identidad OpenID a la aplicación web. Luego
+            son redirigidos a su proveedor OpenID para demostrar la propiedad de la identidad
+            usando una contraseña u otro método. Esta contraseña nunca se proporciona
+            a la aplicación web.
+        </p>
+<p>
+            La identidad OpenID es simplemente una <acronym class="acronym">URI</acronym> que apunta a un sitio web
+            con información sobre un usuario, junto con etiquetas especiales que
+            describen qué servidor usar y qué identidad enviar allí.
+            Puede leer más sobre OpenID en el
+            <a class="ulink" href="http://www.openid.net/" target="_top">sitio oficial de OpenID</a>.
+        </p>
+<p>
+            La clase <code class="classname">Zend_Auth_Adapter_OpenId</code> envuelve
+            el componente <code class="classname">Zend_OpenId_Consumer</code>, que implementa el
+            protocolo de autenticación OpenID en sí mismo.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_OpenId</code> aprovecha la <a class="ulink" href="http://php.net/gmp" target="_top">extensión GMP</a>, cuando está disponible. Considere
+                habilitar la extensión <acronym class="acronym">GMP</acronym> para obtener un mejor rendimiento al usar
+                <code class="classname">Zend_Auth_Adapter_OpenId</code>.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.openid.specifics"></a>15.6.2. Aspectos específicos</h3></div></div></div>
+<p>
+            Como es el caso de todos los adaptadores de <code class="classname">Zend_Auth</code>, la clase
+            <code class="classname">Zend_Auth_Adapter_OpenId</code> implementa
+            <code class="classname">Zend_Auth_Adapter_Interface</code>, que define un método:
+            <code class="methodname">authenticate()</code>. Este método realiza la autenticación en sí misma,
+            pero el objeto debe prepararse antes de invocarlo. Dicha preparación del adaptador incluye
+            configurar la identidad OpenID y algunas otras opciones específicas de
+            <code class="classname">Zend_OpenId</code>.
+        </p>
+<p>
+            Sin embargo, a diferencia de otros adaptadores de <code class="classname">Zend_Auth</code>,
+            <code class="classname">Zend_Auth_Adapter_OpenId</code> realiza la autenticación en un servidor
+            externo en dos peticiones <acronym class="acronym">HTTP</acronym> separadas. Por lo tanto, el
+            método <code class="methodname">Zend_Auth_Adapter_OpenId::authenticate()</code> debe llamarse
+            dos veces. En la primera invocación, el método no retorna, sino que
+            redirige al usuario a su servidor OpenID. Luego, después de que el usuario se autentica en el servidor
+            remoto, será redirigido de vuelta y el script para esta segunda petición debe llamar de nuevo a
+            <code class="methodname">Zend_Auth_Adapter_OpenId::authenticate()</code> para verificar la
+            firma que viene con la petición redirigida del servidor para completar el
+            proceso de autenticación. En esta segunda invocación, el método devolverá el
+            objeto <code class="classname">Zend_Auth_Result</code> como se espera.
+        </p>
+<p>
+            El siguiente ejemplo muestra el uso de
+            <code class="classname">Zend_Auth_Adapter_OpenId</code>. Como se mencionó anteriormente, el método
+            <code class="methodname">Zend_Auth_Adapter_OpenId::authenticate()</code> debe llamarse dos
+            veces. La primera vez es después de que el usuario envía el formulario <acronym class="acronym">HTML</acronym> con
+            <code class="varname">$_POST['openid_action']</code> establecido en <span class="emphasis"><em>"login"</em></span>,
+            y la segunda vez es después de la redirección <acronym class="acronym">HTTP</acronym> desde el servidor OpenID
+            con <code class="varname">$_GET['openid_mode']</code> o
+            <code class="varname">$_POST['openid_mode']</code> establecidos.
+        </p>
+<pre class="programlisting">
+&lt;?php
+$status = "";
+$auth = Zend_Auth::getInstance();
+if ((isset($_POST['openid_action']) &amp;&amp;
+     $_POST['openid_action'] == "login" &amp;&amp;
+     !empty($_POST['openid_identifier'])) ||
+    isset($_GET['openid_mode']) ||
+    isset($_POST['openid_mode'])) {
+    $result = $auth-&gt;authenticate(
+        new Zend_Auth_Adapter_OpenId(@$_POST['openid_identifier']));
+    if ($result-&gt;isValid()) {
+        $status = "You are logged in as "
+                . $auth-&gt;getIdentity()
+                . "&lt;br&gt;\n";
+    } else {
+        $auth-&gt;clearIdentity();
+        foreach ($result-&gt;getMessages() as $message) {
+            $status .= "$message&lt;br&gt;\n";
+        }
+    }
+} else if ($auth-&gt;hasIdentity()) {
+    if (isset($_POST['openid_action']) &amp;&amp;
+        $_POST['openid_action'] == "logout") {
+        $auth-&gt;clearIdentity();
+    } else {
+        $status = "You are logged in as "
+                . $auth-&gt;getIdentity()
+                . "&lt;br&gt;\n";
+    }
+}
+?&gt;
+&lt;html&gt;&lt;body&gt;
+&lt;?php echo htmlspecialchars($status);?&gt;
+&lt;form method="post"&gt;&lt;fieldset&gt;
+&lt;legend&gt;OpenID Login&lt;/legend&gt;
+&lt;input type="text" name="openid_identifier" value=""&gt;
+&lt;input type="submit" name="openid_action" value="login"&gt;
+&lt;input type="submit" name="openid_action" value="logout"&gt;
+&lt;/fieldset&gt;&lt;/form&gt;&lt;/body&gt;&lt;/html&gt;
+*/
+</pre>
+<p>
+            Puede personalizar el proceso de autenticación OpenID de varias formas.
+            Puede, por ejemplo, recibir la redirección del servidor OpenID en una página separada,
+            especificando la "raíz" del sitio web y usando un
+            <code class="classname">Zend_OpenId_Consumer_Storage</code> personalizado o una
+            <code class="classname">Zend_Controller_Response</code> personalizada. También puede usar
+            la Simple Registration Extension para recuperar información sobre
+            el usuario del servidor OpenID. Todas estas posibilidades se describen
+            con más detalle en el capítulo de <code class="classname">Zend_OpenId_Consumer</code>.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.auth.adapter.ldap.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.auth.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.barcode.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">15.5. Autenticación LDAP </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 16. Zend_Barcode</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

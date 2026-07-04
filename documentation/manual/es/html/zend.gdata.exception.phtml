@@ -1,0 +1,114 @@
+<?php $title = '37.11. Capturar excepciones de Gdata'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">37.11. Capturar excepciones de Gdata</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.gdata.photos.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 37. Zend_Gdata</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.http.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.gdata.exception"></a>37.11. Capturar excepciones de Gdata</h2></div></div></div>
+<p>
+        La clase <code class="classname">Zend_Gdata_App_Exception</code> es una clase base
+        para las excepciones lanzadas por <code class="classname">Zend_Gdata</code>. Puede capturar cualquier excepción
+        lanzada por <code class="classname">Zend_Gdata</code> capturando
+        <code class="classname">Zend_Gdata_App_Exception</code>.
+    </p>
+<pre class="programlisting">
+try {
+    $client =
+        Zend_Gdata_ClientLogin::getHttpClient($username, $password);
+} catch(Zend_Gdata_App_Exception $ex) {
+    // Report the exception to the user
+    die($ex-&gt;getMessage());
+}
+</pre>
+<p>
+        Las siguientes subclases de excepción son usadas por <code class="classname">Zend_Gdata</code>:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="classname">Zend_Gdata_App_AuthException</code>
+                    indica que las credenciales de la cuenta del usuario no eran válidas.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Gdata_App_BadMethodCallException</code>
+                    indica que se llamó a un método para un servicio
+                    que no soporta dicho método. Por ejemplo,
+                    el servicio CodeSearch no soporta <code class="methodname">post()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Gdata_App_HttpException</code>
+                    indica que una petición <acronym class="acronym">HTTP</acronym> no tuvo éxito.
+                    Proporciona la capacidad de obtener el objeto <code class="classname">Zend_Http_Response</code>
+                    completo para determinar la causa exacta del fallo en
+                    los casos en que <span class="command"><strong>$e-&gt;getMessage()</strong></span> no proporciona
+                    suficientes detalles.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Gdata_App_InvalidArgumentException</code>
+                    se lanza cuando la aplicación proporciona un valor que
+                    no es válido en un contexto determinado. Por ejemplo,
+                    especificar un valor de visibilidad de Calendar de "banana",
+                    o consultar un feed de Blogger sin especificar
+                    ningún nombre de blog.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Gdata_App_CaptchaRequiredException</code>
+                    se lanza cuando un intento de ClientLogin recibe un
+                    desafío <span class="trademark">CAPTCHA</span>™ del
+                    servicio de autenticación. Esta excepción contiene un ID de
+                    token y una <acronym class="acronym">URL</acronym> a una imagen de desafío
+                    <span class="trademark">CAPTCHA</span>™. La imagen es un rompecabezas visual que
+                    debería mostrarse al usuario. Después de
+                    recopilar la respuesta del usuario a la imagen de
+                    desafío, la respuesta puede incluirse en el siguiente
+                    intento de ClientLogin. Alternativamente, se puede
+                    dirigir al usuario a este sitio web:
+                    <a class="ulink" href="https://www.google.com/accounts/DisplayUnlockCaptcha" target="_top">https://www.google.com/accounts/DisplayUnlockCaptcha</a>
+                    Puede encontrarse más información en la
+                    <a class="link" href="zend.gdata.clientlogin.phtml" title="37.5. Authenticating with ClientLogin">documentación de ClientLogin</a>.
+                </p></li>
+</ul></div>
+<p>
+    </p>
+<p>
+        Puede usar estas subclases de excepción para manejar excepciones específicas
+        de forma diferente. Consulte la documentación de la <acronym class="acronym">API</acronym> para obtener información sobre qué
+        subclases de excepción son lanzadas por qué métodos en <code class="classname">Zend_Gdata</code>.
+    </p>
+<pre class="programlisting">
+try {
+    $client = Zend_Gdata_ClientLogin::getHttpClient($username,
+                                                    $password,
+                                                    $service);
+} catch(Zend_Gdata_App_AuthException $authEx) {
+    // The user's credentials were incorrect.
+    // It would be appropriate to give the user a second try.
+    ...
+} catch(Zend_Gdata_App_HttpException $httpEx) {
+    // Google Data servers cannot be contacted.
+    die($httpEx-&gt;getMessage);}
+</pre>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.gdata.photos.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.gdata.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.http.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">37.10. Usar Picasa Web Albums </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 38. Zend_Http</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

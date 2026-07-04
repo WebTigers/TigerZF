@@ -1,0 +1,237 @@
+<?php $title = 'Capítulo 70. Zend_TimeSync'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 70. Zend_TimeSync</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.text.table.introduction.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.timesync.working.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.timesync"></a>Capítulo 70. Zend_TimeSync</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.timesync.phtml#zend.timesync.introduction">70.1. Introducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.timesync.phtml#zend.timesync.introduction.why">70.1.1. ¿Por qué Zend_TimeSync?</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.phtml#zend.timesync.introduction.ntp">70.1.2. ¿Qué es NTP?</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.phtml#zend.timesync.introduction.sntp">70.1.3. ¿Qué es SNTP?</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.phtml#zend.timesync.introduction.problematic">70.1.4. Uso problemático</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.phtml#zend.timesync.introduction.decision">70.1.5. Decidir qué servidor usar</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.timesync.working.phtml">70.2. Trabajando con Zend_TimeSync</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.generic">70.2.1. Petición genérica a servidor de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.multiple">70.2.2. Múltiples servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.protocol">70.2.3. Protocolos de los servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.ports">70.2.4. Uso de puertos para servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.options">70.2.5. Opciones de los servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.different">70.2.6. Uso de diferentes servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.informations">70.2.7. Información de los servidores de tiempo</a></span></dt>
+<dt><span class="sect2"><a href="zend.timesync.working.phtml#zend.timesync.working.exceptions">70.2.8. Manejo de excepciones</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.timesync.introduction"></a>70.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_TimeSync</code> es capaz de recibir la hora de internet o de red desde un
+        servidor de tiempo usando el protocolo <span class="emphasis"><em>NTP</em></span> o <span class="emphasis"><em>SNTP</em></span>.
+        Con <code class="classname">Zend_TimeSync</code>, Zend Framework puede actuar de forma independiente
+        respecto a la configuración horaria del servidor donde se ejecuta.
+    </p>
+<p>
+        Para ser independiente de la hora real del servidor, <code class="classname">Zend_TimeSync</code>
+        trabaja con la diferencia entre la hora real enviada a través de NTP o SNTP y la
+        hora interna del servidor.
+    </p>
+<div class="note"><table border="0" summary="Note: Background">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Contexto</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_TimeSync</code> no puede cambiar la hora del servidor, pero
+            devolverá una instancia de <a class="link" href="zend.date.phtml#zend.date.introduction" title="26.1. Introduction">Zend_Date</a> con la
+            que se puede trabajar la diferencia respecto a la hora del servidor.
+        </p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.timesync.introduction.why"></a>70.1.1. ¿Por qué Zend_TimeSync?</h3></div></div></div>
+<p>
+            Entonces, ¿por qué alguien usaría <code class="classname">Zend_TimeSync</code>?
+        </p>
+<p>
+            Normalmente, cada servidor dentro de una granja de múltiples servidores tendrá un servicio
+            en ejecución que sincroniza su propia hora con un servidor de tiempo. Así que dentro de un
+            entorno estándar no debería ser necesario usar <code class="classname">Zend_TimeSync</code>. Pero
+            puede resultar útil si no hay ningún servicio disponible y si no tiene el derecho de
+            instalar dicho servicio.
+        </p>
+<p>
+            Aquí hay algunos ejemplos de casos de uso para los que <code class="classname">Zend_TimeSync</code>
+            es perfecto:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Servidor sin servicio de hora</em></span>
+                </p>
+<p>
+                    Si su aplicación se ejecuta en un servidor y este servidor no tiene ningún
+                    servicio de hora en ejecución, puede tener sentido usar
+                    <code class="classname">Zend_TimeSync</code> en su aplicación.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Servidor de base de datos separado</em></span>
+                </p>
+<p>
+                    Si su base de datos se ejecuta en un servidor diferente y este servidor no está
+                    conectado con <span class="emphasis"><em>NTP</em></span> o <span class="emphasis"><em>SNTP</em></span>
+                    al servidor de la aplicación, podría tener problemas al almacenar y usar datos de
+                    marca de tiempo.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Múltiples servidores</em></span>
+                </p>
+<p>
+                    Si su aplicación se ejecuta en más de un servidor y las bases horarias de estos
+                    servidores no están sincronizadas, puede esperar problemas dentro de su aplicación
+                    cuando parte de la aplicación proviene de un servidor y otra parte de otro
+                    servidor.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <span class="emphasis"><em>Procesamiento por lotes</em></span>
+                </p>
+<p>
+                    Si desea trabajar con un servicio de hora dentro de un archivo por lotes o dentro
+                    de una aplicación de línea de comandos, <code class="classname">Zend_TimeSync</code> puede
+                    ser de utilidad.
+                </p>
+</li>
+</ul></div>
+<p>
+            <code class="classname">Zend_TimeSync</code> puede proporcionar una buena solución en todos estos
+            casos y puede usarse si no puede ejecutar ningún servicio en su servidor.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.timesync.introduction.ntp"></a>70.1.2. ¿Qué es NTP?</h3></div></div></div>
+<p>
+            El Network Time Protocol (<span class="emphasis"><em>NTP</em></span>) es un protocolo
+            para sincronizar los relojes de múltiples sistemas a través de redes de datos de
+            conmutación de paquetes y latencia variable. NTP usa el puerto UDP 123 como su capa de
+            transporte. Consulte el <a class="ulink" href="http://en.wikipedia.org/wiki/Network_Time_Protocol" target="_top">artículo de wikipedia</a>
+            para más detalles sobre este protocolo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.timesync.introduction.sntp"></a>70.1.3. ¿Qué es SNTP?</h3></div></div></div>
+<p>
+            El Simple Network Time Protocol (<span class="emphasis"><em>SNTP</em></span>) es un
+            protocolo que sincroniza los relojes de múltiples sistemas a través de redes de datos de
+            conmutación de paquetes y latencia variable. SNTP usa el puerto UDP 37 como su capa de
+            transporte. Está estrechamente relacionado con el Network Time Protocol, pero es más
+            sencillo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.timesync.introduction.problematic"></a>70.1.4. Uso problemático</h3></div></div></div>
+<p>
+            Tenga en cuenta que cuando use <code class="classname">Zend_TimeSync</code> tendrá que
+            pensar en algunos detalles relacionados con la estructura de la sincronización horaria y
+            con internet en sí. Aquí se describirán el uso correcto y las mejores prácticas. Lea
+            atentamente antes de comenzar a usar <code class="classname">Zend_TimeSync</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.timesync.introduction.decision"></a>70.1.5. Decidir qué servidor usar</h3></div></div></div>
+<p>
+            Debe seleccionar con mucho cuidado el servidor de tiempo que desea usar según los
+            siguientes criterios:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Distancia
+                </p>
+<p>
+                    La distancia desde su servidor de aplicación hasta el servidor de tiempo. Si su
+                    servidor está en Europa, tendría poco sentido seleccionar un servidor de tiempo en
+                    Tahití. Seleccione siempre un servidor que no esté lejos. Esto reduce el tiempo de
+                    petición y la carga global de la red.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Velocidad
+                </p>
+<p>
+                    El tiempo que tarda en recibirse la petición también es relevante. Pruebe
+                    diferentes servidores para obtener el mejor resultado. Si está solicitando un
+                    servidor que nunca es accesible, siempre tendrá un retraso innecesario.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    División
+                </p>
+<p>
+                    No use siempre el mismo servidor. Todos los servidores de tiempo bloquearán las
+                    peticiones de servidores que los estén saturando. Si su aplicación requiere un uso
+                    intensivo de servidores de tiempo, debería considerar uno de los conjuntos
+                    descritos más adelante.
+                </p>
+</li>
+</ul></div>
+<p>
+            Entonces, ¿dónde puede encontrar un servidor de tiempo? En general, puede usar cualquier
+            servidor de tiempo al que pueda conectarse. Esto puede ser un servidor de tiempo dentro de
+            su LAN o cualquier servidor de tiempo público al que tenga acceso. Si decide usar un
+            servidor de tiempo público, debería considerar usar un conjunto de servidores. Los
+            conjuntos de servidores son direcciones públicas desde las que obtendrá un servidor de
+            tiempo aleatorio y agrupado al solicitar la hora. De esta manera no tendrá que dividir sus
+            peticiones. Hay conjuntos de servidores públicos disponibles para muchas regiones que
+            puede usar para evitar los problemas mencionados anteriormente.
+        </p>
+<p>
+            Vea <a class="ulink" href="http://www.pool.ntp.org" target="_top">pool.ntp.org</a> para encontrar su conjunto
+            de servidores más cercano. Por ejemplo, si su servidor está ubicado en Alemania, puede
+            conectarse a
+            <span class="emphasis"><em>0.europe.pool.ntp.org</em></span>.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.text.table.introduction.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.timesync.working.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">69.2. Zend_Text_Table </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 70.2. Trabajando con Zend_TimeSync</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

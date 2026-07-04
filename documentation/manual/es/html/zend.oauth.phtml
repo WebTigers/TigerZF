@@ -1,0 +1,419 @@
+<?php $title = 'Capítulo 52. Zend_Oauth'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 52. Zend_Oauth</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.navigation.containers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.openid.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.oauth"></a>Capítulo 52. Zend_Oauth</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.oauth.phtml#zend.oauth.introduction">52.1. Introducción a OAuth</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.oauth.phtml#zend.oauth.introduction.protocol-workflow">52.1.1. Flujo de trabajo del protocolo</a></span></dt>
+<dt><span class="sect2"><a href="zend.oauth.phtml#zend.oauth.introduction.security-architecture">52.1.2. Arquitectura de seguridad</a></span></dt>
+<dt><span class="sect2"><a href="zend.oauth.phtml#zend.oauth.introduction.getting-started">52.1.3. Primeros pasos</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.oauth.introduction"></a>52.1. Introducción a OAuth</h2></div></div></div>
+<p>
+        OAuth permite aprobar el acceso de cualquier aplicación a sus datos privados almacenados en un sitio web
+        sin verse obligado a revelar su nombre de usuario o contraseña. Si lo piensa bien, la
+        práctica de entregar su nombre de usuario y contraseña a sitios como Yahoo Mail o Twitter ha
+        sido habitual durante bastante tiempo. Esto ha planteado serias preocupaciones porque no hay
+        nada que impida que otras aplicaciones hagan un mal uso de estos datos. Sí, algunos servicios pueden
+        parecer confiables, pero eso nunca está garantizado. OAuth resuelve este problema eliminando
+        la necesidad de compartir cualquier nombre de usuario y contraseña, reemplazándola por un proceso de
+        autorización controlado por el usuario.
+    </p>
+<p>
+        Este proceso de autorización se basa en tokens. Si autoriza a una aplicación (y por
+        aplicación podemos incluir cualquier aplicación web o de escritorio) a acceder a sus datos, recibirá
+        un Token de Acceso asociado a su cuenta. Usando este Token de Acceso,
+        la aplicación puede acceder a sus datos privados sin requerir continuamente sus credenciales.
+        En definitiva, este estilo de delegación de autorización del protocolo es simplemente una solución más segura al
+        problema de acceder a datos privados a través de cualquier <acronym class="acronym">API</acronym> de servicio web.
+    </p>
+<p>
+        OAuth no es una idea completamente nueva, sino más bien un protocolo estandarizado que se construye sobre las
+        propiedades existentes de protocolos como Google AuthSub, Yahoo BBAuth, la <acronym class="acronym">API</acronym>
+        de Flickr, etc. Todos ellos operan, hasta cierto punto, sobre la base de intercambiar
+        las credenciales del usuario por un Token de Acceso de algún tipo. El poder de una especificación estandarizada
+        como OAuth es que solo requiere una única implementación, en lugar de muchas
+        implementaciones dispares en función del servicio web. Esta estandarización no se ha producido
+        de forma independiente de los actores principales, y de hecho muchos ahora admiten OAuth como una alternativa y
+        futuro reemplazo de sus propias soluciones.
+    </p>
+<p>
+        <code class="classname">Zend_Oauth</code> de Zend Framework actualmente implementa un Consumidor OAuth
+        completo que cumple con la especificación OAuth Core 1.0 Revisión A (24 de junio de 2009) a través de la
+        clase <code class="classname">Zend_Oauth_Consumer</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.oauth.introduction.protocol-workflow"></a>52.1.1. Flujo de trabajo del protocolo</h3></div></div></div>
+<p>
+        Antes de implementar OAuth tiene sentido entender cómo opera el protocolo. Para ello
+        tomaremos el ejemplo de Twitter, que actualmente implementa OAuth basado en la especificación OAuth Core
+        1.0 Revisión A. Este ejemplo analiza el protocolo desde las perspectivas del
+        Usuario (quien aprobará el acceso), el Consumidor (quien busca acceso) y el Proveedor
+        (quien tiene los datos privados del Usuario). El acceso puede ser solo lectura o lectura y escritura.
+    </p>
+<p>
+        Por casualidad, nuestro Usuario ha decidido que quiere utilizar un nuevo servicio llamado TweetExpress
+        que afirma ser capaz de volver a publicar sus entradas de blog en Twitter en cuestión de segundos.
+        TweetExpress es una aplicación registrada en Twitter, lo que significa que tiene acceso a una Clave de Consumidor
+        y un Secreto de Consumidor (todas las aplicaciones OAuth deben tener estos elementos del Proveedor al que
+        van a acceder), los cuales identifican sus solicitudes ante Twitter y garantizan que todas las solicitudes puedan
+        ser firmadas usando el Secreto de Consumidor para verificar su origen.
+    </p>
+<p>
+        Para usar TweetExpress se le pide registrarse para obtener una nueva cuenta, y después de que su registro
+        sea confirmado, se le informa de que TweetExpress buscará asociar su cuenta de Twitter
+        con el servicio.
+    </p>
+<p>
+        Mientras tanto, TweetExpress ha estado ocupado. Antes de obtener su aprobación de Twitter, ha
+        enviado una solicitud <acronym class="acronym">HTTP</acronym> al servicio de Twitter pidiendo un nuevo
+        Token de Solicitud no autorizado. Este token no es específico del Usuario desde la perspectiva de Twitter, pero
+        TweetExpress puede usarlo específicamente para el Usuario actual y debería asociarlo con su
+        cuenta y almacenarlo para uso futuro. TweetExpress ahora redirige al Usuario a Twitter para que
+        pueda aprobar el acceso de TweetExpress. La URL de esta redirección se firmará usando
+        el Secreto de Consumidor de TweetExpress y contendrá el Token de Solicitud no autorizado como
+        parámetro.
+    </p>
+<p>
+        En este punto se le puede pedir al Usuario que inicie sesión en Twitter y ahora se enfrentará a una
+        pantalla de Twitter preguntando si aprueba esta solicitud de TweetExpress para acceder a la
+        <acronym class="acronym">API</acronym> de Twitter en nombre del Usuario. Twitter registrará la respuesta, que
+        asumiremos que fue positiva. Con base en la aprobación del Usuario, Twitter registrará el
+        Token de Solicitud no autorizado actual como aprobado por el Usuario (haciéndolo así
+        específico del Usuario) y generará un nuevo valor en forma de código de verificación. El Usuario ahora es
+        redirigido de vuelta a una URL de retorno específica utilizada por TweetExpress (esta URL de retorno puede
+        estar registrada en Twitter o establecerse dinámicamente usando un parámetro oauth_callback en las solicitudes).
+        La URL de redirección contendrá el código de verificación recién generado.
+    </p>
+<p>
+        La URL de retorno de TweetExpress activará un examen de la respuesta para determinar si
+        el Usuario ha otorgado su aprobación a Twitter. Suponiendo que sí, ahora puede intercambiar su
+        Token de Solicitud no autorizado por un Token de Acceso totalmente autorizado enviando una solicitud de vuelta a
+        Twitter, incluyendo el Token de Solicitud y el código de verificación recibido. Twitter debería ahora
+        enviar de vuelta una respuesta que contenga este Token de Acceso, que debe usarse en todas las solicitudes utilizadas para
+        acceder a la <acronym class="acronym">API</acronym> de Twitter en nombre del Usuario. Twitter solo hará esto
+        una vez que haya confirmado que el Token de Solicitud adjunto no se ha usado ya para obtener
+        otro Token de Acceso. En este punto, TweetExpress puede confirmar la recepción de la aprobación al
+        Usuario y eliminar el Token de Solicitud original, que ya no es necesario.
+    </p>
+<p>
+        A partir de este punto, TweetExpress puede usar la <acronym class="acronym">API</acronym> de Twitter para publicar nuevos
+        tweets en nombre del Usuario simplemente accediendo a los puntos de acceso de la <acronym class="acronym">API</acronym> con una
+        solicitud que ha sido firmada digitalmente (mediante HMAC-SHA1) con una combinación del Secreto de Consumidor
+        de TweetExpress y la Clave de Acceso que se está utilizando.
+    </p>
+<p>
+        Aunque actualmente Twitter no hace caducar los Tokens de Acceso, el Usuario tiene la libertad de
+        desautorizar a TweetExpress desde la configuración de su cuenta de Twitter. Una vez desautorizado, el acceso de TweetExpress
+        se cortará y su Token de Acceso quedará invalidado.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.oauth.introduction.security-architecture"></a>52.1.2. Arquitectura de seguridad</h3></div></div></div>
+<p>
+        OAuth fue diseñado específicamente para operar sobre una conexión <acronym class="acronym">HTTP</acronym>
+        insegura, por lo que el uso de <acronym class="acronym">HTTPS</acronym> no es obligatorio, aunque obviamente
+        sería deseable si está disponible. Si fuera factible una conexión <acronym class="acronym">HTTPS</acronym>,
+        OAuth ofrece una implementación del método de firma llamada PLAINTEXT que puede utilizarse. En
+        una conexión <acronym class="acronym">HTTP</acronym> típica no segura, debe evitarse el uso de PLAINTEXT
+        y debe usarse un esquema alternativo. La especificación de OAuth define dos de estos métodos de firma:
+        HMAC-SHA1 y RSA-SHA1. Ambos son totalmente compatibles con <code class="classname">Zend_Oauth</code>.
+    </p>
+<p>
+        Estos métodos de firma son bastante fáciles de entender. Como puede imaginar, un método de firma
+        PLAINTEXT no hace nada digno de mención, ya que depende de
+        <acronym class="acronym">HTTPS</acronym>. Si usara PLAINTEXT sobre <acronym class="acronym">HTTP</acronym>, se
+        enfrentaría a un problema importante: no hay forma de estar seguro de que el contenido de cualquier solicitud
+        habilitada para OAuth (que incluiría el Token de Acceso OAuth) no haya sido alterado en el camino. Esto es
+        porque las solicitudes <acronym class="acronym">HTTP</acronym> no seguras siempre están en riesgo de ser espiadas, de
+        ataques de tipo Hombre en el Medio (MITM), o de otros riesgos por los cuales una solicitud puede ser reformulada
+        para realizar tareas en nombre del atacante, haciéndose pasar por la aplicación de origen sin
+        ser detectada por el proveedor de servicios.
+    </p>
+<p>
+        HMAC-SHA1 y RSA-SHA1 mitigan este riesgo firmando digitalmente todas las solicitudes OAuth con el
+        Secreto de Consumidor registrado de la aplicación original. Suponiendo que solo el Consumidor y el
+        Proveedor conocen cuál es este secreto, un intermediario puede alterar las solicitudes a su antojo, pero
+        no podrá firmarlas válidamente, y las solicitudes sin firmar o firmadas de forma inválida serían
+        descartadas por ambas partes. Las firmas digitales, por lo tanto, ofrecen la garantía de que las solicitudes firmadas
+        válidamente provienen de la parte esperada y no han sido alteradas en el camino. Esto es
+        el núcleo de por qué OAuth puede operar sobre una conexión no segura.
+    </p>
+<p>
+        La forma en que operan estas firmas digitales depende del método utilizado, es decir, HMAC-SHA1, RSA-SHA1 o
+        quizás otro método definido por el proveedor de servicios. HMAC-SHA1 es un mecanismo simple
+        que genera un Código de Autenticación de Mensaje (MAC) usando una función hash criptográfica
+        (es decir, SHA1) en combinación con una clave secreta conocida solo por el emisor y el receptor del mensaje
+        (es decir, el Secreto de Consumidor OAuth y la Clave de Acceso autorizada combinados). Este mecanismo de hash
+        se aplica a los parámetros y contenido de cualquier solicitud OAuth, que se
+        concatenan en una "cadena de firma base" según lo definido por la especificación de OAuth.
+    </p>
+<p>
+        RSA-SHA1 opera con principios similares, excepto que el secreto compartido es, como cabría
+        esperar, la clave privada RSA de cada parte. Ambos lados tendrían la clave pública del otro para
+        verificar las firmas digitales. Esto supone un cierto nivel de riesgo en comparación con HMAC-SHA1,
+        ya que el método RSA no usa la Clave de Acceso como parte del secreto compartido. Esto significa
+        que si la clave privada RSA de cualquier Consumidor se ve comprometida, todos los Tokens de Acceso asignados
+        a ese Consumidor también lo están. RSA impone un esquema de todo o nada. En general, la mayoría de los
+        proveedores de servicios que ofrecen autorización OAuth han tendido, por lo tanto, a usar HMAC-SHA1 de
+        forma predeterminada, y aquellos que ofrecen RSA-SHA1 pueden ofrecer compatibilidad de reserva con HMAC-SHA1.
+    </p>
+<p>
+        Si bien las firmas digitales aumentan la seguridad de OAuth, siguen siendo vulnerables a otras formas de
+        ataque, como los ataques de repetición que copian solicitudes anteriores que fueron interceptadas y
+        firmadas válidamente en ese momento. Un atacante ahora puede reenviar exactamente la misma solicitud a un
+        Proveedor en cualquier momento e interceptar sus resultados. Esto plantea un riesgo importante, pero es
+        bastante sencillo defenderse de él: agregar una cadena única (es decir, un nonce) a todas las solicitudes que
+        cambia por solicitud (cambiando así continuamente la cadena de firma) pero que nunca puede
+        reutilizarse porque los Proveedores rastrean activamente los nonces usados dentro de una determinada ventana definida por
+        la marca de tiempo que también se adjunta a una solicitud. Podría sospechar primero que, una vez que se deja de
+        rastrear un nonce en particular, la repetición podría funcionar, pero esto ignora la marca de tiempo, que puede
+        usarse para determinar la antigüedad de una solicitud en el momento en que fue firmada válidamente. Se puede asumir que
+        una solicitud de una semana de antigüedad usada en un intento de repetición debería ser descartada sumariamente.
+    </p>
+<p>
+        Como observación final, esta no es una revisión exhaustiva de la arquitectura de seguridad en OAuth. Por
+        ejemplo, ¿qué pasa si las solicitudes <acronym class="acronym">HTTP</acronym> que contienen tanto el Token de Acceso como
+        el Secreto de Consumidor son espiadas? El sistema depende de al menos una transmisión en claro
+        de cada uno, a menos que <acronym class="acronym">HTTPS</acronym> esté activo, por lo que la conclusión obvia es que, donde
+        sea factible, se debe preferir <acronym class="acronym">HTTPS</acronym>, dejando el
+        <acronym class="acronym">HTTP</acronym> no seguro solo para cuando no sea posible o asequible hacerlo.
+    </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.oauth.introduction.getting-started"></a>52.1.3. Primeros pasos</h3></div></div></div>
+<p>
+        Con el protocolo OAuth explicado, mostremos un ejemplo simple con
+        código fuente. Nuestro nuevo Consumidor gestionará el envío de estados de Twitter.
+        Para hacerlo, deberá estar registrado en Twitter para recibir
+        una Clave de Consumidor y un Secreto de Consumidor OAuth. Estos se utilizan para obtener
+        un Token de Acceso antes de usar la <acronym class="acronym">API</acronym> de Twitter para publicar un mensaje de estado.
+    </p>
+<p>
+        Suponiendo que hemos obtenido una clave y un secreto, podemos iniciar el flujo de trabajo de OAuth
+        configurando una instancia de <code class="classname">Zend_Oauth_Consumer</code> de la
+        siguiente manera, pasándole una configuración (ya sea un array o un objeto
+        <code class="classname">Zend_Config</code>).
+    </p>
+<pre class="programlisting">
+$config = array(
+    'callbackUrl' =&gt; 'http://example.com/callback.php',
+    'siteUrl' =&gt; 'http://twitter.com/oauth',
+    'consumerKey' =&gt; 'gg3DsFTW9OU9eWPnbuPzQ',
+    'consumerSecret' =&gt; 'tFB0fyWLSMf74lkEu9FTyoHXcazOWpbrAjTCCK48A'
+);
+$consumer = new Zend_Oauth_Consumer($config);
+</pre>
+<p>
+        El callbackUrl es la URI que queremos que Twitter solicite a nuestro servidor
+        al enviar información. Veremos esto más adelante. El siteUrl es la
+        URI base de los puntos de acceso de la <acronym class="acronym">API</acronym> OAuth de Twitter. La lista completa de puntos de acceso
+        incluye http://twitter.com/oauth/request_token, http://twitter.com/oauth/access_token,
+        y http://twitter.com/oauth/authorize. El siteUrl base utiliza una convención
+        que mapea a estos tres puntos de acceso OAuth (como estándar) para solicitar un
+        token de solicitud, token de acceso o autorización. Si los puntos de acceso reales de
+        cualquier servicio difieren del conjunto estándar, estas tres URI pueden establecerse por separado
+        usando los métodos <code class="methodname">setRequestTokenUrl()</code>,
+        <code class="methodname">setAccessTokenUrl()</code>,
+        y <code class="methodname">setAuthorizeUrl()</code>, o los campos de configuración requestTokenUrl,
+        accessTokenUrl y authorizeUrl.
+    </p>
+<p>
+        El consumerKey y consumerSecret se obtienen de Twitter cuando su
+        aplicación se registra para el acceso OAuth. Esto también aplica a cualquier servicio
+        habilitado para OAuth, por lo que cada uno proporcionará una clave y un secreto para su
+        aplicación.
+    </p>
+<p>
+        Todas estas opciones de configuración pueden establecerse mediante llamadas a métodos, simplemente
+        convirtiendo, por ejemplo, callbackUrl a setCallbackUrl().
+    </p>
+<p>
+        Además, debe tener en cuenta otros valores de configuración no
+        utilizados explícitamente: requestMethod y requestScheme. Por defecto,
+        <code class="classname">Zend_Oauth_Consumer</code> envía las solicitudes como POST (excepto para una
+        redirección, que usa <code class="constant">GET</code>). El cliente personalizado (ver más adelante) también
+        incluye su autorización mediante una cabecera. Algunos servicios pueden, a su discreción,
+        requerir alternativas. Puede restablecer el requestMethod (que por defecto
+        es Zend_Oauth::POST) a Zend_Oauth::GET, por ejemplo, y restablecer el
+        requestScheme desde su valor predeterminado de Zend_Oauth::REQUEST_SCHEME_HEADER a uno
+        de Zend_Oauth::REQUEST_SCHEME_POSTBODY o
+        Zend_Oauth::REQUEST_SCHEME_QUERYSTRING. Normalmente los valores predeterminados deberían funcionar
+        bien, salvo en algunos casos excepcionales. Por favor, consulte la documentación del proveedor de servicios
+        para más detalles.
+    </p>
+<p>
+        La segunda área de personalización es cómo opera <acronym class="acronym">HMAC</acronym>
+        al calcular/comparar las firmas para todas las solicitudes. Esto se configura usando
+        el campo de configuración signatureMethod o <code class="methodname">setSignatureMethod()
+        </code>. Por defecto, este es HMAC-SHA1. También puede establecerlo en el método
+        preferido de un proveedor, incluyendo RSA-SHA1. Para RSA-SHA1, también debe configurar
+        las claves privada y pública RSA a través de los campos de configuración rsaPrivateKey y rsaPublicKey,
+        o los métodos <code class="methodname">setRsaPrivateKey()</code> y
+        <code class="methodname">setRsaPublicKey()</code>.
+    </p>
+<p>
+        La primera parte del flujo de trabajo de OAuth es obtener un token de solicitud. Esto
+        se logra usando:
+    </p>
+<pre class="programlisting">
+$config = array(
+    'callbackUrl' =&gt; 'http://example.com/callback.php',
+    'siteUrl' =&gt; 'http://twitter.com/oauth',
+    'consumerKey' =&gt; 'gg3DsFTW9OU9eWPnbuPzQ',
+    'consumerSecret' =&gt; 'tFB0fyWLSMf74lkEu9FTyoHXcazOWpbrAjTCCK48A'
+);
+$consumer = new Zend_Oauth_Consumer($config);
+
+// fetch a request token
+$token = $consumer-&gt;getRequestToken();
+</pre>
+<p>
+        El nuevo token de solicitud (una instancia de <code class="classname">Zend_Oauth_Token_Request
+        </code>) no está autorizado. Para intercambiarlo por un
+        token autorizado con el que podamos acceder a la <acronym class="acronym">API</acronym> de Twitter, necesitamos que el usuario lo
+        autorice. Logramos esto redirigiendo al usuario al punto de acceso de autorización de Twitter
+        mediante:
+    </p>
+<pre class="programlisting">
+$config = array(
+    'callbackUrl' =&gt; 'http://example.com/callback.php',
+    'siteUrl' =&gt; 'http://twitter.com/oauth',
+    'consumerKey' =&gt; 'gg3DsFTW9OU9eWPnbuPzQ',
+    'consumerSecret' =&gt; 'tFB0fyWLSMf74lkEu9FTyoHXcazOWpbrAjTCCK48A'
+);
+$consumer = new Zend_Oauth_Consumer($config);
+
+// fetch a request token
+$token = $consumer-&gt;getRequestToken();
+
+// persist the token to storage
+$_SESSION['TWITTER_REQUEST_TOKEN'] = serialize($token);
+
+// redirect the user
+$consumer-&gt;redirect();
+</pre>
+<p>
+        El usuario ahora será redirigido a Twitter. Se le pedirá que autorice
+        el token de solicitud adjunto a la cadena de consulta de la URI de redirección. Suponiendo que
+        acepte y complete la autorización, será redirigido nuevamente, esta
+        vez a nuestra URL de retorno tal como se estableció previamente (tenga en cuenta que la URL de retorno también
+        está registrada en Twitter cuando registramos nuestra aplicación).
+    </p>
+<p>
+        Antes de redirigir al usuario, debemos persistir el token de solicitud en el almacenamiento.
+        Por simplicidad, solo estoy usando la sesión del usuario, pero fácilmente puede usar una
+        base de datos con el mismo propósito, siempre que vincule el token de solicitud al
+        usuario actual, de modo que pueda recuperarse cuando regrese a nuestra aplicación.
+    </p>
+<p>
+        La URI de redirección de Twitter contendrá un Token de Acceso autorizado. Podemos
+        incluir código para analizar este token de acceso de la siguiente manera; este código
+        fuente existiría dentro del código ejecutado de nuestra URI de retorno. Una vez analizado,
+        podemos descartar el token de solicitud anterior, y en su lugar persistir el token
+        de acceso para uso futuro con la <acronym class="acronym">API</acronym> de Twitter. Nuevamente, simplemente lo estamos persistiendo
+        en la sesión del usuario, pero en realidad un token de acceso puede tener una vida útil larga,
+        por lo que realmente debería almacenarse en una base de datos.
+    </p>
+<pre class="programlisting">
+$config = array(
+    'callbackUrl' =&gt; 'http://example.com/callback.php',
+    'siteUrl' =&gt; 'http://twitter.com/oauth',
+    'consumerKey' =&gt; 'gg3DsFTW9OU9eWPnbuPzQ',
+    'consumerSecret' =&gt; 'tFB0fyWLSMf74lkEu9FTyoHXcazOWpbrAjTCCK48A'
+);
+$consumer = new Zend_Oauth_Consumer($config);
+
+if (!empty($_GET) &amp;&amp; isset($_SESSION['TWITTER_REQUEST_TOKEN'])) {
+    $token = $consumer-&gt;getAccessToken(
+                 $_GET,
+                 unserialize($_SESSION['TWITTER_REQUEST_TOKEN'])
+             );
+    $_SESSION['TWITTER_ACCESS_TOKEN'] = serialize($token);
+
+    // Now that we have an Access Token, we can discard the Request Token
+    $_SESSION['TWITTER_REQUEST_TOKEN'] = null;
+} else {
+    // Mistaken request? Some malfeasant trying something?
+    exit('Invalid callback request. Oops. Sorry.');
+}
+</pre>
+<p>
+        ¡Éxito! Tenemos un token de acceso autorizado, así que es hora de realmente
+        usar la <acronym class="acronym">API</acronym> de Twitter. Dado que el token de acceso debe incluirse en cada
+        solicitud individual a la <acronym class="acronym">API</acronym>, <code class="classname">Zend_Oauth_Consumer</code> ofrece un
+        cliente <acronym class="acronym">HTTP</acronym> listo para usar (una subclase de
+        <code class="classname">Zend_Http_Client</code>) para usarlo ya sea por sí solo o pasándolo como un
+        Cliente <acronym class="acronym">HTTP</acronym> personalizado a otra biblioteca o
+        componente. Aquí hay un ejemplo de su uso independiente. Esto se puede hacer
+        desde cualquier lugar de su aplicación, siempre que pueda acceder a la configuración
+        de OAuth y recuperar el token de acceso autorizado final.
+    </p>
+<pre class="programlisting">
+$config = array(
+    'callbackUrl' =&gt; 'http://example.com/callback.php',
+    'siteUrl' =&gt; 'http://twitter.com/oauth',
+    'consumerKey' =&gt; 'gg3DsFTW9OU9eWPnbuPzQ',
+    'consumerSecret' =&gt; 'tFB0fyWLSMf74lkEu9FTyoHXcazOWpbrAjTCCK48A'
+);
+
+$statusMessage = 'I\'m posting to Twitter using Zend_Oauth!';
+
+$token = unserialize($_SESSION['TWITTER_ACCESS_TOKEN']);
+$client = $token-&gt;getHttpClient($configuration);
+$client-&gt;setUri('http://twitter.com/statuses/update.json');
+$client-&gt;setMethod(Zend_Http_Client::POST);
+$client-&gt;setParameterPost('status', $statusMessage);
+$response = $client-&gt;request();
+
+$data = Zend_Json::decode($response-&gt;getBody());
+$result = $response-&gt;getBody();
+if (isset($data-&gt;text)) {
+    $result = 'true';
+}
+echo $result;
+</pre>
+<p>
+        Como nota sobre el cliente personalizado, este puede pasarse a la mayoría de las
+        clases de servicio de Zend Framework u otras clases usando <code class="classname">Zend_Http_Client
+        </code>, desplazando al cliente predeterminado que de otro modo usarían.
+    </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.navigation.containers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.openid.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">51.3. Contenedores </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 53. Zend_OpenId</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,523 @@
+<?php $title = '36.7. Decoradores de formulario estándar incluidos con Zend Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">36.7. Decoradores de formulario estándar incluidos con Zend Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.form.standardElements.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 36. Zend_Form</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.form.i18n.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.form.standardDecorators"></a>36.7. Decoradores de formulario estándar incluidos con Zend Framework</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Form</code> incluye varios decoradores estándar. Para más
+        información sobre el uso general de decoradores, consulte <a class="link" href="zend.form.decorators.phtml" title="36.5. Creating Custom Form Markup Using Zend_Form_Decorator">la sección de Decoradores</a>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.callback"></a>36.7.1. Zend_Form_Decorator_Callback</h3></div></div></div>
+<p>
+            El decorador Callback puede ejecutar una retrollamada (callback) arbitraria para
+            renderizar contenido. Las retrollamadas deben especificarse mediante la opción
+            'callback' pasada en la configuración del decorador, y pueden ser cualquier
+            tipo de retrollamada válido de <acronym class="acronym">PHP</acronym>. Las retrollamadas deben aceptar tres
+            argumentos, <code class="varname">$content</code> (el contenido original pasado a
+            el decorador), <code class="varname">$element</code> (el elemento que se está
+            decorando), y un array de <code class="varname">$options</code>. Como ejemplo
+            de retrollamada:
+        </p>
+<pre class="programlisting">
+class Util
+{
+    public static function label($content, $element, array $options)
+    {
+        return '&lt;span class="label"&gt;' . $element-&gt;getLabel() . "&lt;/span&gt;";
+    }
+}
+</pre>
+<p>
+            Esta retrollamada se especificaría como <code class="methodname">array('Util',
+                'label')</code>, y generaría cierto (mal) marcado <acronym class="acronym">HTML</acronym>
+            para la etiqueta. El decorador Callback entonces reemplazaría,
+            añadiría o antepondría al contenido original el valor de
+            retorno de esto.
+        </p>
+<p>
+            El decorador Callback permite especificar un valor <code class="constant">NULL</code> para la
+            opción de posicionamiento, lo que reemplazará el contenido original con
+            el valor de retorno de la retrollamada; 'prepend' y 'append' siguen siendo
+            válidos también.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.captcha"></a>36.7.2. Zend_Form_Decorator_Captcha</h3></div></div></div>
+<p>
+            El decorador Captcha se utiliza con el <a class="link" href="zend.form.standardElements.phtml#zend.form.standardElements.captcha" title="36.6.2. Zend_Form_Element_Captcha">elemento de formulario
+                CAPTCHA</a>. Utiliza el método <code class="methodname">render()</code> del
+            adaptador CAPTCHA para generar la salida.
+        </p>
+<p>
+            Una variante del decorador Captcha, 'Captcha_Word', también es comúnmente
+            utilizada, y crea dos elementos, un id y un input. El id indica
+            el identificador de sesión contra el cual comparar, y el input es para la
+            verificación del CAPTCHA por parte del usuario. Estos se validan como un único
+            elemento.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.description"></a>36.7.3. Zend_Form_Decorator_Description</h3></div></div></div>
+<p>
+            El decorador Description puede utilizarse para mostrar una descripción establecida
+            en un <code class="classname">Zend_Form</code>, <code class="classname">Zend_Form_Element</code>, o
+            elemento <code class="classname">Zend_Form_DisplayGroup</code>; obtiene la descripción
+            mediante el método <code class="methodname">getDescription()</code> del objeto. Los casos de uso
+            comunes son proporcionar sugerencias de interfaz de usuario para sus elementos.
+        </p>
+<p>
+            Por defecto, si no hay ninguna descripción presente, no se genera ninguna salida. Si
+            la descripción está presente, entonces se envuelve en una etiqueta <acronym class="acronym">HTML</acronym>
+            <span class="emphasis"><em>p</em></span> por defecto, aunque puede especificar una etiqueta
+            pasando una opción <span class="property">tag</span> al crear el decorador, o
+            llamando a <code class="methodname">setTag()</code>. Adicionalmente puede especificar una clase
+            para la etiqueta usando la opción <span class="property">class</span> o llamando a
+            <code class="methodname">setOption('class', 'foo')</code>; por defecto, se usa la clase 'hint'.
+        </p>
+<p>
+            La descripción se escapa usando los mecanismos de escape del objeto de vista
+            por defecto. Puede deshabilitar esto pasando un valor
+            <code class="constant">FALSE</code> a la opción 'escape' del decorador o al método
+            <code class="methodname">setEscape()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.dtDdWrapper"></a>36.7.4. Zend_Form_Decorator_DtDdWrapper</h3></div></div></div>
+<p>
+            Los decoradores por defecto utilizan listas de definición
+            (<span class="emphasis"><em>&lt;dl&gt;</em></span>) para renderizar los elementos de formulario. Dado que los
+            elementos de formulario pueden aparecer en cualquier orden, los grupos de visualización y los subformularios pueden
+            intercalarse con otros elementos de formulario. Para mantener estos tipos particulares de
+            elementos dentro de la lista de definición, el DtDdWrapper crea un
+            nuevo término de definición vacío (<span class="emphasis"><em>&lt;dt&gt;</em></span>) y envuelve
+            su contenido en un nuevo dato de definición (<span class="emphasis"><em>&lt;dd&gt;</em></span>).
+            La salida se ve algo así:
+        </p>
+<pre class="programlisting">
+&lt;dt&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;fieldset id="subform"&gt;
+    &lt;legend&gt;User Information&lt;/legend&gt;
+    ...
+&lt;/fieldset&gt;&lt;/dd&gt;
+</pre>
+<p>
+            Este decorador reemplaza el contenido que se le proporciona envolviéndolo
+            dentro del elemento <span class="emphasis"><em>&lt;dd&gt;</em></span>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.errors"></a>36.7.5. Zend_Form_Decorator_Errors</h3></div></div></div>
+<p>
+            Los errores de elemento tienen su propio decorador con el decorador Errors.
+            Este decorador delega en el ayudante de vista (view helper) FormErrors,
+            el cual renderiza los mensajes de error en una lista no ordenada
+            (<span class="emphasis"><em>&lt;ul&gt;</em></span>) como elementos de lista. El elemento
+            <span class="emphasis"><em>&lt;ul&gt;</em></span> recibe una clase de "errors".
+        </p>
+<p>
+            El decorador Errors puede anteponer o añadir el contenido
+            que se le proporciona.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.fieldset"></a>36.7.6. Zend_Form_Decorator_Fieldset</h3></div></div></div>
+<p>
+            Los grupos de visualización y los subformularios renderizan su contenido dentro de
+            fieldsets por defecto. El decorador Fieldset comprueba si existe una
+            opción 'legend' o un método <code class="methodname">getLegend()</code> en el
+            elemento registrado, y lo usa como leyenda si no está vacío. Cualquier
+            contenido pasado se envuelve en el fieldset <acronym class="acronym">HTML</acronym>, reemplazando el
+            contenido original. Cualquier atributo establecido en el elemento decorado se
+            pasa al fieldset como atributos <acronym class="acronym">HTML</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.file"></a>36.7.7. Zend_Form_Decorator_File</h3></div></div></div>
+<p>
+            Los elementos File tienen una notación especial cuando se usan múltiples
+            elementos file o subformularios. El decorador File es usado por
+            <code class="classname">Zend_Form_Element_File</code> y permite establecer múltiples
+            elementos file con una sola llamada a método. Se usa
+            automáticamente y corrige el nombre de los elementos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.form"></a>36.7.8. Zend_Form_Decorator_Form</h3></div></div></div>
+<p>
+            Los objetos <code class="classname">Zend_Form</code> típicamente necesitan renderizar una
+            etiqueta form <acronym class="acronym">HTML</acronym>. El decorador Form delega en el ayudante de vista Form. Envuelve
+            cualquier contenido proporcionado en un elemento form <acronym class="acronym">HTML</acronym>, usando la
+            acción y el método del objeto <code class="classname">Zend_Form</code>, y cualquier
+            atributo como atributos <acronym class="acronym">HTML</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.formElements"></a>36.7.9. Zend_Form_Decorator_FormElements</h3></div></div></div>
+<p>
+            Los formularios, grupos de visualización y subformularios son colecciones de
+            elementos. Para renderizar estos elementos, utilizan el
+            decorador FormElements, que itera a través de todos los elementos,
+            llamando a <code class="methodname">render()</code> en cada uno y uniéndolos con el
+            separador registrado. Puede añadir o anteponer contenido
+            que se le pasa.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.formErrors"></a>36.7.10. Zend_Form_Decorator_FormErrors</h3></div></div></div>
+<p>
+            Algunos desarrolladores y diseñadores prefieren agrupar todos los mensajes de error en
+            la parte superior del formulario. El decorador FormErrors le permite hacer esto.
+        </p>
+<p>
+            Por defecto, la lista de errores generada tiene el siguiente marcado:
+        </p>
+<pre class="programlisting">
+&lt;ul class="form-errors&gt;
+    &lt;li&gt;&lt;b&gt;[element label or name]&lt;/b&gt;&lt;ul&gt;
+            &lt;li&gt;[error message]&lt;/li&gt;
+            &lt;li&gt;[error message]&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;ul&gt;
+        &lt;li&gt;&lt;b&gt;[subform element label or name&lt;/b&gt;&lt;ul&gt;
+                &lt;li&gt;[error message]&lt;/li&gt;
+                &lt;li&gt;[error message]&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<p>
+            Puede pasar una variedad de opciones para configurar la salida
+            generada:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">ignoreSubForms</span>: si se debe deshabilitar o no la recursión en
+                    subformularios. Valor por defecto: <code class="constant">FALSE</code> (es decir, permite la recursión).
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupElementLabelEnd</span>: Marcado a añadir a las etiquetas
+                    de los elementos. Valor por defecto: '&lt;/b&gt;'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupElementLabelStart</span>: Marcado a anteponer a
+                    las etiquetas de los elementos. Valor por defecto: '&lt;b&gt;'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupListEnd</span>: Marcado a añadir a las listas de mensajes de error
+                    . Valor por defecto: '&lt;/ul&gt;'.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupListItemEnd</span>: Marcado a añadir a los
+                    mensajes de error individuales. Valor por defecto: '&lt;/li&gt;'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupListItemStart</span>: Marcado a anteponer a los
+                    mensajes de error individuales. Valor por defecto: '&lt;li&gt;'
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">markupListStart</span>: Marcado a añadir a las listas de mensajes
+                    de error. Valor por defecto: '&lt;ul class="form-errors"&gt;'
+                </p></li>
+</ul></div>
+<p>
+            El decorador FormErrors puede añadir o anteponer el contenido
+            que se le proporciona.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.htmlTag"></a>36.7.11. Zend_Form_Decorator_HtmlTag</h3></div></div></div>
+<p>
+            El decorador HtmlTag le permite utilizar etiquetas <acronym class="acronym">HTML</acronym> para
+            decorar contenido; la etiqueta utilizada se pasa en la opción
+            'tag', y cualquier otra opción se usa como atributos <acronym class="acronym">HTML</acronym> de
+            esa etiqueta. Se asume que la etiqueta es de nivel de bloque por defecto, y
+            reemplaza el contenido envolviéndolo en la etiqueta dada. Sin embargo,
+            también puede especificar un posicionamiento para añadir o anteponer una etiqueta.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.image"></a>36.7.12. Zend_Form_Decorator_Image</h3></div></div></div>
+<p>
+            El decorador Image le permite crear una entrada de imagen <acronym class="acronym">HTML</acronym>
+            (<span class="emphasis"><em>&lt;input type="image" ... /&gt;</em></span>), y opcionalmente
+            renderizarla dentro de otra etiqueta <acronym class="acronym">HTML</acronym>.
+        </p>
+<p>
+            Por defecto, el decorador usa la propiedad src del elemento, que puede
+            establecerse con el método <code class="methodname">setImage()</code>, como la fuente
+            de la imagen. Adicionalmente, la etiqueta del elemento se usará como la etiqueta
+            alt, y el <span class="property">imageValue</span> (manipulado con los métodos de acceso
+            <code class="methodname">setImageValue()</code> y
+            <code class="methodname">getImageValue()</code> del elemento Image) se usará para el valor.
+        </p>
+<p>
+            Para especificar una etiqueta <acronym class="acronym">HTML</acronym> con la cual envolver el elemento, o bien pase una
+            opción 'tag' al decorador, o llame explícitamente a
+            <code class="methodname">setTag()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.label"></a>36.7.13. Zend_Form_Decorator_Label</h3></div></div></div>
+<p>
+            Los elementos de formulario típicamente tienen etiquetas, y el decorador Label se
+            utiliza para renderizar estas etiquetas. Delega en el ayudante de vista FormLabel,
+            y obtiene la etiqueta del elemento usando el método
+            <code class="methodname">getLabel()</code> del elemento. Si no hay etiqueta
+            presente, no se renderiza ninguna. Por defecto, las etiquetas se traducen cuando existe un
+            adaptador de traducción y existe una traducción para la etiqueta.
+        </p>
+<p>
+            Opcionalmente puede especificar una opción 'tag'; si se proporciona, envuelve
+            la etiqueta en esa etiqueta de nivel de bloque. Si la opción 'tag' está
+            presente, y no hay ninguna etiqueta presente, la etiqueta se renderiza sin
+            contenido. Puede especificar la clase a usar con la etiqueta con la
+            opción 'class' o llamando a <code class="methodname">setTagClass()</code>.
+        </p>
+<p>
+            Adicionalmente, puede especificar prefijos y sufijos a usar al
+            mostrar el elemento, según si la etiqueta es para un elemento
+            opcional o requerido. Los casos de uso comunes serían añadir un
+            ':' a la etiqueta, o un '*' indicando que un elemento es requerido. Puede
+            hacer esto con las siguientes opciones y métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">optionalPrefix</span>: establece el texto a anteponer a la
+                    etiqueta cuando el elemento es opcional. Use los métodos de acceso
+                    <code class="methodname">setOptionalPrefix()</code> y
+                    <code class="methodname">getOptionalPrefix()</code> para manipularlo.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">optionalSuffix</span>: establece el texto a añadir a la
+                    etiqueta cuando el elemento es opcional. Use los métodos de acceso
+                    <code class="methodname">setOptionalSuffix()</code> y
+                    <code class="methodname">getOptionalSuffix()</code> para manipularlo.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">requiredPrefix</span>: establece el texto a anteponer a la
+                    etiqueta cuando el elemento es requerido. Use los métodos de acceso
+                    <code class="methodname">setRequiredPrefix()</code> y
+                    <code class="methodname">getRequiredPrefix()</code> para manipularlo.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">requiredSuffix</span>: establece el texto a añadir a la
+                    etiqueta cuando el elemento es requerido. Use los métodos de acceso
+                    <code class="methodname">setRequiredSuffix()</code> y
+                    <code class="methodname">getRequiredSuffix()</code> para manipularlo.
+                </p></li>
+</ul></div>
+<p>
+            Por defecto, el decorador Label antepone al contenido
+            proporcionado; Esto puede controlarse especificando una de las siguientes
+            opciones de 'placement':
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">PREPEND</span>: renderiza la etiqueta antes del
+                    contenido.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">APPEND</span>: renderiza la etiqueta después del
+                    contenido.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">IMPLICIT_PREPEND</span>: renderiza el elemento
+                    dentro de la etiqueta label, colocando el texto de la etiqueta antes del contenido.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">IMPLICIT_APPEND</span>: renderiza el elemento
+                    dentro de la etiqueta label, colocando el texto de la etiqueta después del contenido.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.prepareElements"></a>36.7.14. Zend_Form_Decorator_PrepareElements</h3></div></div></div>
+<p>
+            Los formularios, grupos de visualización y subformularios son colecciones de
+            elementos. Al usar el decorador <a class="link" href="zend.form.standardDecorators.phtml#zend.form.standardDecorators.viewScript" title="36.7.17. Zend_Form_Decorator_ViewScript">ViewScript</a>
+            con su formulario o subformulario, es útil poder
+            establecer recursivamente el objeto de vista, el traductor, y todos los nombres
+            completamente calificados (según lo determinado por la notación de array de subformulario). El
+            decorador 'PrepareElements' puede hacer esto por usted. Típicamente, lo
+            establecerá como el primer decorador en la lista.
+        </p>
+<pre class="programlisting">
+$form-&gt;setDecorators(array(
+    'PrepareElements',
+    array('ViewScript', array('viewScript' =&gt; 'form.phtml')),
+));
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.tooltip"></a>36.7.15. Zend_Form_Decorator_Tooltip</h3></div></div></div>
+<p>
+            El decorador Tooltip traduce el atributo title si está
+            disponible, si el traductor está disponible y si el traductor no está
+            deshabilitado en el elemento que se está renderizando.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.viewHelper"></a>36.7.16. Zend_Form_Decorator_ViewHelper</h3></div></div></div>
+<p>
+            La mayoría de los elementos utilizan ayudantes de vista de <code class="classname">Zend_View</code>
+            para renderizar, y esto se hace con el decorador ViewHelper. Con
+            él, puede especificar una etiqueta 'helper' para establecer explícitamente el ayudante
+            de vista a utilizar; si no se proporciona ninguno, usa el último segmento
+            del nombre de clase del elemento para determinar el ayudante, anteponiendo
+            la cadena 'form': por ejemplo, 'Zend_Form_Element_Text' buscaría
+            un ayudante de vista de 'formText'.
+        </p>
+<p>
+            Cualquier atributo del elemento proporcionado se pasa al ayudante de
+            vista como atributos del elemento.
+        </p>
+<p>
+            Por defecto, este decorador añade contenido; use la opción
+            'placement' para especificar un posicionamiento alternativo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.standardDecorators.viewScript"></a>36.7.17. Zend_Form_Decorator_ViewScript</h3></div></div></div>
+<p>
+            A veces puede querer usar un script de vista para crear sus
+            elementos; de esta forma puede tener control detallado sobre sus
+            elementos, entregar el script de vista a un diseñador, o simplemente crear
+            una forma de anular fácilmente la configuración según el módulo que esté usando
+            (cada módulo podría opcionalmente anular los scripts de vista de elementos para adaptarse a
+            sus propias necesidades). El decorador ViewScript resuelve este problema.
+        </p>
+<p>
+            El decorador ViewScript requiere una opción 'viewScript', ya sea
+            proporcionada al decorador, o como un atributo del elemento. Luego
+            renderiza ese script de vista como un script parcial, lo que significa que cada llamada
+            a él tiene su propio ámbito de variables; no se inyectará ninguna variable de la vista
+            excepto el elemento mismo. Luego se rellenan varias variables:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">element</span>: el elemento que se está decorando
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">content</span>: el contenido pasado al decorador
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">decorator</span>: el objeto decorador mismo
+                </p></li>
+<li class="listitem"><p>
+                    Adicionalmente, todas las opciones pasadas al decorador mediante
+                    <code class="methodname">setOptions()</code> que no se usan internamente (tales
+                    como placement, separator, etc.) se pasan al script de vista
+                    como variables de vista.
+                </p></li>
+</ul></div>
+<p>
+            Como ejemplo, podría tener el siguiente elemento:
+        </p>
+<pre class="programlisting">
+// Setting the decorator for the element to a single, ViewScript,
+// decorator, specifying the viewScript as an option, and some extra
+// options:
+$element-&gt;setDecorators(array(array('ViewScript', array(
+    'viewScript' =&gt; '_element.phtml',
+    'class'      =&gt; 'form element'
+))));
+
+// OR specifying the viewScript as an element attribute:
+$element-&gt;viewScript = '_element.phtml';
+$element-&gt;setDecorators(array(array('ViewScript',
+                                    array('class' =&gt; 'form element'))));
+</pre>
+<p>
+            Entonces podría tener un script de vista algo así:
+        </p>
+<pre class="programlisting">
+&lt;div class="&lt;?php echo $this-&gt;class ?&gt;"&gt;
+    &lt;?php echo $this-&gt;formLabel($this-&gt;element-&gt;getName(),
+                         $this-&gt;element-&gt;getLabel()) ?&gt;
+    &lt;?php echo $this-&gt;{$this-&gt;element-&gt;helper}(
+        $this-&gt;element-&gt;getName(),
+        $this-&gt;element-&gt;getValue(),
+        $this-&gt;element-&gt;getAttribs()
+    ) ?&gt;
+    &lt;?php echo $this-&gt;formErrors($this-&gt;element-&gt;getMessages()) ?&gt;
+    &lt;div class="hint"&gt;&lt;?php echo $this-&gt;element-&gt;getDescription() ?&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+<div class="note"><table border="0" summary="Note: Replacing content with a view script">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Reemplazar el contenido con un script de vista</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Puede resultarle útil que el script de vista reemplace el
+                contenido proporcionado al decorador -- por ejemplo, si desea
+                envolverlo. Puede hacerlo especificando un valor booleano <code class="constant">FALSE</code>
+                para la opción 'placement' del decorador:
+            </p>
+<pre class="programlisting">
+// At decorator creation:
+$element-&gt;addDecorator('ViewScript', array('placement' =&gt; false));
+
+// Applying to an existing decorator instance:
+$decorator-&gt;setOption('placement', false);
+
+// Applying to a decorator already attached to an element:
+$element-&gt;getDecorator('ViewScript')-&gt;setOption('placement', false);
+
+// Within a view script used by a decorator:
+$this-&gt;decorator-&gt;setOption('placement', false);
+</pre>
+</td></tr>
+</table></div>
+<p>
+            Se recomienda usar el decorador ViewScript cuando desee tener
+            un control muy detallado sobre cómo se renderizan sus elementos.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.form.standardElements.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.form.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.form.i18n.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">36.6. Elementos de formulario estándar incluidos con Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 36.8. Internacionalización de Zend_Form</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

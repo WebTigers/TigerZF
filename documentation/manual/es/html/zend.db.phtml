@@ -1,0 +1,2295 @@
+<?php $title = 'Capítulo 27. Zend_Db'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 27. Zend_Db</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.date.additional.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.statement.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.db"></a>Capítulo 27. Zend_Db</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.db.phtml#zend.db.adapter">27.1. Zend_Db_Adapter</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.connecting">27.1.1. Conectando a una base de datos usando un adaptador</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.connecting.constructor">27.1.1.1. Usando un constructor de adaptador de Zend_Db</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.connecting.factory">27.1.1.2. Usando la fábrica de Zend_Db</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.connecting.factory-config">27.1.1.3. Usando Zend_Config con la fábrica de Zend_Db</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.connecting.parameters">27.1.1.4. Parámetros del adaptador</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.connecting.getconnection">27.1.1.5. Gestión de conexiones perezosas (lazy)</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.example-database">27.1.2. Base de datos de ejemplo</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.select">27.1.3. Lectura de resultados de consultas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchall">27.1.3.1. Obtención de un conjunto de resultados completo</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetch-mode">27.1.3.2. Cambio del modo de obtención (fetch)</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchassoc">27.1.3.3. Obtención de un conjunto de resultados como array asociativo</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchcol">27.1.3.4. Obtención de una sola columna de un conjunto de resultados</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchpairs">27.1.3.5. Obtención de pares clave-valor de un conjunto de resultados</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchrow">27.1.3.6. Obtención de una sola fila de un conjunto de resultados</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.select.fetchone">27.1.3.7. Obtención de un solo valor escalar de un conjunto de resultados</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.write">27.1.4. Escritura de cambios en la base de datos</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.write.insert">27.1.4.1. Inserción de datos</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.write.lastinsertid">27.1.4.2. Recuperación de un valor generado</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.write.update">27.1.4.3. Actualización de datos</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.write.delete">27.1.4.4. Eliminación de datos</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.quoting">27.1.5. Entrecomillado de valores e identificadores</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.quoting.quote">27.1.5.1. Uso de quote()</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.quoting.quote-into">27.1.5.2. Uso de quoteInto()</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.quoting.quote-identifier">27.1.5.3. Uso de quoteIdentifier()</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.transactions">27.1.6. Control de transacciones de la base de datos</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.list-describe">27.1.7. Listado y descripción de tablas</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.closing">27.1.8. Cierre de una conexión</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.other-statements">27.1.9. Ejecución de otras sentencias de base de datos</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.server-version">27.1.10. Recuperación de la versión del servidor</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.phtml#zend.db.adapter.adapter-notes">27.1.11. Notas sobre adaptadores específicos</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.ibm-db2">27.1.11.1. IBM DB2</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.mysqli">27.1.11.2. MySQLi</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.oracle">27.1.11.3. Oracle</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.sqlsrv">27.1.11.4. Microsoft SQL Server</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-ibm">27.1.11.5. PDO para IBM DB2 e Informix Dynamic Server (IDS)</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-mssql">27.1.11.6. PDO Microsoft SQL Server</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-mysql">27.1.11.7. PDO MySQL</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-oci">27.1.11.8. PDO Oracle</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-pgsql">27.1.11.9. PDO PostgreSQL</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.pdo-sqlite">27.1.11.10. PDO SQLite</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.phtml#zend.db.adapter.adapter-notes.firebird">27.1.11.11. Firebird (Interbase)</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.statement.phtml">27.2. Zend_Db_Statement</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.statement.phtml#zend.db.statement.creating">27.2.1. Creación de una sentencia (Statement)</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.statement.phtml#zend.db.statement.executing">27.2.2. Ejecución de una sentencia</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.statement.phtml#zend.db.statement.fetching">27.2.3. Obtención de resultados de una sentencia SELECT</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.statement.phtml#zend.db.statement.fetching.fetch">27.2.3.1. Obtención de una sola fila de un conjunto de resultados</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.statement.phtml#zend.db.statement.fetching.fetchall">27.2.3.2. Obtención de un conjunto de resultados completo</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.statement.phtml#zend.db.statement.fetching.fetch-mode">27.2.3.3. Cambio del modo de obtención (fetch)</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.statement.phtml#zend.db.statement.fetching.fetchcolumn">27.2.3.4. Obtención de una sola columna de un conjunto de resultados</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.statement.phtml#zend.db.statement.fetching.fetchobject">27.2.3.5. Obtención de una fila como objeto</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.profiler.phtml">27.3. Zend_Db_Profiler</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.profiler.phtml#zend.db.profiler.introduction">27.3.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.profiler.phtml#zend.db.profiler.using">27.3.2. Uso del Profiler</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.profiler.phtml#zend.db.profiler.advanced">27.3.3. Uso avanzado del Profiler</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.profiler.phtml#zend.db.profiler.advanced.filtertime">27.3.3.1. Filtrar por tiempo transcurrido de la consulta</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.profiler.phtml#zend.db.profiler.advanced.filtertype">27.3.3.2. Filtrar por tipo de consulta</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.profiler.phtml#zend.db.profiler.advanced.getbytype">27.3.3.3. Recuperar perfiles por tipo de consulta</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.profiler.phtml#zend.db.profiler.profilers">27.3.4. Profilers especializados</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.db.profiler.phtml#zend.db.profiler.profilers.firebug">27.3.4.1. Perfilado con Firebug</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.select.phtml">27.4. Zend_Db_Select</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.select.phtml#zend.db.select.introduction">27.4.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.select.phtml#zend.db.select.creating">27.4.2. Creación de un objeto Select</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.select.phtml#zend.db.select.building">27.4.3. Construcción de consultas Select</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.from">27.4.3.1. Agregar una cláusula FROM</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.columns">27.4.3.2. Agregar columnas</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.columns-expr">27.4.3.3. Agregar columnas de expresión</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.columns-atomic">27.4.3.4. Agregar columnas a una tabla FROM o JOIN existente</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.join">27.4.3.5. Agregar otra tabla a la consulta con JOIN</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.where">27.4.3.6. Agregar una cláusula WHERE</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.group">27.4.3.7. Agregar una cláusula GROUP BY</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.having">27.4.3.8. Agregar una cláusula HAVING</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.order">27.4.3.9. Agregar una cláusula ORDER BY</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.limit">27.4.3.10. Agregar una cláusula LIMIT</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.distinct">27.4.3.11. Agregar el modificador de consulta DISTINCT</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.for-update">27.4.3.12. Agregar el modificador de consulta FOR UPDATE</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.building.union">27.4.3.13. Construcción de una consulta UNION</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.select.phtml#zend.db.select.execute">27.4.4. Ejecución de consultas Select</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.execute.query-adapter">27.4.4.1. Ejecución de consultas Select desde el adaptador Db</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.execute.query-select">27.4.4.2. Ejecución de consultas Select desde el objeto</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.execute.tostring">27.4.4.3. Conversión de un objeto Select en una cadena SQL</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.select.phtml#zend.db.select.other">27.4.5. Otros métodos</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.other.get-part">27.4.5.1. Recuperación de partes del objeto Select</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.select.phtml#zend.db.select.other.reset">27.4.5.2. Reinicio de partes del objeto Select</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.table.phtml">27.5. Zend_Db_Table</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.introduction">27.5.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.concrete">27.5.2. Uso de Zend_Db_Table como clase concreta</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.defining">27.5.3. Definición de una clase Table</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.defining.table-schema">27.5.3.1. Definición del nombre y esquema de la tabla</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.defining.primary-key">27.5.3.2. Definición de la clave primaria de la tabla</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.defining.setup">27.5.3.3. Sobrescribir los métodos de configuración de la tabla</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.initialization">27.5.3.4. Inicialización de la tabla</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.constructing">27.5.4. Creación de una instancia de una tabla</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.constructing.adapter">27.5.4.1. Especificación de un adaptador de base de datos</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.constructing.default-adapter">27.5.4.2. Establecimiento de un adaptador de base de datos por defecto</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.constructing.registry">27.5.4.3. Almacenamiento de un adaptador de base de datos en el Registro</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.insert">27.5.5. Inserción de filas en una tabla</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.insert.key-auto">27.5.5.1. Uso de una tabla con clave autoincremental</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.insert.key-sequence">27.5.5.2. Uso de una tabla con una secuencia</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.insert.key-natural">27.5.5.3. Uso de una tabla con una clave natural</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.update">27.5.6. Actualización de filas en una tabla</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.delete">27.5.7. Eliminación de filas de una tabla</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.find">27.5.8. Búsqueda de filas por clave primaria</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.fetch-all">27.5.9. Consulta de un conjunto de filas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.fetch-all.select">27.5.9.1. API de Select</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.fetch-all.usage">27.5.9.2. Obtención de un conjunto de filas (rowset)</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.advanced.usage">27.5.9.3. Uso avanzado</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.fetch-row">27.5.10. Consulta de una sola fila</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.info">27.5.11. Recuperación de información de metadatos de la tabla</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.metadata.caching">27.5.12. Caché de metadatos de la tabla</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.metadata.caching.hardcoding">27.5.12.1. Codificación fija de los metadatos de la tabla</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.phtml#zend.db.table.extending">27.5.13. Personalización y extensión de una clase Table</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.extending.row-rowset">27.5.13.1. Uso de clases Row o Rowset personalizadas</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.extending.insert-update">27.5.13.2. Definición de lógica personalizada para Insert, Update y Delete</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.extending.finders">27.5.13.3. Definir métodos de búsqueda personalizados en Zend_Db_Table</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.phtml#zend.db.table.extending.inflection">27.5.13.4. Definir la inflexión en Zend_Db_Table</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.table.row.phtml">27.6. Zend_Db_Table_Row</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.table.row.phtml#zend.db.table.row.introduction">27.6.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.row.phtml#zend.db.table.row.read">27.6.2. Obtención de una fila</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.read.get">27.6.2.1. Lectura de valores de columna de una fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.read.to-array">27.6.2.2. Recuperación de los datos de una fila como array</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.read.relationships">27.6.2.3. Obtención de datos de tablas relacionadas</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.row.phtml#zend.db.table.row.write">27.6.3. Escritura de filas en la base de datos</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.write.set">27.6.3.1. Cambio de valores de columna en una fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.write.insert">27.6.3.2. Inserción de una nueva fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.write.set-from-array">27.6.3.3. Cambio de valores en varias columnas</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.write.delete">27.6.3.4. Eliminación de una fila</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.row.phtml#zend.db.table.row.serialize">27.6.4. Serialización y deserialización de filas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.serialize.serializing">27.6.4.1. Serialización de una fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.serialize.unserializing">27.6.4.2. Deserialización de los datos de una fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.serialize.set-table">27.6.4.3. Reactivación de una fila como datos vivos</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.db.table.row.phtml#zend.db.table.row.extending">27.6.5. Extensión de la clase Row</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.extending.overriding">27.6.5.1. Inicialización de la fila</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.extending.insert-update">27.6.5.2. Definición de lógica personalizada para Insert, Update y Delete en Zend_Db_Table_Row</a></span></dt>
+<dt><span class="sect3"><a href="zend.db.table.row.phtml#zend.db.table.row.extending.inflection">27.6.5.3. Definir la inflexión en Zend_Db_Table_Row</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.table.rowset.phtml">27.7. Zend_Db_Table_Rowset</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.introduction">27.7.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.fetch">27.7.2. Obtención de un Rowset</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.rows">27.7.3. Recuperación de filas de un Rowset</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.to-array">27.7.4. Recuperación de un Rowset como array</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.serialize">27.7.5. Serialización y deserialización de un Rowset</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.rowset.phtml#zend.db.table.rowset.extending">27.7.6. Extensión de la clase Rowset</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.table.relationships.phtml">27.8. Relaciones de Zend_Db_Table</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.introduction">27.8.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.defining">27.8.2. Definición de relaciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.fetching.dependent">27.8.3. Obtención de un Rowset dependiente</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.fetching.parent">27.8.4. Obtención de una fila padre</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.fetching.many-to-many">27.8.5. Obtención de un Rowset mediante una relación muchos a muchos</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.cascading">27.8.6. Cascada de operaciones de escritura</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.db.table.relationships.phtml#zend.db.table.relationships.cascading.notes">27.8.6.1. Notas sobre las operaciones en cascada</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.db.table.definition.phtml">27.9. Zend_Db_Table_Definition</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.db.table.definition.phtml#zend.db.table.definition.introduction">27.9.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.definition.phtml#zend.db.table.definition.usage">27.9.2. Uso básico</a></span></dt>
+<dt><span class="sect2"><a href="zend.db.table.definition.phtml#zend.db.table.definition.advanced-usage">27.9.3. Uso avanzado</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.db.adapter"></a>27.1. Zend_Db_Adapter</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Db</code> y sus clases relacionadas proporcionan una interfaz de base de datos
+        <acronym class="acronym">SQL</acronym> sencilla para Zend Framework. El
+        <code class="classname">Zend_Db_Adapter</code> es la clase básica que se utiliza para conectar su aplicación
+        <acronym class="acronym">PHP</acronym> a un <acronym class="acronym">RDBMS</acronym>. Hay una clase Adapter distinta para
+        cada marca de <acronym class="acronym">RDBMS</acronym>.
+    </p>
+<p>
+        Los adaptadores de <code class="classname">Zend_Db</code> crean un puente entre las
+        extensiones <acronym class="acronym">PHP</acronym> específicas de cada proveedor y una interfaz común para ayudarle a escribir
+        aplicaciones <acronym class="acronym">PHP</acronym> una sola vez y desplegarlas con múltiples marcas de
+        <acronym class="acronym">RDBMS</acronym> con muy poco esfuerzo.
+    </p>
+<p>
+        La interfaz de la clase adaptadora es similar a la interfaz de la extensión
+        <a class="ulink" href="http://www.php.net/pdo" target="_top">PHP Data Objects</a>.
+        <code class="classname">Zend_Db</code> proporciona clases Adapter para los controladores <acronym class="acronym">PDO</acronym>
+        de las siguientes marcas de <acronym class="acronym">RDBMS</acronym>:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym> e Informix Dynamic Server
+                (<acronym class="acronym">IDS</acronym>), usando la extensión <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-ibm" target="_top">pdo_ibm</a>
+            </p></li>
+<li class="listitem"><p>
+                MariaDB, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-mysql" target="_top">pdo_mysql</a>
+            </p></li>
+<li class="listitem"><p>
+                MySQL, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-mysql" target="_top">pdo_mysql</a>
+            </p></li>
+<li class="listitem"><p>
+                Microsoft <acronym class="acronym">SQL</acronym> Server, usando la extensión <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-dblib" target="_top">pdo_dblib</a>
+            </p></li>
+<li class="listitem"><p>
+                Oracle, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-oci" target="_top">pdo_oci</a>
+            </p></li>
+<li class="listitem"><p>
+                PostgreSQL, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-pgsql" target="_top">pdo_pgsql</a>
+            </p></li>
+<li class="listitem"><p>
+                SQLite, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/pdo-sqlite" target="_top">pdo_sqlite</a>
+            </p></li>
+</ul></div>
+<p>
+        Además, <code class="classname">Zend_Db</code> proporciona clases Adapter que utilizan
+        extensiones de base de datos <acronym class="acronym">PHP</acronym> para las siguientes marcas de <acronym class="acronym">RDBMS</acronym>:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                MariaDB, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/mysqli" target="_top">mysqli</a>
+            </p></li>
+<li class="listitem"><p>
+                MySQL, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/mysqli" target="_top">mysqli</a>
+            </p></li>
+<li class="listitem"><p>
+                Oracle, usando la extensión
+                <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/oci8" target="_top">oci8</a>
+            </p></li>
+<li class="listitem"><p>
+                <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym> y <acronym class="acronym">DB2</acronym> I5, usando
+                la extensión <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/ibm_db2" target="_top">ibm_db2</a>
+            </p></li>
+<li class="listitem"><p>
+                Firebird (Interbase), usando la extensión <acronym class="acronym">PHP</acronym> <a class="ulink" href="http://www.php.net/ibase" target="_top">php_interbase</a>
+            </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Cada adaptador de <code class="classname">Zend_Db</code> utiliza una extensión <acronym class="acronym">PHP</acronym>. Debe
+            tener habilitada la respectiva extensión <acronym class="acronym">PHP</acronym> en su
+            entorno <acronym class="acronym">PHP</acronym> para usar un adaptador de <code class="classname">Zend_Db</code>. Por
+            ejemplo, si usa cualquiera de los adaptadores <acronym class="acronym">PDO</acronym> de <code class="classname">Zend_Db</code>,
+            necesita habilitar tanto la extensión <acronym class="acronym">PDO</acronym> como el controlador
+            <acronym class="acronym">PDO</acronym> para la marca de <acronym class="acronym">RDBMS</acronym> que utilice.
+        </p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.connecting"></a>27.1.1. Conectando a una base de datos usando un adaptador</h3></div></div></div>
+<p>
+            Esta sección describe cómo crear una instancia de un adaptador de base de datos.
+            Esto corresponde a establecer una conexión a su servidor <acronym class="acronym">RDBMS</acronym> desde
+            su aplicación <acronym class="acronym">PHP</acronym>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.connecting.constructor"></a>27.1.1.1. Usando un constructor de adaptador de Zend_Db</h4></div></div></div>
+<p>
+                Puede crear una instancia de un adaptador usando su constructor.
+                El constructor de un adaptador toma un argumento, que es un array
+                de parámetros usados para declarar la conexión.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.constructor.example"></a><p class="title"><b>Ejemplo 27.1. Uso de un constructor de adaptador</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db = new Zend_Db_Adapter_Pdo_Mysql(array(
+    'host'     =&gt; '127.0.0.1',
+    'username' =&gt; 'webuser',
+    'password' =&gt; 'xxxxxxxx',
+    'dbname'   =&gt; 'test'
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.connecting.factory"></a>27.1.1.2. Usando la fábrica de Zend_Db</h4></div></div></div>
+<p>
+                Como alternativa al uso directo de un constructor de adaptador, puede
+                crear una instancia de un adaptador usando el método estático
+                <code class="methodname">Zend_Db::factory()</code>. Este método carga dinámicamente
+                el archivo de la clase adaptadora bajo demanda usando
+                <a class="link" href="zend.loader.phtml#zend.loader.load.class" title="42.1.2. Loading Classes">Zend_Loader::loadClass()</a>.
+            </p>
+<p>
+                El primer argumento es una cadena que nombra la parte base del
+                nombre de la clase adaptadora. Por ejemplo, la cadena '<code class="classname">Pdo_Mysql</code>' corresponde
+                a la clase <code class="classname">Zend_Db_Adapter_Pdo_Mysql</code>. El segundo argumento
+                es el mismo array de parámetros que habría entregado al
+                constructor del adaptador.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.factory.example"></a><p class="title"><b>Ejemplo 27.2. Uso del método de fábrica del adaptador</b></p>
+<div class="example-contents"><pre class="programlisting">
+// No necesitamos la siguiente sentencia porque el
+// archivo Zend_Db_Adapter_Pdo_Mysql será cargado por nosotros mediante el
+// método de fábrica de Zend_Db.
+
+// require_once 'Zend/Db/Adapter/Pdo/Mysql.php';
+
+// Cargar automáticamente la clase Zend_Db_Adapter_Pdo_Mysql
+// y crear una instancia de ella.
+$db = Zend_Db::factory('Pdo_Mysql', array(
+    'host'     =&gt; '127.0.0.1',
+    'username' =&gt; 'webuser',
+    'password' =&gt; 'xxxxxxxx',
+    'dbname'   =&gt; 'test'
+));
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si crea su propia clase que extienda
+                <code class="classname">Zend_Db_Adapter_Abstract</code>, pero no nombra su
+                clase con el prefijo de paquete "<code class="classname">Zend_Db_Adapter</code>", puede usar
+                el método <code class="methodname">factory()</code> para cargar su adaptador si
+                especifica la parte inicial de la clase adaptadora con la
+                clave 'adapterNamespace' en el array de parámetros.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.factory.example2"></a><p class="title"><b>Ejemplo 27.3. Uso del método de fábrica del adaptador para una clase de adaptador personalizada</b></p>
+<div class="example-contents"><pre class="programlisting">
+// No necesitamos cargar el archivo de la clase adaptadora
+// porque será cargado por nosotros mediante el método de fábrica de Zend_Db.
+
+// Cargar automáticamente la clase MyProject_Db_Adapter_Pdo_Mysql y crear
+// una instancia de ella.
+$db = Zend_Db::factory('Pdo_Mysql', array(
+    'host'             =&gt; '127.0.0.1',
+    'username'         =&gt; 'webuser',
+    'password'         =&gt; 'xxxxxxxx',
+    'dbname'           =&gt; 'test',
+    'adapterNamespace' =&gt; 'MyProject_Db_Adapter'
+));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.connecting.factory-config"></a>27.1.1.3. Usando Zend_Config con la fábrica de Zend_Db</h4></div></div></div>
+<p>
+                Opcionalmente, puede especificar cualquiera de los argumentos del
+                método <code class="methodname">factory()</code> como un objeto de tipo
+                <a class="link" href="zend.config.phtml" title="Chapter 21. Zend_Config">Zend_Config</a>.
+            </p>
+<p>
+                Si el primer argumento es un objeto de configuración, se espera que
+                contenga una propiedad llamada <span class="property">adapter</span>, que contenga la
+                cadena que nombra la parte base del nombre de la clase adaptadora. Opcionalmente, el objeto
+                puede contener una propiedad llamada <span class="property">params</span>, con
+                subpropiedades correspondientes a los nombres de parámetros del adaptador.
+                Esto solo se utiliza si el segundo argumento del
+                método <code class="methodname">factory()</code> está ausente.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.factory.example1"></a><p class="title"><b>Ejemplo 27.4. Uso del método de fábrica del adaptador con un objeto Zend_Config</b></p>
+<div class="example-contents">
+<p>
+                    En el ejemplo siguiente, se crea un objeto <code class="classname">Zend_Config</code> a partir
+                    de un array. También puede cargar datos desde un archivo externo usando clases como
+                    <a class="link" href="zend.config.adapters.ini.phtml" title="21.3. Zend_Config_Ini">Zend_Config_Ini</a>
+                    y <a class="link" href="zend.config.adapters.xml.phtml" title="21.5. Zend_Config_Xml">Zend_Config_Xml</a>.
+                </p>
+<pre class="programlisting">
+$config = new Zend_Config(
+    array(
+        'database' =&gt; array(
+            'adapter' =&gt; 'Mysqli',
+            'params'  =&gt; array(
+                'host'     =&gt; '127.0.0.1',
+                'dbname'   =&gt; 'test',
+                'username' =&gt; 'webuser',
+                'password' =&gt; 'secret',
+            )
+        )
+    )
+);
+
+$db = Zend_Db::factory($config-&gt;database);
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+                El segundo argumento del método <code class="methodname">factory()</code> puede ser
+                un array asociativo que contenga entradas correspondientes a los
+                parámetros del adaptador. Este argumento es opcional. Si el primer
+                argumento es de tipo <code class="classname">Zend_Config</code>, se asume que contiene todos los
+                parámetros, y el segundo argumento se ignora.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.connecting.parameters"></a>27.1.1.4. Parámetros del adaptador</h4></div></div></div>
+<p>
+                La siguiente lista explica los parámetros comunes reconocidos por
+                las clases adaptadoras de <code class="classname">Zend_Db</code>.
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>host</em></span>:
+                        una cadena que contiene un nombre de host o dirección IP del
+                        servidor de base de datos. Si la base de datos se ejecuta en el
+                        mismo host que la aplicación <acronym class="acronym">PHP</acronym>, puede usar
+                        'localhost' o '127.0.0.1'.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>username</em></span>:
+                        identificador de cuenta para autenticar una conexión al
+                        servidor <acronym class="acronym">RDBMS</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>password</em></span>:
+                        credencial de contraseña de la cuenta para autenticar una
+                        conexión al servidor <acronym class="acronym">RDBMS</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>dbname</em></span>:
+                        nombre de la instancia de base de datos en el servidor <acronym class="acronym">RDBMS</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>port</em></span>:
+                        algunos servidores <acronym class="acronym">RDBMS</acronym> pueden aceptar conexiones de red en un
+                        número de puerto especificado por el administrador. El parámetro
+                        port le permite especificar el puerto al que se conecta su
+                        aplicación <acronym class="acronym">PHP</acronym>, para coincidir con el puerto configurado
+                        en el servidor <acronym class="acronym">RDBMS</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>charset</em></span>:
+                        especifica el juego de caracteres usado para la conexión.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>options</em></span>:
+                        este parámetro es un array asociativo de opciones
+                        que son genéricas para todas las clases <code class="classname">Zend_Db_Adapter</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>driver_options</em></span>:
+                        este parámetro es un array asociativo de opciones
+                        adicionales específicas de una extensión de base de datos
+                        determinada. Un uso típico de este parámetro es
+                        establecer atributos de un controlador <acronym class="acronym">PDO</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>adapterNamespace</em></span>:
+                        nombra la parte inicial del nombre de la clase del
+                        adaptador, en lugar de '<code class="classname">Zend_Db_Adapter</code>'. Use esto si
+                        necesita usar el método <code class="methodname">factory()</code> para
+                        cargar una clase de adaptador de base de datos que no sea de Zend.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>socket</em></span>:
+                        le permite especificar el socket o pipe con nombre a usar.
+                        Actualmente solo compatible con el adaptador mysqli.
+                    </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.db.adapter.connecting.parameters.example1"></a><p class="title"><b>Ejemplo 27.5. Pasar la opción de conversión de mayúsculas/minúsculas a la fábrica</b></p>
+<div class="example-contents">
+<p>
+                    Puede especificar esta opción mediante la constante
+                    <code class="constant">Zend_Db::CASE_FOLDING</code>.
+                    Esto corresponde al atributo <code class="constant">ATTR_CASE</code> en los
+                    controladores de base de datos <acronym class="acronym">PDO</acronym> e <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym>,
+                    ajustando la mayúscula/minúscula de las claves de cadena en los conjuntos de resultados de consulta. La
+                    opción toma los valores <code class="constant">Zend_Db::CASE_NATURAL</code> (el valor por defecto),
+                    <code class="constant">Zend_Db::CASE_UPPER</code>, y
+                    <code class="constant">Zend_Db::CASE_LOWER</code>.
+                </p>
+<pre class="programlisting">
+$options = array(
+    Zend_Db::CASE_FOLDING =&gt; Zend_Db::CASE_UPPER
+);
+
+$params = array(
+    'host'           =&gt; '127.0.0.1',
+    'username'       =&gt; 'webuser',
+    'password'       =&gt; 'xxxxxxxx',
+    'dbname'         =&gt; 'test',
+    'options'        =&gt; $options
+);
+
+$db = Zend_Db::factory('Db2', $params);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.adapter.connecting.parameters.example2"></a><p class="title"><b>Ejemplo 27.6. Pasar la opción de entrecomillado automático a la fábrica</b></p>
+<div class="example-contents">
+<p>
+                    Puede especificar esta opción mediante la constante
+                    <code class="constant">Zend_Db::AUTO_QUOTE_IDENTIFIERS</code>. Si el valor
+                    es <code class="constant">TRUE</code> (el valor por defecto), los identificadores como nombres
+                    de tabla, nombres de columna, e incluso alias, se delimitan en toda la
+                    sintaxis <acronym class="acronym">SQL</acronym> generada por el objeto Adapter. Esto facilita
+                    el uso de identificadores que contienen palabras clave <acronym class="acronym">SQL</acronym>, o
+                    caracteres especiales. Si el valor es <code class="constant">FALSE</code>,
+                    los identificadores no se delimitan automáticamente. Si necesita
+                    delimitar identificadores, debe hacerlo usted mismo usando el
+                    método <code class="methodname">quoteIdentifier()</code>.
+                </p>
+<pre class="programlisting">
+$options = array(
+    Zend_Db::AUTO_QUOTE_IDENTIFIERS =&gt; false
+);
+
+$params = array(
+    'host'           =&gt; '127.0.0.1',
+    'username'       =&gt; 'webuser',
+    'password'       =&gt; 'xxxxxxxx',
+    'dbname'         =&gt; 'test',
+    'options'        =&gt; $options
+);
+
+$db = Zend_Db::factory('Pdo_Mysql', $params);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.adapter.connecting.parameters.example3"></a><p class="title"><b>Ejemplo 27.7. Pasar opciones del controlador PDO a la fábrica</b></p>
+<div class="example-contents"><pre class="programlisting">
+$pdoParams = array(
+    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY =&gt; true
+);
+
+$params = array(
+    'host'           =&gt; '127.0.0.1',
+    'username'       =&gt; 'webuser',
+    'password'       =&gt; 'xxxxxxxx',
+    'dbname'         =&gt; 'test',
+    'driver_options' =&gt; $pdoParams
+);
+
+$db = Zend_Db::factory('Pdo_Mysql', $params);
+
+echo $db-&gt;getConnection()
+        -&gt;getAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.adapter.connecting.parameters.example4"></a><p class="title"><b>Ejemplo 27.8. Pasar opciones de serialización a la fábrica</b></p>
+<div class="example-contents"><pre class="programlisting">
+$options = array(
+    Zend_Db::ALLOW_SERIALIZATION =&gt; false
+);
+
+$params = array(
+    'host'           =&gt; '127.0.0.1',
+    'username'       =&gt; 'webuser',
+    'password'       =&gt; 'xxxxxxxx',
+    'dbname'         =&gt; 'test',
+    'options'        =&gt; $options
+);
+
+$db = Zend_Db::factory('Pdo_Mysql', $params);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.connecting.getconnection"></a>27.1.1.5. Gestión de conexiones perezosas (lazy)</h4></div></div></div>
+<p>
+                Crear una instancia de una clase Adapter no conecta inmediatamente
+                al servidor <acronym class="acronym">RDBMS</acronym>. El Adapter guarda los parámetros de conexión, y
+                establece la conexión real bajo demanda, la
+                primera vez que necesita ejecutar una consulta. Esto garantiza que
+                crear un objeto Adapter sea rápido y económico. Puede
+                crear una instancia de un Adapter incluso si no está seguro de
+                que necesite ejecutar alguna consulta de base de datos durante la solicitud actual
+                que su aplicación está atendiendo.
+            </p>
+<p>
+                Si necesita forzar al Adapter a conectarse al <acronym class="acronym">RDBMS</acronym>, use
+                el método <code class="methodname">getConnection()</code>. Este método devuelve
+                un objeto para la conexión tal como lo representa la respectiva
+                extensión de base de datos <acronym class="acronym">PHP</acronym>. Por ejemplo, si usa cualquiera de las
+                clases Adapter para controladores <acronym class="acronym">PDO</acronym>, entonces
+                <code class="methodname">getConnection()</code> devuelve el objeto <acronym class="acronym">PDO</acronym>,
+                después de iniciarlo como una conexión activa a la base de datos específica.
+            </p>
+<p>
+                Puede ser útil forzar la conexión si desea capturar
+                cualquier excepción que lance como resultado de credenciales de cuenta no válidas,
+                u otro fallo al conectarse al servidor <acronym class="acronym">RDBMS</acronym>.
+                Estas excepciones no se lanzan hasta que se establece la conexión,
+                por lo que puede ayudar a simplificar el código de su aplicación si maneja las
+                excepciones en un solo lugar, en lugar de en el momento
+                de la primera consulta contra la base de datos.
+            </p>
+<p>
+                Adicionalmente, un adaptador puede serializarse para almacenarlo, por ejemplo,
+                en una variable de sesión. Esto puede ser muy útil no solo para el
+                adaptador en sí, sino para otros objetos que lo agregan, como un
+                objeto <code class="classname">Zend_Db_Select</code>. Por defecto, se permite serializar los
+                adaptadores; si no lo desea, debería considerar pasar la
+                opción <code class="constant">Zend_Db::ALLOW_SERIALIZATION</code> con
+                <code class="constant">FALSE</code>, vea el ejemplo anterior. Para respetar el principio de
+                conexiones perezosas, el adaptador no se reconectará por sí mismo después de ser
+                deserializado. Debe entonces llamar usted mismo a <code class="methodname">getConnection()</code>. Puede hacer que el
+                adaptador se reconecte automáticamente pasando
+                <code class="constant">Zend_Db::AUTO_RECONNECT_ON_UNSERIALIZE</code> con
+                <code class="constant">TRUE</code> como opción del adaptador.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.getconnection.example"></a><p class="title"><b>Ejemplo 27.9. Manejo de excepciones de conexión</b></p>
+<div class="example-contents"><pre class="programlisting">
+try {
+    $db = Zend_Db::factory('Pdo_Mysql', $parameters);
+    $db-&gt;getConnection();
+} catch (Zend_Db_Adapter_Exception $e) {
+    // quizás una credencial de acceso fallida, o quizás el RDBMS no está en ejecución
+} catch (Zend_Exception $e) {
+    // quizás factory() no pudo cargar la clase Adapter especificada
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.example-database"></a>27.1.2. Base de datos de ejemplo</h3></div></div></div>
+<p>
+            En la documentación de las clases <code class="classname">Zend_Db</code>, usamos un conjunto de tablas simples
+            para ilustrar el uso de las clases y métodos. Estas
+            tablas de ejemplo podrían almacenar información para el seguimiento de errores (bugs) en un
+            proyecto de desarrollo de software. La base de datos contiene cuatro tablas:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>accounts</em></span> almacena
+                    información sobre cada usuario de la base de datos de seguimiento de errores.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>products</em></span> almacena
+                    información sobre cada producto para el que puede registrarse un error.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>bugs</em></span> almacena información
+                    sobre errores, incluyendo el estado actual del error, la
+                    persona que reportó el error, la persona asignada para
+                    corregir el error, y la persona asignada para verificar la
+                    corrección.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>bugs_products</em></span> almacena una
+                    relación entre errores y productos. Esto implementa una
+                    relación muchos a muchos, porque un error dado puede ser
+                    relevante para múltiples productos, y por supuesto un
+                    producto dado puede tener múltiples errores.
+                </p></li>
+</ul></div>
+<p>
+            El siguiente pseudocódigo de lenguaje de definición de datos <acronym class="acronym">SQL</acronym> describe las
+            tablas de esta base de datos de ejemplo. Estas tablas de ejemplo se usan
+            extensamente en las pruebas automatizadas de unidad para <code class="classname">Zend_Db</code>.
+        </p>
+<pre class="programlisting">
+CREATE TABLE accounts (
+  account_name      VARCHAR(100) NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE products (
+  product_id        INTEGER NOT NULL PRIMARY KEY,
+  product_name      VARCHAR(100)
+);
+
+CREATE TABLE bugs (
+  bug_id            INTEGER NOT NULL PRIMARY KEY,
+  bug_description   VARCHAR(100),
+  bug_status        VARCHAR(20),
+  reported_by       VARCHAR(100) REFERENCES accounts(account_name),
+  assigned_to       VARCHAR(100) REFERENCES accounts(account_name),
+  verified_by       VARCHAR(100) REFERENCES accounts(account_name)
+);
+
+CREATE TABLE bugs_products (
+  bug_id            INTEGER NOT NULL REFERENCES bugs,
+  product_id        INTEGER NOT NULL REFERENCES products,
+  PRIMARY KEY       (bug_id, product_id)
+);
+</pre>
+<p>
+            Note también que la tabla 'bugs' contiene múltiples
+            referencias de clave foránea a la tabla 'accounts'.
+            Cada una de estas claves foráneas puede referenciar una fila diferente en la
+            tabla 'accounts' para un error dado.
+        </p>
+<p>
+            El diagrama a continuación ilustra el modelo de datos físico de la
+            base de datos de ejemplo.
+        </p>
+<p>
+            <img src="figures/zend.db.adapter.example-database.png" align="middle">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.select"></a>27.1.3. Lectura de resultados de consultas</h3></div></div></div>
+<p>
+            Esta sección describe métodos de la clase Adapter con los que
+            puede ejecutar consultas <acronym class="acronym">SELECT</acronym> y recuperar los resultados de las consultas.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchall"></a>27.1.3.1. Obtención de un conjunto de resultados completo</h4></div></div></div>
+<p>
+                Puede ejecutar una consulta <acronym class="acronym">SQL</acronym> <acronym class="acronym">SELECT</acronym> y recuperar
+                sus resultados en un solo paso usando el método <code class="methodname">fetchAll()</code>.
+            </p>
+<p>
+                El primer argumento de este método es una cadena que contiene una
+                sentencia <acronym class="acronym">SELECT</acronym>. Alternativamente, el primer argumento puede ser un
+                objeto de la clase <a class="link" href="zend.db.select.phtml" title="27.4. Zend_Db_Select">Zend_Db_Select</a>.
+                El Adapter convierte automáticamente este objeto a una representación en cadena
+                de la sentencia <acronym class="acronym">SELECT</acronym>.
+            </p>
+<p>
+                El segundo argumento de <code class="methodname">fetchAll()</code> es un array de
+                valores para sustituir los marcadores de posición de parámetros en la sentencia
+                <acronym class="acronym">SQL</acronym>.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchall.example"></a><p class="title"><b>Ejemplo 27.10. Uso de fetchAll()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sql = 'SELECT * FROM bugs WHERE bug_id = ?';
+
+$result = $db-&gt;fetchAll($sql, 2);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetch-mode"></a>27.1.3.2. Cambio del modo de obtención (fetch)</h4></div></div></div>
+<p>
+                Por defecto, <code class="methodname">fetchAll()</code> devuelve un array de
+                filas, cada una de las cuales es un array asociativo. Las claves del
+                array asociativo son las columnas o alias de columna nombrados en
+                la consulta select.
+            </p>
+<p>
+                Puede especificar un estilo diferente de obtención de resultados usando el
+                método <code class="methodname">setFetchMode()</code>. Los modos soportados se
+                identifican mediante constantes:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em><code class="constant">Zend_Db::FETCH_ASSOC</code></em></span>:
+                        devuelve los datos en un array de arrays asociativos.
+                        Las claves del array son los nombres de columna, como cadenas. Este es el modo de obtención por defecto
+                        para las clases <code class="classname">Zend_Db_Adapter</code>.
+                    </p>
+<p>
+                        Tenga en cuenta que si su lista de selección contiene más de una
+                        columna con el mismo nombre, por ejemplo si provienen de
+                        dos tablas diferentes en un <acronym class="acronym">JOIN</acronym>, solo puede haber una
+                        entrada en el array asociativo para un nombre dado.
+                        Si usa el modo <code class="constant">FETCH_ASSOC</code>, debería especificar
+                        alias de columna en su consulta <acronym class="acronym">SELECT</acronym> para asegurar que los
+                        nombres resulten en claves de array únicas.
+                    </p>
+<p>
+                        Por defecto, estas cadenas se devuelven tal como las
+                        devuelve el controlador de la base de datos. Esto generalmente es la
+                        forma en que se escribe la columna en el servidor <acronym class="acronym">RDBMS</acronym>. Puede
+                        especificar la mayúscula/minúscula para estas cadenas, usando la
+                        opción <code class="constant">Zend_Db::CASE_FOLDING</code>.
+                        Especifique esto al instanciar el Adapter.
+                        Vea <a class="link" href="zend.db.phtml#zend.db.adapter.connecting.parameters.example1" title="Example 27.5. Passing the Case-Folding Option to the Factory">este
+                            ejemplo</a>
+                    </p>
+</li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><code class="constant">Zend_Db::FETCH_NUM</code></em></span>:
+                        devuelve los datos en un array de arrays. Los arrays se
+                        indexan mediante enteros, correspondientes a la posición del
+                        respectivo campo en la lista de selección de la consulta.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><code class="constant">Zend_Db::FETCH_BOTH</code></em></span>:
+                        devuelve los datos en un array de arrays. Las claves del array son
+                        tanto cadenas como se usan en el modo <code class="constant">FETCH_ASSOC</code>, como
+                        enteros como se usan en el modo <code class="constant">FETCH_NUM</code>. Tenga en cuenta que el
+                        número de elementos en el array es el doble del que
+                        habría en el array si usara <code class="constant">FETCH_ASSOC</code>
+                        o <code class="constant">FETCH_NUM</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><code class="constant">Zend_Db::FETCH_COLUMN</code></em></span>:
+                        devuelve los datos en un array de valores. El valor en cada array
+                        es el valor devuelto por una columna del conjunto de resultados.
+                        Por defecto, esta es la primera columna, indexada como 0.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><code class="constant">Zend_Db::FETCH_OBJ</code></em></span>:
+                        devuelve los datos en un array de objetos. La clase por defecto
+                        es la clase incorporada de <acronym class="acronym">PHP</acronym> stdClass. Las columnas del
+                        conjunto de resultados están disponibles como propiedades públicas del
+                        objeto.
+                    </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.db.adapter.select.fetch-mode.example"></a><p class="title"><b>Ejemplo 27.11. Uso de setFetchMode()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;setFetchMode(Zend_Db::FETCH_OBJ);
+
+$result = $db-&gt;fetchAll('SELECT * FROM bugs WHERE bug_id = ?', 2);
+
+// $result es un array de objetos
+echo $result[0]-&gt;bug_description;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchassoc"></a>27.1.3.3. Obtención de un conjunto de resultados como array asociativo</h4></div></div></div>
+<p>
+                El método <code class="methodname">fetchAssoc()</code> devuelve los datos en un array
+                de arrays asociativos, sin importar qué valor haya establecido
+                para el modo de obtención, usando la primera columna como índice del array.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchassoc.example"></a><p class="title"><b>Ejemplo 27.12. Uso de fetchAssoc()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;setFetchMode(Zend_Db::FETCH_OBJ);
+
+$result = $db-&gt;fetchAssoc(
+    'SELECT bug_id, bug_description, bug_status FROM bugs'
+);
+
+// $result es un array de arrays asociativos, a pesar del modo de obtención
+echo $result[2]['bug_description']; // Descripción del Bug #2
+echo $result[1]['bug_description']; // Descripción del Bug #1
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchcol"></a>27.1.3.4. Obtención de una sola columna de un conjunto de resultados</h4></div></div></div>
+<p>
+                El método <code class="methodname">fetchCol()</code> devuelve los datos en un array
+                de valores, sin importar el valor que haya establecido para el modo de obtención.
+                Esto solo devuelve la primera columna devuelta por la consulta.
+                Cualquier otra columna devuelta por la consulta se descarta.
+                Si necesita devolver una columna distinta de la primera, vea
+                <a class="link" href="zend.db.statement.phtml#zend.db.statement.fetching.fetchcolumn" title="27.2.3.4. Fetching a Single Column from a Result Set">esta sección</a>.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchcol.example"></a><p class="title"><b>Ejemplo 27.13. Uso de fetchCol()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;setFetchMode(Zend_Db::FETCH_OBJ);
+
+$result = $db-&gt;fetchCol(
+    'SELECT bug_description, bug_id FROM bugs WHERE bug_id = ?', 2);
+
+// contiene bug_description; bug_id no se devuelve
+echo $result[0];
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchpairs"></a>27.1.3.5. Obtención de pares clave-valor de un conjunto de resultados</h4></div></div></div>
+<p>
+                El método <code class="methodname">fetchPairs()</code> devuelve los datos en un array
+                de pares clave-valor, como un array asociativo con una sola entrada
+                por fila. La clave de este array asociativo se toma de la
+                primera columna devuelta por la consulta <acronym class="acronym">SELECT</acronym>. El valor se toma
+                de la segunda columna devuelta por la consulta <acronym class="acronym">SELECT</acronym>. Cualquier otra
+                columna devuelta por la consulta se descarta.
+            </p>
+<p>
+                Debería diseñar la consulta <acronym class="acronym">SELECT</acronym> de modo que la primera columna
+                devuelta tenga valores únicos. Si hay valores duplicados en
+                la primera columna, las entradas en el array asociativo se
+                sobrescribirán.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchpairs.example"></a><p class="title"><b>Ejemplo 27.14. Uso de fetchPairs()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;setFetchMode(Zend_Db::FETCH_OBJ);
+
+$result = $db-&gt;fetchPairs('SELECT bug_id, bug_status FROM bugs');
+
+echo $result[2];
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchrow"></a>27.1.3.6. Obtención de una sola fila de un conjunto de resultados</h4></div></div></div>
+<p>
+                El método <code class="methodname">fetchRow()</code> devuelve los datos usando el
+                modo de obtención actual, pero devuelve solo la primera fila
+                obtenida del conjunto de resultados.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchrow.example"></a><p class="title"><b>Ejemplo 27.15. Uso de fetchRow()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;setFetchMode(Zend_Db::FETCH_OBJ);
+
+$result = $db-&gt;fetchRow('SELECT * FROM bugs WHERE bug_id = 2');
+
+// note que $result es un solo objeto, no un array de objetos
+echo $result-&gt;bug_description;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.select.fetchone"></a>27.1.3.7. Obtención de un solo valor escalar de un conjunto de resultados</h4></div></div></div>
+<p>
+                El método <code class="methodname">fetchOne()</code> es como una combinación
+                de <code class="methodname">fetchRow()</code> con <code class="methodname">fetchCol()</code>,
+                en el sentido de que devuelve datos solo de la primera fila obtenida del
+                conjunto de resultados, y devuelve solo el valor de la primera
+                columna de esa fila. Por lo tanto, devuelve solo un único valor
+                escalar, no un array ni un objeto.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.select.fetchone.example"></a><p class="title"><b>Ejemplo 27.16. Uso de fetchOne()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$result = $db-&gt;fetchOne('SELECT bug_status FROM bugs WHERE bug_id = 2');
+
+// este es un único valor de cadena
+echo $result;
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.write"></a>27.1.4. Escritura de cambios en la base de datos</h3></div></div></div>
+<p>
+            Puede usar la clase Adapter para escribir nuevos datos o cambiar datos
+            existentes en su base de datos. Esta sección describe los métodos para hacer estas
+            operaciones.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.write.insert"></a>27.1.4.1. Inserción de datos</h4></div></div></div>
+<p>
+                Puede añadir nuevas filas a una tabla de su base de datos usando el
+                método <code class="methodname">insert()</code>. El primer argumento es una cadena
+                que nombra la tabla, y el segundo argumento es un array asociativo,
+                que asigna nombres de columna a valores de datos.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.insert.example"></a><p class="title"><b>Ejemplo 27.17. Inserción en una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'created_on'      =&gt; '2007-03-22',
+    'bug_description' =&gt; 'Something wrong',
+    'bug_status'      =&gt; 'NEW'
+);
+
+$db-&gt;insert('bugs', $data);
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Las columnas que excluya del array de datos no se especifican a
+                la base de datos. Por lo tanto, siguen las mismas reglas que sigue una
+                sentencia <acronym class="acronym">SQL</acronym> <acronym class="acronym">INSERT</acronym>: si la columna
+                tiene una cláusula <acronym class="acronym">DEFAULT</acronym>, la columna toma ese valor en la fila
+                creada; en caso contrario, la columna queda en estado <code class="constant">NULL</code>.
+            </p>
+<p>
+                Por defecto, los valores en su array de datos se insertan usando
+                parámetros. Esto reduce el riesgo de algunos tipos de problemas de
+                seguridad. No necesita aplicar escape o entrecomillado a los valores
+                en el array de datos.
+            </p>
+<p>
+                Podría necesitar que los valores en el array de datos se traten como expresiones
+                <acronym class="acronym">SQL</acronym>, en cuyo caso no deben entrecomillarse. Por
+                defecto, todos los valores de datos pasados como cadenas se tratan como
+                literales de cadena. Para especificar que el valor es una expresión
+                <acronym class="acronym">SQL</acronym> y por lo tanto no debe entrecomillarse, pase el valor
+                en el array de datos como un objeto de tipo <code class="classname">Zend_Db_Expr</code> en lugar
+                de una cadena simple.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.insert.example2"></a><p class="title"><b>Ejemplo 27.18. Inserción de expresiones en una tabla</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'created_on'      =&gt; new Zend_Db_Expr('CURDATE()'),
+    'bug_description' =&gt; 'Something wrong',
+    'bug_status'      =&gt; 'NEW'
+);
+
+$db-&gt;insert('bugs', $data);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.write.lastinsertid"></a>27.1.4.2. Recuperación de un valor generado</h4></div></div></div>
+<p>
+                Algunas marcas de <acronym class="acronym">RDBMS</acronym> admiten claves primarias autoincrementales.
+                Una tabla definida de esta manera genera un valor de clave primaria
+                automáticamente durante un <acronym class="acronym">INSERT</acronym> de una nueva fila. El valor de retorno
+                del método <code class="methodname">insert()</code> <span class="emphasis"><em>no</em></span> es
+                el último ID insertado, porque la tabla podría no tener una
+                columna autoincremental. En su lugar, el valor de retorno es el
+                número de filas afectadas (normalmente 1).
+            </p>
+<p>
+                Si su tabla está definida con una clave primaria autoincremental,
+                puede llamar al método <code class="methodname">lastInsertId()</code> después de la
+                inserción. Este método devuelve el último valor generado en el
+                ámbito de la conexión actual a la base de datos.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.lastinsertid.example-1"></a><p class="title"><b>Ejemplo 27.19. Uso de lastInsertId() para una clave autoincremental</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;insert('bugs', $data);
+
+// devuelve el último valor generado por una columna autoincremental
+$id = $db-&gt;lastInsertId();
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Algunas marcas de <acronym class="acronym">RDBMS</acronym> admiten un objeto de secuencia, que genera
+                valores únicos para servir como valores de clave primaria. Para admitir
+                secuencias, el método <code class="methodname">lastInsertId()</code> acepta dos
+                argumentos de cadena opcionales. Estos argumentos nombran la tabla y
+                la columna, asumiendo que ha seguido la convención de que una
+                secuencia se nombra usando los nombres de la tabla y la columna para los que
+                la secuencia genera valores, y un sufijo "_seq". Esto se
+                basa en la convención usada por PostgreSQL al nombrar
+                secuencias para columnas <code class="constant">SERIAL</code>. Por ejemplo, una tabla "bugs" con
+                columna de clave primaria "bug_id" usaría una secuencia llamada
+                "bugs_bug_id_seq".
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.lastinsertid.example-2"></a><p class="title"><b>Ejemplo 27.20. Uso de lastInsertId() para una secuencia</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;insert('bugs', $data);
+
+// devuelve el último valor generado por la secuencia 'bugs_bug_id_seq'.
+$id = $db-&gt;lastInsertId('bugs', 'bug_id');
+
+// alternativamente, devuelve el último valor generado por la secuencia 'bugs_seq'.
+$id = $db-&gt;lastInsertId('bugs');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si el nombre de su objeto de secuencia no sigue esta convención de
+                nomenclatura, use el método <code class="methodname">lastSequenceId()</code>
+                en su lugar. Este método toma un único argumento de cadena, que nombra
+                la secuencia literalmente.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.lastinsertid.example-3"></a><p class="title"><b>Ejemplo 27.21. Uso de lastSequenceId()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;insert('bugs', $data);
+
+// devuelve el último valor generado por la secuencia 'bugs_id_gen'.
+$id = $db-&gt;lastSequenceId('bugs_id_gen');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Para las marcas de <acronym class="acronym">RDBMS</acronym> que no admiten secuencias, incluyendo MariaDB,
+        MySQL, Microsoft <acronym class="acronym">SQL</acronym> Server, y SQLite, los argumentos del
+                método <code class="methodname">lastInsertId()</code> se ignoran, y el valor devuelto
+                es el valor más reciente generado para cualquier tabla mediante operaciones
+                <acronym class="acronym">INSERT</acronym> durante la conexión actual. Para estas marcas de <acronym class="acronym">RDBMS</acronym>,
+                el método <code class="methodname">lastSequenceId()</code> siempre devuelve
+                <code class="constant">NULL</code>.
+            </p>
+<div class="note"><table border="0" summary='Note: Why Not Use "SELECT MAX(id) FROM table"?'>
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Por qué no usar "SELECT MAX(id) FROM table"?</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    A veces esta consulta devuelve el valor de clave primaria más reciente
+                    insertado en la tabla. Sin embargo, esta técnica
+                    no es segura de usar en un entorno donde múltiples clientes están
+                    insertando registros en la base de datos. Es posible, y
+                    por lo tanto está destinado a suceder eventualmente, que otro
+                    cliente inserte otra fila en el instante entre la
+                    inserción realizada por su aplicación cliente y su consulta
+                    para el valor <code class="methodname">MAX(id)</code>. Por lo tanto, el valor devuelto no
+                    identifica la fila que insertó, identifica la fila
+                    insertada por algún otro cliente. No hay forma de saber
+                    cuándo ha ocurrido esto.
+                </p>
+<p>
+                    Usar un modo de aislamiento de transacciones fuerte como
+                    "repeatable read" puede mitigar este riesgo, pero algunas marcas de <acronym class="acronym">RDBMS</acronym>
+                    no admiten el aislamiento de transacciones requerido para
+                    esto, o bien su aplicación puede usar un modo de aislamiento de transacciones
+                    más bajo por diseño.
+                </p>
+<p>
+                    Además, usar una expresión como "<span class="command"><strong>MAX(id)+1</strong></span>" para generar
+                    un nuevo valor para una clave primaria no es seguro, porque dos clientes
+                    podrían realizar esta consulta simultáneamente, y luego ambos usar el mismo
+                    valor calculado para su siguiente operación <acronym class="acronym">INSERT</acronym>.
+                </p>
+<p>
+                    Todas las marcas de <acronym class="acronym">RDBMS</acronym> proporcionan mecanismos para generar
+                    valores únicos, y para devolver el último valor generado. Estos
+                    mecanismos necesariamente funcionan fuera del ámbito del
+                    aislamiento de transacciones, por lo que no hay posibilidad de que dos clientes
+                    generen el mismo valor, y no hay posibilidad de que el
+                    valor generado por otro cliente se informe a la conexión de su
+                    cliente como el último valor generado.
+                </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.write.update"></a>27.1.4.3. Actualización de datos</h4></div></div></div>
+<p>
+                Puede actualizar filas en una tabla de base de datos usando el
+                método <code class="methodname">update()</code> de un Adapter. Este método toma
+                tres argumentos: el primero es el nombre de la tabla; el
+                segundo es un array asociativo que asigna columnas por cambiar a nuevos
+                valores a asignar a estas columnas.
+            </p>
+<p>
+                Los valores en el array de datos se tratan como literales de cadena.
+                Vea <a class="link" href="zend.db.phtml#zend.db.adapter.write.insert" title="27.1.4.1. Inserting Data">esta sección</a>
+                para información sobre el uso de expresiones <acronym class="acronym">SQL</acronym> en el array de datos.
+            </p>
+<p>
+                El tercer argumento es una cadena que contiene una expresión <acronym class="acronym">SQL</acronym>
+                que se usa como criterio para las filas a cambiar. Los valores
+                e identificadores en este argumento no se entrecomillan ni se escapan.
+                Usted es responsable de asegurar que cualquier contenido dinámico se
+                interpole en esta cadena de forma segura.
+                Vea <a class="link" href="zend.db.phtml#zend.db.adapter.quoting" title="27.1.5. Quoting Values and Identifiers">esta sección</a>
+                para conocer métodos que le ayuden a hacer esto.
+            </p>
+<p>
+                El valor de retorno es el número de filas afectadas por la operación de
+                actualización.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.update.example"></a><p class="title"><b>Ejemplo 27.22. Actualización de filas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'updated_on'      =&gt; '2007-03-23',
+    'bug_status'      =&gt; 'FIXED'
+);
+
+$n = $db-&gt;update('bugs', $data, 'bug_id = 2');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si omite el tercer argumento, entonces todas las filas en la tabla
+                de la base de datos se actualizan con los valores especificados en el array de datos.
+            </p>
+<p>
+                Si proporciona un array de cadenas como tercer argumento, estas
+                cadenas se unen como términos en una expresión separados
+                por operadores <code class="constant">AND</code>.
+            </p>
+<p>
+                Si proporciona un array de arrays como tercer argumento, los
+                valores se entrecomillarán automáticamente en las claves. Estos
+                luego se unirán como términos, separados por
+                operadores <code class="constant">AND</code>.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.update.example-array"></a><p class="title"><b>Ejemplo 27.23. Actualización de filas usando un array de expresiones</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'updated_on'      =&gt; '2007-03-23',
+    'bug_status'      =&gt; 'FIXED'
+);
+
+$where[] = "reported_by = 'goofy'";
+$where[] = "bug_status = 'OPEN'";
+
+$n = $db-&gt;update('bugs', $data, $where);
+
+// El SQL resultante es:
+//  UPDATE "bugs" SET "update_on" = '2007-03-23', "bug_status" = 'FIXED'
+//  WHERE ("reported_by" = 'goofy') AND ("bug_status" = 'OPEN')
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.adapter.write.update.example-arrayofarrays"></a><p class="title"><b>Ejemplo 27.24. Actualización de filas usando un array de arrays</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'updated_on'      =&gt; '2007-03-23',
+    'bug_status'      =&gt; 'FIXED'
+);
+
+$where['reported_by = ?'] = 'goofy';
+$where['bug_status = ?']  = 'OPEN';
+
+$n = $db-&gt;update('bugs', $data, $where);
+
+// El SQL resultante es:
+//  UPDATE "bugs" SET "update_on" = '2007-03-23', "bug_status" = 'FIXED'
+//  WHERE ("reported_by" = 'goofy') AND ("bug_status" = 'OPEN')
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.write.delete"></a>27.1.4.4. Eliminación de datos</h4></div></div></div>
+<p>
+                Puede eliminar filas de una tabla de base de datos usando el
+                método <code class="methodname">delete()</code>. Este método toma dos argumentos:
+                el primero es una cadena que nombra la tabla.
+            </p>
+<p>
+                El segundo argumento es una cadena que contiene una expresión <acronym class="acronym">SQL</acronym>
+                que se usa como criterio para las filas a eliminar. Los valores
+                e identificadores en este argumento no se entrecomillan ni se escapan.
+                Usted es responsable de asegurar que cualquier contenido dinámico se
+                interpole en esta cadena de forma segura.
+                Vea <a class="link" href="zend.db.phtml#zend.db.adapter.quoting" title="27.1.5. Quoting Values and Identifiers"> esta sección</a>
+                para conocer métodos que le ayuden a hacer esto.
+            </p>
+<p>
+                El valor de retorno es el número de filas afectadas por la operación de
+                eliminación.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.write.delete.example"></a><p class="title"><b>Ejemplo 27.25. Eliminación de filas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$n = $db-&gt;delete('bugs', 'bug_id = 3');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Si omite el segundo argumento, el resultado es que se eliminan todas las filas de
+                la tabla de la base de datos.
+            </p>
+<p>
+                Si proporciona un array de cadenas como segundo argumento, estas
+                cadenas se unen como términos en una expresión separados
+                por operadores <code class="constant">AND</code>.
+            </p>
+<p>
+                Si proporciona un array de arrays como segundo argumento, los
+                valores se entrecomillarán automáticamente en las claves. Estos
+                luego se unirán como términos, separados por
+                operadores <code class="constant">AND</code>.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.quoting"></a>27.1.5. Entrecomillado de valores e identificadores</h3></div></div></div>
+<p>
+            Cuando forma consultas <acronym class="acronym">SQL</acronym>, a menudo es el caso que necesita
+            incluir los valores de variables <acronym class="acronym">PHP</acronym> en expresiones
+            <acronym class="acronym">SQL</acronym>. Esto es riesgoso, porque si el valor en una cadena <acronym class="acronym">PHP</acronym>
+            contiene ciertos símbolos, como el símbolo de comilla, podría resultar en un
+            <acronym class="acronym">SQL</acronym> no válido. Por ejemplo, note las comillas desbalanceadas en la
+            siguiente consulta:
+        </p>
+<pre class="programlisting">
+$name = "O'Reilly";
+$sql = "SELECT * FROM bugs WHERE reported_by = '$name'";
+
+echo $sql;
+// SELECT * FROM bugs WHERE reported_by = 'O'Reilly'
+</pre>
+<p>
+            Peor aún es el riesgo de que tales errores de código puedan ser explotados
+            deliberadamente por una persona que intenta manipular el funcionamiento
+            de su aplicación web. Si pueden especificar el valor de una variable
+            <acronym class="acronym">PHP</acronym> mediante el uso de un parámetro <acronym class="acronym">HTTP</acronym> u otro mecanismo,
+            podrían lograr que sus consultas <acronym class="acronym">SQL</acronym> hagan cosas que usted no
+            pretendía que hicieran, como devolver datos a los que la persona
+            no debería tener privilegio de leer. Esta es una técnica seria y generalizada
+            para vulnerar la seguridad de aplicaciones, conocida como "Inyección SQL" (vea <a class="ulink" href="http://en.wikipedia.org/wiki/SQL_Injection" target="_top">http://en.wikipedia.org/wiki/SQL_Injection</a>).
+        </p>
+<p>
+            La clase Adapter de <code class="classname">Zend_Db</code> proporciona funciones convenientes para ayudarle
+            a reducir las vulnerabilidades a ataques de inyección <acronym class="acronym">SQL</acronym> en su
+            código <acronym class="acronym">PHP</acronym>. La solución consiste en escapar caracteres especiales como comillas
+            en los valores <acronym class="acronym">PHP</acronym> antes de que se interpolen en sus
+            cadenas <acronym class="acronym">SQL</acronym>. Esto protege contra la manipulación tanto accidental como
+            deliberada de cadenas <acronym class="acronym">SQL</acronym> por variables <acronym class="acronym">PHP</acronym> que
+            contienen caracteres especiales.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.quoting.quote"></a>27.1.5.1. Uso de quote()</h4></div></div></div>
+<p>
+                El método <code class="methodname">quote()</code> acepta un único argumento, un
+                valor de cadena escalar. Devuelve el valor con caracteres especiales
+                escapados de manera apropiada para el <acronym class="acronym">RDBMS</acronym> que
+                esté usando, y rodeado por delimitadores de valor de cadena. El
+                delimitador de valor de cadena <acronym class="acronym">SQL</acronym> estándar es la comilla simple
+                (').
+            </p>
+<div class="example">
+<a name="zend.db.adapter.quoting.quote.example"></a><p class="title"><b>Ejemplo 27.26. Uso de quote()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$name = $db-&gt;quote("O'Reilly");
+echo $name;
+// 'O\'Reilly'
+
+$sql = "SELECT * FROM bugs WHERE reported_by = $name";
+
+echo $sql;
+// SELECT * FROM bugs WHERE reported_by = 'O\'Reilly'
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Tenga en cuenta que el valor de retorno de <code class="methodname">quote()</code> incluye los
+                delimitadores de comilla alrededor de la cadena. Esto es diferente de
+                algunas funciones que escapan caracteres especiales pero no añaden
+                los delimitadores de comilla, por ejemplo <a class="ulink" href="http://www.php.net/mysqli_real_escape_string" target="_top">mysql_real_escape_string()</a>.
+            </p>
+<p>
+                Los valores pueden necesitar entrecomillarse o no según el contexto de tipo de dato
+                <acronym class="acronym">SQL</acronym> en el que se usen. Por ejemplo, en algunas
+                marcas de <acronym class="acronym">RDBMS</acronym>, un valor entero no debe entrecomillarse como cadena
+                si se compara con una columna o expresión de tipo entero.
+                En otras palabras, lo siguiente es un error en algunas implementaciones
+                <acronym class="acronym">SQL</acronym>, asumiendo que <span class="property">intColumn</span> tiene un
+                tipo de dato <acronym class="acronym">SQL</acronym> de <code class="constant">INTEGER</code>
+            </p>
+<pre class="programlisting">
+SELECT * FROM atable WHERE intColumn = '123'
+</pre>
+<p>
+                Puede usar el segundo argumento opcional del método
+                <code class="methodname">quote()</code> para aplicar el entrecomillado de forma selectiva para
+                el tipo de dato <acronym class="acronym">SQL</acronym> que especifique.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.quoting.quote.example-2"></a><p class="title"><b>Ejemplo 27.27. Uso de quote() con un tipo SQL</b></p>
+<div class="example-contents"><pre class="programlisting">
+$value = '1234';
+$sql = 'SELECT * FROM atable WHERE intColumn = '
+     . $db-&gt;quote($value, 'INTEGER');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Cada clase <code class="classname">Zend_Db_Adapter</code> ha codificado los nombres de los tipos de datos
+                <acronym class="acronym">SQL</acronym> numéricos para la respectiva marca de
+                <acronym class="acronym">RDBMS</acronym>. También puede usar las constantes
+                <code class="constant">Zend_Db::INT_TYPE</code>, <code class="constant">Zend_Db::BIGINT_TYPE</code>,
+                y <code class="constant">Zend_Db::FLOAT_TYPE</code> para escribir código de una manera más
+                independiente del <acronym class="acronym">RDBMS</acronym>.
+            </p>
+<p>
+                <code class="classname">Zend_Db_Table</code> especifica los tipos <acronym class="acronym">SQL</acronym> a
+                <code class="methodname">quote()</code> automáticamente al generar
+                consultas <acronym class="acronym">SQL</acronym> que hacen referencia a las columnas clave de una tabla.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.quoting.quote-into"></a>27.1.5.2. Uso de quoteInto()</h4></div></div></div>
+<p>
+                El uso más típico del entrecomillado es interpolar una variable
+                <acronym class="acronym">PHP</acronym> en una expresión o sentencia <acronym class="acronym">SQL</acronym>. Puede usar el
+                método <code class="methodname">quoteInto()</code> para hacer esto en un solo paso. Este
+                método toma dos argumentos: el primer argumento es una cadena
+                que contiene un símbolo de marcador de posición (?), y el
+                segundo argumento es un valor o variable <acronym class="acronym">PHP</acronym> que debe
+                sustituirse por ese marcador de posición.
+            </p>
+<p>
+                El símbolo de marcador de posición es el mismo símbolo usado por muchas marcas de
+                <acronym class="acronym">RDBMS</acronym> para parámetros posicionales, pero el
+                método <code class="methodname">quoteInto()</code> solo emula parámetros de consulta.
+                El método simplemente interpola el valor en la cadena,
+                escapa caracteres especiales, y aplica comillas alrededor de él.
+                Los verdaderos parámetros de consulta mantienen la separación entre la cadena
+                <acronym class="acronym">SQL</acronym> y los parámetros a medida que la sentencia se analiza en el
+                servidor <acronym class="acronym">RDBMS</acronym>.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.quoting.quote-into.example"></a><p class="title"><b>Ejemplo 27.28. Uso de quoteInto()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sql = $db-&gt;quoteInto("SELECT * FROM bugs WHERE reported_by = ?", "O'Reilly");
+
+echo $sql;
+// SELECT * FROM bugs WHERE reported_by = 'O\'Reilly'
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Puede usar el tercer parámetro opcional de
+                <code class="methodname">quoteInto()</code> para especificar el tipo de dato <acronym class="acronym">SQL</acronym>.
+                Los tipos de datos numéricos no se entrecomillan, y otros tipos sí.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.quoting.quote-into.example-2"></a><p class="title"><b>Ejemplo 27.29. Uso de quoteInto() con un tipo SQL</b></p>
+<div class="example-contents"><pre class="programlisting">
+$sql = $db
+    -&gt;quoteInto("SELECT * FROM bugs WHERE bug_id = ?", '1234', 'INTEGER');
+
+echo $sql;
+// SELECT * FROM bugs WHERE reported_by = 1234
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.quoting.quote-identifier"></a>27.1.5.3. Uso de quoteIdentifier()</h4></div></div></div>
+<p>
+                Los valores no son la única parte de la sintaxis <acronym class="acronym">SQL</acronym> que podría necesitar
+                ser variable. Si usa variables <acronym class="acronym">PHP</acronym> para nombrar tablas, columnas,
+                u otros identificadores en sus sentencias <acronym class="acronym">SQL</acronym>, podría necesitar
+                entrecomillar también estas cadenas. Por defecto, los identificadores <acronym class="acronym">SQL</acronym> tienen
+                reglas de sintaxis similares a <acronym class="acronym">PHP</acronym> y a la mayoría de otros lenguajes de programación.
+                Por ejemplo, los identificadores no deben contener espacios, cierta
+                puntuación o caracteres especiales, o caracteres internacionales.
+                Además, ciertas palabras están reservadas para la sintaxis <acronym class="acronym">SQL</acronym>, y no deben
+                usarse como identificadores.
+            </p>
+<p>
+                Sin embargo, <acronym class="acronym">SQL</acronym> tiene una característica llamada
+                <span class="emphasis"><em>identificadores delimitados</em></span>, que permite opciones más amplias para la
+                escritura de identificadores. Si encierra un identificador <acronym class="acronym">SQL</acronym> entre el
+                tipo apropiado de comillas, puede usar identificadores con formas que serían inválidas
+                sin las comillas. Los identificadores delimitados pueden contener espacios,
+                puntuación, o caracteres internacionales. También puede usar palabras
+                reservadas <acronym class="acronym">SQL</acronym> si las encierra en delimitadores de identificador.
+            </p>
+<p>
+                El método <code class="methodname">quoteIdentifier()</code> funciona como
+                <code class="methodname">quote()</code>, pero aplica los caracteres delimitadores de identificador
+                a la cadena según el tipo de Adapter que use. Por ejemplo, el <acronym class="acronym">SQL</acronym> estándar
+                usa comillas dobles
+                (") para delimitadores de identificador, y la mayoría de las marcas de <acronym class="acronym">RDBMS</acronym>
+                usan ese símbolo. MySQL usa comillas invertidas (`) por defecto. El
+                método <code class="methodname">quoteIdentifier()</code> también escapa caracteres
+                especiales dentro del argumento de cadena.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.quoting.quote-identifier.example"></a><p class="title"><b>Ejemplo 27.30. Uso de quoteIdentifier()</b></p>
+<div class="example-contents"><pre class="programlisting">
+// podríamos tener un nombre de tabla que sea una palabra reservada de SQL
+$tableName = $db-&gt;quoteIdentifier("order");
+
+$sql = "SELECT * FROM $tableName";
+
+echo $sql
+// SELECT * FROM "order"
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Los identificadores delimitados <acronym class="acronym">SQL</acronym> son sensibles a mayúsculas/minúsculas, a diferencia de los
+                identificadores sin comillas. Por lo tanto, si usa identificadores delimitados, debe
+                usar la escritura del identificador exactamente como está almacenada
+                en su esquema, incluyendo las mayúsculas y minúsculas de las letras.
+            </p>
+<p>
+                En la mayoría de los casos en que se genera <acronym class="acronym">SQL</acronym> dentro de las
+                clases <code class="classname">Zend_Db</code>, el valor por defecto es que todos los identificadores se
+                delimitan automáticamente. Puede cambiar este comportamiento con la opción
+                <code class="constant">Zend_Db::AUTO_QUOTE_IDENTIFIERS</code>. Especifique esto
+                al instanciar el Adapter.
+                Vea <a class="link" href="zend.db.phtml#zend.db.adapter.connecting.parameters.example2" title="Example 27.6. Passing the Auto-Quoting Option to the Factory">este
+                    ejemplo</a>.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.transactions"></a>27.1.6. Control de transacciones de la base de datos</h3></div></div></div>
+<p>
+            Las bases de datos definen las transacciones como unidades lógicas de trabajo que se pueden
+            confirmar o revertir como un único cambio, incluso si operan
+            sobre múltiples tablas. Todas las consultas a una base de datos se ejecutan dentro
+            del contexto de una transacción, incluso si el controlador de la base de datos las
+            gestiona implícitamente. Esto se llama modo <span class="emphasis"><em>auto-commit</em></span>
+            (confirmación automática), en el que el controlador de la base de datos crea una transacción para cada
+            sentencia que ejecuta, y confirma esa transacción después de que se ha ejecutado su
+            sentencia <acronym class="acronym">SQL</acronym>. Por defecto, todas las clases Adapter de
+            <code class="classname">Zend_Db</code> operan en modo auto-commit.
+        </p>
+<p>
+            Alternativamente, puede especificar el inicio y la resolución de una
+            transacción, y así controlar cuántas consultas <acronym class="acronym">SQL</acronym> se incluyen en
+            un único grupo que se confirma (o revierte) como una única
+            operación. Use el método <code class="methodname">beginTransaction()</code> para
+            iniciar una transacción. Las sentencias <acronym class="acronym">SQL</acronym> subsiguientes se ejecutan en
+            el contexto de la misma transacción hasta que la resuelva
+            explícitamente.
+        </p>
+<p>
+            Para resolver la transacción, use el método <code class="methodname">commit()</code> o
+            <code class="methodname">rollBack()</code>. El método <code class="methodname">commit()</code>
+            marca los cambios realizados durante su transacción como confirmados, lo que
+            significa que los efectos de estos cambios se muestran en consultas ejecutadas en
+            otras transacciones.
+        </p>
+<p>
+            El método <code class="methodname">rollBack()</code> hace lo contrario: descarta
+            los cambios realizados durante su transacción. Los cambios se
+            deshacen efectivamente, y el estado de los datos vuelve a cómo estaba
+            antes de que comenzara su transacción. Sin embargo, revertir su
+            transacción no tiene efecto en los cambios realizados por otras transacciones
+            que se ejecutan concurrentemente.
+        </p>
+<p>
+            Después de resolver esta transacción, <code class="classname">Zend_Db_Adapter</code>
+            vuelve al modo auto-commit hasta que llame de nuevo a
+            <code class="methodname">beginTransaction()</code>.
+        </p>
+<div class="example">
+<a name="zend.db.adapter.transactions.example"></a><p class="title"><b>Ejemplo 27.31. Gestión de una transacción para garantizar la coherencia</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Iniciar una transacción explícitamente.
+$db-&gt;beginTransaction();
+
+try {
+    // Intentar ejecutar una o más consultas:
+    $db-&gt;query(...);
+    $db-&gt;query(...);
+    $db-&gt;query(...);
+
+    // Si todas tienen éxito, confirmar la transacción y todos los cambios
+    // se confirman de una vez.
+    $db-&gt;commit();
+
+} catch (Exception $e) {
+    // Si alguna de las consultas falló y lanzó una excepción,
+    // queremos revertir toda la transacción, revirtiendo los
+    // cambios realizados en la transacción, incluso los que tuvieron éxito.
+    // Así todos los cambios se confirman juntos, o ninguno se confirma.
+    $db-&gt;rollBack();
+    echo $e-&gt;getMessage();
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.list-describe"></a>27.1.7. Listado y descripción de tablas</h3></div></div></div>
+<p>
+            El método <code class="methodname">listTables()</code> devuelve un array de cadenas,
+            que nombran todas las tablas de la base de datos actual.
+        </p>
+<p>
+            El método <code class="methodname">describeTable()</code> devuelve un array asociativo
+            de metadatos sobre una tabla. Especifique el nombre de la tabla
+            como cadena en el primer argumento de este método. El segundo
+            argumento es opcional, y nombra el esquema en el que existe la
+            tabla.
+        </p>
+<p>
+            Las claves del array asociativo devuelto son los nombres de columna de
+            la tabla. El valor correspondiente a cada columna es también un
+            array asociativo, con las siguientes claves y valores:
+        </p>
+<div class="table">
+<a name="zend.db.adapter.list-describe.metadata"></a><p class="title"><b>Tabla 27.1. Campos de metadatos devueltos por describeTable()</b></p>
+<div class="table-contents"><table class="table" summary="Metadata Fields Returned by describeTable()" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Clave</th>
+<th align="left">Tipo</th>
+<th align="left">Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left"><code class="constant">SCHEMA_NAME</code></td>
+<td align="left">(cadena)</td>
+<td align="left">Nombre del esquema de la base de datos en el que existe esta tabla.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">TABLE_NAME</code></td>
+<td align="left">(cadena)</td>
+<td align="left">Nombre de la tabla a la que pertenece esta columna.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">COLUMN_NAME</code></td>
+<td align="left">(cadena)</td>
+<td align="left">Nombre de la columna.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">COLUMN_POSITION</code></td>
+<td align="left">(entero)</td>
+<td align="left">Posición ordinal de la columna en la tabla.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">DATA_TYPE</code></td>
+<td align="left">(cadena)</td>
+<td align="left">
+Nombre <acronym class="acronym">RDBMS</acronym> del tipo de dato de la columna.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">DEFAULT</code></td>
+<td align="left">(cadena)</td>
+<td align="left">Valor por defecto de la columna, si lo hay.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">NULLABLE</code></td>
+<td align="left">(booleano)</td>
+<td align="left">
+                            <code class="constant">TRUE</code> si la columna acepta
+                            <code class="constant">NULL</code>'s de <acronym class="acronym">SQL</acronym>, <code class="constant">FALSE</code> si la
+                            columna tiene una restricción <code class="constant">NOT</code> <code class="constant">NULL</code>.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">LENGTH</code></td>
+<td align="left">(entero)</td>
+<td align="left">
+                            Longitud o tamaño de la columna según lo informado por el
+                            <acronym class="acronym">RDBMS</acronym>.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">SCALE</code></td>
+<td align="left">(entero)</td>
+<td align="left">
+                            Escala del tipo <acronym class="acronym">SQL</acronym> <code class="constant">NUMERIC</code> o
+                            <code class="constant">DECIMAL</code>.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">PRECISION</code></td>
+<td align="left">(entero)</td>
+<td align="left">
+                            Precisión del tipo <acronym class="acronym">SQL</acronym> <code class="constant">NUMERIC</code> o
+                            <code class="constant">DECIMAL</code>.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">UNSIGNED</code></td>
+<td align="left">(booleano)</td>
+<td align="left">
+                            <code class="constant">TRUE</code> si un tipo basado en entero se informa como
+                            <code class="constant">UNSIGNED</code>.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">PRIMARY</code></td>
+<td align="left">(booleano)</td>
+<td align="left">
+                            <code class="constant">TRUE</code> si la columna forma parte de la clave primaria de
+                            esta tabla.
+                        </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">PRIMARY_POSITION</code></td>
+<td align="left">(entero)</td>
+<td align="left">Posición ordinal (basada en 1) de la columna en la clave primaria.</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">IDENTITY</code></td>
+<td align="left">(booleano)</td>
+<td align="left">
+                            <code class="constant">TRUE</code> si la columna usa un valor autogenerado.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note: How the IDENTITY Metadata Field Relates to Specific RDBMSs">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Cómo se relaciona el campo de metadatos IDENTITY con RDBMS específicos</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                El campo de metadatos <code class="constant">IDENTITY</code> se eligió como un término 'idiomático'
+                para representar una relación con claves sustitutas. Este campo puede
+                conocerse comúnmente por los siguientes valores:-
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">IDENTITY</code> - <acronym class="acronym">DB2</acronym>,
+                        <acronym class="acronym">MSSQL</acronym>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">AUTO_INCREMENT</code> - MySQL/MariaDB
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">SERIAL</code> - PostgreSQL
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">SEQUENCE</code> - Oracle
+                    </p></li>
+</ul></div>
+</td></tr>
+</table></div>
+<p>
+            Si no existe ninguna tabla que coincida con el nombre de tabla y el nombre de esquema opcional
+            especificados, entonces <code class="methodname">describeTable()</code> devuelve un array vacío.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.closing"></a>27.1.8. Cierre de una conexión</h3></div></div></div>
+<p>
+            Normalmente no es necesario cerrar una conexión de base de datos. <acronym class="acronym">PHP</acronym>
+            limpia automáticamente todos los recursos al final de una solicitud.
+            Las extensiones de base de datos están diseñadas para cerrar la conexión cuando la
+            referencia al objeto de recurso se limpia.
+        </p>
+<p>
+            Sin embargo, si tiene un script <acronym class="acronym">PHP</acronym> de larga duración que inicia muchas
+            conexiones de base de datos, podría necesitar cerrar la conexión, para evitar
+            agotar la capacidad de su servidor <acronym class="acronym">RDBMS</acronym>. Puede usar el
+            método <code class="methodname">closeConnection()</code> del Adapter para cerrar explícitamente
+            la conexión de base de datos subyacente.
+        </p>
+<p>
+            Desde la versión 1.7.2, puede comprobar si está actualmente conectado al
+            servidor <acronym class="acronym">RDBMS</acronym> con el método <code class="methodname">isConnected()</code>.
+            Esto significa que se ha iniciado un recurso de conexión y no se ha cerrado. Esta
+            función actualmente no puede detectar, por ejemplo, un cierre de la conexión
+            realizado por el lado del servidor. Esto se usa internamente para cerrar la conexión. Le
+            permite cerrar la conexión varias veces sin errores. Ya era el caso antes de 1.7.2 para
+            los adaptadores <acronym class="acronym">PDO</acronym>, pero no para los demás.
+        </p>
+<div class="example">
+<a name="zend.db.adapter.closing.example"></a><p class="title"><b>Ejemplo 27.32. Cierre de una conexión de base de datos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db-&gt;closeConnection();
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Does Zend_Db Support Persistent Connections?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Admite Zend_Db conexiones persistentes?</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Sí, la persistencia se admite mediante la adición del
+                indicador <span class="property">persistent</span> establecido en <code class="constant">TRUE</code> en la
+                configuración (no driver_configuration) de un adaptador
+                en <code class="classname">Zend_Db</code>.
+            </p>
+<div class="example">
+<a name="zend.db.adapter.connecting.persistence.example"></a><p class="title"><b>Ejemplo 27.33. Uso del indicador de persistencia con el adaptador Oracle</b></p>
+<div class="example-contents"><pre class="programlisting">
+$db = Zend_Db::factory('Oracle', array(
+    'host'       =&gt; '127.0.0.1',
+    'username'   =&gt; 'webuser',
+    'password'   =&gt; 'xxxxxxxx',
+    'dbname'     =&gt; 'test',
+    'persistent' =&gt; true
+));
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Tenga en cuenta que el uso de conexiones persistentes puede causar un
+                exceso de conexiones inactivas en el servidor <acronym class="acronym">RDBMS</acronym>, lo que causa
+                más problemas que cualquier ganancia de rendimiento que pudiera lograr
+                reduciendo la sobrecarga de establecer conexiones.
+            </p>
+<p>
+                Las conexiones de base de datos tienen estado. Es decir, algunos objetos en el
+                servidor <acronym class="acronym">RDBMS</acronym> existen en el ámbito de sesión. Ejemplos son bloqueos, variables
+                de usuario, tablas temporales, e información sobre la consulta
+                ejecutada más recientemente, como filas afectadas, y el último
+                valor de id generado. Si usa conexiones persistentes, su
+                aplicación podría acceder a datos inválidos o privilegiados que fueron
+                creados en una solicitud <acronym class="acronym">PHP</acronym> anterior.
+            </p>
+<p>
+                Actualmente, solo Oracle, <acronym class="acronym">DB2</acronym>, y los adaptadores
+                <acronym class="acronym">PDO</acronym> (cuando lo especifica <acronym class="acronym">PHP</acronym>) admiten la persistencia en
+                <code class="classname">Zend_Db</code>.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.other-statements"></a>27.1.9. Ejecución de otras sentencias de base de datos</h3></div></div></div>
+<p>
+            Puede haber casos en los que necesite acceder directamente al objeto de conexión,
+            tal como lo proporciona la extensión de base de datos <acronym class="acronym">PHP</acronym>. Algunas
+            de estas extensiones pueden ofrecer características que no se exponen mediante
+            métodos de <code class="classname">Zend_Db_Adapter_Abstract</code>.
+        </p>
+<p>
+            Por ejemplo, todas las sentencias <acronym class="acronym">SQL</acronym> ejecutadas por <code class="classname">Zend_Db</code>
+            se preparan, y luego se ejecutan. Sin embargo, algunas características de base de datos son incompatibles con
+            las sentencias preparadas. Las sentencias <code class="constant">DDL</code> como
+            <code class="constant">CREATE</code> y <code class="constant">ALTER</code> no se pueden preparar en MySQL.
+            Además, las sentencias <acronym class="acronym">SQL</acronym> no se benefician de la <a class="ulink" href="http://dev.mysql.com/doc/refman/5.1/en/query-cache-how.html" target="_top">caché de
+                consultas de MySQL</a>, antes de MySQL 5.1.17.
+        </p>
+<p>
+            La mayoría de las extensiones de base de datos <acronym class="acronym">PHP</acronym> proporcionan un método para ejecutar
+            sentencias <acronym class="acronym">SQL</acronym> sin prepararlas. Por ejemplo, en
+            <acronym class="acronym">PDO</acronym>, este método es <code class="methodname">exec()</code>. Puede acceder
+            al objeto de conexión en la extensión <acronym class="acronym">PHP</acronym> directamente usando
+            <code class="methodname">getConnection()</code>.
+        </p>
+<div class="example">
+<a name="zend.db.adapter.other-statements.example"></a><p class="title"><b>Ejemplo 27.34. Ejecución de una sentencia no preparada en un adaptador PDO</b></p>
+<div class="example-contents"><pre class="programlisting">
+$result = $db-&gt;getConnection()-&gt;exec('DROP TABLE bugs');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            De manera similar, puede acceder a otros métodos o propiedades que son
+            específicos de las extensiones de base de datos <acronym class="acronym">PHP</acronym>. Sin embargo, tenga en cuenta que al
+            hacer esto podría limitar su aplicación a la interfaz
+            proporcionada por la extensión para una marca específica de <acronym class="acronym">RDBMS</acronym>.
+        </p>
+<p>
+            En futuras versiones de <code class="classname">Zend_Db</code>, habrá oportunidades para
+            añadir puntos de entrada de métodos para la funcionalidad que es común a
+            las extensiones de base de datos <acronym class="acronym">PHP</acronym> admitidas. Esto no afectará la
+            compatibilidad con versiones anteriores.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.server-version"></a>27.1.10. Recuperación de la versión del servidor</h3></div></div></div>
+<p>
+            Desde la versión 1.7.2, puede recuperar la versión del servidor con el estilo de sintaxis
+            <acronym class="acronym">PHP</acronym> para poder usar <code class="methodname">version_compare()</code>. Si la
+            información no está disponible, recibirá <code class="constant">NULL</code>.
+        </p>
+<div class="example">
+<a name="zend.db.adapter.server-version.example"></a><p class="title"><b>Ejemplo 27.35. Verificación de la versión del servidor antes de ejecutar una consulta</b></p>
+<div class="example-contents"><pre class="programlisting">
+$version = $db-&gt;getServerVersion();
+if (!is_null($version)) {
+    if (version_compare($version, '5.0.0', '&gt;=')) {
+        // hacer algo
+    } else {
+        // hacer otra cosa
+    }
+} else {
+    // imposible leer la versión del servidor
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.adapter.adapter-notes"></a>27.1.11. Notas sobre adaptadores específicos</h3></div></div></div>
+<p>
+            Esta sección enumera las diferencias entre las clases Adapter de las que
+            debería estar al tanto.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.ibm-db2"></a>27.1.11.1. IBM DB2</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code> con
+                        el nombre 'Db2'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa la extensión <acronym class="acronym">PHP</acronym>
+                        <code class="constant">IBM_DB2</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <acronym class="acronym">IBM</acronym> <acronym class="acronym">DB2</acronym> admite tanto secuencias como
+                        claves autoincrementales. Por lo tanto, los argumentos de
+                        <code class="methodname">lastInsertId()</code> son opcionales. Si no proporciona
+                        argumentos, el Adapter devuelve el último valor
+                        generado para una clave autoincremental. Si proporciona
+                        argumentos, el Adapter devuelve el último valor generado
+                        por la secuencia nombrada según la convención
+                        '<span class="emphasis"><em>tabla</em></span>_<span class="emphasis"><em>columna</em></span>_seq'.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.mysqli"></a>27.1.11.2. MySQLi</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre 'Mysqli'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter utiliza la extensión <acronym class="acronym">PHP</acronym> mysqli.
+                    </p></li>
+<li class="listitem"><p>
+                        MySQL y MariaDB no admiten secuencias, por lo que
+                        <code class="methodname">lastInsertId()</code> ignora sus argumentos y
+                        siempre devuelve el último valor generado para una clave
+                        autoincremental. El método <code class="methodname">lastSequenceId()</code>
+                        devuelve <code class="constant">NULL</code>.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.oracle"></a>27.1.11.3. Oracle</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre 'Oracle'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa la extensión <acronym class="acronym">PHP</acronym> oci8.
+                    </p></li>
+<li class="listitem"><p>
+                        Oracle no admite claves autoincrementales, por lo que
+                        debería especificar el nombre de una secuencia a
+                        <code class="methodname">lastInsertId()</code> o
+                        <code class="methodname">lastSequenceId()</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        La extensión Oracle no admite parámetros
+                        posicionales. Debe usar parámetros con nombre.
+                    </p></li>
+<li class="listitem"><p>
+                        Actualmente la opción <code class="constant">Zend_Db::CASE_FOLDING</code>
+                        no es compatible con el adaptador Oracle. Para usar esta
+                        opción con Oracle, debe usar el adaptador <acronym class="acronym">PDO</acronym>
+                        <acronym class="acronym">OCI</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        Por defecto, los campos <acronym class="acronym">LOB</acronym> se devuelven como
+                        objetos <acronym class="acronym">OCI</acronym>-Lob. Puede recuperarlos como cadena para
+                        todas las solicitudes usando las opciones de controlador '<span class="property">lob_as_string</span>' o
+                        para una solicitud en particular usando
+                        <code class="methodname">setLobAsString(boolean)</code> en el adaptador o en la sentencia.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.sqlsrv"></a>27.1.11.4. Microsoft SQL Server</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code> con
+                        el nombre 'Sqlsrv'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa la extensión <acronym class="acronym">PHP</acronym> sqlsrv
+                    </p></li>
+<li class="listitem"><p>
+                        Solo se admite Microsoft <acronym class="acronym">SQL</acronym> Server 2005 o superior.
+                    </p></li>
+<li class="listitem"><p>
+                        Microsoft <acronym class="acronym">SQL</acronym> Server no admite secuencias, por lo que
+                        <code class="methodname">lastInsertId()</code> ignora el argumento de clave primaria y
+                        devuelve el último valor generado para una clave autoincremental si se especifica un nombre
+                        de tabla o si una consulta de última inserción devolvió un id. El método
+                        <code class="methodname">lastSequenceId()</code> devuelve
+                        <code class="constant">NULL</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Db_Adapter_Sqlsrv</code> establece
+                        <code class="constant">QUOTED_IDENTIFIER</code> en ON inmediatamente
+                        después de conectarse a una base de datos <acronym class="acronym">SQL</acronym> Server. Esto hace que el
+                        controlador use el símbolo delimitador de identificador <acronym class="acronym">SQL</acronym> estándar
+                        (<span class="emphasis"><em>"</em></span>) en lugar de la sintaxis propietaria de corchetes
+                        que <acronym class="acronym">SQL</acronym> Server usa para delimitar identificadores.
+                    </p></li>
+<li class="listitem"><p>
+                        Puede especificar <span class="property">driver_options</span> como clave en el array
+                        de opciones. El valor puede ser cualquier cosa de aquí <a class="ulink" href="http://msdn.microsoft.com/en-us/library/cc296161(SQL.90).aspx" target="_top">http://msdn.microsoft.com/en-us/library/cc296161(SQL.90).aspx</a>.
+                    </p></li>
+<li class="listitem"><p>
+                        Puede usar <code class="methodname">setTransactionIsolationLevel()</code> para establecer
+                        el nivel de aislamiento para la conexión actual. El valor puede ser
+                        <code class="constant">SQLSRV_TXN_READ_UNCOMMITTED</code>,
+                        <code class="constant">SQLSRV_TXN_READ_COMMITTED</code>,
+                        <code class="constant">SQLSRV_TXN_REPEATABLE_READ</code>,
+                        <code class="constant">SQLSRV_TXN_SNAPSHOT</code> o
+                        <code class="constant">SQLSRV_TXN_SERIALIZABLE</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        A partir de Zend Framework 1.9, la versión mínima admitida de la
+                        extensión <acronym class="acronym">PHP</acronym> <acronym class="acronym">SQL</acronym> Server de
+                        Microsoft es 1.0.1924.0. y la versión del cliente nativo de <acronym class="acronym">MSSQL</acronym> Server
+                        9.00.3042.00.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-ibm"></a>27.1.11.5. PDO para IBM DB2 e Informix Dynamic Server (IDS)</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Ibm</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym>
+                        <acronym class="acronym">PDO</acronym> y <code class="constant">PDO_IBM</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Debe usar al menos la versión 1.2.2 de la extensión <code class="constant">PDO_IBM</code>.
+                        Si tiene una versión anterior de esta extensión, debe
+                        actualizar la extensión <code class="constant">PDO_IBM</code> desde
+                        <acronym class="acronym">PECL</acronym>.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-mssql"></a>27.1.11.6. PDO Microsoft SQL Server</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Mssql</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym> pdo y pdo_dblib.
+                    </p></li>
+<li class="listitem"><p>
+                        Microsoft <acronym class="acronym">SQL</acronym> Server no admite secuencias, por lo que
+                        <code class="methodname">lastInsertId()</code> ignora sus argumentos y
+                        siempre devuelve el último valor generado para una clave
+                        autoincremental. El método <code class="methodname">lastSequenceId()</code>
+                        devuelve <code class="constant">NULL</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Si trabaja con cadenas unicode en una codificación distinta de
+                        <acronym class="acronym">UCS</acronym>-2 (como <acronym class="acronym">UTF</acronym>-8), es posible que deba
+                        realizar una conversión en el código de su aplicación o almacenar los datos en una columna
+                        binaria. Consulte la <a class="ulink" href="http://support.microsoft.com/kb/232580" target="_top">Base de conocimiento de
+                            Microsoft</a> para más información.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Db_Adapter_Pdo_Mssql</code> establece
+                        <code class="constant">QUOTED_IDENTIFIER</code> en ON inmediatamente
+                        después de conectarse a una base de datos <acronym class="acronym">SQL</acronym> Server. Esto hace que el
+                        controlador use el símbolo delimitador de identificador <acronym class="acronym">SQL</acronym> estándar
+                        (") en lugar de la sintaxis propietaria de corchetes que <acronym class="acronym">SQL</acronym>
+                        Server usa para delimitar identificadores.
+                    </p></li>
+<li class="listitem"><p>
+                        Puede especificar <span class="property">pdoType</span> como clave en el array de
+                        opciones. El valor puede ser "mssql" (el valor por defecto),
+                        "dblib", "freetds", o "sybase". Esta opción afecta al
+                        prefijo <acronym class="acronym">DSN</acronym> que usa el adaptador al construir la
+                        cadena <acronym class="acronym">DSN</acronym>. Tanto "freetds" como "sybase" implican un prefijo
+                        de "sybase:", que se usa para el conjunto de bibliotecas
+                        <a class="ulink" href="http://www.freetds.org/" target="_top">FreeTDS</a>.
+                        Vea también
+                        <a class="ulink" href="http://www.php.net/manual/en/ref.pdo-dblib.connection.php" target="_top">
+                        http://www.php.net/manual/en/ref.pdo-dblib.connection.php</a>
+                        para más información sobre los prefijos <acronym class="acronym">DSN</acronym> usados en este
+                        controlador.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-mysql"></a>27.1.11.7. PDO MySQL</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Mysql</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym> pdo y pdo_mysql.
+                    </p></li>
+<li class="listitem"><p>
+                        MySQL y MariaDB no admiten secuencias, por lo que
+                        <code class="methodname">lastInsertId()</code> ignora sus argumentos y
+                        siempre devuelve el último valor generado para una clave
+                        autoincremental. El método <code class="methodname">lastSequenceId()</code>
+                        devuelve <code class="constant">NULL</code>.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-oci"></a>27.1.11.8. PDO Oracle</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Oci</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym> pdo y pdo_oci.
+                    </p></li>
+<li class="listitem"><p>
+                        Oracle no admite claves autoincrementales, por lo que
+                        debería especificar el nombre de una secuencia a
+                        <code class="methodname">lastInsertId()</code> o
+                        <code class="methodname">lastSequenceId()</code>.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-pgsql"></a>27.1.11.9. PDO PostgreSQL</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Pgsql</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym> pdo y pdo_pgsql.
+                    </p></li>
+<li class="listitem"><p>
+                        PostgreSQL admite tanto secuencias como claves
+                        autoincrementales. Por lo tanto, los argumentos de
+                        <code class="methodname">lastInsertId()</code> son opcionales. Si no proporciona
+                        argumentos, el Adapter devuelve el último valor
+                        generado para una clave autoincremental. Si proporciona
+                        argumentos, el Adapter devuelve el último valor generado
+                        por la secuencia nombrada según la convención
+                        '<span class="emphasis"><em>tabla</em></span>_<span class="emphasis"><em>columna</em></span>_seq'.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.pdo-sqlite"></a>27.1.11.10. PDO SQLite</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especifique este Adapter al método <code class="methodname">factory()</code>
+                        con el nombre '<code class="classname">Pdo_Sqlite</code>'.
+                    </p></li>
+<li class="listitem"><p>
+                        Este Adapter usa las extensiones <acronym class="acronym">PHP</acronym> pdo y pdo_sqlite.
+                    </p></li>
+<li class="listitem"><p>
+                        SQLite no admite secuencias, por lo que
+                        <code class="methodname">lastInsertId()</code> ignora sus argumentos y
+                        siempre devuelve el último valor generado para una clave
+                        autoincremental. El método <code class="methodname">lastSequenceId()</code>
+                        devuelve <code class="constant">NULL</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Para conectarse a una base de datos SQLite2, especifique
+                        <span class="command"><strong>'sqlite2' =&gt; true</strong></span> en el array de
+                        parámetros al crear una instancia del Adapter
+                        <code class="classname">Pdo_Sqlite</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Para conectarse a una base de datos SQLite en memoria,
+                        especifique <span class="command"><strong>'dbname' =&gt; ':memory:'</strong></span> en el
+                        array de parámetros al crear una instancia
+                        del Adapter <code class="classname">Pdo_Sqlite</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Las versiones antiguas del controlador SQLite para <acronym class="acronym">PHP</acronym> no parecen
+                        admitir los comandos <acronym class="acronym">PRAGMA</acronym> necesarios para garantizar que se
+                        usen nombres de columna cortos en los conjuntos de resultados. Si
+                        tiene problemas porque sus conjuntos de resultados se devuelven con
+                        claves de la forma "tablename.columnname" cuando hace una
+                        consulta de unión (join), entonces debería actualizar a la versión
+                        actual de <acronym class="acronym">PHP</acronym>.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.adapter.adapter-notes.firebird"></a>27.1.11.11. Firebird (Interbase)</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Este Adapter usa la extensión <acronym class="acronym">PHP</acronym> php_interbase.
+                    </p></li>
+<li class="listitem"><p>
+                        Firebird (Interbase) no admite claves autoincrementales,
+                        por lo que debería especificar el nombre de una secuencia a
+                        <code class="methodname">lastInsertId()</code> o
+                        <code class="methodname">lastSequenceId()</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        Actualmente la opción <code class="constant">Zend_Db::CASE_FOLDING</code>
+                        no es compatible con el adaptador Firebird (Interbase).
+                        Los identificadores sin comillas se devuelven automáticamente en
+                        mayúsculas.
+                    </p></li>
+<li class="listitem">
+<p>El nombre del Adapter es <code class="classname">ZendX_Db_Adapter_Firebird</code>.</p>
+<p>
+                        Recuerde usar el parámetro adapterNamespace con el valor
+                        <code class="classname">ZendX_Db_Adapter</code>.
+                    </p>
+<p>
+                        Recomendamos actualizar el <code class="filename">gds32.dll</code> (o su
+                        equivalente en linux) incluido con <acronym class="acronym">PHP</acronym>, a la misma versión del
+                        servidor. Para Firebird el equivalente de <code class="filename">gds32.dll</code> es
+                        <code class="filename">fbclient.dll</code>.
+                    </p>
+<p>
+                        Por defecto, todos los identificadores (nombres de tabla, campos) se devuelven en
+                        mayúsculas.
+                    </p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.date.additional.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.statement.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">26.7. Ejemplos de trabajo </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 27.2. Zend_Db_Statement</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

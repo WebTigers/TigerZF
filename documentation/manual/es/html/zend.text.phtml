@@ -1,0 +1,158 @@
+<?php $title = 'Capítulo 69. Zend_Text'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 69. Zend_Text</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.test.phpunit.db.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.text.table.introduction.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.text"></a>Capítulo 69. Zend_Text</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.text.phtml#zend.text.figlet">69.1. Zend_Text_Figlet</a></span></dt>
+<dt><span class="sect1"><a href="zend.text.table.introduction.phtml">69.2. Zend_Text_Table</a></span></dt>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.text.figlet"></a>69.1. Zend_Text_Figlet</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Text_Figlet</code> es un componente que permite a los desarrolladores
+        crear el llamado texto FIGlet. Un texto FIGlet es una cadena que se
+        representa como arte <acronym class="acronym">ASCII</acronym>. Los FIGlets utilizan un formato de fuente especial, denominado
+        FLT (FigLet Font). Por defecto, se distribuye una fuente estándar con
+        <code class="classname">Zend_Text_Figlet</code>, pero puede descargar fuentes adicionales en
+        <a class="ulink" href="http://www.figlet.org/fontdb.cgi" target="_top">http://www.figlet.org</a>.
+    </p>
+<div class="note"><table border="0" summary="Note: Compressed fonts">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Fuentes comprimidas</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Text_Figlet</code> admite fuentes comprimidas con gzip. Esto significa que
+            puede tomar un archivo <code class="filename">.flf</code> y comprimirlo con gzip. Para que
+            <code class="classname">Zend_Text_Figlet</code> lo reconozca, la fuente comprimida
+            debe tener la extensión <code class="filename">.gz</code>. Además, para poder usar
+            fuentes comprimidas, debe tener habilitada la extensión GZIP de <acronym class="acronym">PHP</acronym>.
+        </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Encoding">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Codificación</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Text_Figlet</code> espera que sus cadenas estén codificadas en UTF-8
+            por defecto. Si este no es el caso, puede indicar la codificación de
+            caracteres como segundo parámetro del método <code class="methodname">render()</code>.
+        </p></td></tr>
+</table></div>
+<p>
+        Puede definir múltiples opciones para un FIGlet. Al instanciar
+        <code class="classname">Zend_Text_Figlet</code>, puede suministrar un array o una instancia de
+        <code class="classname">Zend_Config</code>.
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">font</span> - Define la fuente que se debe usar
+                    para el renderizado. Si no se define, se utilizará la fuente
+                    incorporada.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">outputWidth</span> - Define el ancho máximo de la
+                    cadena de salida. Se utiliza tanto para el ajuste de línea como para
+                    la justificación. Tenga cuidado con valores demasiado pequeños, ya que pueden dar
+                    lugar a un comportamiento indefinido. El valor por defecto es 80.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">handleParagraphs</span> - Un valor booleano que indica
+                    cómo se manejan los saltos de línea. Cuando se establece en <code class="constant">TRUE</code>, los saltos de línea
+                    individuales se ignoran y en su lugar se tratan como espacios simples. Solo los saltos de línea
+                    múltiples se tratarán como tales. El valor por defecto es
+                    <code class="constant">FALSE</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">justification</span> - Puede ser uno de los valores de
+                    <code class="classname">Zend_Text_Figlet::JUSTIFICATION_*</code>. Existen
+                    <code class="constant">JUSTIFICATION_LEFT</code>,
+                    <code class="constant">JUSTIFICATION_CENTER</code> y
+                    <code class="constant">JUSTIFICATION_RIGHT</code>. La justificación predeterminada
+                    viene definida por el valor de <span class="property">rightToLeft</span>.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">rightToLeft</span> - Define en qué dirección se
+                    escribe el texto. Puede ser
+                    <code class="constant">Zend_Text_Figlet::DIRECTION_LEFT_TO_RIGHT</code> o
+                    <code class="constant">Zend_Text_Figlet::DIRECTION_RIGHT_TO_LEFT</code>. Por
+                    defecto se utiliza la configuración del archivo de fuente. Cuando la justificación
+                    no está definida, un texto escrito de derecha a izquierda se
+                    alinea automáticamente a la derecha.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">smushMode</span> - Un campo de bits entero que define
+                    cómo se combinan (smush) los caracteres individuales entre sí. Puede ser la
+                    suma de varios valores de <code class="classname">Zend_Text_Figlet::SM_*</code>.
+                    Existen los siguientes modos de smush: SM_EQUAL, SM_LOWLINE,
+                    SM_HIERARCHY, SM_PAIR, SM_BIGX, SM_HARDBLANK, SM_KERN y
+                    SM_SMUSH. Un valor de 0 no desactiva por completo el smushing,
+                    sino que fuerza la aplicación de SM_KERN, mientras que un valor de -1 lo
+                    desactiva. Puede encontrar una explicación de los distintos modos de smush
+                    <a class="ulink" href="http://www.jave.de/figlet/figfont.txt" target="_top">aquí</a>.
+                    Por defecto se utiliza la configuración del archivo de fuente. La opción de modo de smush
+                    normalmente solo la utilizan los diseñadores de fuentes al probar los distintos
+                    modos de disposición con una fuente nueva.
+                </p></li>
+</ul></div>
+<p>
+    </p>
+<div class="example">
+<a name="zend.text.figlet.example.using"></a><p class="title"><b>Ejemplo 69.1. Uso de Zend_Text_Figlet</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo ilustra el uso básico de <code class="classname">Zend_Text_Figlet</code>
+            para crear un texto FIGlet sencillo:
+        </p>
+<pre class="programlisting">
+$figlet = new Zend_Text_Figlet();
+echo $figlet-&gt;render('Zend');
+</pre>
+<p>
+            Suponiendo que esté usando una fuente monoespaciada, esto se vería de la siguiente manera:
+        </p>
+<pre class="programlisting">
+  ______    ______    _  __   ______
+ |__  //   |  ___||  | \| || |  __ \\
+   / //    | ||__    |  ' || | |  \ ||
+  / //__   | ||___   | .  || | |__/ ||
+ /_____||  |_____||  |_|\_|| |_____//
+ `-----`'  `-----`   `-` -`'  -----`
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.test.phpunit.db.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.text.table.introduction.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">68.3. Zend_Test_PHPUnit_Db </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 69.2. Zend_Text_Table</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

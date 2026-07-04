@@ -1,0 +1,64 @@
+<?php $title = '45.11. Codificación'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">45.11. Codificación</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mail.character-sets.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 45. Zend_Mail</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mail.smtp-authentication.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.mail.encoding"></a>45.11. Codificación</h2></div></div></div>
+<p>
+        Los cuerpos de mensajes de texto y <acronym class="acronym">HTML</acronym> se codifican con el mecanismo
+        quotedprintable de forma predeterminada. Las cabeceras de los mensajes también se codifican con
+        el mecanismo quotedprintable si no se especifica base64 en <code class="methodname">setHeaderEncoding()</code>.
+        Si se utiliza un idioma que no se basa en letras romanas, base64 sería más adecuado. Todos los demás
+        adjuntos se codifican mediante base64 si no se indica otra codificación en la llamada a
+        <code class="methodname">addAttachment()</code> o se asigna al objeto de la parte
+        <acronym class="acronym">MIME</acronym> más adelante. La codificación 7Bit y 8Bit actualmente solo
+        transmiten los datos de contenido binario.
+    </p>
+<p>
+        La codificación de cabeceras, especialmente la codificación del asunto, es un tema delicado.
+        <code class="classname">Zend_Mime</code> implementa actualmente su propio algoritmo para codificar
+        cabeceras quoted printable según la RFC-2045. Esto se debe a los problemas de
+        <code class="methodname">iconv_mime_encode()</code> y
+        <code class="methodname">mb_encode_mimeheader()</code> con respecto a ciertos
+        conjuntos de caracteres. Este algoritmo solo corta la cabecera en los espacios, lo que puede
+        llevar a cabeceras que superen ampliamente la longitud sugerida de 76 caracteres. Para estos
+        casos se sugiere cambiar a la codificación de cabeceras BASE64, tal como describe el
+        siguiente ejemplo:
+    </p>
+<pre class="programlisting">
+// By default Zend_Mime::ENCODING_QUOTEDPRINTABLE
+$mail = new Zend_Mail('KOI8-R');
+
+// Reset to Base64 Encoding because Russian expressed in KOI8-R is
+// different from Roman letters-based languages greatly.
+$mail-&gt;setHeaderEncoding(Zend_Mime::ENCODING_BASE64);
+</pre>
+<p>
+        <code class="classname">Zend_Mail_Transport_Smtp</code> codifica las líneas que empiezan con uno o dos
+        puntos para que el correo no viole el protocolo SMTP.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mail.character-sets.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.mail.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mail.smtp-authentication.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">45.10. Conjuntos de caracteres </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 45.12. Autenticación SMTP</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

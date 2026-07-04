@@ -1,0 +1,179 @@
+<?php $title = '64.6. Zend_Service_Amazon_Ec2: Instancias Windows'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.6. Zend_Service_Amazon_Ec2: Instancias Windows</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.instance.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.reserved.instance.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.windows.instance"></a>64.6. Zend_Service_Amazon_Ec2: Instancias Windows</h2></div></div></div>
+<p>
+        Usar instancias de Amazon EC2 ejecutando Windows es similar a usar instancias
+        que ejecutan Linux y UNIX. Las siguientes son las principales diferencias entre
+        las instancias que usan Linux o UNIX y Windows:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Escritorio remoto—Para acceder a las instancias Windows, se usa Escritorio
+                remoto en lugar de SSH.
+            </p></li>
+<li class="listitem"><p>
+                Contraseña de administrador—Para acceder a las instancias Windows por primera vez,
+                debe obtener la contraseña de administrador usando el comando
+                ec2-get-password.
+            </p></li>
+<li class="listitem"><p>
+                Empaquetado simplificado—Para empaquetar una instancia Windows, se usa un único comando que
+                apaga la instancia, la guarda como una <acronym class="acronym">AMI</acronym>, y la reinicia.
+            </p></li>
+</ul></div>
+<p>
+        Como parte de este servicio, las instancias de Amazon EC2 ahora pueden ejecutar Microsoft Windows Server
+        2003. Nuestra imagen base de Windows le proporciona la mayoría de las funcionalidades comunes asociadas
+        con Windows. Sin embargo, si requiere más de dos usuarios Windows concurrentes o necesita
+        aprovechar aplicaciones que requieren <acronym class="acronym">LDAP</acronym>, Kerberos, RADIUS, u otros
+        servicios de credenciales, debe usar Windows con Servicios de Autenticación. Por ejemplo,
+        Microsoft Exchange Server y Microsoft SharePoint Server requieren Windows con
+        Servicios de Autenticación.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Para empezar a usar instancias Windows, recomendamos usar la Consola de Administración
+            de <acronym class="acronym">AWS</acronym>. Hay diferencias en los precios entre las instancias Windows y las de Windows con
+            Servicios de Autenticación. Para información sobre precios, vaya a la página de producto
+            de Amazon EC2.
+        </p></td></tr>
+</table></div>
+<p>
+        Amazon EC2 actualmente proporciona las siguientes <acronym class="acronym">AMI</acronym>s de Windows:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Windows Autenticado (32 bits)</p></li>
+<li class="listitem"><p>Windows Autenticado (64 bits)</p></li>
+<li class="listitem"><p>Windows Anónimo (32 bits)</p></li>
+<li class="listitem"><p>Windows Anónimo (64 bits)</p></li>
+</ul></div>
+<p>
+        Las <acronym class="acronym">AMI</acronym>s públicas de Windows que Amazon proporciona son versiones sin modificar
+        de Windows con las siguientes dos excepciones: agregamos
+        controladores para mejorar el rendimiento de red y de E/S de disco y
+        creamos el servicio de configuración de Amazon EC2. El servicio de configuración
+        de Amazon EC2 realiza las siguientes funciones:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Establece aleatoriamente la contraseña de Administrador en el lanzamiento inicial,
+                cifra la contraseña con la clave SSH del usuario, y la reporta
+                en la consola. Esta operación ocurre en el lanzamiento inicial de la <acronym class="acronym">AMI</acronym>.
+                Si cambia la contraseña, las <acronym class="acronym">AMI</acronym>s que se creen
+                a partir de esta instancia usan la nueva contraseña.
+            </p></li>
+<li class="listitem"><p>
+                Configura el nombre del equipo con el nombre DNS interno. Para
+                determinar el nombre DNS interno, consulte Uso del direccionamiento de instancias.
+            </p></li>
+<li class="listitem"><p>
+                Envía los últimos tres errores de sistema y de aplicación del
+                registro de eventos a la consola. Esto ayuda a los desarrolladores a identificar
+                problemas que causaron que una instancia se bloqueara o que se perdiera la conectividad
+                de red.
+            </p></li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.windows.instance.operations"></a>64.6.1. Uso de instancias Windows</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.windows.instance.operations.bundle"></a><p class="title"><b>Ejemplo 64.22. Empaqueta una instancia de Amazon EC2 que ejecuta Windows</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">bundle()</code> tiene tres parámetros requeridos y uno opcional
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="emphasis"><em>instanceId</em></span> La instancia que desea empaquetar</p></li>
+<li class="listitem"><p><span class="emphasis"><em>s3Bucket</em></span> Dónde desea que resida la ami en S3</p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>s3Prefix</em></span> El prefijo que desea asignar a la
+                        <acronym class="acronym">AMI</acronym> en S3
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>uploadExpiration</em></span> La expiración de la política de carga.
+                        Amazon recomienda 12 horas o más. Esto se basa en el número de
+                        minutos. El valor predeterminado es 1440 minutos (24 horas)
+                    </p></li>
+</ul></div>
+<p>
+                <code class="methodname">bundle()</code> devuelve un array multidimensional que contiene
+                instanceId, bundleId, state, startTime, updateTime, progress
+                s3Bucket y s3Prefix.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Windows('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;bundle('instanceId', 's3Bucket', 's3Prefix');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.windows.instance.operations.describe"></a><p class="title"><b>Ejemplo 64.23. Describe las tareas de empaquetado actuales</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">describeBundle()</code> Describe las tareas de empaquetado actuales
+            </p>
+<p>
+                <code class="methodname">describeBundle()</code> devuelve un array multidimensional que
+                contiene instanceId, bundleId, state, startTime, updateTime, progress
+                s3Bucket y s3Prefix.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Windows('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;describeBundle('bundleId');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.windows.instance.operations.cancel"></a><p class="title"><b>Ejemplo 64.24. Cancela una operación de empaquetado de Amazon EC2</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">cancelBundle()</code> Cancela una operación de empaquetado de Amazon EC2
+            </p>
+<p>
+                <code class="methodname">cancelBundle()</code> devuelve un array multidimensional que
+                contiene instanceId, bundleId, state, startTime, updateTime, progress
+                s3Bucket y s3Prefix.
+            </p>
+<pre class="programlisting">
+$ec2_instance = new Zend_Service_Amazon_Ec2_Instance_Windows('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_instance-&gt;cancelBundle('bundleId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.instance.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.ec2.reserved.instance.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.5. Zend_Service_Amazon_Ec2: Instancias </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.7. Zend_Service_Amazon_Ec2: Instancias reservadas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,237 @@
+<?php $title = '24.11. Uso de una estructura de directorios modular convencional'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">24.11. Uso de una estructura de directorios modular convencional</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.controller.plugins.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 24. Zend_Controller</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.controller.exceptions.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.controller.modular"></a>24.11. Uso de una estructura de directorios modular convencional</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.modular.introduction"></a>24.11.1. Introducción</h3></div></div></div>
+<p>
+            La estructura de directorios modular convencional le permite separar
+            diferentes aplicaciones <acronym class="acronym">MVC</acronym> en unidades autocontenidas, y reutilizarlas
+            con diferentes controladores frontales. Para ilustrar tal
+            estructura de directorios:
+        </p>
+<pre class="programlisting">
+docroot/
+    index.php
+application/
+    default/
+        controllers/
+            IndexController.php
+            FooController.php
+        models/
+        views/
+            scripts/
+                index/
+                foo/
+            helpers/
+            filters/
+    blog/
+        controllers/
+            IndexController.php
+        models/
+        views/
+            scripts/
+                index/
+            helpers/
+            filters/
+    news/
+        controllers/
+            IndexController.php
+            ListController.php
+        models/
+        views/
+            scripts/
+                index/
+                list/
+            helpers/
+            filters/
+</pre>
+<p>
+            En este paradigma, el nombre del módulo sirve como prefijo para los
+            controladores que contiene. El ejemplo anterior contiene tres
+            controladores de módulo, '<code class="classname">Blog_IndexController</code>',
+            '<code class="classname">News_IndexController</code>', y
+            '<code class="classname">News_ListController</code>'.
+            También se definen dos controladores globales, '<code class="classname">IndexController</code>' y
+            '<code class="classname">FooController</code>'; ninguno de ellos llevará espacio de nombres. Esta
+            estructura de directorios se usará para los ejemplos de
+            este capítulo.
+        </p>
+<div class="note"><table border="0" summary="Note: No Namespacing in the Default Module">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Sin espacio de nombres en el módulo por defecto</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Tenga en cuenta que en el módulo por defecto, los controladores no necesitan un
+                prefijo de espacio de nombres. Así, en el ejemplo anterior, los controladores del
+                módulo por defecto no necesitan un prefijo 'Default_' -- simplemente
+                se despachan según su nombre de controlador base:
+                '<code class="classname">IndexController</code>' y
+                '<code class="classname">FooController</code>'. Sin embargo, en todos los demás módulos se
+                usa un prefijo de espacio de nombres.
+            </p></td></tr>
+</table></div>
+<p>
+            Entonces, ¿cómo se implementa una estructura de directorios así usando los
+            componentes <acronym class="acronym">MVC</acronym> de Zend Framework?
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.modular.directories"></a>24.11.2. Especificar directorios de controladores de módulo</h3></div></div></div>
+<p>
+            El primer paso para hacer uso de módulos es modificar la forma en que se especifica
+            la lista de directorios de controladores en el controlador frontal. En la serie
+            básica <acronym class="acronym">MVC</acronym>, se pasa un array o una cadena a
+            <code class="methodname">setControllerDirectory()</code>, o una ruta a
+            <code class="methodname">addControllerDirectory()</code>. Al usar módulos, es necesario
+            modificar ligeramente las llamadas a estos métodos.
+        </p>
+<p>
+            Con <code class="methodname">setControllerDirectory()</code>, deberá pasar un
+            array asociativo y especificar pares clave-valor de nombre
+            de módulo y rutas de directorio. La clave especial <span class="property">default</span> se
+            usará para los controladores globales (aquellos que no necesitan espacio de nombres de módulo).
+            Todas las entradas deben contener una clave de tipo cadena que apunte a una única ruta,
+            y la clave <span class="property">default</span> debe estar presente. Por ejemplo:
+        </p>
+<pre class="programlisting">
+$front-&gt;setControllerDirectory(array(
+    'default' =&gt; '/path/to/application/controllers',
+    'blog'    =&gt; '/path/to/application/blog/controllers'
+));
+</pre>
+<p>
+            <code class="methodname">addControllerDirectory()</code> aceptará un segundo
+            argumento opcional. Al usar módulos, pase el nombre del módulo como segundo
+            argumento; si no se especifica, la ruta se añadirá al
+            espacio de nombres <span class="emphasis"><em>default</em></span>. Por ejemplo:
+        </p>
+<pre class="programlisting">
+$front-&gt;addControllerDirectory('/path/to/application/news/controllers',
+                               'news');
+</pre>
+<p>
+            Dejando lo mejor para el final, la forma más sencilla de especificar
+            los directorios de módulo es hacerlo en bloque, con todos los módulos bajo un
+            directorio común y compartiendo la misma estructura. Esto se puede hacer con
+            <code class="methodname">addModuleDirectory()</code>:
+        </p>
+<pre class="programlisting">
+/**
+ * Assuming the following directory structure:
+ * application/
+ *     modules/
+ *         default/
+ *             controllers/
+ *         foo/
+ *             controllers/
+ *         bar/
+ *             controllers/
+ */
+$front-&gt;addModuleDirectory('/path/to/application/modules');
+</pre>
+<p>
+            El ejemplo anterior definirá los módulos <span class="emphasis"><em>default</em></span>,
+            <span class="emphasis"><em>foo</em></span>, y <span class="emphasis"><em>bar</em></span>, cada uno apuntando al
+            subdirectorio <code class="filename">controllers/</code> de su respectivo módulo.
+        </p>
+<p>
+            Puede personalizar el subdirectorio de controladores a usar dentro de sus
+            módulos usando <code class="methodname">setModuleControllerDirectoryName()</code>:
+        </p>
+<pre class="programlisting">
+/**
+ * Change the controllers subdirectory to be 'con'
+ * application/
+ *     modules/
+ *         default/
+ *             con/
+ *         foo/
+ *             con/
+ *         bar/
+ *             con/
+ */
+$front-&gt;setModuleControllerDirectoryName('con');
+$front-&gt;addModuleDirectory('/path/to/application/modules');
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Puede indicar que no se use ningún subdirectorio de controladores para sus
+                módulos pasando un valor vacío a
+                <code class="methodname">setModuleControllerDirectoryName()</code>.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.modular.router"></a>24.11.3. Enrutando a módulos</h3></div></div></div>
+<p>
+            La ruta por defecto en <code class="classname">Zend_Controller_Router_Rewrite</code> es
+            un objeto de tipo <code class="classname">Zend_Controller_Router_Route_Module</code>.
+            Esta ruta espera uno de los siguientes esquemas de enrutamiento:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="filename">:module/:controller/:action/*</code></p></li>
+<li class="listitem"><p><code class="filename">:controller/:action/*</code></p></li>
+</ul></div>
+<p>
+            En otras palabras, coincidirá con un controlador y una acción por sí solos
+            o precedidos por un módulo. Las reglas de coincidencia especifican que un
+            módulo solo se hará coincidir si existe una clave con el mismo nombre en el
+            array de directorios de controladores pasado al controlador frontal y
+            al despachador.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.modular.defaultcontroller"></a>24.11.4. Controlador por defecto de módulo o global</h3></div></div></div>
+<p>
+            En el enrutador por defecto, si no se especificó un controlador en la <acronym class="acronym">URL</acronym>,
+            se usa un controlador por defecto (<code class="classname">IndexController</code>, a menos que
+            se solicite otro). Con controladores modulares, si se ha especificado un módulo
+            pero no un controlador, el despachador primero busca este
+            controlador por defecto en la ruta del módulo, y luego recurre al
+            controlador por defecto que se encuentra en el espacio de nombres global 'default'.
+        </p>
+<p>
+            Si desea recurrir siempre al espacio de nombres global, establezca el
+            parámetro <code class="varname">$useDefaultControllerAlways</code> en el controlador frontal:
+        </p>
+<pre class="programlisting">
+$front-&gt;setParam('useDefaultControllerAlways', true);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.controller.plugins.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.controller.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.controller.exceptions.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">24.10. Plugins </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 24.12. Excepciones MVC</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

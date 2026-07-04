@@ -1,0 +1,140 @@
+<?php $title = '44.3. Formateadores'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">44.3. Formateadores</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.log.writers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 44. Zend_Log</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.log.filters.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.log.formatters"></a>44.3. Formateadores</h2></div></div></div>
+<p>
+        Un Formatter es un objeto responsable de tomar un array de <span class="property">event</span> que
+        describe un evento de log y devolver una cadena con una línea de log formateada.
+    </p>
+<p>
+        Algunos Writers no están orientados a líneas y no pueden usar un Formatter. Un ejemplo es el
+        Database Writer, que inserta los elementos del evento directamente en columnas de la base de datos. Para
+        los Writers que no pueden soportar un Formatter, se lanza una excepción si se intenta
+        establecer un Formatter.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.formatters.simple"></a>44.3.1. Formateo simple</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Log_Formatter_Simple</code> es el formateador predeterminado. Se
+            configura automáticamente cuando no especifica ningún formateador. La configuración predeterminada es
+            equivalente a lo siguiente:
+        </p>
+<pre class="programlisting">
+$format = '%timestamp% %priorityName% (%priority%): %message%' . PHP_EOL;
+$formatter = new Zend_Log_Formatter_Simple($format);
+</pre>
+<p>
+            Un formateador se establece en un objeto Writer individual usando el método
+            <code class="methodname">setFormatter()</code> del Writer:
+        </p>
+<pre class="programlisting">
+$writer = new Zend_Log_Writer_Stream('php://output');
+$formatter = new Zend_Log_Formatter_Simple('hello %message%' . PHP_EOL);
+$writer-&gt;setFormatter($formatter);
+
+$logger = new Zend_Log();
+$logger-&gt;addWriter($writer);
+
+$logger-&gt;info('there');
+
+// outputs "hello there"
+</pre>
+<p>
+            El constructor de <code class="classname">Zend_Log_Formatter_Simple</code> acepta un único
+            parámetro: la cadena de formato. Esta cadena contiene claves rodeadas por
+            signos de porcentaje (por ejemplo, <span class="command"><strong>%message%</strong></span>). La cadena de formato puede
+            contener cualquier clave del array de datos del evento.
+            Puede obtener las claves predeterminadas usando la constante DEFAULT_FORMAT de
+            <code class="classname">Zend_Log_Formatter_Simple</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.formatters.xml"></a>44.3.2. Formateo a XML</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Log_Formatter_Xml</code> formatea los datos de log en
+            cadenas <acronym class="acronym">XML</acronym>. Por defecto, registra automáticamente todos los elementos del array de datos
+            del evento:
+        </p>
+<pre class="programlisting">
+$writer = new Zend_Log_Writer_Stream('php://output');
+$formatter = new Zend_Log_Formatter_Xml();
+$writer-&gt;setFormatter($formatter);
+
+$logger = new Zend_Log();
+$logger-&gt;addWriter($writer);
+
+$logger-&gt;info('informational message');
+</pre>
+<p>
+            El código anterior produce la siguiente salida <acronym class="acronym">XML</acronym> (espacio añadido para mayor claridad):
+        </p>
+<pre class="programlisting">
+&lt;logEntry&gt;
+  &lt;timestamp&gt;2007-04-06T07:24:37-07:00&lt;/timestamp&gt;
+  &lt;message&gt;informational message&lt;/message&gt;
+  &lt;priority&gt;6&lt;/priority&gt;
+  &lt;priorityName&gt;INFO&lt;/priorityName&gt;
+&lt;/logEntry&gt;
+</pre>
+<p>
+            Es posible personalizar el elemento raíz, así como especificar una asignación
+            de elementos <acronym class="acronym">XML</acronym> a los elementos del array de datos del evento. El constructor
+            de <code class="classname">Zend_Log_Formatter_Xml</code> acepta una cadena con el nombre de
+            el elemento raíz como primer parámetro y un array asociativo con
+            la asignación de elementos como segundo parámetro:
+        </p>
+<pre class="programlisting">
+$writer = new Zend_Log_Writer_Stream('php://output');
+$formatter = new Zend_Log_Formatter_Xml('log',
+                                        array('msg' =&gt; 'message',
+                                              'level' =&gt; 'priorityName')
+                                       );
+$writer-&gt;setFormatter($formatter);
+
+$logger = new Zend_Log();
+$logger-&gt;addWriter($writer);
+
+$logger-&gt;info('informational message');
+</pre>
+<p>
+            El código anterior cambia el elemento raíz de su valor predeterminado
+            <span class="property">logEntry</span> a <span class="property">log</span>. También asigna el elemento
+            <span class="property">msg</span> al elemento de datos del evento <span class="property">message</span>. Esto
+            produce la siguiente salida:
+        </p>
+<pre class="programlisting">
+&lt;log&gt;
+  &lt;msg&gt;informational message&lt;/msg&gt;
+  &lt;level&gt;INFO&lt;/level&gt;
+&lt;/log&gt;
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.log.writers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.log.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.log.filters.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">44.2. Writers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 44.4. Filtros</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

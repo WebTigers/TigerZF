@@ -1,0 +1,278 @@
+<?php $title = '18.3. Adaptadores CAPTCHA'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">18.3. Adaptadores CAPTCHA</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.captcha.operation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 18. Zend_Captcha</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cloud.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.captcha.adapters"></a>18.3. Adaptadores CAPTCHA</h2></div></div></div>
+<p>
+        Los siguientes adaptadores se incluyen con Zend Framework por defecto.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.captcha.adapters.word"></a>18.3.1. Zend_Captcha_Word</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Captcha_Word</code> es un adaptador abstracto que sirve como clase
+            base para la mayoría de los demás adaptadores <acronym class="acronym">CAPTCHA</acronym>. Proporciona mutadores para
+            especificar la longitud de la palabra, el <acronym class="acronym">TTL</acronym> de sesión, el objeto de espacio de nombres
+            de sesión a usar, y la clase de espacio de nombres de sesión a usar para la persistencia si
+            no desea usar <code class="classname">Zend_Session_Namespace</code>.
+            <code class="classname">Zend_Captcha_Word</code> encapsula la lógica de validación.
+        </p>
+<p>
+            Por defecto, la longitud de la palabra es de 8 caracteres, el tiempo de espera de la sesión es
+            de 5 minutos, y se usa <code class="classname">Zend_Session_Namespace</code> para la persistencia
+            (usando el espacio de nombres "<code class="classname">Zend_Form_Captcha_&lt;captcha ID&gt;</code>").
+        </p>
+<p>
+            Además de los métodos requeridos por la
+            interfaz <code class="classname">Zend_Captcha_Adapter</code>,
+            <code class="classname">Zend_Captcha_Word</code> expone los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setWordLen($length)</code> y
+                    <code class="methodname">getWordLen()</code> le permiten especificar la longitud de la
+                    "palabra" generada en caracteres, y recuperar el valor actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTimeout($ttl)</code> y
+                    <code class="methodname">getTimeout()</code> le permiten especificar el tiempo de vida de
+                    la sesión token, y recuperar el valor actual. <code class="varname">$ttl</code>
+                    debe especificarse en segundos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setUseNumbers($numbers)</code> y
+                    <code class="methodname">getUseNumbers()</code> le permiten especificar si se
+                    considerarán números como posibles caracteres para la palabra aleatoria, o si solo
+                    se usarán letras.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSessionClass($class)</code> y
+                    <code class="methodname">getSessionClass()</code> le permiten especificar una
+                    implementación alternativa de <code class="classname">Zend_Session_Namespace</code> para
+                    usar en la persistencia del token <acronym class="acronym">CAPTCHA</acronym>, y recuperar el
+                    valor actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getId()</code> le permite recuperar el identificador del token
+                    actual.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getWord()</code> le permite recuperar la palabra generada
+                    para usar con el <acronym class="acronym">CAPTCHA</acronym>. Generará la palabra por
+                    usted si aún no se ha generado ninguna.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSession(Zend_Session_Namespace $session)</code> le permite
+                    especificar un objeto de sesión a usar para persistir el token
+                    <acronym class="acronym">CAPTCHA</acronym>. <code class="methodname">getSession()</code> le permite
+                    recuperar el objeto de sesión actual.
+                </p></li>
+</ul></div>
+<p>
+            Todos los <acronym class="acronym">CAPTCHA</acronym> de tipo palabra le permiten pasar un array de opciones al
+            constructor, o, alternativamente, pasarlas a
+            <code class="methodname">setOptions()</code>. También puede pasar un objeto
+            <code class="classname">Zend_Config</code> a <code class="methodname">setConfig()</code>. Por
+            defecto, se pueden usar las claves <span class="emphasis"><em>wordLen</em></span>, <span class="emphasis"><em>timeout</em></span>, y
+            <span class="emphasis"><em>sessionClass</em></span>. Cada implementación concreta
+            puede definir claves adicionales o utilizar las opciones de
+            otras maneras.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_Captcha_Word</code> es una clase abstracta y no puede
+                instanciarse directamente.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.captcha.adapters.dumb"></a>18.3.2. Zend_Captcha_Dumb</h3></div></div></div>
+<p>
+            El adaptador <code class="classname">Zend_Captch_Dumb</code> es en su mayoría autodescriptivo. Proporciona
+            una cadena aleatoria que debe escribirse al revés para validarse. Como tal,
+            no es una buena solución <acronym class="acronym">CAPTCHA</acronym> y solo debe usarse para
+            pruebas. Extiende <code class="classname">Zend_Captcha_Word</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.captcha.adapters.figlet"></a>18.3.3. Zend_Captcha_Figlet</h3></div></div></div>
+<p>
+            El adaptador <code class="classname">Zend_Captcha_Figlet</code> utiliza <a class="link" href="zend.text.phtml#zend.text.figlet" title="69.1. Zend_Text_Figlet"><code class="classname">Zend_Text_Figlet</code></a> para presentar
+            un figlet al usuario.
+        </p>
+<p>
+            Las opciones pasadas al constructor también se pasarán al objeto <a class="link" href="zend.text.phtml#zend.text.figlet" title="69.1. Zend_Text_Figlet"><code class="classname">Zend_Text_Figlet</code></a>.
+            Consulte la documentación de <a class="link" href="zend.text.phtml#zend.text.figlet" title="69.1. Zend_Text_Figlet"><code class="classname">Zend_Text_Figlet</code></a>
+            para más detalles sobre qué opciones de configuración están disponibles.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.captcha.adapters.image"></a>18.3.4. Zend_Captcha_Image</h3></div></div></div>
+<p>
+            El adaptador <code class="classname">Zend_Captcha_Image</code> toma la palabra generada y
+            la renderiza como una imagen, realizando varias permutaciones de distorsión para hacer
+            difícil descifrarla automáticamente. Requiere
+            la <a class="ulink" href="http://php.net/gd" target="_top">extensión GD</a>
+            compilada con soporte para TrueType o Freetype. Actualmente, el
+            adaptador <code class="classname">Zend_Captcha_Image</code> solo puede generar
+            imágenes <acronym class="acronym">PNG</acronym>.
+        </p>
+<p>
+            <code class="classname">Zend_Captcha_Image</code> extiende
+            <code class="classname">Zend_Captcha_Word</code>, y además expone los
+            siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setExpiration($expiration)</code> y
+                    <code class="methodname">getExpiration()</code> le permiten especificar el tiempo de vida máximo
+                    que la imagen <acronym class="acronym">CAPTCHA</acronym> puede permanecer en el sistema de archivos.
+                    Esto suele ser más largo que el tiempo de vida de la sesión. La recolección de basura
+                    se ejecuta periódicamente cada vez que se invoca el objeto <acronym class="acronym">CAPTCHA</acronym>,
+                    eliminando todas las imágenes que hayan expirado.
+                    Los valores de expiración deben especificarse en segundos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setGcFreq($gcFreq)</code> y
+                    <code class="methodname">getGcFreg()</code> le permiten especificar con qué frecuencia debe ejecutarse
+                    la recolección de basura. La recolección de basura se ejecutará cada
+                    <span class="command"><strong>1/$gcFreq</strong></span> llamadas. El valor predeterminado es 100.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setFont($font)</code> y <code class="methodname">getFont()</code>
+                    le permiten especificar la fuente que usará. <code class="varname">$font</code>
+                    debe ser una ruta completa al archivo de fuente.
+                    Este valor es obligatorio; el <acronym class="acronym">CAPTCHA</acronym> lanzará una
+                    excepción durante la generación si no se ha especificado el archivo de fuente.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setFontSize($fsize)</code> y
+                    <code class="methodname">getFontSize()</code> le permiten especificar el tamaño de fuente en
+                    píxeles para generar el <acronym class="acronym">CAPTCHA</acronym>. El valor predeterminado es 24px.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setHeight($height)</code> y
+                    <code class="methodname">getHeight()</code> le permiten especificar la altura en píxeles
+                    de la imagen <acronym class="acronym">CAPTCHA</acronym> generada. El valor predeterminado es 50px.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setWidth($width)</code> y
+                    <code class="methodname">getWidth()</code> le permiten especificar el ancho en píxeles de
+                    la imagen <acronym class="acronym">CAPTCHA</acronym> generada. El valor predeterminado es 200px.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setImgDir($imgDir)</code> y
+                    <code class="methodname">getImgDir()</code> le permiten especificar el directorio para
+                    almacenar las imágenes <acronym class="acronym">CAPTCHA</acronym>. El valor predeterminado es
+                    "<code class="filename">./images/captcha/</code>", relativo al script de arranque.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setImgUrl($imgUrl)</code> y
+                    <code class="methodname">getImgUrl()</code> le permiten especificar la ruta relativa a
+                    una imagen <acronym class="acronym">CAPTCHA</acronym> para usar en el marcado <acronym class="acronym">HTML</acronym>.
+                    El valor predeterminado es "<code class="filename">/images/captcha/</code>".
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setSuffix($suffix)</code> y
+                    <code class="methodname">getSuffix()</code> le permiten especificar el sufijo del nombre de archivo
+                    para la imagen <acronym class="acronym">CAPTCHA</acronym>. El valor predeterminado es
+                    "<code class="filename">.png</code>". Nota: cambiar este valor no cambiará el tipo
+                    de la imagen generada.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setDotNoiseLevel($level)</code> y
+                    <code class="methodname">getDotNoiseLevel()</code>, junto con
+                    <code class="methodname">setLineNoiseLevel($level)</code> y
+                    <code class="methodname">getLineNoiseLevel()</code>,
+                    le permiten controlar cuánto "ruido" en forma de puntos y líneas aleatorios contendrá la
+                    imagen. Cada unidad de <code class="varname">$level</code> produce un punto o línea
+                    aleatorio. El valor predeterminado es 100 puntos y 5 líneas. El ruido se agrega dos veces:
+                    antes y después de la transformación de distorsión de la imagen.
+                </p></li>
+</ul></div>
+<p>
+            Todas las opciones anteriores pueden pasarse al
+            constructor simplemente eliminando el prefijo 'set' del método y convirtiendo
+            la letra inicial a minúscula: "suffix", "height", "imgUrl", etc.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.captcha.adapters.recaptcha"></a>18.3.5. Zend_Captcha_ReCaptcha</h3></div></div></div>
+<p>
+            El adaptador <code class="classname">Zend_Captcha_ReCaptcha</code> usa <a class="link" href="zend.service.recaptcha.phtml" title="64.26. Zend_Service_ReCaptcha">Zend_Service_ReCaptcha</a>
+            para generar y validar <acronym class="acronym">CAPTCHA</acronym>s. Expone los siguientes
+            métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setPrivKey($key)</code> y
+                    <code class="methodname">getPrivKey()</code> le permiten especificar la clave privada a
+                    usar con el servicio ReCaptcha. Esto debe especificarse durante la construcción,
+                    aunque puede sobrescribirse en cualquier momento.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setPubKey($key)</code> y
+                    <code class="methodname">getPubKey()</code> le permiten especificar la clave pública a usar
+                    con el servicio ReCaptcha. Esto debe especificarse durante la construcción, aunque
+                    puede sobrescribirse en cualquier momento.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setService(Zend_Service_ReCaptcha $service)</code> y
+                    <code class="methodname">getService()</code> le permiten establecer y obtener
+                    el objeto de servicio ReCaptcha.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">isValid($value, $context = null)</code> valida la entrada del usuario
+                    contra el servicio ReCaptcha. <code class="varname">$value</code> es un array con las siguientes
+                    claves:
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                <code class="varname">recaptcha_challenge_field</code> - Valor del campo challenge (oculto)
+                                del widget de ReCaptcha
+                            </p></li>
+<li class="listitem"><p>
+                                <code class="varname">recaptcha_response_field</code> - Valor del campo de entrada de
+                                usuario del widget de ReCaptcha
+                            </p></li>
+</ul></div>
+<p>
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.captcha.operation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.captcha.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cloud.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">18.2. Operación de Captcha </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 19. API SimpleCloud: Zend_Cloud</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

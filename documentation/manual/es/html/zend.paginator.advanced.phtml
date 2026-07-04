@@ -1,0 +1,231 @@
+<?php $title = '54.4. Uso avanzado'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">54.4. Uso avanzado</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.paginator.configuration.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 54. Zend_Paginator</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.pdf.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.paginator.advanced"></a>54.4. Uso avanzado</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.paginator.advanced.adapters"></a>54.4.1. Adaptadores de origen de datos personalizados</h3></div></div></div>
+<p>
+            En algún momento puede que te encuentres con un tipo de datos que no está cubierto por
+            los adaptadores incluidos. En ese caso, necesitarás escribir el
+            tuyo propio.
+        </p>
+<p>
+            Para hacerlo, debes implementar
+            <code class="classname">Zend_Paginator_Adapter_Interface</code>. Hay dos
+            métodos necesarios para hacerlo:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>count()</p></li>
+<li class="listitem"><p>getItems($offset, $itemCountPerPage)</p></li>
+</ul></div>
+<p>
+            Además, querrás implementar un constructor que reciba tu
+            origen de datos como parámetro y lo almacene como una propiedad protegida o
+            privada. Cómo quieras hacer esto en concreto
+            depende de ti.
+        </p>
+<p>
+            Si alguna vez has usado la interfaz SPL <a class="ulink" href="http://www.php.net/~helly/php/ext/spl/interfaceCountable.html" target="_top">Countable</a>,
+            estarás familiarizado con <code class="methodname">count()</code>. Tal como se usa con
+            <code class="classname">Zend_Paginator</code>, este es el número total de elementos
+            en la colección de datos.
+            Además, la instancia de <code class="classname">Zend_Paginator</code> proporciona un método
+            <code class="methodname">countAllItems()</code> que actúa como proxy hacia el método
+            <code class="methodname">count()</code> del adaptador.
+        </p>
+<p>
+            El método <code class="methodname">getItems()</code> es solo ligeramente más
+            complicado. Para esto, a tu adaptador se le proporciona un offset y
+            el número de elementos a mostrar por página. Debes devolver el
+            fragmento apropiado de datos. Para un array, eso sería:
+        </p>
+<pre class="programlisting">
+return array_slice($this-&gt;_array, $offset, $itemCountPerPage);
+</pre>
+<p>
+            Echa un vistazo a los adaptadores incluidos (todos los cuales implementan
+            <code class="classname">Zend_Paginator_Adapter_Interface</code>) para tener ideas de cómo
+            podrías implementar el tuyo propio.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.paginator.advanced.scrolling-styles"></a>54.4.2. Estilos de desplazamiento personalizados</h3></div></div></div>
+<p>
+            Crear tu propio estilo de desplazamiento requiere que implementes
+            <code class="classname">Zend_Paginator_ScrollingStyle_Interface</code>, que define
+            un único método, <code class="methodname">getPages()</code>. Específicamente,
+        </p>
+<pre class="programlisting">
+public function getPages(Zend_Paginator $paginator, $pageRange = null);
+</pre>
+<p>
+            Este método debe calcular un límite inferior y superior para los números de página
+            dentro del rango de las llamadas páginas "locales" (es decir, páginas
+            que están cerca de la página actual).
+        </p>
+<p>
+            A menos que extienda otro estilo de desplazamiento (ver
+            <code class="classname">Zend_Paginator_ScrollingStyle_Elastic</code> como ejemplo),
+            tu estilo de desplazamiento personalizado inevitablemente terminará con algo
+            similar a la siguiente línea de código:
+        </p>
+<pre class="programlisting">
+return $paginator-&gt;getPagesInRange($lowerBound, $upperBound);
+</pre>
+<p>
+            No hay nada especial en esta llamada; es simplemente un método de conveniencia
+            para comprobar la validez del límite inferior y superior y
+            devolver un array del rango al paginador.
+        </p>
+<p>
+            Cuando estés listo para usar tu nuevo estilo de desplazamiento, necesitarás
+            indicarle a <code class="classname">Zend_Paginator</code> en qué directorio buscar. Para
+            hacerlo, haz lo siguiente:
+        </p>
+<pre class="programlisting">
+$prefix = 'My_Paginator_ScrollingStyle';
+$path   = 'My/Paginator/ScrollingStyle/';
+Zend_Paginator::addScrollingStylePrefixPath($prefix, $path);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.paginator.advanced.caching"></a>54.4.3. Funcionalidades de caché</h3></div></div></div>
+<p>
+            Se le puede indicar a <code class="classname">Zend_Paginator</code> que almacene en caché los datos que ya ha
+            devuelto, evitando que el adaptador los obtenga cada vez que se usan.
+            Para indicarle al paginador que almacene en caché automáticamente los datos del adaptador, simplemente pasa a
+            su método <code class="methodname">setCache()</code> una instancia de <code class="classname">Zend_Cache_Core</code>.
+        </p>
+<pre class="programlisting">
+$paginator = Zend_Paginator::factory($someData);
+$fO = array('lifetime' =&gt; 3600, 'automatic_serialization' =&gt; true);
+$bO = array('cache_dir'=&gt;'/tmp');
+$cache = Zend_cache::factory('Core', 'File', $fO, $bO);
+Zend_Paginator::setCache($cache);
+</pre>
+<p>
+            Mientras <code class="classname">Zend_Paginator</code> tenga una instancia de
+            <code class="classname">Zend_Cache_Core</code>, los datos se almacenarán en caché. A veces
+            querrás no almacenar en caché los datos aunque ya hayas pasado una instancia de caché. Deberías
+            entonces usar <code class="methodname">setCacheEnable()</code> para eso.
+        </p>
+<pre class="programlisting">
+$paginator = Zend_Paginator::factory($someData);
+// $cache is a Zend_Cache_Core instance
+Zend_Paginator::setCache($cache);
+// ... later on the script
+$paginator-&gt;setCacheEnable(false);
+// cache is now disabled
+</pre>
+<p>
+            Cuando se establece una caché, los datos se almacenan y se extraen de ella
+            automáticamente. Puede ser útil entonces vaciar la caché manualmente. Puedes hacerlo
+            llamando a <code class="methodname">clearPageItemCache($pageNumber)</code>.
+            Si no pasas ningún parámetro, se vaciará toda la caché. Opcionalmente puedes
+            pasar un parámetro que represente el número de página a vaciar en la caché:
+        </p>
+<pre class="programlisting">
+$paginator = Zend_Paginator::factory($someData);
+Zend_Paginator::setCache($cache);
+$items = $paginator-&gt;getCurrentItems();
+// page 1 is now in cache
+$page3Items = $paginator-&gt;getItemsByPage(3);
+// page 3 is now in cache
+
+// clear the cache of the results for page 3
+$paginator-&gt;clearPageItemCache(3);
+
+// clear all the cache data
+$paginator-&gt;clearPageItemCache();
+</pre>
+<p>
+            Cambiar el número de elementos por página vaciará toda la caché
+            ya que se habría vuelto inválida:
+        </p>
+<pre class="programlisting">
+$paginator = Zend_Paginator::factory($someData);
+Zend_Paginator::setCache($cache);
+// fetch some items
+$items = $paginator-&gt;getCurrentItems();
+
+// all the cache data will be flushed:
+$paginator-&gt;setItemCountPerPage(2);
+</pre>
+<p>
+            También es posible ver los datos en caché y solicitarlos directamente.
+            <code class="methodname">getPageItemCache()</code> se puede usar para eso:
+        </p>
+<pre class="programlisting">
+$paginator = Zend_Paginator::factory($someData);
+$paginator-&gt;setItemCountPerPage(3);
+Zend_Paginator::setCache($cache);
+
+// fetch some items
+$items = $paginator-&gt;getCurrentItems();
+$otherItems = $paginator-&gt;getItemsPerPage(4);
+
+// see the cached items as a two-dimension array:
+var_dump($paginator-&gt;getPageItemCache());
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.paginator.advanced.aggregator"></a>54.4.4. Interfaz Zend_Paginator_AdapterAggregate</h3></div></div></div>
+<p>
+            Dependiendo de tu aplicación, es posible que quieras paginar objetos, cuya estructura
+            interna de datos es igual a la de los adaptadores existentes, pero no quieras romper tu
+            encapsulación para permitir el acceso a estos datos. En otros casos un objeto puede estar en una
+            relación "tiene-un adaptador", en lugar de la relación "es-un adaptador" que
+            <code class="classname">Zend_Paginator_Adapter_Abstract</code> promueve. Para estos casos puedes
+            usar la interfaz <code class="classname">Zend_Paginator_AdapterAggregate</code> que se comporta
+            de forma muy similar a la interfaz <code class="classname">IteratorAggregate</code> de la
+            extensión SPL de <acronym class="acronym">PHP</acronym>.
+        </p>
+<pre class="programlisting">
+interface Zend_Paginator_AdapterAggregate
+{
+    /**
+     * Return a fully configured Paginator Adapter from this method.
+     *
+     * @return Zend_Paginator_Adapter_Abstract
+     */
+    public function getPaginatorAdapter();
+}
+</pre>
+<p>
+            La interfaz es bastante pequeña y solo espera que devuelvas una instancia de
+            <code class="classname">Zend_Paginator_Adapter_Abstract</code>. Una instancia de Adapter Aggregate es
+            entonces reconocida tanto por <code class="methodname">Zend_Paginator::factory()</code> como por el
+            constructor de <code class="classname">Zend_Paginator</code> y gestionada en consecuencia.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.paginator.configuration.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.paginator.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.pdf.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">54.3. Configuración </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 55. Zend_Pdf</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

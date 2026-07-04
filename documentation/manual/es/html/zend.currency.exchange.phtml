@@ -1,0 +1,124 @@
+<?php $title = '25.9. Intercambio de divisas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.9. Intercambio de divisas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.calculation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.currency.additional.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.exchange"></a>25.9. Intercambio de divisas</h2></div></div></div>
+<p>
+        En la sección anterior hablamos sobre los cálculos con divisas. Pero, como puede imaginar,
+        calcular divisas a menudo implica calcular divisas diferentes de distintos
+        países.
+    </p>
+<p>
+        En este caso, las divisas deben intercambiarse para que ambas usen la misma divisa.
+        En la vida real, esta información la proporcionan los bancos o la prensa diaria. Pero como
+        estamos en la web, deberíamos usar los servicios de cambio disponibles.
+        <code class="classname">Zend_Currency</code> permite su uso mediante un simple callback.
+    </p>
+<p>
+        Primero, escribamos un servicio de cambio sencillo.
+    </p>
+<pre class="programlisting">
+class SimpleExchange implements Zend_Currency_CurrencyInterface
+{
+    public function getRate($from, $to)
+    {
+        if ($from !== "USD") {
+            throw new Exception('We can only exchange USD');
+        }
+
+        switch ($to) {
+            case 'EUR':
+                return 2;
+            case 'JPE':
+                return 0.7;
+       }
+
+       throw new Exception('Unable to exchange $to');
+    }
+}
+</pre>
+<p>
+        Hemos creado ahora un servicio de cambio manual. No encajará en la vida real, pero
+        muestra cómo funciona el intercambio de divisas.
+    </p>
+<p>
+        Su clase de intercambio debe implementar la interfaz
+        <code class="classname">Zend_Currency_CurrencyInterface</code>. Esta interfaz
+        requiere que se implemente el único método <code class="methodname">getRate()</code>. Este
+        método recibe dos parámetros. Ambos son los nombres cortos de las
+        divisas indicadas. <code class="classname">Zend_Currency</code>, por su parte, necesita que se
+        devuelva la tasa de cambio.
+    </p>
+<p>
+        En una clase de intercambio real, probablemente consultaría al proveedor del servicio para obtener las
+        tasas de cambio correctas. Para nuestro ejemplo, la tasa manual será suficiente.
+    </p>
+<p>
+        Ahora simplemente vincularemos nuestra clase de intercambio con <code class="classname">Zend_Currency</code>.
+        Hay dos formas de hacerlo. Bien vinculando una instancia de la clase Exchange, o
+        simplemente indicando una cadena con el nombre de la clase.
+    </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'EUR',
+    )
+);
+
+$service  = new SimpleExchange();
+
+// attach the exchange service
+$currency-&gt;setService($service);
+
+$currency2 = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD',
+    )
+);
+
+print $currency-&gt;add($currency2);
+</pre>
+<p>
+        El ejemplo anterior devolverá '$ 3.000' porque los 1.000 <acronym class="acronym">USD</acronym> serán
+        convertidos con una tasa de 2 a 2.000 <acronym class="acronym">EUR</acronym>.
+    </p>
+<div class="note"><table border="0" summary="Note: Calculation without exchange service">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Cálculo sin servicio de cambio</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Cuando intente calcular dos objetos de divisa que no usen la misma divisa
+            y no tengan ningún servicio de cambio vinculado, obtendrá una excepción. La razón es
+            que <code class="classname">Zend_Currency</code> no puede entonces cambiar entre las
+            distintas divisas.
+        </p></td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.calculation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.currency.additional.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.8. Cálculos con divisas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 25.10. Información adicional sobre Zend_Currency</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

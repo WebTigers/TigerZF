@@ -1,0 +1,125 @@
+<?php $title = '21.2. Teoría de funcionamiento'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">21.2. Teoría de funcionamiento</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.config.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 21. Zend_Config</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.adapters.ini.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.config.theory_of_operation"></a>21.2. Teoría de funcionamiento</h2></div></div></div>
+<p>
+        Los datos de configuración se ponen a disposición del constructor de <code class="classname">Zend_Config</code>
+        a través de un array asociativo, que puede ser multidimensional, con el fin de apoyar
+        la organización de los datos de lo general a lo específico. Las clases adaptadoras concretas
+        adaptan los datos de configuración desde el almacenamiento para producir el array asociativo
+        para el constructor de <code class="classname">Zend_Config</code>. Los scripts de usuario pueden proporcionar dichos arrays
+        directamente al constructor de <code class="classname">Zend_Config</code>, sin usar una clase
+        adaptadora, ya que puede ser apropiado hacerlo en ciertas situaciones.
+    </p>
+<p>
+        Cada valor del array de datos de configuración se convierte en una propiedad del
+        objeto <code class="classname">Zend_Config</code>. La clave se utiliza como el nombre de la propiedad. Si un valor
+        es en sí mismo un array, entonces la propiedad del objeto resultante se crea como un nuevo
+        objeto <code class="classname">Zend_Config</code>, cargado con los datos del array. Esto ocurre
+        de forma recursiva, de manera que se puede crear una jerarquía de datos de configuración con cualquier número de
+        niveles.
+    </p>
+<p>
+        <code class="classname">Zend_Config</code> implementa las interfaces <span class="emphasis"><em>Countable</em></span> y
+        <span class="emphasis"><em>Iterator</em></span> con el fin de facilitar el acceso sencillo a los
+        datos de configuración. Así, se puede utilizar la
+        función <a class="ulink" href="http://php.net/count" target="_top"><code class="methodname">count()</code></a>
+        y construcciones de <acronym class="acronym">PHP</acronym> como
+        <a class="ulink" href="http://php.net/foreach" target="_top"><span class="emphasis"><em>foreach</em></span></a> con
+        objetos <code class="classname">Zend_Config</code>.
+    </p>
+<p>
+        Por defecto, los datos de configuración disponibles a través de <code class="classname">Zend_Config</code> son
+        de solo lectura, y una asignación (por ejemplo,
+        <span class="command"><strong>$config-&gt;database-&gt;host = 'example.com';</strong></span>)
+        da como resultado una excepción lanzada. Este comportamiento por defecto puede ser anulado a través del
+        constructor, sin embargo, para permitir la modificación de los valores de datos. Además, cuando se permiten
+        modificaciones, <code class="classname">Zend_Config</code> admite la eliminación de valores (es decir,
+        <code class="methodname">unset($config-&gt;database-&gt;host)</code>). El método
+        <code class="methodname">readOnly()</code> se puede utilizar para determinar si se permiten modificaciones a un
+        determinado objeto <code class="classname">Zend_Config</code>, y el método
+        <code class="methodname">setReadOnly()</code> se puede utilizar para detener cualquier modificación posterior
+        de un objeto <code class="classname">Zend_Config</code> que fue creado permitiendo modificaciones.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Es importante no confundir estas modificaciones en memoria con el guardado de los
+            datos de configuración en un medio de almacenamiento específico. Las herramientas para crear y modificar
+            datos de configuración para varios medios de almacenamiento están fuera del alcance de
+            <code class="classname">Zend_Config</code>. Existen fácilmente disponibles soluciones de código abierto
+            de terceros con el propósito de crear y modificar datos de configuración para varios
+            medios de almacenamiento.
+        </p></td></tr>
+</table></div>
+<p>
+        Las clases adaptadoras heredan de la clase <code class="classname">Zend_Config</code>, ya que utilizan
+        su funcionalidad.
+    </p>
+<p>
+        La familia de clases <code class="classname">Zend_Config</code> permite organizar los datos de configuración
+        en secciones. Los objetos adaptadores de <code class="classname">Zend_Config</code> pueden cargarse
+        con una única sección especificada, varias secciones especificadas, o todas las secciones
+        (si no se especifica ninguna).
+    </p>
+<p>
+        Las clases adaptadoras de <code class="classname">Zend_Config</code> admiten un modelo de herencia simple que
+        permite que los datos de configuración se hereden de una sección de datos de configuración
+        a otra. Esto se proporciona con el fin de reducir o eliminar la necesidad de
+        duplicar datos de configuración para diferentes propósitos. Una sección heredera
+        también puede sobrescribir los valores que hereda a través de su sección padre.
+        Al igual que la herencia de clases de <acronym class="acronym">PHP</acronym>, una sección puede heredar de una sección padre,
+        que a su vez puede heredar de una sección abuela, y así sucesivamente, pero la herencia múltiple
+        (es decir, la sección C heredando directamente de las secciones padre A y B) no está soportada.
+    </p>
+<p>
+        Si tiene dos objetos <code class="classname">Zend_Config</code>, puede combinarlos en un único
+        objeto usando la función <code class="methodname">merge()</code>. Por ejemplo, dados
+        <code class="varname">$config</code> y <code class="varname">$localConfig</code>, puede combinar los datos de
+        <code class="varname">$localConfig</code> en <code class="varname">$config</code> usando
+        <span class="command"><strong>$config-&gt;merge($localConfig);</strong></span>. Los elementos en
+        <code class="varname">$localConfig</code> sobrescribirán cualquier elemento con el mismo nombre en
+        <code class="varname">$config</code>.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            El objeto <code class="classname">Zend_Config</code> que realiza la combinación debe
+            haber sido construido para permitir modificaciones, pasando <code class="constant">TRUE</code> como el
+            segundo parámetro del constructor. El método <code class="methodname">setReadOnly()</code>
+            se puede utilizar entonces para evitar cualquier modificación posterior una vez completada la combinación.
+        </p></td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.config.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.config.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.adapters.ini.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 21. Zend_Config </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 21.3. Zend_Config_Ini</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

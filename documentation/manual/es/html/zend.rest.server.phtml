@@ -1,0 +1,174 @@
+<?php $title = '60.3. Zend_Rest_Server'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">60.3. Zend_Rest_Server</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.rest.client.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 60. Zend_Rest</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.rest.server"></a>60.3. Zend_Rest_Server</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.rest.server.introduction"></a>60.3.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Rest_Server</code> pretende ser un servidor REST completo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.rest.server.usage"></a>60.3.2. Uso del servidor REST</h3></div></div></div>
+<div class="example">
+<a name="zend.rest.server.usage.example-1"></a><p class="title"><b>Ejemplo 60.6. Uso básico de Zend_Rest_Server - Clases</b></p>
+<div class="example-contents"><pre class="programlisting">
+$server = new Zend_Rest_Server();
+$server-&gt;setClass('My_Service_Class');
+$server-&gt;handle();
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.rest.server.usage.example-2"></a><p class="title"><b>Ejemplo 60.7. Uso básico de Zend_Rest_Server - Funciones</b></p>
+<div class="example-contents"><pre class="programlisting">
+/**
+ * Say Hello
+ *
+ * @param string $who
+ * @param string $when
+ * @return string
+ */
+function sayHello($who, $when)
+{
+    return "Hello $who, Good $when";
+}
+
+$server = new Zend_Rest_Server();
+$server-&gt;addFunction('sayHello');
+$server-&gt;handle();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.rest.server.args"></a>60.3.3. Llamar a un servicio de Zend_Rest_Server</h3></div></div></div>
+<p>
+            Para llamar a un servicio de <code class="classname">Zend_Rest_Server</code>, debe proporcionar
+            un argumento <code class="constant">GET</code>/POST <code class="code">method</code> con un valor que sea el
+            método que desea llamar. Después puede continuar con cualquier número
+            de argumentos usando el nombre del argumento (por ejemplo, "who") o
+            usando <code class="code">arg</code> seguido de la posición numérica del
+            argumento (por ejemplo, "arg1").
+        </p>
+<div class="note"><table border="0" summary="Note: Numeric index">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Índice numérico</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los argumentos numéricos usan un índice basado en 1.
+            </p></td></tr>
+</table></div>
+<p>
+            Para llamar a <code class="code">sayHello</code> del ejemplo anterior, puede usar cualquiera de estas dos formas:
+        </p>
+<p>
+            <code class="code">?method=sayHello&amp;who=Davey&amp;when=Day</code>
+        </p>
+<p>
+            o:
+        </p>
+<p>
+            <code class="code">?method=sayHello&amp;arg1=Davey&amp;arg2=Day</code>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.rest.server.customstatus"></a>60.3.4. Envío de un estado personalizado</h3></div></div></div>
+<p>
+            Al devolver valores, para devolver un estado personalizado, puede devolver un
+            array con una clave <code class="code">status</code>.
+        </p>
+<div class="example">
+<a name="zend.rest.server.customstatus.example-1"></a><p class="title"><b>Ejemplo 60.8. Devolución de un estado personalizado</b></p>
+<div class="example-contents"><pre class="programlisting">
+/**
+ * Say Hello
+ *
+ * @param string $who
+ * @param string $when
+ * @return array
+ */
+function sayHello($who, $when)
+{
+    return array('msg' =&gt; "An Error Occurred", 'status' =&gt; false);
+}
+
+$server = new Zend_Rest_Server();
+$server-&gt;addFunction('sayHello');
+$server-&gt;handle();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.rest.server.customxml"></a>60.3.5. Devolución de respuestas XML personalizadas</h3></div></div></div>
+<p>
+            Si desea devolver <acronym class="acronym">XML</acronym> personalizado, simplemente devuelva un
+            objeto <code class="code">DOMDocument</code>, <code class="code">DOMElement</code> o
+            <code class="code">SimpleXMLElement</code>.
+        </p>
+<div class="example">
+<a name="zend.rest.server.customxml.example-1"></a><p class="title"><b>Ejemplo 60.9. Devolución de XML personalizado</b></p>
+<div class="example-contents"><pre class="programlisting">
+/**
+ * Say Hello
+ *
+ * @param string $who
+ * @param string $when
+ * @return SimpleXMLElement
+ */
+function sayHello($who, $when)
+{
+    $xml ='&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;mysite&gt;
+    &lt;value&gt;Hey $who! Hope you\'re having a good $when&lt;/value&gt;
+    &lt;code&gt;200&lt;/code&gt;
+&lt;/mysite&gt;';
+
+    $xml = simplexml_load_string($xml);
+    return $xml;
+}
+
+$server = new Zend_Rest_Server();
+$server-&gt;addFunction('sayHello');
+
+$server-&gt;handle();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            La respuesta del servicio se devolverá sin modificación
+            al cliente.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.rest.client.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.rest.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">60.2. Zend_Rest_Client </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 61. Zend_Search_Lucene</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

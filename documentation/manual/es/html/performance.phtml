@@ -1,0 +1,96 @@
+<?php $title = 'Apéndice F. Guía de rendimiento de Zend Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Apéndice F. Guía de rendimiento de Zend Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="project-structure.rewrite.phtml">Anterior</a> </td>
+<th width="60%" align="center"> </th>
+<td width="20%" align="right"> <a accesskey="n" href="performance.classloading.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="appendix">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="performance"></a>Apéndice F. Guía de rendimiento de Zend Framework</h1></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="performance.phtml#performance.introduction">F.1. Introducción</a></span></dt>
+<dt><span class="sect1"><a href="performance.classloading.phtml">F.2. Carga de clases</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="performance.classloading.phtml#performance.classloading.includepath">F.2.1. ¿Cómo puedo optimizar mi include_path?</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.includepath.abspath">F.2.1.1. Usar rutas absolutas</a></span></dt>
+<dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.includepath.reduce">F.2.1.2. Reducir el número de rutas de inclusión que define</a></span></dt>
+<dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.includepath.early">F.2.1.3. Definir el include_path de Zend Framework lo antes posible</a></span></dt>
+<dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.includepath.currentdir">F.2.1.4. Definir el directorio actual al final, o no definirlo en absoluto</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="performance.classloading.phtml#performance.classloading.striprequires">F.2.2. ¿Cómo puedo eliminar las instrucciones require_once innecesarias?</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.striprequires.sed">F.2.2.1. Eliminar las llamadas require_once con find y sed</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="performance.classloading.phtml#performance.classloading.pluginloader">F.2.3. ¿Cómo puedo acelerar la carga de plugins?</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.classloading.phtml#performance.classloading.pluginloader.includefilecache">F.2.3.1. Usar la caché de archivos de inclusión de PluginLoader</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="performance.database.phtml">F.3. Rendimiento de Zend_Db</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="performance.database.phtml#performance.database.tableMetadata">F.3.1. ¿Cómo puedo reducir la sobrecarga introducida por Zend_Db_Table al
+            recuperar los metadatos de la tabla?</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="performance.database.phtml#performance.database.tableMetadata.cache">F.3.1.1. Usar la caché de metadatos</a></span></dt>
+<dt><span class="sect3"><a href="performance.database.phtml#performance.database.tableMetadata.hardcoding">F.3.1.2. Codificar sus metadatos directamente en la definición de la tabla</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="performance.database.phtml#performance.database.select">F.3.2.
+            El SQL generado con Zend_Db_Select no está utilizando mis índices; ¿cómo puedo mejorarlo?
+        </a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.database.phtml#performance.database.select.writeyourown">F.3.2.1. Escriba su propio SQL optimizado</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="performance.localization.phtml">F.4. Internacionalización (i18n) y localización (l10n)</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="performance.localization.phtml#performance.localization.translationadapter">F.4.1. ¿Qué adaptador de traducción debería usar?</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.localization.phtml#performance.localization.translationadapter.fastest">F.4.1.1. Usar adaptadores de traducción no XML para obtener la mayor velocidad</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="performance.localization.phtml#performance.localization.cache">F.4.2. ¿Cómo puedo hacer la traducción y la localización aún más rápidas?</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.localization.phtml#performance.localization.cache.usage">F.4.2.1. Usar cachés de traducción y localización</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="performance.view.phtml">F.5. Renderizado de vistas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="performance.view.phtml#performance.view.pluginloader">F.5.1. ¿Cómo puedo acelerar la resolución de los helpers de vista?</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="performance.view.phtml#performance.view.pluginloader.cache">F.5.1.1. Usar la caché de archivos de inclusión de PluginLoader</a></span></dt>
+<dt><span class="sect3"><a href="performance.view.phtml#performance.view.pluginloader.extend">F.5.1.2. Extender Zend_View para proporcionar los métodos de helper usados con frecuencia</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="performance.view.phtml#performance.view.partial">F.5.2. ¿Cómo puedo acelerar las vistas parciales?</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="performance.view.phtml#performance.view.partial.render">F.5.2.1. Usar partial() solo cuando sea realmente necesario</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="performance.view.phtml#performance.view.action">F.5.3. ¿Cómo puedo acelerar las llamadas al helper de vista action()?</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="performance.view.phtml#performance.view.action.actionstack">F.5.3.1. Usar el ActionStack cuando sea posible</a></span></dt>
+<dt><span class="sect3"><a href="performance.view.phtml#performance.view.action.model">F.5.3.2. Preferir los helpers que consultan el modelo en lugar de action()</a></span></dt>
+</dl></dd>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="performance.introduction"></a>F.1. Introducción</h2></div></div></div>
+<p>
+        El propósito de este apéndice es proporcionar algunas estrategias concretas
+        para mejorar el rendimiento de sus aplicaciones Zend Framework. La guía
+        se presenta en formato de "Preguntas y Respuestas", y se organiza en áreas
+        de interés.
+    </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="project-structure.rewrite.phtml">Anterior</a> </td>
+<td width="20%" align="center"> </td>
+<td width="40%" align="right"> <a accesskey="n" href="performance.classloading.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">E.4. Guía de configuración de reescritura </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> F.2. Carga de clases</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

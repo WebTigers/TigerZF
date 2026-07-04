@@ -1,0 +1,127 @@
+<?php $title = 'F.4. Internacionalización (i18n) y localización (l10n)'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">F.4. Internacionalización (i18n) y localización (l10n)</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="performance.database.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice F. Guía de rendimiento de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="performance.view.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="performance.localization"></a>F.4. Internacionalización (i18n) y localización (l10n)</h2></div></div></div>
+<p>
+        Internacionalizar y localizar un sitio son formas fantásticas de ampliar
+        su audiencia y garantizar que todos los visitantes puedan acceder a la información
+        que necesitan. Sin embargo, esto a menudo conlleva una penalización de rendimiento.
+        A continuación se muestran algunas estrategias que puede emplear para reducir la
+        sobrecarga de i18n y l10n.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.localization.translationadapter"></a>F.4.1. ¿Qué adaptador de traducción debería usar?</h3></div></div></div>
+<p>
+            No todos los adaptadores de traducción son iguales. Algunos tienen más
+            características que otros, y algunos rinden mejor que otros.
+            Además, puede tener requisitos de negocio que le obliguen a
+            usar un adaptador en particular. Sin embargo, si tiene posibilidad de elegir, ¿qué
+            adaptadores son los más rápidos?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.localization.translationadapter.fastest"></a>F.4.1.1. Usar adaptadores de traducción no XML para obtener la mayor velocidad</h4></div></div></div>
+<p>
+                Zend Framework se distribuye con una variedad de adaptadores de traducción.
+                La mitad de ellos utilizan un formato <acronym class="acronym">XML</acronym>, lo que implica una sobrecarga
+                de memoria y rendimiento. Afortunadamente, hay varios adaptadores
+                que utilizan otros formatos que pueden analizarse mucho más
+                rápidamente. En orden de velocidad, de más rápido a más lento, son:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Array</em></span>: este es el más rápido, ya que, por
+                        definición, se analiza en un formato nativo de <acronym class="acronym">PHP</acronym> inmediatamente
+                        al incluirse.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><acronym class="acronym">CSV</acronym></em></span>: usa
+                        <code class="methodname">fgetcsv()</code> para analizar un archivo <acronym class="acronym">CSV</acronym>
+                        y transformarlo en un formato nativo de <acronym class="acronym">PHP</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em><acronym class="acronym">INI</acronym></em></span>: usa
+                        <code class="methodname">parse_ini_file()</code> para analizar un archivo <acronym class="acronym">INI</acronym>
+                        y transformarlo en un formato nativo de <acronym class="acronym">PHP</acronym>. Este y
+                        el adaptador <acronym class="acronym">CSV</acronym> son aproximadamente equivalentes en rendimiento.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>Gettext</em></span>: el adaptador gettext de Zend Framework
+                        <span class="emphasis"><em>no</em></span> utiliza la extensión gettext
+                        ya que no es segura para hilos y no permite
+                        especificar más de una configuración regional por servidor. Como resultado, es
+                        más lento que usar la extensión gettext directamente, pero,
+                        debido a que el formato gettext es binario, es más rápido de analizar
+                        que <acronym class="acronym">XML</acronym>.
+                    </p></li>
+</ul></div>
+<p>
+                Si el alto rendimiento es una de sus preocupaciones, le sugerimos
+                utilizar uno de los adaptadores anteriores.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.localization.cache"></a>F.4.2. ¿Cómo puedo hacer la traducción y la localización aún más rápidas?</h3></div></div></div>
+<p>
+            Tal vez, por razones de negocio, esté limitado a un adaptador de traducción
+            basado en <acronym class="acronym">XML</acronym>. O tal vez le gustaría acelerar las cosas aún
+            más. O tal vez quiera hacer más rápidas las operaciones de l10n. ¿Cómo
+            puede hacer esto?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.localization.cache.usage"></a>F.4.2.1. Usar cachés de traducción y localización</h4></div></div></div>
+<p>
+                Tanto <code class="classname">Zend_Translate</code> como <code class="classname">Zend_Locale</code>
+                implementan una funcionalidad de caché que puede afectar en gran medida
+                el rendimiento. En cada caso, el cuello de botella principal
+                suele ser la lectura de los archivos, no las búsquedas en sí; usar una
+                caché elimina la necesidad de leer los archivos de traducción y/o
+                localización.
+            </p>
+<p>
+                Puede leer sobre el almacenamiento en caché de las cadenas de traducción y
+                localización en los siguientes lugares:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <a class="link" href="zend.translate.adapter.phtml#zend.translate.adapter.caching" title="74.2.3. Speedup all Adapters"><code class="classname">Zend_Translate</code>
+                            caché del adaptador</a>
+                    </p></li>
+<li class="listitem"><p>
+                        <a class="link" href="zend.locale.phtml#zend.locale.cache" title="43.1.10. Speed up Zend_Locale and its subclasses"><code class="classname">Zend_Locale</code>
+                            caché</a>
+                    </p></li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="performance.database.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="performance.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="performance.view.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">F.3. Rendimiento de Zend_Db </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> F.5. Renderizado de vistas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

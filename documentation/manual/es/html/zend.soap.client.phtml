@@ -1,0 +1,231 @@
+<?php $title = '66.2. Zend_Soap_Client'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">66.2. Zend_Soap_Client</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.soap.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 66. Zend_Soap</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.soap.wsdl.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.soap.client"></a>66.2. Zend_Soap_Client</h2></div></div></div>
+<p>
+        La clase <code class="classname">Zend_Soap_Client</code> simplifica el desarrollo de clientes
+        <acronym class="acronym">SOAP</acronym> para programadores <acronym class="acronym">PHP</acronym>.
+    </p>
+<p>
+        Puede usarse en modo WSDL o no-WSDL.
+    </p>
+<p>
+        En el modo WSDL, el componente <code class="classname">Zend_Soap_Client</code> usa un documento WSDL
+        para definir las opciones de la capa de transporte.
+    </p>
+<p>
+        La descripción WSDL normalmente la proporciona el servicio web al que accederá el cliente. Si la
+        descripción WSDL no está disponible, puede que desee usar
+        <code class="classname">Zend_Soap_Client</code> en modo no-WSDL. En este modo, todas las
+        opciones del protocolo <acronym class="acronym">SOAP</acronym> deben establecerse explícitamente en la
+        clase <code class="classname">Zend_Soap_Client</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.client.constructor"></a>66.2.1. Constructor de Zend_Soap_Client</h3></div></div></div>
+<p>
+            El constructor de <code class="classname">Zend_Soap_Client</code> toma dos parámetros:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="varname">$wsdl</code>: el <acronym class="acronym">URI</acronym> de un archivo WSDL.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="varname">$options</code>: opciones para crear el objeto cliente
+                        <acronym class="acronym">SOAP</acronym>.
+                    </p></li>
+</ul></div>
+<p>
+
+            Ambos parámetros pueden establecerse posteriormente usando los métodos <code class="methodname">setWsdl($wsdl)</code>
+            y <code class="methodname">setOptions($options)</code> respectivamente.
+        </p>
+<div class="note"><table border="0" summary="Note: Important!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Importante!</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si usa el componente <code class="classname">Zend_Soap_Client</code> en modo no-WSDL,
+                <span class="emphasis"><em>debe</em></span> establecer las opciones 'location' y 'uri'.
+            </p></td></tr>
+</table></div>
+<p>
+            Se reconocen las siguientes opciones:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        'soap_version' ('soapVersion'): versión de soap a usar (SOAP_1_1 o
+                        <acronym class="acronym">SOAP</acronym>_1_2).
+                    </p></li>
+<li class="listitem">
+<p>
+                        'classmap' ('classMap'): puede usarse para asignar algunos tipos WSDL a
+                        clases <acronym class="acronym">PHP</acronym>.
+                    </p>
+<p>
+                        La opción debe ser un array con los tipos WSDL como claves y los nombres de
+                        las clases <acronym class="acronym">PHP</acronym> como valores.
+                    </p>
+</li>
+<li class="listitem"><p>
+                        'encoding': codificación de caracteres interna (UTF-8 siempre se usa como
+                        codificación externa).
+                    </p></li>
+<li class="listitem">
+<p>
+                        'wsdl', que equivale a la llamada <code class="methodname">setWsdl($wsdlValue)</code>.
+                    </p>
+<p>
+                        Cambiar esta opción puede alternar el objeto <code class="classname">Zend_Soap_Client</code>
+                        entre el modo WSDL y el modo no-WSDL.
+                    </p>
+</li>
+<li class="listitem"><p>
+                        'uri': espacio de nombres de destino para el servicio <acronym class="acronym">SOAP</acronym> (requerido
+                        para el modo no-WSDL, no funciona en modo WSDL).
+                    </p></li>
+<li class="listitem"><p>
+                        'location': la <acronym class="acronym">URL</acronym> a solicitar (requerida para
+                        el modo no-WSDL, no funciona en modo WSDL).
+                    </p></li>
+<li class="listitem"><p>
+                        'style': estilo de la solicitud (no funciona en modo WSDL):
+                        <code class="constant">SOAP_RPC</code> o <code class="constant">SOAP_DOCUMENT</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        'use': método para codificar los mensajes (no funciona en modo WSDL):
+                        <code class="constant">SOAP_ENCODED</code> o <code class="constant">SOAP_LITERAL</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        'login' y 'password': usuario y contraseña para una autenticación
+                        <acronym class="acronym">HTTP</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        'proxy_host', 'proxy_port', 'proxy_login' y 'proxy_password': para una conexión
+                        <acronym class="acronym">HTTP</acronym> a través de un servidor proxy.
+                    </p></li>
+<li class="listitem"><p>
+                        'local_cert' y 'passphrase': opciones de autenticación de certificado de cliente
+                        <acronym class="acronym">HTTPS</acronym>.
+                    </p></li>
+<li class="listitem">
+<p>
+                        'compression': opciones de compresión; es una combinación de las opciones
+                        <code class="constant">SOAP_COMPRESSION_ACCEPT</code>,
+                        <code class="constant">SOAP_COMPRESSION_GZIP</code> y
+                        <code class="constant">SOAP_COMPRESSION_DEFLATE</code>, que pueden usarse de
+                        esta manera:
+                    </p>
+<pre class="programlisting">
+// Accept response compression
+$client = new Zend_Soap_Client("some.wsdl",
+  array('compression' =&gt; SOAP_COMPRESSION_ACCEPT));
+...
+
+// Compress requests using gzip with compression level 5
+$client = new Zend_Soap_Client("some.wsdl",
+  array('compression' =&gt; SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP | 5));
+...
+
+// Compress requests using deflate compression
+$client = new Zend_Soap_Client("some.wsdl",
+  array('compression' =&gt; SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_DEFLATE));
+</pre>
+</li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.client.calls"></a>66.2.2. Realizar solicitudes SOAP</h3></div></div></div>
+<p>
+            Después de haber creado un objeto <code class="classname">Zend_Soap_Client</code> estamos listos para
+            realizar solicitudes <acronym class="acronym">SOAP</acronym>.
+        </p>
+<p>
+            Cada método del servicio web se asigna al método virtual del objeto
+            <code class="classname">Zend_Soap_Client</code> correspondiente, que toma parámetros con tipos comunes de <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Úselo como en el siguiente ejemplo:
+        </p>
+<pre class="programlisting">
+//****************************************************************
+//                Server code
+//****************************************************************
+// class MyClass {
+//     /**
+//      * This method takes ...
+//      *
+//      * @param integer $inputParam
+//      * @return string
+//      */
+//     public function method1($inputParam) {
+//         ...
+//     }
+//
+//     /**
+//      * This method takes ...
+//      *
+//      * @param integer $inputParam1
+//      * @param string  $inputParam2
+//      * @return float
+//      */
+//     public function method2($inputParam1, $inputParam2) {
+//         ...
+//     }
+//
+//     ...
+// }
+// ...
+// $server = new Zend_Soap_Server(null, $options);
+// $server-&gt;setClass('MyClass');
+// ...
+// $server-&gt;handle();
+//
+//****************************************************************
+//                End of server code
+//****************************************************************
+
+$client = new Zend_Soap_Client("MyService.wsdl");
+...
+
+// $result1 is a string
+$result1 = $client-&gt;method1(10);
+...
+
+// $result2 is a float
+$result2 = $client-&gt;method2(22, 'some string');
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.soap.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.soap.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.soap.wsdl.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 66. Zend_Soap </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 66.3. WSDL Accessor</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

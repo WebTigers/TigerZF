@@ -1,0 +1,214 @@
+<?php $title = '50.4. Zend_Mobile_Push_Mpns'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">50.4. Zend_Mobile_Push_Mpns</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mobile.push.gcm.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 50. Zend_Mobile_Push</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.navigation.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.mobile.push.mpns"></a>50.4. Zend_Mobile_Push_Mpns</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Mobile_Push_Mpns</code> proporciona la capacidad de
+        enviar notificaciones push a Windows Phone. MPNS permite el envío de
+        3 tipos distintos de notificaciones, cuyo comportamiento común se encuentra en
+        la clase base <code class="classname">Zend_Mobile_Push_Message_Mpns</code>. Seguida de
+        clases específicas para notificaciones Raw, Toast y Tile.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mobile.push.mpns.server"></a>50.4.1. Envío de mensajes</h3></div></div></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>Antes de enviar mensajes, debe implementar las prácticas
+                descritas en <a class="ulink" href="http://msdn.microsoft.com/en-us/library/hh202940(v=VS.92).aspx" target="_top">Receiving
+                Push Notifications for Windows Phone</a>.
+            </p></td></tr>
+</table></div>
+<p>
+            Al implementar MPNS, dispone de varios componentes que
+            utilizará. <code class="classname">Zend_Mobile_Push_Mpns</code>,
+            que contiene los componentes de servidor, y
+            <code class="classname">Zend_Mobile_Push_Message_Mpns_Raw</code>, que
+            le permite enviar <a class="ulink" href="http://msdn.microsoft.com/en-us/library/hh202977(v=VS.92).aspx" target="_top">notificaciones
+            raw</a>,
+            <code class="classname">Zend_Mobile_Push_Message_Mpns_Toast</code>, que
+            le permite enviar <a class="ulink" href="http://msdn.microsoft.com/en-us/library/hh202967(v=VS.92).aspx" target="_top">notificaciones
+            toast</a>, y
+            <code class="classname">Zend_Mobile_Push_Message_Mpns_Tile</code>, que
+            le permite enviar <a class="ulink" href="http://msdn.microsoft.com/en-us/library/hh202970(v=VS.92).aspx" target="_top">notificaciones
+            tile</a>. Cada mensaje enviado debe realizar una petición HTTP,
+            así que téngalo en cuenta al enviar en lotes grandes.
+        </p>
+<p>
+            La implementación real del código es bastante mínima; sin embargo,
+            deben tenerse en cuenta consideraciones para el manejo de errores.
+        </p>
+<pre class="programlisting">
+$mpns = new Zend_Mobile_Push_Mpns();
+$messages = array();
+
+// raw notification
+$message = new Zend_Mobile_Push_Message_Mpns_Raw();
+$message-&gt;setToken('http://sn1.notify.live.net/throttledthirdparty/01.00/THETOKEN');
+$message-&gt;setMessage('&lt;notification&gt;&lt;foo id="bar" /&gt;&lt;/notification&gt;');
+$messages[] = $message;
+
+// toast message
+$message = new Zend_Mobile_Push_Message_Mpns_Toast();
+$message-&gt;setToken('http://sn1.notify.live.net/throttledthirdparty/01.00/THETOKEN');
+$message-&gt;setTitle('Foo');
+$message-&gt;setMessage('Bar');
+$messages[] = $message;
+
+// tile message
+$message = new Zend_Mobile_Push_Mpns_Tile();
+$message-&gt;setToken('http://sn1.notify.live.net/throttledthirdparty/01.00/THETOKEN');
+$message-&gt;setBackgroundImage('foo.bar');
+$message-&gt;setCount(1);
+$message-&gt;setTitle('Bar Foo');
+$messages[] = $message;
+
+foreach ($messages as $m) {
+    try {
+        $mpns-&gt;send($m);
+    } catch (Zend_Mobile_Push_Exception_InvalidToken $e) {
+        echo 'Remove token: ' . $m-&gt;getToken() . PHP_EOL;
+    } catch (Zend_Mobile_Push_Exception $e) {
+        echo 'Error occurred, token: ' . $m-&gt;getToken() . ' - ' . $e-&gt;getMessage() . PHP_EOL;
+    }
+}
+</pre>
+<div class="table">
+<a name="zend.mobile.push.mpns.server.exceptions"></a><p class="title"><b>Tabla 50.5. Excepciones y técnicas de solución</b></p>
+<div class="table-contents"><table class="table" summary="Exceptions and Remediation Techniques" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Excepción</th>
+<th align="left">Significado</th>
+<th align="left">Solución</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">Zend_Mobile_Push_Exception</td>
+<td align="left">Este tipo de excepciones son de naturaleza más genérica
+                        y se lanzan desde MPNS o internamente al validar
+                        la entrada</td>
+<td align="left">Lea el mensaje y determine los pasos de solución.</td>
+</tr>
+<tr>
+<td align="left">Zend_Mobile_Push_Exception_DeviceQuotaExceeded</td>
+<td align="left">Ha enviado demasiados mensajes a este dispositivo;
+                            puede volver a intentarlo más tarde.</td>
+<td align="left">Vuelva a intentarlo más tarde o implemente <a class="ulink" href="http://en.wikipedia.org/wiki/Exponential_backoff" target="_top">
+                            Exponential Backoff
+                        </a>.</td>
+</tr>
+<tr>
+<td align="left">Zend_Mobile_Push_Exception_InvalidPayload</td>
+<td align="left">Por lo general, el payload no generará una excepción
+                        a menos que su tamaño sea demasiado grande o le falte
+                        contenido obligatorio.</td>
+<td align="left">Compruebe que el tamaño del payload esté dentro de los
+                        requisitos de MPNS</td>
+</tr>
+<tr>
+<td align="left">Zend_Mobile_Push_Exception_InvalidToken</td>
+<td align="left">Cualquier forma de token no válido se producirá si el
+                            dispositivo ya no está suscrito, está inactivo o no
+                            es válido.</td>
+<td align="left">En algunos casos puede intentar reenviar en una
+                            hora; esto se indicará en la excepción.
+                            De lo contrario, deberá eliminar el token para
+                            que no se le vuelva a enviar.</td>
+</tr>
+<tr>
+<td align="left">Zend_Mobile_Push_Exception_QuotaExceeded</td>
+<td align="left">Ha alcanzado el límite de envíos por día.</td>
+<td align="left">La limitación por día solo se aplica a los servicios
+                        web no autenticados; deberá <a class="ulink" href="http://msdn.microsoft.com/en-us/library/ff941099(v=vs.92).aspx" target="_top">registrar
+                        su aplicación para notificaciones</a>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mobile.push.mpns.message"></a>50.4.2. Mensajes avanzados</h3></div></div></div>
+<p>
+            MPNS ofrece la posibilidad de enviar mensajes más avanzados; por
+            ejemplo, los ejemplos anteriores muestran la implementación más básica de un
+            mensaje. Zend_Mobile_Push_Message_Mpns_* le permite realizar mensajes
+            mucho más avanzados, tal como se describe a continuación.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.mobile.push.mpns.message.tile"></a>50.4.2.1. Mensajes Tile</h4></div></div></div>
+<p>
+                Los mensajes Tile tienen atributos opcionales adicionales para Windows
+                Phone 7.1+; debe asegurarse de que está enviando a un dispositivo
+                con la versión adecuada, de lo contrario su notificación fallará.
+            </p>
+<pre class="programlisting">
+$message = new Zend_Mobile_Push_Message_Mpns_Tile();
+$message-&gt;setToken('http://sn1.notify.live.net/throttledthirdparty/01.00/THETOKEN'); // REPLACE WITH NOTIFICATION URI FROM MPNS
+$message-&gt;setBackgroundImage('foo.jpg');
+$message-&gt;setCount(1);
+$message-&gt;setTitle('Bar');
+
+// other optional attributes for wp7.1+
+$message-&gt;setTileId('/Foo.xaml');
+$message-&gt;setBackBackgroundImage('blue.jpg');
+$message-&gt;setBackTitle('Bar');
+$message-&gt;setBackContent('Foo Bar');
+    </pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.mobile.push.mpns.message.toast"></a>50.4.2.2. Mensajes Toast</h4></div></div></div>
+<p>
+                Los mensajes Toast tienen atributos opcionales adicionales para Windows
+                Phone 7.1+; debe asegurarse de que está enviando a un dispositivo
+                con la versión adecuada, de lo contrario su notificación fallará.
+            </p>
+<pre class="programlisting">
+$message = new Zend_Mobile_Push_Message_Mpns_Toast();
+$message-&gt;setToken('http://sn1.notify.live.net/throttledthirdparty/01.00/THETOKEN'); // REPLACE WITH NOTIFICATION URI FROM MPNS
+$message-&gt;setTitle('Foo');
+$message-&gt;setMessage('Bar');
+
+// optional attributes for wp7.1+
+$message-&gt;setParams('?bar=foo'); //optional parameters
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mobile.push.gcm.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.mobile.push.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.navigation.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">50.3. Zend_Mobile_Push_Gcm </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 51. Zend_Navigation</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

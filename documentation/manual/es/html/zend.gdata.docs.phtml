@@ -1,0 +1,181 @@
+<?php $title = '37.7. Uso de la API de datos de Google Documents List'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">37.7. Uso de la API de datos de Google Documents List</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.gdata.calendar.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 37. Zend_Gdata</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.gdata.spreadsheets.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.gdata.docs"></a>37.7. Uso de la API de datos de Google Documents List</h2></div></div></div>
+<p>
+        La API de datos de Google Documents List <acronym class="acronym">API</acronym> permite que las aplicaciones cliente
+        suban documentos a Google Documents y los listen en forma de
+        feeds de la API de datos de Google Data ("GData"). Su aplicación cliente puede solicitar
+        una lista de los documentos de un usuario, y consultar el contenido de un
+        documento existente.
+    </p>
+<p>
+        Consulte <a class="ulink" href="http://code.google.com/apis/documents/overview.html" target="_top">http://code.google.com/apis/documents/overview.html</a>
+        para obtener más información sobre la API de Google Documents List <acronym class="acronym">API</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.docs.listdocuments"></a>37.7.1. Obtener una lista de documentos</h3></div></div></div>
+<p>
+            Puede obtener una lista de los documentos de Google de un usuario en particular usando
+            el método <code class="methodname">getDocumentListFeed()</code> del servicio
+            docs. El servicio devolverá un objeto
+            <code class="classname">Zend_Gdata_Docs_DocumentListFeed</code>
+            que contiene una lista de documentos asociados con el usuario
+            autenticado.
+        </p>
+<pre class="programlisting">
+$service = Zend_Gdata_Docs::AUTH_SERVICE_NAME;
+$client = Zend_Gdata_ClientLogin::getHttpClient($user, $pass, $service);
+$docs = new Zend_Gdata_Docs($client);
+$feed = $docs-&gt;getDocumentListFeed();
+</pre>
+<p>
+        El objeto <code class="classname">Zend_Gdata_Docs_DocumentListFeed</code> resultante
+        representa la respuesta del servidor. Este feed contiene una lista de
+        objetos <code class="classname">Zend_Gdata_Docs_DocumentListEntry</code>
+        (<span class="command"><strong>$feed-&gt;entries</strong></span>), cada uno de los cuales representa un único
+        documento de Google.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.docs.creating"></a>37.7.2. Subir un documento</h3></div></div></div>
+<p>
+            Puede crear un nuevo documento de Google subiendo un documento
+            de procesamiento de texto, una hoja de cálculo o una presentación. Este ejemplo
+            proviene del ejemplo interactivo Docs.php que viene con la
+            biblioteca. Muestra cómo subir un archivo e imprimir
+            información sobre el resultado devuelto por el servidor.
+        </p>
+<pre class="programlisting">
+/**
+ * Upload the specified document
+ *
+ * @param Zend_Gdata_Docs $docs The service object to use for communicating
+ *     with the Google Documents server.
+ * @param boolean $html True if output should be formatted for display in a
+ *     web browser.
+ * @param string $originalFileName The name of the file to be uploaded. The
+ *     MIME type of the file is determined from the extension on this file
+ *     name. For example, test.csv is uploaded as a comma separated volume
+ *     and converted into a spreadsheet.
+ * @param string $temporaryFileLocation (optional) The file in which the
+ *     data for the document is stored. This is used when the file has been
+ *     uploaded from the client's machine to the server and is stored in
+ *     a temporary file which does not have an extension. If this parameter
+ *     is null, the file is read from the originalFileName.
+ */
+function uploadDocument($docs, $html, $originalFileName,
+                        $temporaryFileLocation) {
+  $fileToUpload = $originalFileName;
+  if ($temporaryFileLocation) {
+    $fileToUpload = $temporaryFileLocation;
+  }
+
+  // Upload the file and convert it into a Google Document. The original
+  // file name is used as the title of the document and the MIME type
+  // is determined based on the extension on the original file name.
+  $newDocumentEntry = $docs-&gt;uploadFile($fileToUpload, $originalFileName,
+      null, Zend_Gdata_Docs::DOCUMENTS_LIST_FEED_URI);
+
+  echo "New Document Title: ";
+
+  if ($html) {
+      // Find the URL of the HTML view of this document.
+      $alternateLink = '';
+      foreach ($newDocumentEntry-&gt;link as $link) {
+          if ($link-&gt;getRel() === 'alternate') {
+              $alternateLink = $link-&gt;getHref();
+          }
+      }
+      // Make the title link to the document on docs.google.com.
+      echo "&lt;a href=\"$alternateLink\"&gt;\n";
+  }
+  echo $newDocumentEntry-&gt;title."\n";
+  if ($html) {echo "&lt;/a&gt;\n";}
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.docs.queries"></a>37.7.3. Búsqueda en el feed de documentos</h3></div></div></div>
+<p>
+            Puede buscar en la lista de documentos usando algunos de los <a class="ulink" href="http://code.google.com/apis/gdata/reference.html#Queries" target="_top">parámetros de consulta
+            estándar de la API de Google Data</a>. Las categorías se usan para
+            restringir el
+            tipo de documento (documento de procesador de texto, hoja de cálculo) devuelto.
+            La cadena de consulta de texto completo se usa para buscar en el contenido de todos
+            los documentos. Puede encontrar información más detallada sobre los parámetros específicos
+            de Documents List en la <a class="ulink" href="http://code.google.com/apis/documents/reference.html#Parameters" target="_top">Guía de referencia de la API de datos de
+                Documents List</a>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.docs.listwpdocuments"></a>37.7.3.1. Obtener una lista de documentos de procesamiento de texto</h4></div></div></div>
+<p>
+                También puede solicitar un feed que contenga todos sus documentos de un tipo específico. Por
+                ejemplo, para ver una lista de sus documentos de procesamiento de texto, realizaría una
+                consulta por categoría de la siguiente manera.
+            </p>
+<pre class="programlisting">
+$feed = $docs-&gt;getDocumentListFeed(
+    'http://docs.google.com/feeds/documents/private/full/-/document');
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.docs.listspreadsheets"></a>37.7.3.2. Obtener una lista de hojas de cálculo</h4></div></div></div>
+<p>
+                Para solicitar una lista de sus hojas de cálculo de Google, use la siguiente consulta por categoría:
+            </p>
+<pre class="programlisting">
+$feed = $docs-&gt;getDocumentListFeed(
+    'http://docs.google.com/feeds/documents/private/full/-/spreadsheet');
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.docs.textquery"></a>37.7.3.3. Realizar una consulta de texto</h4></div></div></div>
+<p>
+                Puede buscar en el contenido de los documentos usando un
+                <code class="classname">Zend_Gdata_Docs_Query</code> en su solicitud. Un objeto Query
+                puede usarse para construir el <acronym class="acronym">URI</acronym> de la consulta, pasando el término de búsqueda
+                como parámetro. Aquí hay un método de ejemplo que consulta
+                la lista de documentos en busca de documentos que contengan la cadena de búsqueda:
+            </p>
+<pre class="programlisting">
+$docsQuery = new Zend_Gdata_Docs_Query();
+$docsQuery-&gt;setQuery($query);
+$feed = $client-&gt;getDocumentListFeed($docsQuery);
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.gdata.calendar.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.gdata.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.gdata.spreadsheets.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">37.6. Uso de Google Calendar </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 37.8. Uso de Google Spreadsheets</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>
+</content>

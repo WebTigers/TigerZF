@@ -1,0 +1,774 @@
+<?php $title = '15.5. Autenticación LDAP'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">15.5. Autenticación LDAP</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.auth.adapter.http.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 15. Zend_Auth</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.auth.adapter.openid.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.auth.adapter.ldap"></a>15.5. Autenticación LDAP</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.introduction"></a>15.5.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Auth_Adapter_Ldap</code> permite la autenticación de aplicaciones web
+            con servicios <acronym class="acronym">LDAP</acronym>. Sus características incluyen la canonicalización
+            de nombres de usuario y de dominio, autenticación multi-dominio y capacidades de conmutación
+            por error (failover). Ha sido probado con
+            <a class="ulink" href="http://www.microsoft.com/windowsserver2003/technologies/directory/activedirectory/" target="_top">Microsoft
+                Active Directory</a> y <a class="ulink" href="http://www.openldap.org/" target="_top">OpenLDAP</a>,
+            pero también debería funcionar con otros proveedores de servicios <acronym class="acronym">LDAP</acronym>.
+        </p>
+<p>
+            Esta documentación incluye una guía para usar
+            <code class="classname">Zend_Auth_Adapter_Ldap</code>, una exploración de su
+            <acronym class="acronym">API</acronym>, un esquema de las diversas opciones disponibles, información
+            de diagnóstico para solucionar problemas de autenticación, y opciones de ejemplo tanto
+            para servidores Active Directory como OpenLDAP.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.usage"></a>15.5.2. Uso</h3></div></div></div>
+<p>
+            Para incorporar rápidamente la autenticación con <code class="classname">Zend_Auth_Adapter_Ldap</code> en su
+            aplicación, incluso si no está usando <code class="classname">Zend_Controller</code>,
+            la parte esencial de su código debería tener un aspecto similar al siguiente:
+        </p>
+<pre class="programlisting">
+$username = $this-&gt;_request-&gt;getParam('username');
+$password = $this-&gt;_request-&gt;getParam('password');
+
+$auth = Zend_Auth::getInstance();
+
+$config = new Zend_Config_Ini('../application/config/config.ini',
+                              'production');
+$log_path = $config-&gt;ldap-&gt;log_path;
+$options = $config-&gt;ldap-&gt;toArray();
+unset($options['log_path']);
+
+$adapter = new Zend_Auth_Adapter_Ldap($options, $username,
+                                      $password);
+
+$result = $auth-&gt;authenticate($adapter);
+
+if ($log_path) {
+    $messages = $result-&gt;getMessages();
+
+    $logger = new Zend_Log();
+    $logger-&gt;addWriter(new Zend_Log_Writer_Stream($log_path));
+    $filter = new Zend_Log_Filter_Priority(Zend_Log::DEBUG);
+    $logger-&gt;addFilter($filter);
+
+    foreach ($messages as $i =&gt; $message) {
+        if ($i-- &gt; 1) { // $messages[2] and up are log messages
+            $message = str_replace("\n", "\n  ", $message);
+            $logger-&gt;log("Ldap: $i: $message", Zend_Log::DEBUG);
+        }
+    }
+}
+</pre>
+<p>
+            Por supuesto, el código de registro (logging) es opcional, pero es muy recomendable usar
+            un registrador (logger). <code class="classname">Zend_Auth_Adapter_Ldap</code> registrará prácticamente
+            toda la información que cualquiera pudiera desear en <code class="varname">$messages</code> (más abajo), lo cual
+            es una característica interesante en sí misma para algo que tiene fama de ser notoriamente difícil
+            de depurar.
+        </p>
+<p>
+            El código de <code class="classname">Zend_Config_Ini</code> se utiliza arriba para cargar las
+            opciones del adaptador. También es opcional. Un array normal funcionaría igual de bien. A continuación se
+            muestra un archivo de ejemplo <code class="filename">application/config/config.ini</code> que tiene opciones para
+            dos servidores separados. Con varios conjuntos de opciones de servidor, el adaptador intentará cada uno, en
+            orden, hasta que las credenciales se autentiquen con éxito. Los nombres de los servidores
+            (por ejemplo, 'server1' y 'server2') son en gran medida arbitrarios. Para más detalles sobre el array
+            de opciones, consulte la sección <span class="emphasis"><em>Opciones del servidor</em></span> más abajo. Tenga en cuenta que
+            <code class="classname">Zend_Config_Ini</code> requiere que cualquier valor con caracteres "igual"
+            (<span class="emphasis"><em>=</em></span>) deba estar entrecomillado (como los DN mostrados abajo).
+        </p>
+<pre class="programlisting">
+[production]
+
+ldap.log_path = /tmp/ldap.log
+
+; Typical options for OpenLDAP
+ldap.server1.host = s0.foo.net
+ldap.server1.accountDomainName = foo.net
+ldap.server1.accountDomainNameShort = FOO
+ldap.server1.accountCanonicalForm = 3
+ldap.server1.username = "CN=user1,DC=foo,DC=net"
+ldap.server1.password = pass1
+ldap.server1.baseDn = "OU=Sales,DC=foo,DC=net"
+ldap.server1.bindRequiresDn = true
+
+; Typical options for Active Directory
+ldap.server2.host = dc1.w.net
+ldap.server2.useStartTls = true
+ldap.server2.accountDomainName = w.net
+ldap.server2.accountDomainNameShort = W
+ldap.server2.accountCanonicalForm = 3
+ldap.server2.baseDn = "CN=Users,DC=w,DC=net"
+</pre>
+<p>
+            La configuración anterior indicará a <code class="classname">Zend_Auth_Adapter_Ldap</code> que
+            intente autenticar a los usuarios primero con el servidor OpenLDAP <code class="filename">s0.foo.net</code>.
+            Si la autenticación falla por cualquier motivo, se intentará con el servidor AD
+            <code class="filename">dc1.w.net</code>.
+        </p>
+<p>
+            Con servidores en dominios diferentes, esta configuración ilustra la autenticación
+            multi-dominio. También puede tener varios servidores en el mismo dominio para proporcionar
+            redundancia.
+        </p>
+<p>
+            Tenga en cuenta que en este caso, aunque OpenLDAP no necesita el nombre de dominio corto
+            estilo NetBIOS utilizado por Windows, lo proporcionamos aquí con fines de canonicalización
+            de nombres (descrito en la sección <span class="emphasis"><em>Canonicalización de nombres de usuario</em></span> más abajo).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.api"></a>15.5.3. La API</h3></div></div></div>
+<p>
+            El constructor de <code class="classname">Zend_Auth_Adapter_Ldap</code> acepta tres parámetros.
+        </p>
+<p>
+            El parámetro <code class="varname">$options</code> es obligatorio y debe ser un array que contenga
+            uno o más conjuntos de opciones. Tenga en cuenta que es <span class="emphasis"><em>un array de arrays</em></span> de
+            opciones de <a class="link" href="zend.ldap.phtml" title="Chapter 41. Zend_Ldap"><code class="classname">Zend_Ldap</code></a>. Incluso si
+            va a usar un único servidor <acronym class="acronym">LDAP</acronym>, las opciones deben seguir estando dentro de
+            otro array.
+        </p>
+<p>
+            A continuación se muestra la salida de <a class="ulink" href="http://php.net/print_r" target="_top"><code class="methodname">print_r()</code></a>
+            de un ejemplo de parámetro de opciones que contiene dos conjuntos de opciones de servidor para
+            servidores <acronym class="acronym">LDAP</acronym> <code class="filename">s0.foo.net</code> y
+            <code class="filename">dc1.w.net</code> (las mismas opciones que la representación
+            <acronym class="acronym">INI</acronym> anterior):
+        </p>
+<pre class="programlisting">
+Array
+(
+    [server2] =&gt; Array
+        (
+            [host] =&gt; dc1.w.net
+            [useStartTls] =&gt; 1
+            [accountDomainName] =&gt; w.net
+            [accountDomainNameShort] =&gt; W
+            [accountCanonicalForm] =&gt; 3
+            [baseDn] =&gt; CN=Users,DC=w,DC=net
+        )
+
+    [server1] =&gt; Array
+        (
+            [host] =&gt; s0.foo.net
+            [accountDomainName] =&gt; foo.net
+            [accountDomainNameShort] =&gt; FOO
+            [accountCanonicalForm] =&gt; 3
+            [username] =&gt; CN=user1,DC=foo,DC=net
+            [password] =&gt; pass1
+            [baseDn] =&gt; OU=Sales,DC=foo,DC=net
+            [bindRequiresDn] =&gt; 1
+        )
+
+)
+</pre>
+<p>
+            La información proporcionada en cada conjunto de opciones anterior es diferente principalmente porque AD
+            no requiere que un nombre de usuario esté en forma de DN al enlazar (bind) (consulte la
+            opción <span class="property">bindRequiresDn</span> en la sección <span class="emphasis"><em>Opciones del servidor</em></span>
+            más abajo), lo que significa que podemos omitir varias opciones asociadas con la obtención
+            del DN de un nombre de usuario que se está autenticando.
+        </p>
+<div class="note"><table border="0" summary="Note: What is a Distinguished Name?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Qué es un Distinguished Name?</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Un DN o "nombre distintivo" (distinguished name) es una cadena que representa la ruta a un objeto
+                dentro del directorio <acronym class="acronym">LDAP</acronym>. Cada componente separado por comas es un
+                atributo y valor que representa un nodo. Los componentes se evalúan en orden inverso.
+                Por ejemplo, la cuenta de usuario
+                <span class="emphasis"><em>CN=Bob Carter,CN=Users,DC=w,DC=net</em></span> se encuentra directamente
+                dentro del <span class="emphasis"><em>contenedor CN=Users,DC=w,DC=net</em></span>. Esta estructura se
+                explora mejor con un navegador <acronym class="acronym">LDAP</acronym> como el
+                complemento (snap-in) <acronym class="acronym">MMC</acronym> de <acronym class="acronym">ADSI</acronym> Edit para Active Directory o
+                phpLDAPadmin.
+            </p></td></tr>
+</table></div>
+<p>
+            Los nombres de los servidores (por ejemplo, 'server1' y 'server2' mostrados arriba) son en gran medida
+            arbitrarios, pero por el bien del uso de <code class="classname">Zend_Config</code>, los identificadores deben
+            estar presentes (en lugar de ser índices numéricos) y no deben contener ningún carácter especial
+            usado por los formatos de archivo asociados (por ejemplo, el separador de propiedades '<span class="emphasis"><em>.</em></span>'
+            de <acronym class="acronym">INI</acronym>, '<span class="emphasis"><em>&amp;</em></span>' para las
+            referencias de entidad <acronym class="acronym">XML</acronym>, etc).
+        </p>
+<p>
+            Con varios conjuntos de opciones de servidor, el adaptador puede autenticar usuarios en múltiples
+            dominios y proporcionar conmutación por error (failover) de forma que si un servidor no está
+            disponible, se consulte otro.
+        </p>
+<div class="note"><table border="0" summary="Note: The Gory Details: What Happens in the Authenticate Method?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Los detalles sórdidos: ¿qué ocurre en el método authenticate?</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Cuando se llama al método <code class="methodname">authenticate()</code>, el adaptador
+                itera sobre cada conjunto de opciones de servidor, las establece en la instancia interna de
+                <code class="classname">Zend_Ldap</code>, y llama al método
+                <code class="methodname">Zend_Ldap::bind()</code> con el nombre de usuario y la contraseña
+                que se están autenticando. La clase <code class="classname">Zend_Ldap</code> comprueba si
+                el nombre de usuario está cualificado con un dominio (por ejemplo, tiene un componente de dominio
+                como <code class="filename">alice@foo.net</code> o <code class="filename">FOO\alice</code>). Si hay un dominio
+                presente, pero no coincide con ninguno de los nombres de dominio del servidor
+                (<code class="filename">foo.net</code> o <acronym class="acronym">FOO</acronym>), se lanza una excepción
+                especial que es capturada por <code class="classname">Zend_Auth_Adapter_Ldap</code>, la cual hace que ese
+                servidor sea ignorado y se seleccione el siguiente conjunto de opciones de servidor. Si un dominio
+                <span class="emphasis"><em>sí</em></span> coincide, o si el usuario no proporcionó un nombre de usuario cualificado,
+                <code class="classname">Zend_Ldap</code> procede a intentar enlazar (bind) con las credenciales
+                proporcionadas. Si el enlace no tiene éxito, <code class="classname">Zend_Ldap</code> lanza
+                una <code class="classname">Zend_Ldap_Exception</code> que es capturada por
+                <code class="classname">Zend_Auth_Adapter_Ldap</code> y se prueba el siguiente conjunto de opciones de
+                servidor. Si el enlace tiene éxito, la iteración se detiene, y el método
+                <code class="methodname">authenticate()</code> del adaptador devuelve un resultado exitoso. Si se han
+                probado todos los conjuntos de opciones de servidor sin éxito, la autenticación falla, y
+                <code class="methodname">authenticate()</code> devuelve un resultado fallido con mensajes de error
+                de la última iteración.
+            </p></td></tr>
+</table></div>
+<p>
+            Los parámetros de nombre de usuario y contraseña del constructor de
+            <code class="classname">Zend_Auth_Adapter_Ldap</code> representan las credenciales
+            que se están autenticando (es decir, las credenciales proporcionadas por el usuario a través de su
+            formulario de inicio de sesión <acronym class="acronym">HTML</acronym>). Alternativamente, también se pueden establecer con los
+            métodos <code class="methodname">setUsername()</code> y <code class="methodname">setPassword()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.server-options"></a>15.5.4. Opciones del servidor</h3></div></div></div>
+<p>
+            Cada conjunto de opciones de servidor <span class="emphasis"><em>en el contexto de
+            <code class="classname">Zend_Auth_Adapter_Ldap</code></em></span> consta de las siguientes
+            opciones, que se pasan, en gran medida sin modificar, a
+            <code class="methodname">Zend_Ldap::setOptions()</code>:
+        </p>
+<div class="table">
+<a name="zend.auth.adapter.ldap.server-options.table"></a><p class="title"><b>Tabla 15.2. Opciones del servidor</b></p>
+<div class="table-contents"><table class="table" summary="Server Options" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em><span class="property">host</span></em></span></td>
+<td>
+                            El nombre de host del servidor <acronym class="acronym">LDAP</acronym> que representan estas
+                            opciones. Esta opción es obligatoria.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">port</span></em></span></td>
+<td>
+                            El puerto en el que escucha el servidor <acronym class="acronym">LDAP</acronym>. Si
+                            <span class="emphasis"><em>useSsl</em></span> es <code class="constant">TRUE</code>, el valor
+                            por defecto de <span class="property">port</span> es 636. Si <span class="property">useSsl</span>
+                            es <code class="constant">FALSE</code>, el valor por defecto de <span class="property">port</span>
+                            es 389.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useStartTls</span></em></span></td>
+<td>
+                            Indica si el cliente <acronym class="acronym">LDAP</acronym> debe usar
+                            transporte cifrado <acronym class="acronym">TLS</acronym> (también conocido como
+                            <acronym class="acronym">SSL</acronym>v2). Un valor de <code class="constant">TRUE</code> es muy
+                            recomendable en entornos de producción para evitar que las contraseñas se
+                            transmitan en texto claro. El valor por defecto es <code class="constant">FALSE</code>, ya que
+                            los servidores frecuentemente requieren que se instale un certificado por
+                            separado después de la instalación. Las opciones <span class="property">useSsl</span> y
+                            <span class="property">useStartTls</span> son mutuamente excluyentes. Se debería
+                            favorecer la opción <span class="property">useStartTls</span> sobre
+                            <span class="property">useSsl</span>, pero no todos los servidores soportan este
+                            mecanismo más reciente.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useSsl</span></em></span></td>
+<td>
+                            Indica si el cliente <acronym class="acronym">LDAP</acronym> debe usar
+                            transporte cifrado <acronym class="acronym">SSL</acronym>. Las opciones
+                            <span class="property">useSsl</span> y <span class="property">useStartTls</span>
+                            son mutuamente excluyentes, pero se debería favorecer <span class="property">useStartTls</span>
+                            si el servidor y la biblioteca cliente <acronym class="acronym">LDAP</acronym>
+                            lo soportan. Este valor también cambia el valor por defecto de
+                            <span class="property">port</span> (consulte la descripción de <span class="property">port</span>
+                            arriba).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">username</span></em></span></td>
+<td>
+                            El DN de la cuenta usada para realizar búsquedas de DN de cuentas.
+                            Los servidores <acronym class="acronym">LDAP</acronym> que requieren que el nombre de usuario esté en forma
+                            de DN al realizar el "bind" requieren esta opción. Es decir, si
+                            <span class="property">bindRequiresDn</span> es <code class="constant">TRUE</code>, esta
+                            opción es obligatoria. Esta cuenta no necesita ser una cuenta con privilegios;
+                            una cuenta con acceso de solo lectura a los objetos bajo
+                            <span class="property">baseDn</span> es todo lo necesario (y lo preferible según el
+                            <span class="emphasis"><em>Principio del Mínimo Privilegio</em></span>).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">password</span></em></span></td>
+<td>
+                            La contraseña de la cuenta usada para realizar búsquedas de DN de cuentas. Si esta
+                            opción no se proporciona, el cliente <acronym class="acronym">LDAP</acronym> intentará
+                            un "bind anónimo" al realizar las búsquedas de DN de cuentas.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">bindRequiresDn</span></em></span></td>
+<td>
+                            Algunos servidores <acronym class="acronym">LDAP</acronym> requieren que el nombre de usuario usado
+                            para el bind esté en forma de DN como
+                            <span class="emphasis"><em>CN=Alice Baker,OU=Sales,DC=foo,DC=net</em></span> (básicamente
+                            todos los servidores <span class="emphasis"><em>excepto</em></span> AD). Si esta opción es
+                            <code class="constant">TRUE</code>, esto indica a
+                            <code class="classname">Zend_Ldap</code> que recupere automáticamente el DN
+                            correspondiente al nombre de usuario que se está autenticando, si aún no está
+                            en forma de DN, y luego vuelva a enlazar (bind) con el DN correcto. El valor por defecto es
+                            <code class="constant">FALSE</code>. Actualmente solo se sabe que Microsoft Active Directory
+                            Server (<acronym class="acronym">ADS</acronym>) <span class="emphasis"><em>no</em></span> requiere que los
+                            nombres de usuario estén en forma de DN al hacer bind, por lo que esta
+                            opción puede ser <code class="constant">FALSE</code> con AD (y debería serlo, ya que
+                            recuperar el DN requiere un viaje de ida y vuelta adicional al servidor). En caso
+                            contrario, esta opción debe establecerse en <code class="constant">TRUE</code> (por ejemplo,
+                            para OpenLDAP). Esta opción también controla el valor por defecto de
+                            <span class="property">acountFilterFormat</span> usado al buscar
+                            cuentas. Consulte la opción <span class="property">accountFilterFormat</span>.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">baseDn</span></em></span></td>
+<td>
+                            El DN bajo el cual se ubican todas las cuentas que se autentican. Esta
+                            opción es obligatoria. Si no está seguro sobre el valor correcto de
+                            <span class="property">baseDn</span>, debería ser suficiente derivarlo
+                            del dominio <acronym class="acronym">DNS</acronym> del usuario usando
+                            componentes <span class="emphasis"><em>DC=</em></span>. Por ejemplo, si el nombre principal del usuario
+                            es <code class="filename">alice@foo.net</code>, un
+                            <span class="property">baseDn</span> de <span class="emphasis"><em>DC=foo,DC=net</em></span>
+                            debería funcionar. No obstante, una ubicación más precisa (por ejemplo,
+                            <span class="emphasis"><em>OU=Sales,DC=foo,DC=net</em></span>) será más eficiente.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <span class="emphasis"><em><span class="property">accountCanonicalForm</span></em></span>
+                        </td>
+<td>
+                            Un valor de 2, 3 o 4 que indica la forma a la que deben canonicalizarse
+                            los nombres de cuenta tras una autenticación exitosa. Los valores son los
+                            siguientes: 2 para nombres estilo nombre de usuario tradicional (por ejemplo,
+                            <span class="emphasis"><em>alice</em></span>), 3 para nombres estilo barra invertida (por ejemplo,
+                            <code class="filename">FOO\alice</code>) o 4 para nombres de usuario estilo principal
+                            (por ejemplo, <code class="filename">alice@foo.net</code>). El valor por defecto es 4
+                            (por ejemplo, <code class="filename">alice@foo.net</code>). Por ejemplo, con un valor
+                            de 3, la identidad devuelta por
+                            <code class="methodname">Zend_Auth_Result::getIdentity()</code> (y
+                            <code class="methodname">Zend_Auth::getIdentity()</code>, si se usó
+                            <code class="classname">Zend_Auth</code>) será siempre
+                            <code class="filename">FOO\alice</code>, independientemente de la forma que Alice haya
+                            proporcionado, ya sea <span class="emphasis"><em>alice</em></span>,
+                            <code class="filename">alice@foo.net</code>, <code class="filename">FOO\alice</code>,
+                            <code class="filename">FoO\aLicE</code>, <code class="filename">foo.net\alice</code>,
+                            etc. Consulte la sección <span class="emphasis"><em>Canonicalización de nombres de cuenta</em></span>
+                            en la documentación de <code class="classname">Zend_Ldap</code> para más detalles. Tenga en cuenta
+                            que al usar varios conjuntos de opciones de servidor se recomienda, aunque
+                            no es obligatorio, que se use el mismo <span class="property">accountCanonicalForm</span>
+                            con todas las opciones de servidor, de modo que los nombres de usuario resultantes
+                            se canonicalicen siempre a la misma forma (por ejemplo, si canonicaliza a
+                            <code class="filename">EXAMPLE\username</code> con un servidor AD pero a
+                            <code class="filename">username@example.com</code> con un servidor OpenLDAP, eso
+                            puede resultar incómodo para la lógica de alto nivel de la aplicación).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">accountDomainName</span></em></span></td>
+<td>
+                            El nombre de dominio <acronym class="acronym">FQDN</acronym> para el cual el servidor
+                            <acronym class="acronym">LDAP</acronym> de destino es una autoridad (por ejemplo,
+                            <code class="filename">example.com</code>). Esta opción se usa para canonicalizar
+                            nombres de forma que el nombre de usuario proporcionado por el usuario pueda convertirse
+                            según sea necesario para el bind. También se usa para determinar si el servidor es una
+                            autoridad para el nombre de usuario proporcionado (por ejemplo, si
+                            <span class="property">accountDomainName</span> es <code class="filename">foo.net</code>
+                            y el usuario proporciona <code class="filename">bob@bar.net</code>, no se consultará
+                            el servidor y se producirá un fallo). Esta opción no es
+                            obligatoria, pero si no se proporciona, no se admiten los nombres de usuario en forma
+                            de nombre principal (por ejemplo, <code class="filename">alice@foo.net</code>). Se
+                            recomienda encarecidamente proporcionar esta opción, ya que hay muchos
+                            casos de uso que requieren generar la forma de nombre principal.
+                        </td>
+</tr>
+<tr>
+<td>
+                            <span class="emphasis"><em><span class="property">accountDomainNameShort</span></em></span>
+                        </td>
+<td>
+                            El dominio 'corto' para el cual el servidor <acronym class="acronym">LDAP</acronym> de destino
+                            es una autoridad (por ejemplo, <acronym class="acronym">FOO</acronym>). Tenga en cuenta que existe
+                            una correspondencia 1:1 entre <span class="property">accountDomainName</span> y
+                            <span class="property">accountDomainNameShort</span>. Esta opción debería usarse
+                            para especificar el nombre de dominio NetBIOS de redes Windows, pero también puede
+                            ser usada por servidores no AD (por ejemplo, por consistencia cuando hay varios conjuntos de
+                            opciones de servidor con el <span class="property">accountCanonicalForm</span> estilo
+                            barra invertida). Esta opción no es obligatoria, pero si no se proporciona, no se
+                            admiten los nombres de usuario en forma de barra invertida (por ejemplo,
+                            <code class="filename">FOO\alice</code>).
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">accountFilterFormat</span></em></span></td>
+<td>
+                            El filtro de búsqueda <acronym class="acronym">LDAP</acronym> usado para buscar cuentas.
+                            Esta cadena es una expresión estilo <a class="ulink" href="http://php.net/printf" target="_top"><code class="methodname">printf()</code></a>
+                            que debe contener un '<span class="emphasis"><em>%s</em></span>' para
+                            acomodar el nombre de usuario. El valor por defecto es
+                            '<span class="emphasis"><em>(&amp;(objectClass=user)(sAMAccountName=%s))</em></span>',
+                            a menos que <span class="property">bindRequiresDn</span> esté establecido en
+                            <code class="constant">TRUE</code>, en cuyo caso el valor por defecto es
+                            '<span class="emphasis"><em>(&amp;(objectClass=posixAccount)(uid=%s))</em></span>'. Por
+                            ejemplo, si por alguna razón quisiera usar
+                            <span class="emphasis"><em>bindRequiresDn = true</em></span> con AD, necesitaría
+                            establecer <span class="emphasis"><em>accountFilterFormat =
+                                '(&amp;(objectClass=user)(sAMAccountName=%s))</em></span>'.
+                        </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">optReferrals</span></em></span></td>
+<td>
+                            Si se establece en <code class="constant">TRUE</code>, esta opción indica al
+                            cliente <acronym class="acronym">LDAP</acronym> que se deben seguir las referencias (referrals). El
+                            valor por defecto es <code class="constant">FALSE</code>.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Si habilita <span class="emphasis"><em>useStartTls = <code class="constant">TRUE</code></em></span> o
+                <span class="emphasis"><em>useSsl = <code class="constant">TRUE</code></em></span>, puede que descubra que el
+                cliente <acronym class="acronym">LDAP</acronym> genera un error indicando que no puede validar
+                el certificado del servidor. Suponiendo que la extensión <acronym class="acronym">LDAP</acronym> de
+                <acronym class="acronym">PHP</acronym> esté finalmente enlazada con las bibliotecas de cliente de OpenLDAP,
+                para resolver este problema puede establecer "<span class="command"><strong>TLS_REQCERT never</strong></span>"
+                en el archivo <code class="filename">ldap.conf</code> del cliente OpenLDAP (y reiniciar el servidor web)
+                para indicar al cliente OpenLDAP que confía en el servidor. Alternativamente,
+                si le preocupa que el servidor pueda ser suplantado, puede exportar el
+                certificado raíz del servidor <acronym class="acronym">LDAP</acronym> y colocarlo en el servidor web
+                para que el cliente OpenLDAP pueda validar la identidad del servidor.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.debugging"></a>15.5.5. Recopilación de mensajes de depuración</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Auth_Adapter_Ldap</code> recopila información de depuración dentro de su
+            método <code class="methodname">authenticate()</code>. Esta información se almacena en el
+            objeto <code class="classname">Zend_Auth_Result</code> como mensajes. El array devuelto por
+            <code class="methodname">Zend_Auth_Result::getMessages()</code> se describe a continuación
+        </p>
+<div class="table">
+<a name="zend.auth.adapter.ldap.debugging.table"></a><p class="title"><b>Tabla 15.3. Mensajes de depuración</b></p>
+<div class="table-contents"><table class="table" summary="Debugging Messages" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Índice del array de mensajes</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Índice 0</td>
+<td>
+                            Un mensaje genérico y amigable para el usuario, adecuado para mostrarse a
+                            los usuarios (por ejemplo, "Credenciales no válidas"). Si la autenticación tiene
+                            éxito, esta cadena está vacía.
+                        </td>
+</tr>
+<tr>
+<td>Índice 1</td>
+<td>
+                            Un mensaje de error más detallado que no es adecuado para mostrarse a
+                            los usuarios pero que debería registrarse en beneficio de los operadores del servidor. Si la
+                            autenticación tiene éxito, esta cadena está vacía.
+                        </td>
+</tr>
+<tr>
+<td>Índices 2 y superiores</td>
+<td>Todos los mensajes de registro en orden, empezando por el índice 2.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            En la práctica, el índice 0 debería mostrarse al usuario (por ejemplo, usando el ayudante
+            FlashMessenger), el índice 1 debería registrarse y, si se está recopilando información de
+            depuración, los índices 2 y superiores también podrían registrarse (aunque el mensaje final siempre incluye
+            la cadena del índice 1).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.auth.adapter.ldap.options-common-server-specific"></a>15.5.6. Opciones comunes para servidores específicos</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.auth.adapter.ldap.options-common-server-specific.active-directory"></a>15.5.6.1. Opciones para Active Directory</h4></div></div></div>
+<p>
+                Para <acronym class="acronym">ADS</acronym>, las siguientes opciones son destacables:
+            </p>
+<div class="table">
+<a name="zend.auth.adapter.ldap.options-common-server-specific.active-directory.table"></a><p class="title"><b>Tabla 15.4. Opciones para Active Directory</b></p>
+<div class="table-contents"><table class="table" summary="Options for Active Directory" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Notas adicionales</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em><span class="property">host</span></em></span></td>
+<td>Como con todos los servidores, esta opción es obligatoria.</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useStartTls</span></em></span></td>
+<td>
+                                Por motivos de seguridad, esto debería ser <code class="constant">TRUE</code>
+                                si el servidor tiene instalado el certificado necesario.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useSsl</span></em></span></td>
+<td>
+                                Posiblemente se use como alternativa a <span class="emphasis"><em>useStartTls</em></span>
+                                (ver arriba).
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">baseDn</span></em></span></td>
+<td>
+                                Como con todos los servidores, esta opción es obligatoria. Por defecto AD coloca
+                                todas las cuentas de usuario bajo el contenedor <span class="emphasis"><em>Users</em></span>
+                                (por ejemplo, <span class="emphasis"><em>CN=Users,DC=foo,DC=net</em></span>), pero el
+                                valor por defecto no es habitual en organizaciones grandes. Pregunte a su
+                                administrador de AD cuál sería el mejor DN para las cuentas de su
+                                aplicación.
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountCanonicalForm</span></em></span>
+                            </td>
+<td>
+                                Casi con toda seguridad querrá que esto sea 3 para nombres estilo barra
+                                invertida (por ejemplo, <code class="filename">FOO\alice</code>), que son los más familiares
+                                para los usuarios de Windows. <span class="emphasis"><em>No</em></span> debería usar la
+                                forma no cualificada 2 (por ejemplo, <span class="emphasis"><em>alice</em></span>), ya que esto puede
+                                conceder acceso a su aplicación a usuarios con el mismo nombre de usuario en
+                                otros dominios de confianza (por ejemplo, <code class="filename">BAR\alice</code> y
+                                <code class="filename">FOO\alice</code> se tratarán como el mismo usuario).
+                                (Vea también la nota más abajo.)
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountDomainName</span></em></span>
+                            </td>
+<td>
+                                Esto es obligatorio con AD a menos que se use
+                                <span class="property">accountCanonicalForm</span> 2, lo cual, de nuevo,
+                                se desaconseja.
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountDomainNameShort</span></em></span>
+                            </td>
+<td>
+                                El nombre NetBIOS del dominio en el que están los usuarios y para el cual el
+                                servidor AD es una autoridad. Esto es obligatorio si se usa el
+                                <span class="property">accountCanonicalForm</span> estilo barra invertida.
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Técnicamente no debería haber peligro de autenticación cruzada accidental entre dominios
+                    con la implementación actual de <code class="classname">Zend_Auth_Adapter_Ldap</code>,
+                    ya que los dominios del servidor se comprueban explícitamente, pero esto puede no ser cierto en una
+                    implementación futura que descubra el dominio en tiempo de ejecución, o si se usa un
+                    adaptador alternativo (por ejemplo, Kerberos). En general, se sabe que la ambigüedad en el nombre
+                    de la cuenta es el origen de problemas de seguridad, así que trate siempre de usar nombres de
+                    cuenta cualificados.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.auth.adapter.ldap.options-common-server-specific.openldap"></a>15.5.6.2. Opciones para OpenLDAP</h4></div></div></div>
+<p>
+                Para OpenLDAP o un servidor <acronym class="acronym">LDAP</acronym> genérico que use un esquema
+                típico estilo posixAccount, las siguientes opciones son destacables:
+            </p>
+<div class="table">
+<a name="zend.auth.adapter.ldap.options-common-server-specific.openldap.table"></a><p class="title"><b>Tabla 15.5. Opciones para OpenLDAP</b></p>
+<div class="table-contents"><table class="table" summary="Options for OpenLDAP" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Notas adicionales</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em><span class="property">host</span></em></span></td>
+<td>Como con todos los servidores, esta opción es obligatoria.</td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useStartTls</span></em></span></td>
+<td>
+                                Por motivos de seguridad, esto debería ser <code class="constant">TRUE</code>
+                                si el servidor tiene instalado el certificado necesario.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">useSsl</span></em></span></td>
+<td>
+                                Posiblemente se use como alternativa a <span class="property">useStartTls</span>
+                                (ver arriba).
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">username</span></em></span></td>
+<td>
+                                Obligatorio y debe ser un DN, ya que OpenLDAP requiere que los nombres de usuario estén
+                                en forma de DN al realizar un bind. Intente usar una
+                                cuenta sin privilegios.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">password</span></em></span></td>
+<td>
+                                La contraseña correspondiente al nombre de usuario anterior, pero puede
+                                omitirse si el servidor <acronym class="acronym">LDAP</acronym> permite un bind
+                                anónimo para consultar cuentas de usuario.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">bindRequiresDn</span></em></span></td>
+<td>
+                                Obligatorio y debe ser <code class="constant">TRUE</code>, ya que OpenLDAP
+                                requiere que los nombres de usuario estén en forma de DN al realizar un bind.
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">baseDn</span></em></span></td>
+<td>
+                                Como con todos los servidores, esta opción es obligatoria e indica el DN
+                                bajo el cual se ubican todas las cuentas que se autentican.
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountCanonicalForm</span></em></span>
+                            </td>
+<td>
+                                Opcional, pero el valor por defecto es 4 (nombres estilo principal como
+                                <code class="filename">alice@foo.net</code>), lo cual puede no ser ideal si sus
+                                usuarios están acostumbrados a nombres estilo barra invertida (por ejemplo,
+                                <code class="filename">FOO\alice</code>). Para nombres estilo barra invertida use el
+                                valor 3.
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountDomainName</span></em></span>
+                            </td>
+<td>
+                                Obligatorio a menos que esté usando
+                                <span class="property">accountCanonicalForm</span> 2, lo cual no se
+                                recomienda.
+                            </td>
+</tr>
+<tr>
+<td>
+                                <span class="emphasis"><em><span class="property">accountDomainNameShort</span></em></span>
+                            </td>
+<td>
+                                Si AD tampoco se está usando, este valor no es obligatorio.
+                                De lo contrario, si se usa <span class="property">accountCanonicalForm</span> 3,
+                                esta opción es obligatoria y debería ser un nombre corto que se corresponda
+                                adecuadamente con <span class="property">accountDomainName</span> (por ejemplo, si
+                                su <span class="property">accountDomainName</span> es
+                                <code class="filename">foo.net</code>, un buen valor de
+                                <span class="property">accountDomainNameShort</span> podría ser
+                                <acronym class="acronym">FOO</acronym>).
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.auth.adapter.http.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.auth.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.auth.adapter.openid.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">15.4. Adaptador de autenticación HTTP </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 15.6. Autenticación Open ID</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

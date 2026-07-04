@@ -1,0 +1,322 @@
+<?php $title = 'F.2. Carga de clases'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">F.2. Carga de clases</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="performance.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice F. Guía de rendimiento de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="performance.database.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="performance.classloading"></a>F.2. Carga de clases</h2></div></div></div>
+<p>
+        Cualquiera que alguna vez haya realizado un análisis de perfil de una aplicación de Zend
+        Framework reconocerá de inmediato que la carga de clases es relativamente costosa en Zend
+        Framework. Entre la enorme cantidad de archivos de clase que necesitan ser
+        cargados para muchos componentes, y el uso de plugins que no tienen una relación 1:1
+        entre el nombre de su clase y el sistema de archivos, las diversas
+        llamadas a <code class="methodname">include_once()</code> y
+        <code class="methodname">require_once()</code> pueden resultar problemáticas. Este capítulo pretende ofrecer
+        algunas soluciones concretas a estos problemas.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.classloading.includepath"></a>F.2.1. ¿Cómo puedo optimizar mi include_path?</h3></div></div></div>
+<p>
+            Una optimización trivial que puede realizar para aumentar la velocidad de la carga de
+            clases es prestar mucha atención a su include_path. En
+            particular, debe hacer cuatro cosas: usar rutas absolutas (o rutas
+            relativas a rutas absolutas), reducir el número de rutas de inclusión que
+            define, colocar el include_path de Zend Framework lo antes posible,
+            e incluir la ruta del directorio actual solo al final de su
+            include_path.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.includepath.abspath"></a>F.2.1.1. Use rutas absolutas</h4></div></div></div>
+<p>
+                Aunque esto pueda parecer una microoptimización, el hecho es que si
+                no lo hace, obtendrá muy poco beneficio de la caché realpath de <acronym class="acronym">PHP</acronym>,
+                y como resultado, la caché de opcodes no rendirá tan bien
+                como podría esperar.
+            </p>
+<p>
+                Hay dos formas sencillas de garantizarlo. Primero, puede codificar
+                las rutas directamente en su <code class="filename">php.ini</code>, <code class="filename">httpd.conf</code>,
+                o <code class="filename">.htaccess</code>. Segundo,
+                puede usar la función <code class="methodname">realpath()</code> de <acronym class="acronym">PHP</acronym> al
+                establecer su include_path:
+            </p>
+<pre class="programlisting">
+$paths = array(
+    realpath(dirname(__FILE__) . '/../library'),
+    '.',
+);
+set_include_path(implode(PATH_SEPARATOR, $paths);
+</pre>
+<p>
+                <span class="emphasis"><em>Puede</em></span> usar rutas relativas -- siempre que
+                sean relativas a una ruta absoluta:
+            </p>
+<pre class="programlisting">
+define('APPLICATION_PATH', realpath(dirname(__FILE__)));
+$paths = array(
+    APPLICATION_PATH . '/../library'),
+    '.',
+);
+set_include_path(implode(PATH_SEPARATOR, $paths);
+</pre>
+<p>
+                Sin embargo, aun así, generalmente es una tarea trivial simplemente pasar
+                la ruta a <code class="methodname">realpath()</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.includepath.reduce"></a>F.2.1.2. Reduzca el número de rutas de inclusión que define</h4></div></div></div>
+<p>
+                Las rutas de inclusión se examinan en el orden en que aparecen en
+                el include_path. Obviamente, esto significa que obtendrá un resultado
+                más rápido si el archivo se encuentra en la primera exploración en lugar de en la
+                última. Por tanto, una mejora bastante obvia es simplemente reducir el
+                número de rutas en su include_path a solo lo que necesita. Revise
+                cada include_path que haya definido y determine si realmente
+                tiene alguna funcionalidad en esa ruta que se use en
+                su aplicación; si no, elimínela.
+            </p>
+<p>
+                Otra optimización es combinar rutas. Por ejemplo, Zend
+                Framework sigue las convenciones de nomenclatura de <acronym class="acronym">PEAR</acronym>; por tanto, si
+                usa bibliotecas <acronym class="acronym">PEAR</acronym> (o bibliotecas de otro framework o
+                biblioteca de componentes que siga el estándar de codificación de <acronym class="acronym">PEAR</acronym>), intente colocar todas estas
+                bibliotecas en el mismo include_path. Esto a menudo puede lograrse
+                con algo tan simple como crear un enlace simbólico de una o más bibliotecas en
+                un directorio común.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.includepath.early"></a>F.2.1.3. Defina el include_path de Zend Framework lo antes posible</h4></div></div></div>
+<p>
+                Continuando con la sugerencia anterior, otra optimización obvia
+                es definir el include_path de Zend Framework lo antes posible
+                en su include_path. En la mayoría de los casos, debería ser la primera ruta de la lista. Esto garantiza que los archivos incluidos
+                desde Zend Framework se encuentren en la primera exploración.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.includepath.currentdir"></a>F.2.1.4. Defina el directorio actual al final, o no lo defina en absoluto</h4></div></div></div>
+<p>
+                La mayoría de los ejemplos de include_path muestran el uso del directorio actual, o
+                '.'. Esto resulta conveniente para garantizar que los scripts en el mismo
+                directorio que el archivo que los requiere puedan cargarse. Sin embargo,
+                estos mismos ejemplos suelen mostrar este elemento de ruta como el primer
+                elemento en el include_path -- lo que significa que el árbol de directorios
+                actual siempre se explora primero. En la mayoría de los casos, con aplicaciones de Zend
+                Framework, esto no es deseable, y la ruta puede
+                colocarse de forma segura como el último elemento de la lista.
+            </p>
+<div class="example">
+<a name="performance.classloading.includepath.example"></a><p class="title"><b>Ejemplo F.1. Ejemplo: include_path optimizado</b></p>
+<div class="example-contents">
+<p>
+                    Juntemos todas estas sugerencias. Nuestra suposición será que
+                    está usando una o más bibliotecas <acronym class="acronym">PEAR</acronym> junto con
+                    Zend Framework -- quizás las bibliotecas PHPUnit y <code class="classname">Archive_Tar</code>
+                    -- y que ocasionalmente necesita incluir
+                    archivos relativos al archivo actual.
+                </p>
+<p>
+                    Primero, crearemos un directorio library en nuestro proyecto. Dentro de ese
+                    directorio, enlazaremos simbólicamente el directorio <code class="filename">library/Zend</code>
+                    de nuestro Zend Framework, así como los directorios necesarios de nuestra instalación de
+                    <acronym class="acronym">PEAR</acronym>:
+                </p>
+<pre class="programlisting">
+library
+    Archive/
+    PEAR/
+    PHPUnit/
+    Zend/
+</pre>
+<p>
+                    Esto nos permite añadir nuestro propio código de biblioteca si es necesario, manteniendo
+                    intactas las bibliotecas compartidas.
+                </p>
+<p>
+                    A continuación, optaremos por crear nuestro include_path de forma programática
+                    dentro de nuestro archivo <code class="filename">public/index.php</code>. Esto nos permite mover
+                    nuestro código en el sistema de archivos, sin necesidad de editar el
+                    include_path cada vez.
+                </p>
+<p>
+                    Tomaremos ideas de cada una de las sugerencias anteriores: usaremos
+                    rutas absolutas, determinadas mediante <code class="methodname">realpath()</code>;
+                    incluiremos la ruta de inclusión de Zend Framework al principio; ya
+                    hemos consolidado los include_paths; y colocaremos el directorio
+                    actual como la última ruta. De hecho, lo estamos haciendo muy bien
+                    aquí -- terminaremos con solo dos rutas.
+                </p>
+<pre class="programlisting">
+$paths = array(
+    realpath(dirname(__FILE__) . '/../library'),
+    '.'
+);
+set_include_path(implode(PATH_SEPARATOR, $paths));
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.classloading.striprequires"></a>F.2.2. ¿Cómo puedo eliminar las sentencias require_once innecesarias?</h3></div></div></div>
+<p>
+            La carga diferida (lazy loading) es una técnica de optimización diseñada para postergar la
+            operación costosa de cargar un archivo de clase hasta el último momento
+            posible -- es decir, cuando se instancia un objeto de esa clase, se llama a
+            un método estático de clase, o se referencia una constante de clase o una propiedad
+            estática. <acronym class="acronym">PHP</acronym> soporta esto mediante autoloading, lo que le permite
+            definir una o más funciones de retorno (callbacks) para ejecutar con el fin de asignar un nombre de clase
+            a un archivo.
+        </p>
+<p>
+            Sin embargo, la mayoría de los beneficios que puede obtener del autoloading se anulan si
+            el código de su biblioteca sigue realizando llamadas a <code class="methodname">require_once()</code> --
+            que es precisamente el caso de Zend Framework. Entonces, la pregunta es: ¿cómo
+            puede eliminar esas llamadas a <code class="methodname">require_once()</code> para maximizar
+            el rendimiento del autoloader?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.striprequires.sed"></a>F.2.2.1. Elimine las llamadas a require_once con find y sed</h4></div></div></div>
+<p>
+                Una forma sencilla de eliminar las llamadas a <code class="methodname">require_once()</code> es usar
+                las utilidades de <acronym class="acronym">UNIX</acronym> 'find' y 'sed' en conjunto para comentar
+                cada llamada. Intente ejecutar las siguientes sentencias (donde '%'
+                indica el prompt del shell):
+            </p>
+<pre class="programlisting">
+% cd path/to/ZendFramework/library
+% find . -name '*.php' -not -wholename '*/Loader/Autoloader.php' \
+  -not -wholename '*/Application.php' -print0 | \
+  xargs -0 sed --regexp-extended --in-place 's/(require_once)/\/\/ \1/g'
+</pre>
+<p>
+                Esta línea de comandos (dividida en dos líneas para facilitar la lectura) recorre
+                cada archivo <acronym class="acronym">PHP</acronym> y le indica que reemplace cada instancia de
+                'require_once' por '// require_once', comentando así
+                efectivamente cada una de esas sentencias. (Conserva selectivamente
+                las llamadas a <code class="methodname">require_once()</code> dentro de
+                <code class="classname">Zend_Application</code> y
+                <code class="classname">Zend_Loader_Autoloader</code>, ya que estas clases fallarán sin
+                ellas.)
+            </p>
+<p>
+                Este comando podría añadirse trivialmente a un proceso de compilación o
+                lanzamiento automatizado, ayudando a mejorar el rendimiento en su aplicación
+                de producción. Sin embargo, debe tenerse en cuenta que, si usa esta
+                técnica, <span class="emphasis"><em>debe</em></span> utilizar autoloading;
+                puede hacerlo desde su archivo "<code class="filename">public/index.php</code>" con el
+                siguiente código:
+            </p>
+<pre class="programlisting">
+require_once 'Zend/Loader/Autoloader.php';
+Zend_Loader_Autoloader::getInstance();
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.classloading.pluginloader"></a>F.2.3. ¿Cómo puedo acelerar la carga de plugins?</h3></div></div></div>
+<p>
+            Muchos componentes tienen plugins, que le permiten crear sus propias
+            clases para usar con el componente, así como sobrescribir
+            los plugins estándar existentes incluidos con Zend Framework. Esto
+            proporciona una flexibilidad importante al framework, pero a un precio:
+            la carga de plugins es una tarea bastante costosa.
+        </p>
+<p>
+            El cargador de plugins le permite registrar pares de prefijo de clase / ruta,
+            permitiéndole especificar archivos de clase en rutas no estándar. Cada
+            prefijo puede tener múltiples rutas asociadas.
+            Internamente, el cargador de plugins recorre cada prefijo, y luego
+            cada ruta asociada a él, comprobando si el archivo existe
+            y es legible en esa ruta. Luego lo carga y comprueba
+            que la clase que busca esté disponible. Como puede imaginar,
+            esto puede provocar muchas llamadas stat al sistema de archivos.
+        </p>
+<p>
+            Multiplique esto por el número de componentes que usan el PluginLoader,
+            y tendrá una idea del alcance de este problema. En el momento de escribir
+            esto, los siguientes componentes hacían uso del PluginLoader:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="classname">Zend_Controller_Action_HelperBroker</code>: helpers
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Dojo</code>: view helpers, elementos de formulario y decoradores
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_File_Transfer</code>: adaptadores
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Filter_Inflector</code>: filtros (usados por el
+                    helper de acción ViewRenderer y <code class="classname">Zend_Layout</code>)
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Filter_Input</code>: filtros y validadores
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Form</code>: elementos, validadores, filtros,
+                    decoradores, captcha y adaptadores de transferencia de archivos
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Paginator</code>: adaptadores
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_View</code>: helpers, filtros
+                </p></li>
+</ul></div>
+<p>
+            ¿Cómo puede reducir el número de dichas llamadas realizadas?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.classloading.pluginloader.includefilecache"></a>F.2.3.1. Use la caché de archivos de inclusión del PluginLoader</h4></div></div></div>
+<p>
+                Zend Framework 1.7.0 añade una caché de archivos de inclusión al
+                PluginLoader. Esta funcionalidad escribe llamadas a "<code class="methodname">include_once()</code>"
+                en un archivo, que luego puede incluir en su bootstrap. Aunque esto
+                introduce llamadas adicionales a <code class="methodname">include_once()</code> en su código, también
+                garantiza que el PluginLoader retorne lo antes posible.
+            </p>
+<p>
+                La documentación del PluginLoader <a class="link" href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.performance.example" title="Example 42.6. Using the PluginLoader class file include cache">incluye
+                un ejemplo completo de su uso</a>.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="performance.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="performance.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="performance.database.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Apéndice F. Guía de rendimiento de Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> F.3. Rendimiento de Zend_Db</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

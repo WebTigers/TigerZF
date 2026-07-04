@@ -1,0 +1,182 @@
+<?php $title = '69.2. Zend_Text_Table'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">69.2. Zend_Text_Table</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.text.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 69. Zend_Text</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.timesync.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.text.table.introduction"></a>69.2. Zend_Text_Table</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Text_Table</code> es un componente para crear tablas basadas en texto
+        al vuelo con distintos decoradores. Esto puede ser útil si desea
+        enviar datos estructurados en correos electrónicos de texto, que suelen usar
+        fuentes monoespaciadas, o mostrar información en forma de tabla en una aplicación de <acronym class="acronym">CLI</acronym>.
+        <code class="classname">Zend_Text_Table</code> también soporta columnas multilínea, colspan y
+        alineación.
+    </p>
+<div class="note"><table border="0" summary="Note: Encoding">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Codificación</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="classname">Zend_Text_Table</code> espera que sus cadenas estén codificadas en UTF-8
+            de forma predeterminada. Si no es el caso, puede suministrar la codificación de caracteres
+            como parámetro al <code class="methodname">constructor()</code> o al método
+            <code class="methodname">setContent()</code> de
+            <code class="classname">Zend_Text_Table_Column</code>. Alternativamente, si tiene una codificación diferente
+            en todo el proceso, puede definir el conjunto de caracteres de entrada estándar con
+            <code class="methodname">Zend_Text_Table::setInputCharset($charset)</code>. En
+            caso de que necesite otro conjunto de caracteres de salida para la tabla, puede establecer
+            esto con <code class="methodname">Zend_Text_Table::setOutputCharset($charset)</code>.
+        </p></td></tr>
+</table></div>
+<p>
+        Un objeto <code class="classname">Zend_Text_Table</code> consta de filas, que contienen
+        columnas, representadas por <code class="classname">Zend_Text_Table_Row</code> y
+        <code class="classname">Zend_Text_Table_Column</code>. Al crear una tabla, puede
+        suministrar un array con opciones para la tabla. Estas son:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">columnWidths</span> (requerido): Un array que define
+                    todas las columnas con sus anchos en caracteres.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">decorator</span>: El decorador que se usará para los
+                    bordes de la tabla. El valor predeterminado es <span class="emphasis"><em>unicode</em></span>, pero
+                    también puede especificar <span class="emphasis"><em>ascii</em></span> o dar una instancia
+                    de un objeto decorador personalizado.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">padding</span>: El relleno izquierdo y derecho dentro
+                    de las columnas en caracteres. El relleno predeterminado es cero.
+                </p></li>
+<li class="listitem">
+<p>
+                    <span class="property">AutoSeparate</span>: La forma en que las filas se
+                    separan con líneas horizontales. El valor predeterminado es una
+                    separación entre todas las filas. Esto se define como una máscara de bits
+                    que contiene una o más de las siguientes constantes de
+                    <code class="classname">Zend_Text_Table</code>:
+
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p><code class="constant">Zend_Text_Table::AUTO_SEPARATE_NONE</code></p></li>
+<li class="listitem"><p><code class="constant">Zend_Text_Table::AUTO_SEPARATE_HEADER</code></p></li>
+<li class="listitem"><p><code class="constant">Zend_Text_Table::AUTO_SEPARATE_FOOTER</code></p></li>
+<li class="listitem"><p><code class="constant">Zend_Text_Table::AUTO_SEPARATE_ALL</code></p></li>
+</ul></div>
+<p>
+
+                    Donde la cabecera es siempre la primera fila, y el pie es
+                    siempre la última fila.
+                </p>
+</li>
+</ul></div>
+<p>
+    </p>
+<p>
+        Las filas simplemente se agregan a la tabla creando una nueva instancia de
+        <code class="classname">Zend_Text_Table_Row</code>, y añadiéndola a la tabla mediante el
+        método <code class="methodname">appendRow()</code>. Las filas en sí no tienen opciones. También puede
+        pasar directamente un array al método <code class="methodname">appendRow()</code>, que entonces se
+        convertirá automáticamente en un objeto fila, conteniendo varios objetos
+        columna.
+    </p>
+<p>
+        De la misma forma puede agregar columnas a las filas. Cree una nueva instancia de
+        <code class="classname">Zend_Text_Table_Column</code> y luego establezca las opciones de la columna
+        en el constructor o más adelante con los métodos <code class="methodname">set*()</code>.
+        El primer parámetro es el contenido de la columna, que puede tener
+        varias líneas, que en el mejor de los casos se separan simplemente con el
+        carácter '\n'. El segundo parámetro define la alineación, que
+        es 'left' de forma predeterminada y puede ser una de las constantes de clase de
+        <code class="classname">Zend_Text_Table_Column</code>:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="constant">ALIGN_LEFT</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="constant">ALIGN_CENTER</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="constant">ALIGN_RIGHT</code>
+                </p></li>
+</ul></div>
+<p>
+
+        El tercer parámetro es el colspan de la columna. Por ejemplo, si
+        elige "2" como colspan, la columna se extenderá sobre dos columnas de la tabla.
+        El último parámetro define la codificación del contenido, que debe
+        suministrarse si el contenido no es ni ASCII ni UTF-8. Para agregar la columna
+        a la fila, simplemente llame a <code class="methodname">appendColumn()</code> en su objeto fila
+        con el objeto columna como parámetro. Alternativamente puede dar directamente
+        una cadena al método <code class="methodname">appendColumn()</code>.
+    </p>
+<p>
+        Para finalmente renderizar la tabla, puede usar el método <code class="methodname">render()</code>
+        de la tabla, o usar el método mágico <code class="methodname">__toString()</code>
+        haciendo <span class="command"><strong>echo $table;</strong></span> o
+        <span class="command"><strong>$tableString = (string) $table</strong></span>.
+    </p>
+<div class="example">
+<a name="zend.text.table.example.using"></a><p class="title"><b>Ejemplo 69.2. Uso de Zend_Text_Table</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo ilustra el uso básico de <code class="classname">Zend_Text_Table</code>
+            para crear una tabla simple:
+        </p>
+<pre class="programlisting">
+$table = new Zend_Text_Table(array('columnWidths' =&gt; array(10, 20)));
+
+// Either simple
+$table-&gt;appendRow(array('Zend', 'Framework'));
+
+// Or verbose
+$row = new Zend_Text_Table_Row();
+
+$row-&gt;appendColumn(new Zend_Text_Table_Column('Zend'));
+$row-&gt;appendColumn(new Zend_Text_Table_Column('Framework'));
+
+$table-&gt;appendRow($row);
+
+echo $table;
+</pre>
+<p>
+            Esto dará como resultado la siguiente salida:
+        </p>
+<pre class="programlisting">
+┌──────────┬────────────────────┐
+│Zend      │Framework           │
+└──────────┴────────────────────┘
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.text.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.text.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.timesync.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 69. Zend_Text </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 70. Zend_TimeSync</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

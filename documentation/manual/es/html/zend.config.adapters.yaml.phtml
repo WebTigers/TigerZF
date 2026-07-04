@@ -1,0 +1,238 @@
+<?php $title = '21.6. Zend_Config_Yaml'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">21.6. Zend_Config_Yaml</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.config.adapters.xml.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 21. Zend_Config</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.writer.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.config.adapters.yaml"></a>21.6. Zend_Config_Yaml</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.yaml.intro"></a>21.6.1. Resumen</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://www.yaml.org/" target="_top">YAML</a> es un acrónimo recursivo que significa "YAML
+            Ain't Markup Language", y pretende ser un "estándar de serialización de datos
+            amigable para el ser humano válido para todos los lenguajes de programación." Se utiliza a menudo
+            para la configuración de aplicaciones.
+        </p>
+<p>
+            <code class="classname">Zend_Config_Yaml</code> es una extensión ligera de
+            <code class="classname">Zend_Config</code>. Incluye un parser capaz de
+            reconocer la sintaxis YAML más común utilizada para fines de configuración, y permite
+            especificar otros parsers si desea una sintaxis más compleja (por ejemplo, ext/syck, spyc,
+            sfYaml, etc.).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.yaml.quick-start"></a>21.6.2. Inicio rápido</h3></div></div></div>
+<p>
+            A continuación se muestra una versión YAML de una configuración de aplicación estándar.
+        </p>
+<pre class="programlisting">
+production:
+  phpSettings:
+    display_startup_errors: false
+    display_errors: false
+  includePaths:
+    library: APPLICATION_PATH/../library
+  bootstrap:
+    path: APPLICATION_PATH/Bootstrap.php
+    class: "Bootstrap"
+  appnamespace: "Application"
+  resources:
+    frontController:
+      controllerDirectory: APPLICATION_PATH/controllers
+      moduleDirectory: APPLICATION_PATH/modules
+      params:
+        displayExceptions: false
+    modules:
+    db:
+      adapter: "pdo_sqlite"
+      params:
+        dbname: APPLICATION_PATH/../data/db/application.db
+    layout:
+      layoutPath: APPLICATION_PATH/layouts/scripts/
+
+staging:
+  _extends: production
+
+testing:
+  _extends: production
+  phpSettings:
+    display_startup_errors: true
+    display_errors: true
+
+development:
+  _extends: production
+  phpSettings:
+    display_startup_errors: true
+    display_errors: true
+  resources:
+    frontController:
+      params:
+        displayExceptions: true
+</pre>
+<p>
+            Para utilizarlo, simplemente debe instanciar <code class="classname">Zend_Config_Yaml</code>, apuntando
+            a la ubicación de este archivo e indicando la sección del archivo a cargar. Por
+            defecto, los nombres de constantes encontrados en los valores se sustituirán por sus
+            valores correspondientes.
+        </p>
+<pre class="programlisting">
+$config = new Zend_Config_Yaml(
+    APPLICATION_PATH . '/configs/application.yaml',
+    APPLICATION_ENV
+);
+</pre>
+<p>
+            Una vez instanciado, se utiliza como cualquier otro objeto de configuración.
+        </p>
+<pre class="programlisting">
+$db = Zend_Db::factory($config-&gt;resources-&gt;db);
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.yaml.options"></a>21.6.3. Opciones de configuración</h3></div></div></div>
+<p>
+            Las siguientes opciones pueden pasarse como claves al tercer argumento del constructor,
+            <code class="varname">$options</code>.
+        </p>
+<div class="variablelist">
+<p class="title"><b>Opciones de Zend_Config_Yaml</b></p>
+<dl class="variablelist">
+<dt><span class="term">allow_modifications</span></dt>
+<dd><p>
+                        El comportamiento por defecto de <code class="classname">Zend_Config</code> es marcar el
+                        objeto como inmutable una vez cargado. Al pasar este indicador con un valor
+                        booleano <code class="constant">true</code> se habilitarán las modificaciones al objeto.
+                    </p></dd>
+<dt><span class="term">skip_extends</span></dt>
+<dd><p>
+                        Por defecto, cada vez que una sección extiende a otra,
+                        <code class="classname">Zend_Config</code> fusionará la sección con la sección
+                        que extiende. Especificar un valor booleano <code class="constant">true</code> para esta
+                        opción deshabilitará esta funcionalidad, proporcionándole solo la configuración
+                        definida explícitamente en esa sección.
+                    </p></dd>
+<dt><span class="term">ignore_constants</span></dt>
+<dd><p>
+                        Por defecto, <code class="classname">Zend_Config_Yaml</code> reemplazará los nombres
+                        de constantes encontrados en los valores por el valor de la constante definida. Puede
+                        pasar un valor booleano <code class="constant">true</code> a esta opción para deshabilitar
+                        esta funcionalidad.
+                    </p></dd>
+<dt><span class="term">yaml_decoder</span></dt>
+<dd><p>
+                        Por defecto, <code class="classname">Zend_Config_Yaml</code> utiliza un decodificador
+                        integrado, <code class="methodname">Zend_Config_Yaml::decode()</code>, para analizar y
+                        procesar archivos YAML. Puede especificar un callback alternativo para usar en
+                        lugar del integrado mediante esta opción.
+                    </p></dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.yaml.methods"></a>21.6.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.config.adapters.yaml.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$yaml, $section = null, $options = false</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Constructor. <code class="varname">$yaml</code> debe hacer referencia a una ubicación
+                        válida en el sistema de archivos que contenga un archivo de configuración YAML.
+                        <code class="varname">$section</code>, si se especifica, indica una sección concreta del
+                        archivo de configuración a utilizar. <code class="varname">$options</code> se explica
+                        en la <a class="link" href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.options" title="21.6.3. Configuration Options">sección de opciones</a>.
+                    </p></dd>
+<dt>
+<a name="zend.config.adapters.yaml.methods.decode"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">decode</span>(<span class="methodparam">$yaml</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Analiza una cadena YAML y la convierte en un array de PHP.
+                    </p></dd>
+<dt>
+<a name="zend.config.adapters.yaml.methods.set-ignore-constants"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setIgnoreConstants</span>(<span class="methodparam">$flag</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Esta función <span class="emphasis"><em>estática</em></span> puede utilizarse para sobrescribir
+                        globalmente la configuración por defecto de cómo se gestionan las constantes
+                        encontradas en las cadenas YAML. Por defecto, los nombres de constantes se
+                        reemplazan por los valores de constante correspondientes; pasar un valor booleano
+                        <code class="constant">true</code> a este método sobrescribirá ese comportamiento. (También
+                        puede sobrescribirlo por instancia mediante la opción
+                        <code class="varname">ignore_constants</code>.)
+                    </p></dd>
+<dt>
+<a name="zend.config.adapters.yaml.methods.ignore-constants"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">ignoreConstants</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Este método <span class="emphasis"><em>estático</em></span> le proporciona el valor actual
+                        del indicador <code class="varname">ignore_constants</code>.
+                    </p></dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.yaml.examples"></a>21.6.5. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.config.adapters.yaml.examples.sf-yaml"></a><p class="title"><b>Ejemplo 21.6. Uso de Zend_Config_Yaml con sfYaml</b></p>
+<div class="example-contents">
+<p>
+                Como se indica en la <a class="link" href="zend.config.adapters.yaml.phtml#zend.config.adapters.yaml.options" title="21.6.3. Configuration Options">sección
+                    de opciones</a>, <code class="classname">Zend_Config_Yaml</code> le permite especificar un
+                parser YAML alternativo al instanciar.
+            </p>
+<p>
+                <a class="ulink" href="http://components.symfony-project.org/yaml/" target="_top">sfYaml</a> es un <a class="ulink" href="http://components.symfony-project.org/" target="_top">componente de Symfony</a> que
+                implementa un parser YAML completo en PHP, e incluye una serie de funcionalidades
+                adicionales, incluyendo la capacidad de analizar expresiones PHP incrustadas en el YAML. En
+                este ejemplo, utilizamos el método <code class="methodname">sfYaml::load()</code> como callback
+                decodificador de YAML. <span class="emphasis"><em>(Nota: esto asume que la clase
+                    <code class="classname">sfYaml</code> ya está cargada o disponible mediante
+                    autocarga.)</em></span>
+            </p>
+<pre class="programlisting">
+$config = new Zend_Config_Yaml(
+    APPLICATION_PATH . '/configs/application.yaml',
+    APPLICATION_ENV,
+    array('yaml_decoder' =&gt; array('sfYaml', 'load'))
+);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.config.adapters.xml.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.config.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.writer.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">21.5. Zend_Config_Xml </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 22. Zend_Config_Writer</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>
