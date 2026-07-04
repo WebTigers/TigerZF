@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.30.0] - Unreleased
+## [1.30.0] - 2026-07-04
 
 ### Changed
 
@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PHP 8.4/8.5 compatibility: removed no-op deprecated calls (`imagedestroy`, `ReflectionProperty::setAccessible`, `xml_parser_free`), replaced non-canonical `(double)` casts, and switched `DOMDocument::$actualEncoding` to `$encoding`
 * Fixed `E_STRICT` usage in the test bootstrap that broke the suite on PHP 8.4+
 * Updated stale test expectations for modern PHP error messages and the PHP 8.3 `highlight_string()` output format change
+
+### Tooling
+
+* Raised the PHPStan analysis floor to PHP 8.1 (was 7.4) and regenerated the baseline against the supported 8.1–8.5 range
+
+### Documentation
+
+* Rebuilt the complete ZF1 manual as a modern, self-hosted, **searchable** site in both **English and Spanish** — full-text search (SQLite FTS5 with scroll-to-anchor), a language switcher with English-fallback, filterable navigation, and PHP syntax highlighting. Live at <https://tigerzf.webtigers.com/docs>
 
 ## [1.25.0] - 2026-02-24
 
