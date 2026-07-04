@@ -1,0 +1,30 @@
+<?php
+require __DIR__ . '/search-lib.php';
+require __DIR__ . '/_i18n.php';                 // $LANG, $T (idempotent; _header requires it too)
+$q       = isset($_GET['q']) ? trim((string) $_GET['q']) : '';
+$results = tzf_search(__DIR__, $q, 50);
+$title   = $T['search_results'];
+include __DIR__ . '/_header.phtml';
+?>
+<div class="chapter tzf-search-page">
+<div class="titlepage"><div><div><h2 class="title"><?= htmlspecialchars($T['search_results']) ?></h2></div></div></div>
+<form class="tzf-search-form" method="get" action="search.phtml" role="search">
+  <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="<?= htmlspecialchars($T['search_ph']) ?>" aria-label="<?= htmlspecialchars($T['search_aria']) ?>" autofocus>
+</form>
+<?php if ($q === ''): ?>
+  <p class="tzf-search-hint"><?= htmlspecialchars($T['search_aria']) ?>.</p>
+<?php elseif (!$results): ?>
+  <p class="tzf-search-hint"><?= htmlspecialchars($T['search_none']) ?> &ldquo;<strong><?= htmlspecialchars($q) ?></strong>&rdquo;.</p>
+<?php else: ?>
+  <p class="tzf-search-count"><?= count($results) ?> <?= htmlspecialchars($T['search_count']) ?> &ldquo;<strong><?= htmlspecialchars($q) ?></strong>&rdquo;</p>
+  <ul class="tzf-search-list">
+  <?php foreach ($results as $r): ?>
+    <li>
+      <a class="tzf-sr-title" href="<?= htmlspecialchars($r['url']) ?>"><?= $r['title_html'] ?></a>
+      <p class="tzf-sr-snip"><?= $r['snippet_html'] ?></p>
+    </li>
+  <?php endforeach; ?>
+  </ul>
+<?php endif; ?>
+</div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

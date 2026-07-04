@@ -27,4 +27,8 @@ $T = [
     'toggle_nav'  => 'Toggle navigation',
     'language'    => 'Language',
     'onthispage'  => 'On this page',
+    'search_results' => 'Search results',
+    'search_none'    => 'No results for',
+    'search_all'     => 'See all results',
+    'search_count'   => 'results for',
 ];
