@@ -38,6 +38,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Acl.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Amf/Adobe/Introspector.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Class DOMDocument referenced with incorrect case: DomDocument.',
 	'identifier' => 'class.nameCase',
 	'count' => 1,
@@ -170,12 +176,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Amf/Parse/Deserializer.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $link of function mysqli_num_fields expects mysqli_result, resource given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Amf/Parse/Resource/MysqliResult.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $result of function mysqli_fetch_assoc expects mysqli_result, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
@@ -183,6 +183,12 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $result of function mysqli_fetch_field_direct expects mysqli_result, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Amf/Parse/Resource/MysqliResult.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $result of function mysqli_num_fields expects mysqli_result, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Amf/Parse/Resource/MysqliResult.php',
@@ -674,7 +680,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Barcode/Object/ObjectAbstract.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ltrim expects string, int given.',
+	'rawMessage' => 'Parameter #1 $string of function ltrim expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Barcode/Object/ObjectAbstract.php',
@@ -722,7 +728,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Barcode/Object/Postnet.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_sum expects an array of values castable to number, list<string> given.',
+	'rawMessage' => 'Parameter #1 $array of function array_sum expects an array of values castable to number, list<string> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Barcode/Object/Postnet.php',
@@ -740,14 +746,56 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Barcode/Object/Upce.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Function imagefilledpolygon invoked with 3 parameters, 4 required.',
-	'identifier' => 'arguments.count',
+	'rawMessage' => 'Parameter #1 $image of function imagecolorallocate expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 4,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagefilledpolygon expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagefilledrectangle expects GdImage, resource given.',
+	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Strict comparison using === between class-string and \'GdImage\' will always evaluate to false.',
-	'identifier' => 'identical.alwaysFalse',
+	'rawMessage' => 'Parameter #1 $image of function imagepolygon expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagestring expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagesx expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagesy expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $image of function imagettftext expects GdImage, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Barcode_Renderer_Image::$_resource (resource) does not accept (GdImage|false).',
+	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Barcode/Renderer/Image.php',
 ];
@@ -1286,7 +1334,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Cache/Core.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $value of function ignore_user_abort expects bool, int given.',
+	'rawMessage' => 'Parameter #1 $enable of function ignore_user_abort expects bool|null, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Cache/Core.php',
@@ -1298,32 +1346,14 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Cache/Core.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $flag of function ob_implicit_flush expects int, false given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Capture.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Method Zend_Cache_Frontend_Class::_makeId() is unused.',
 	'identifier' => 'method.unused',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Class.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $flag of function ob_implicit_flush expects int, false given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Class.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Default value of the parameter #4 $specificLifetime (false) of method Zend_Cache_Frontend_Function::call() is incompatible with type int.',
 	'identifier' => 'parameter.defaultValue',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Function.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $flag of function ob_implicit_flush expects int, false given.',
-	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Function.php',
 ];
@@ -1336,12 +1366,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'rawMessage' => 'Default value of the parameter #2 $specificLifetime (false) of method Zend_Cache_Frontend_Output::end() is incompatible with type int.',
 	'identifier' => 'parameter.defaultValue',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Output.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $flag of function ob_implicit_flush expects int, false given.',
-	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Output.php',
 ];
@@ -1360,12 +1384,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @param references unknown parameter: $options',
 	'identifier' => 'parameter.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Page.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $flag of function ob_implicit_flush expects int, false given.',
-	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Cache/Frontend/Page.php',
 ];
@@ -2300,6 +2318,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/CodeGenerator/Php/Method.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation ">=" between int<80100, 80599> and 80000 is always true.',
+	'identifier' => 'greaterOrEqual.alwaysTrue',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/CodeGenerator/Php/Parameter.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Cannot call method generate() on string.',
 	'identifier' => 'method.nonObject',
 	'count' => 2,
@@ -2912,6 +2936,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Controller/Router/Route/Chain.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Strict comparison using !== between non-empty-string and false will always evaluate to true.',
+	'identifier' => 'notIdentical.alwaysTrue',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Controller/Router/Route/Chain.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Unsafe usage of new static().',
 	'identifier' => 'new.static',
 	'count' => 1,
@@ -3044,7 +3074,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Crypt/DiffieHellman.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $dh_key of function openssl_dh_compute_key expects resource, string given.',
+	'rawMessage' => 'Parameter #2 $private_key of function openssl_dh_compute_key expects OpenSSLAsymmetricKey, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/DiffieHellman.php',
@@ -3104,7 +3134,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Crypt/Math.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $ascii of function chr expects int, string given.',
+	'rawMessage' => 'Parameter #1 $codepoint of function chr expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
@@ -3116,43 +3146,43 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcadd expects numeric-string, float|int given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcadd expects numeric-string, float|int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcadd expects numeric-string, int<0, 255> given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcadd expects numeric-string, int<0, 255> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bccomp expects numeric-string, 0 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bccomp expects numeric-string, 0 given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcdiv expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcdiv expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcmod expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcmod expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcmul expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcmul expects numeric-string, 256 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcmul expects numeric-string, 65536 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcmul expects numeric-string, 65536 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
@@ -3164,55 +3194,55 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Bcmath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_add expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num of function gmp_pow expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_cmp expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num of function gmp_powm expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_div expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num of function gmp_strval expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_mod expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_add expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_mul expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_cmp expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $a of function gmp_sub expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_div expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function gmp_pow expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_mod expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function gmp_powm expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_mul expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $gmpnumber of function gmp_strval expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #1 $num1 of function gmp_sub expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
@@ -3224,49 +3254,49 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_add expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $exponent of function gmp_powm expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_cmp expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_add expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_div expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_cmp expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_mod expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_div expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_mul expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_mod expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $b of function gmp_sub expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_mul expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $exp of function gmp_powm expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #2 $num2 of function gmp_sub expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $mod of function gmp_powm expects GMP|int|string, resource given.',
+	'rawMessage' => 'Parameter #3 $modulus of function gmp_powm expects GMP|int|string, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Math/BigInteger/Gmp.php',
@@ -3282,6 +3312,30 @@ $ignoreErrors[] = [
 	'identifier' => 'arguments.count',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Crypt/Rsa.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #3 $private_key|public_key of callable \'openssl_private…\'|\'openssl_public…\' expects array|OpenSSLAsymmetricKey|OpenSSLCertificate|string, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Crypt/Rsa.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #3 $public_key|private_key of callable \'openssl_private…\'|\'openssl_public…\' expects array|OpenSSLAsymmetricKey|OpenSSLCertificate|string, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Crypt/Rsa.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Crypt_Rsa_Key::$_opensslKeyResource (resource) does not accept OpenSSLAsymmetricKey.',
+	'identifier' => 'assign.propertyType',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Crypt/Rsa/Key/Private.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Crypt_Rsa_Key::$_opensslKeyResource (resource) does not accept OpenSSLAsymmetricKey.',
+	'identifier' => 'assign.propertyType',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Crypt/Rsa/Key/Public.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Call to function is_array() with array will always evaluate to true.',
@@ -3692,19 +3746,19 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Date.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function str_pad expects string, (array|float|int<0, max>) given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Date.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function str_pad expects string, (float|int) given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Date.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $num of function abs expects float|int, string given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Date.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $string of function str_pad expects string, (array|float|int) given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Date.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $string of function str_pad expects string, (array|float|int<0, max>) given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Date.php',
@@ -3842,6 +3896,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Date/DateObject.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation ">=" between int<80100, 80599> and 80100 is always true.',
+	'identifier' => 'greaterOrEqual.alwaysTrue',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Date/DateObject.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @param references unknown parameter: $cache',
 	'identifier' => 'parameter.notFound',
 	'count' => 1,
@@ -3874,6 +3934,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'rawMessage' => 'Strict comparison using === between string and 1 will always evaluate to false.',
 	'identifier' => 'identical.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Date/DateObject.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Unreachable statement - code above always terminates.',
+	'identifier' => 'deadCode.unreachable',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Date/DateObject.php',
 ];
@@ -4268,6 +4334,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Db/Adapter/Pdo/Mssql.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation ">=" between int<80100, 80599> and 80100 is always true.',
+	'identifier' => 'greaterOrEqual.alwaysTrue',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Db/Adapter/Pdo/Mysql.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Cannot call method exec() on object|resource.',
 	'identifier' => 'method.nonObject',
 	'count' => 1,
@@ -4289,6 +4361,12 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Cannot call method exec() on object|resource.',
 	'identifier' => 'method.nonObject',
 	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Db/Adapter/Pdo/Sqlite.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation ">=" between int<80100, 80599> and 80100 is always true.',
+	'identifier' => 'greaterOrEqual.alwaysTrue',
+	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Db/Adapter/Pdo/Sqlite.php',
 ];
 $ignoreErrors[] = [
@@ -6776,6 +6854,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Feed/Reader/FeedAbstract.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Call to an undefined method DOMNameSpaceNode|DOMNode::getAttribute().',
+	'identifier' => 'method.notFound',
+	'count' => 11,
+	'path' => __DIR__ . '/library/Zend/Feed/Reader/FeedSet.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Call to an undefined method Zend_Uri::getHost().',
 	'identifier' => 'method.notFound',
 	'count' => 1,
@@ -7256,6 +7340,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/File/ClassFileLocator.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/File/ClassFileLocator.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Strict comparison using === between null and string will always evaluate to false.',
 	'identifier' => 'identical.alwaysFalse',
 	'count' => 1,
@@ -7680,6 +7770,12 @@ $ignoreErrors[] = [
 	'identifier' => 'phpDoc.parseError',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Filter/Encrypt/Mcrypt.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 4,
+	'path' => __DIR__ . '/library/Zend/Filter/Encrypt/Openssl.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @param references unknown parameter: $options',
@@ -8708,7 +8804,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Gdata/App/MediaEntry.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $time of function strtotime expects string, int<min, -1> given.',
+	'rawMessage' => 'Parameter #1 $datetime of function strtotime expects string, int<min, -1> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Gdata/App/Util.php',
@@ -8720,7 +8816,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Gdata/App/Util.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function urlencode expects string, int given.',
+	'rawMessage' => 'Parameter #1 $string of function urlencode expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Gdata/AuthSub.php',
@@ -9554,6 +9650,18 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Gdata/HttpClient.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Parameter #3 $private_key of function openssl_sign expects array|OpenSSLAsymmetricKey|OpenSSLCertificate|string, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Gdata/HttpClient.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Gdata_HttpClient::$_authSubPrivateKeyId (resource) does not accept OpenSSLAsymmetricKey|false.',
+	'identifier' => 'assign.propertyType',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Gdata/HttpClient.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Property Zend_Gdata_HttpClient::$_clientLoginKey is never read, only written.',
 	'identifier' => 'property.onlyWritten',
 	'count' => 1,
@@ -9710,13 +9818,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Gdata/MediaMimeStream.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fileHandle of class Zend_Gdata_MimeFile constructor expects string, resource|false given.',
+	'rawMessage' => 'Parameter #1 $as_float of function microtime expects bool, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Gdata/MediaMimeStream.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $get_as_float of function microtime expects bool, int given.',
+	'rawMessage' => 'Parameter #1 $fileHandle of class Zend_Gdata_MimeFile constructor expects string, resource|false given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Gdata/MediaMimeStream.php',
@@ -10508,6 +10616,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Http/Client.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Static property Zend_Http_Client::$_fileInfoDb (resource) does not accept finfo|false.',
+	'identifier' => 'assign.propertyType',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Unreachable statement - code above always terminates.',
 	'identifier' => 'deadCode.unreachable',
 	'count' => 1,
@@ -10528,6 +10642,42 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @param references unknown parameter: $http_ver',
 	'identifier' => 'parameter.notFound',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $handle of function curl_close expects CurlHandle, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $handle of function curl_error expects CurlHandle, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $handle of function curl_exec expects CurlHandle, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $handle of function curl_getinfo expects CurlHandle, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $handle of function curl_setopt expects CurlHandle, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 18,
+	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Http_Client_Adapter_Curl::$_curl (resource|null) does not accept (CurlHandle|false).',
+	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Http/Client/Adapter/Curl.php',
 ];
@@ -10964,7 +11114,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Http/UserAgent/Text.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $assoc of function json_decode expects bool|null, int given.',
+	'rawMessage' => 'Parameter #2 $associative of function json_decode expects bool|null, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Json.php',
@@ -11102,8 +11252,8 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Layout/Controller/Plugin/Layout.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Class LDAP\\Connection not found.',
-	'identifier' => 'class.notFound',
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80100 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Ldap.php',
 ];
@@ -11126,20 +11276,104 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Ldap.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter &$aname by-ref type of method Zend_Ldap::_splitName() expects string, (string|false) given.',
-	'identifier' => 'parameterByRef.type',
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_add expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Ldap.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter &$dname by-ref type of method Zend_Ldap::_splitName() expects string, (string|false) given.',
-	'identifier' => 'parameterByRef.type',
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_bind expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_delete expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_error expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_first_entry expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_get_dn expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_get_option expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_list expects array|LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_modify expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_next_entry expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_read expects array|LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_rename expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_search expects array|LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_unbind expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $resultId of class Zend_Ldap_Collection_Iterator_Default constructor expects resource, array|LDAP\\Result given.',
+	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Ldap.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter &$dname by-ref type of method Zend_Ldap::_splitName() expects string, null given.',
 	'identifier' => 'parameterByRef.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Ldap::$_resource (resource) does not accept LDAP\\Connection|false.',
+	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Ldap.php',
 ];
@@ -11186,15 +11420,9 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Class LDAP\\Result not found.',
-	'identifier' => 'class.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Class LDAP\\ResultEntry not found.',
-	'identifier' => 'class.notFound',
-	'count' => 1,
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80100 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
 ];
 $ignoreErrors[] = [
@@ -11205,6 +11433,96 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $ldap of class Zend_Ldap_Exception constructor expects Zend_Ldap|null, $this(Zend_Ldap_Collection_Iterator_Default) given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_count_entries expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_first_attribute expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_first_entry expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_get_attributes expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_get_dn expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_get_values_len expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_next_attribute expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $ldap of function ldap_next_entry expects LDAP\\Connection, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $result of function ldap_free_result expects LDAP\\Result, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $entry of function ldap_first_attribute expects LDAP\\ResultEntry, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $entry of function ldap_get_dn expects LDAP\\ResultEntry, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $entry of function ldap_get_values_len expects LDAP\\ResultEntry, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $entry of function ldap_next_attribute expects LDAP\\ResultEntry, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $result of function ldap_count_entries expects LDAP\\Result, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #2 $result of function ldap_first_entry expects LDAP\\Result, resource given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Ldap/Collection/Iterator/Default.php',
@@ -11588,7 +11906,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Ldap/Node/Schema/ObjectClass/OpenLdap.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $array_arg of function sort contains unresolvable type.',
+	'rawMessage' => 'Parameter #1 $array of function sort contains unresolvable type.',
 	'identifier' => 'argument.unresolvableType',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Ldap/Node/Schema/ObjectClass/OpenLdap.php',
@@ -11636,7 +11954,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Loader/Autoloader.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $autoload_function of function spl_autoload_register expects callable(string): void, array{\'Zend_Loader_Autoloader\', \'autoload\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function spl_autoload_register expects (callable(string): void)|null, array{\'Zend_Loader_Autoloader\', \'autoload\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Loader/Autoloader.php',
@@ -11762,13 +12080,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Loader/StandardAutoloader.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $autoload_function of function spl_autoload_register expects callable(string): void, array{$this(Zend_Loader_StandardAutoloader), \'autoload\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Loader_StandardAutoloader), \'handleError\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Loader/StandardAutoloader.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Loader_StandardAutoloader), \'handleError\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function spl_autoload_register expects (callable(string): void)|null, array{$this(Zend_Loader_StandardAutoloader), \'autoload\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Loader/StandardAutoloader.php',
@@ -11876,7 +12194,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Locale.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Static property Zend_Locale::$_environment (string) does not accept array<(int|string), int>.',
+	'rawMessage' => 'Static property Zend_Locale::$_environment (string) does not accept array<string, int>.',
 	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Locale.php',
@@ -11942,13 +12260,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Locale/Math.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function bcpow expects numeric-string, 10 given.',
+	'rawMessage' => 'Parameter #1 $num of function bcpow expects numeric-string, 10 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Locale/Math.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function number_format expects float, string given.',
+	'rawMessage' => 'Parameter #1 $num of function number_format expects float, string given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Locale/Math.php',
@@ -11966,7 +12284,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Locale/Math.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $str of function explode expects string, int given.',
+	'rawMessage' => 'Parameter #2 $string of function explode expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Locale/Math.php',
@@ -12008,25 +12326,25 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function pow expects float|int, string given.',
+	'rawMessage' => 'Parameter #1 $num of function ceil expects float|int, string given.',
+	'identifier' => 'argument.type',
+	'count' => 3,
+	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $num of function floor expects float|int, string given.',
+	'identifier' => 'argument.type',
+	'count' => 3,
+	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $num of function pow expects float|int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function ceil expects float, string given.',
-	'identifier' => 'argument.type',
-	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function floor expects float, string given.',
-	'identifier' => 'argument.type',
-	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function sqrt expects float, string given.',
+	'rawMessage' => 'Parameter #1 $num of function sqrt expects float, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
@@ -12044,19 +12362,19 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Locale/Math/PhpMath.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $array of function array_shift expects array, string given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Log.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $message of method Zend_Log::log() expects string, null given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Log.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $stack of function array_shift expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 2,
-	'path' => __DIR__ . '/library/Zend/Log.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $var of function count expects array|Countable, string given.',
+	'rawMessage' => 'Parameter #1 $value of function count expects array|Countable, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Log.php',
@@ -12104,7 +12422,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Log/Writer/Mail.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fwrite expects resource, stream|null given.',
+	'rawMessage' => 'Parameter #1 $stream of function fwrite expects resource, stream|null given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Log/Writer/Stream.php',
@@ -12350,13 +12668,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Imap.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $start of function substr expects int, string given.',
+	'rawMessage' => 'Parameter #2 $offset of function substr expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Imap.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function substr expects int, string given.',
+	'rawMessage' => 'Parameter #3 $length of function substr expects int|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Imap.php',
@@ -12446,12 +12764,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Smtp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Binary operation "^" between (string|false) and non-empty-string results in an error.',
-	'identifier' => 'binaryOp.invalid',
-	'count' => 2,
-	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Smtp/Auth/Crammd5.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Default value of the parameter #3 $block (int) of method Zend_Mail_Protocol_Smtp_Auth_Crammd5::_hmacMd5() is incompatible with type string.',
 	'identifier' => 'parameter.defaultValue',
 	'count' => 1,
@@ -12464,7 +12776,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Smtp/Auth/Crammd5.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $pad_length of function str_pad expects int, string given.',
+	'rawMessage' => 'Parameter #2 $length of function str_pad expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mail/Protocol/Smtp/Auth/Crammd5.php',
@@ -12818,8 +13130,20 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mail/Transport/SendgridSmtp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Mail_Transport_Sendmail), \'_handleMailErrors\'} given.',
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Mail/Transport/Sendmail.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Mail_Transport_Sendmail), \'_handleMailErrors\'} given.',
 	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Mail/Transport/Sendmail.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Result of && is always false.',
+	'identifier' => 'booleanAnd.alwaysFalse',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Mail/Transport/Sendmail.php',
 ];
@@ -12968,21 +13292,21 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Measure/Number.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function str_split expects string, int given.',
+	'rawMessage' => 'Parameter #1 $string of function str_split expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Measure/Number.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function strtoupper expects string, int given.',
-	'identifier' => 'argument.type',
-	'count' => 4,
 	'path' => __DIR__ . '/library/Zend/Measure/Number.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $string of function strlen expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Measure/Number.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $string of function strtoupper expects string, int given.',
+	'identifier' => 'argument.type',
+	'count' => 4,
 	'path' => __DIR__ . '/library/Zend/Measure/Number.php',
 ];
 $ignoreErrors[] = [
@@ -13178,7 +13502,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Memory/Value.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $get_as_float of function microtime expects bool, int given.',
+	'rawMessage' => 'Parameter #1 $as_float of function microtime expects bool, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mime.php',
@@ -13244,13 +13568,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mobile/Push/Apns.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $mode of function stream_set_blocking expects bool, int given.',
+	'rawMessage' => 'Parameter #2 $enable of function stream_set_blocking expects bool, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mobile/Push/Apns.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #4 $timeout of function stream_socket_client expects float, string given.',
+	'rawMessage' => 'Parameter #4 $timeout of function stream_socket_client expects float|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mobile/Push/Apns.php',
@@ -13364,7 +13688,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Mobile/Push/Test/ApnsProxy.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function substr expects int, string given.',
+	'rawMessage' => 'Parameter #3 $length of function substr expects int|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Mobile/Push/Test/ApnsProxy.php',
@@ -13688,57 +14012,45 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Oauth/Token/AuthorizedRequest.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Method Zend_OpenId::createDhKey() has invalid return type OpenSSLAsymmetricKey.',
-	'identifier' => 'class.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/OpenId.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Method Zend_OpenId::getDhKeyDetails() should return array but return statement is missing.',
 	'identifier' => 'return.missing',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $ascii of function chr expects int, string given.',
+	'rawMessage' => 'Parameter #1 $codepoint of function chr expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcadd expects numeric-string, int<0, 255> given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcadd expects numeric-string, int<0, 255> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bccomp expects numeric-string, 0 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bccomp expects numeric-string, 0 given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcdiv expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcdiv expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcmod expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcmod expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $right_operand of function bcmul expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #2 $num2 of function bcmul expects numeric-string, 256 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/OpenId.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter &$id by-ref type of method Zend_OpenId::normalize() expects string, (string|false) given.',
-	'identifier' => 'parameterByRef.type',
-	'count' => 3,
 	'path' => __DIR__ . '/library/Zend/OpenId.php',
 ];
 $ignoreErrors[] = [
@@ -13769,6 +14081,12 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Binary operation "+" between int<1, max> and string results in an error.',
 	'identifier' => 'binaryOp.invalid',
 	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/OpenId/Consumer.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Call to function is_array() with list<string> will always evaluate to true.',
+	'identifier' => 'function.alreadyNarrowedType',
+	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/OpenId/Consumer.php',
 ];
 $ignoreErrors[] = [
@@ -14276,12 +14594,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Pdf.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $arr1 of function array_merge expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Pdf.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $factory of method Zend_Pdf_Action::dumpAction() expects Zend_Pdf_ElementFactory, Zend_Pdf_ElementFactory_Interface given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
@@ -14295,6 +14607,12 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $prefix of function uniqid expects string, int<0, max> given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Pdf.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 ...$arrays of function array_merge expects array, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Pdf.php',
@@ -15050,7 +15368,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Pdf/Element/Dictionary.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $ascii of function chr expects int, string given.',
+	'rawMessage' => 'Parameter #1 $codepoint of function chr expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Pdf/Element/Name.php',
@@ -15662,19 +15980,25 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Pdf/Filter/AsciiHex.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $ascii of function chr expects int, float given.',
+	'rawMessage' => 'Invalid array key type float.',
+	'identifier' => 'offsetAccess.invalidOffset',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Pdf/Filter/Compression.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $codepoint of function chr expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Pdf/Filter/Compression.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $num of function array_fill expects int, float given.',
+	'rawMessage' => 'Parameter #2 $count of function array_fill expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Pdf/Filter/Compression.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function substr expects int, float given.',
+	'rawMessage' => 'Parameter #3 $length of function substr expects int|null, float given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Pdf/Filter/Compression.php',
@@ -17216,15 +17540,9 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function str_pad expects string, float given.',
+	'rawMessage' => 'Parameter #1 $string of function str_pad expects string, float given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $multiplier of function str_repeat expects int, float given.',
-	'identifier' => 'argument.type',
-	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
 ];
 $ignoreErrors[] = [
@@ -17234,7 +17552,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function substr expects int, string given.',
+	'rawMessage' => 'Parameter #2 $times of function str_repeat expects int, float given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #3 $length of function substr expects int|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/ProgressBar/Adapter/Console.php',
@@ -17630,6 +17954,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Queue/Adapter/PlatformJobQueue.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Class ZendAPI_Queue does not have a constructor and must be instantiated without any parameters.',
+	'identifier' => 'new.noConstructor',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Queue/Adapter/PlatformJobQueue.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Class ZendAPI_Queue referenced with incorrect case: ZendApi_Queue.',
 	'identifier' => 'class.nameCase',
 	'count' => 2,
@@ -17706,6 +18036,12 @@ $ignoreErrors[] = [
 	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Queue/Message/Iterator.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Class ZendAPI_Job does not have a constructor and must be instantiated without any parameters.',
+	'identifier' => 'new.noConstructor',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Queue/Message/PlatformJob.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Class ZendAPI_Job referenced with incorrect case: ZendApi_Job.',
@@ -17792,7 +18128,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Queue/Stomp/Client/Connection.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $mode of function stream_set_blocking expects bool, int given.',
+	'rawMessage' => 'Parameter #2 $enable of function stream_set_blocking expects bool, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Queue/Stomp/Client/Connection.php',
@@ -17864,7 +18200,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Reflection/Class.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $filter of method ReflectionClass<object>::getMethods() expects int, string given.',
+	'rawMessage' => 'Parameter #1 $filter of method ReflectionClass<object>::getMethods() expects int|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Reflection/Class.php',
@@ -17888,7 +18224,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Reflection/File.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_splice is passed by reference, so it expects variables only.',
+	'rawMessage' => 'Parameter #1 $array of function array_splice is passed by reference, so it expects variables only.',
 	'identifier' => 'argument.byRef',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Reflection/Function.php',
@@ -17898,6 +18234,24 @@ $ignoreErrors[] = [
 	'identifier' => 'variable.undefined',
 	'count' => 3,
 	'path' => __DIR__ . '/library/Zend/Reflection/Method.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Call to function unset() contains undefined variable $phpReflection.',
+	'identifier' => 'unset.variable',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Reflection/Parameter.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Reflection/Parameter.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation ">=" between int<80100, 80599> and 80000 is always true.',
+	'identifier' => 'greaterOrEqual.alwaysTrue',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Reflection/Parameter.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @return with type string is incompatible with native type ReflectionType|null.',
@@ -17930,7 +18284,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Rest/Client/Result.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Rest_Client_Result), \'handleXmlErrors\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Rest_Client_Result), \'handleXmlErrors\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Rest/Client/Result.php',
@@ -18032,7 +18386,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Rest/Server.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $exception_handler of function set_exception_handler expects (callable(Throwable): void)|null, array{$this(Zend_Rest_Server), \'fault\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_exception_handler expects (callable(Throwable): void)|null, array{$this(Zend_Rest_Server), \'fault\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Rest/Server.php',
@@ -18068,7 +18422,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Search/Lucene.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function base_convert expects string, int<min, -1>|int<1, max> given.',
+	'rawMessage' => 'Parameter #1 $num of function base_convert expects string, int<min, -1>|int<1, max> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Search/Lucene.php',
@@ -18236,7 +18590,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Field.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $str of function iconv expects string, bool given.',
+	'rawMessage' => 'Parameter #3 $string of function iconv expects string, bool given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Field.php',
@@ -18308,25 +18662,25 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $num of function base_convert expects string, int given.',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $num of function base_convert expects string, int<min, -1>|int<1, max> given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $num of method Zend_Search_Lucene_Storage_File::readBytes() expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function base_convert expects string, int given.',
-	'identifier' => 'argument.type',
-	'count' => 2,
-	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function base_convert expects string, int<min, -1>|int<1, max> given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $multiplier of function str_repeat expects int, float given.',
+	'rawMessage' => 'Parameter #2 $times of function str_repeat expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/SegmentInfo.php',
@@ -18500,7 +18854,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/Writer.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $number of function base_convert expects string, int given.',
+	'rawMessage' => 'Parameter #1 $num of function base_convert expects string, int given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Search/Lucene/Index/Writer.php',
@@ -18950,19 +19304,19 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Serializer/Adapter/PythonPickle.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function bcpow expects numeric-string, 2 given.',
+	'rawMessage' => 'Parameter #1 $num of function bcpow expects numeric-string, 2 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Serializer/Adapter/PythonPickle.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $base of function bcpow expects numeric-string, 256 given.',
+	'rawMessage' => 'Parameter #1 $num of function bcpow expects numeric-string, 256 given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Serializer/Adapter/PythonPickle.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $left_operand of function bcmul expects numeric-string, int<0, 255> given.',
+	'rawMessage' => 'Parameter #1 $num1 of function bcmul expects numeric-string, int<0, 255> given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Serializer/Adapter/PythonPickle.php',
@@ -19117,6 +19471,12 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Call to an undefined method Zend_Server_Reflection_Function_Abstract::getName().',
 	'identifier' => 'method.notFound',
 	'count' => 2,
+	'path' => __DIR__ . '/library/Zend/Server/Reflection/Function/Abstract.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Comparison operation "<" between int<80100, 80599> and 80000 is always false.',
+	'identifier' => 'smaller.alwaysFalse',
+	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Server/Reflection/Function/Abstract.php',
 ];
 $ignoreErrors[] = [
@@ -19321,6 +19681,12 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Access to an undefined property DOMNameSpaceNode|DOMNode::$data.',
 	'identifier' => 'property.notFound',
 	'count' => 13,
+	'path' => __DIR__ . '/library/Zend/Service/Amazon/Item.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Access to an undefined property DOMNode::$tagName.',
+	'identifier' => 'property.notFound',
+	'count' => 6,
 	'path' => __DIR__ . '/library/Zend/Service/Amazon/Item.php',
 ];
 $ignoreErrors[] = [
@@ -19576,7 +19942,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/Amazon/Sqs.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Service_Audioscrobbler), \'_errorHandler\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Service_Audioscrobbler), \'_errorHandler\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Service/Audioscrobbler.php',
@@ -19624,13 +19990,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/Console/Command.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $exception_handler of function set_exception_handler expects (callable(Throwable): void)|null, array{\'Zend_Service…\', \'phpstdex\'} given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Service/Console/Command.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $parameters of function call_user_func_array expects array<int, mixed>, array<int|string, mixed> given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_exception_handler expects (callable(Throwable): void)|null, array{\'Zend_Service…\', \'phpstdex\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Service/Console/Command.php',
@@ -19690,7 +20050,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/Delicious.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $micro_seconds of function usleep expects int, float given.',
+	'rawMessage' => 'Parameter #1 $microseconds of function usleep expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Service/Delicious.php',
@@ -20338,7 +20698,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/Rackspace/Servers.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function rawurlencode expects string, int<min, -1>|int<1, max> given.',
+	'rawMessage' => 'Parameter #1 $string of function rawurlencode expects string, int<min, -1>|int<1, max> given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Service/Rackspace/Servers.php',
@@ -20476,12 +20836,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/StrikeIron.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Access to an undefined property SoapHeader::$name.',
-	'identifier' => 'property.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Service/StrikeIron/Base.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'PHPDoc tag @param references unknown parameter: $param',
 	'identifier' => 'parameter.notFound',
 	'count' => 1,
@@ -20560,7 +20914,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/WindowsAzure/CommandLine/Deployment.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 ...$args of function array_merge expects array, SimpleXMLElement given.',
+	'rawMessage' => 'Parameter #2 ...$arrays of function array_merge expects array, SimpleXMLElement given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Service/WindowsAzure/CommandLine/Package.php',
@@ -20584,13 +20938,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Service/WindowsAzure/CommandLine/PackageScaffolder/PackageScaffolderAbstract.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $mode of function chmod expects int, string given.',
+	'rawMessage' => 'Parameter #2 $permissions of function chmod expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Service/WindowsAzure/CommandLine/PackageScaffolder/PackageScaffolderAbstract.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $mode of function mkdir expects int, string given.',
+	'rawMessage' => 'Parameter #2 $permissions of function mkdir expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Service/WindowsAzure/CommandLine/PackageScaffolder/PackageScaffolderAbstract.php',
@@ -21244,13 +21598,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Session.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{\'Zend_Session…\', \'handleSessionStartE…\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{\'Zend_Session…\', \'handleSessionStartE…\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Session.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{\'Zend_Session…\', \'handleSilentWriteCl…\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{\'Zend_Session…\', \'handleSilentWriteCl…\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Session.php',
@@ -21376,12 +21730,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Soap/Client.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $options of method SoapClient::__soapCall() expects array, null given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Soap/Client.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Property Zend_Soap_Client::$_soapClient (SoapClient) does not accept null.',
 	'identifier' => 'assign.propertyType',
 	'count' => 18,
@@ -21424,7 +21772,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Soap/Server.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Soap_Server), \'handlePhpErrors\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Soap_Server), \'handlePhpErrors\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Soap/Server.php',
@@ -21432,18 +21780,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #2 $code (string) of method Zend_Soap_Server::fault() should be compatible with parameter $code (int) of method Zend_Server_Interface::fault()',
 	'identifier' => 'method.childParameterType',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Soap/Server.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $newvalue of function ini_set expects string, bool given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Soap/Server.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $newvalue of function ini_set expects string, false given.',
-	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Soap/Server.php',
 ];
@@ -21568,7 +21904,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Stdlib/CallbackHandler.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int, array): bool)|null, array{$this(Zend_Stdlib_CallbackHandler), \'errorHandler\'} given.',
+	'rawMessage' => 'Parameter #1 $callback of function set_error_handler expects (callable(int, string, string, int): bool)|null, array{$this(Zend_Stdlib_CallbackHandler), \'errorHandler\'} given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Stdlib/CallbackHandler.php',
@@ -21664,13 +22000,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Text/Figlet.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $multiplier of function str_repeat expects int, float given.',
+	'rawMessage' => 'Parameter #2 $times of function str_repeat expects int, float given.',
 	'identifier' => 'argument.type',
 	'count' => 4,
 	'path' => __DIR__ . '/library/Zend/Text/MultiByte.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function iconv_substr expects int, float given.',
+	'rawMessage' => 'Parameter #3 $length of function iconv_substr expects int|null, float given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Text/MultiByte.php',
@@ -21712,7 +22048,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Text/Table/Column.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_sum expects an array of values castable to number, array given.',
+	'rawMessage' => 'Parameter #1 $array of function array_sum expects an array of values castable to number, array given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Text/Table/Row.php',
@@ -21772,33 +22108,27 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fclose expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fclose expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fread expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fread expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 11,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fwrite expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fwrite expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function stream_get_meta_data expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function stream_get_meta_data expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function str_pad expects string, int<0, 255> given.',
-	'identifier' => 'argument.type',
-	'count' => 8,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
@@ -21808,13 +22138,19 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $string of function str_pad expects string, int<0, 255> given.',
+	'identifier' => 'argument.type',
+	'count' => 8,
+	'path' => __DIR__ . '/library/Zend/TimeSync/Ntp.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $date of class Zend_Date constructor expects array|int|string|Zend_Date|null, $this(Zend_TimeSync_Protocol) given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Protocol.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fclose expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fclose expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Protocol.php',
@@ -21832,13 +22168,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/TimeSync/Protocol.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fputs expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fputs expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Sntp.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $fp of function fread expects resource, array given.',
+	'rawMessage' => 'Parameter #1 $stream of function fread expects resource, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/TimeSync/Sntp.php',
@@ -22324,7 +22660,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Framework/System/Provider/Config.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $prefix of function http_build_query expects string, null given.',
+	'rawMessage' => 'Parameter #2 $numeric_prefix of function http_build_query expects string, null given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Tool/Framework/System/Provider/Manifest.php',
@@ -22390,7 +22726,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Filesystem/File.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function rtrim expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function rtrim expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/System/ProjectDirectory.php',
@@ -22402,7 +22738,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/System/ProjectProfileFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/AbstractClassFile.php',
@@ -22486,7 +22822,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ControllerFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ControllerFile.php',
@@ -22522,7 +22858,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/DbTableFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/DbTableFile.php',
@@ -22540,7 +22876,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/FormFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/FormFile.php',
@@ -22582,7 +22918,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ModelFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ModelFile.php',
@@ -22612,13 +22948,13 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ProjectProviderFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ProjectProviderFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #2 $str of function explode expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #2 $string of function explode expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/ProjectProviderFile.php',
@@ -22696,7 +23032,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/TestApplicationControllerFile.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $str of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
+	'rawMessage' => 'Parameter #1 $string of function ucfirst expects string, Zend_Tool_Project_Profile_Resource_Container given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Tool/Project/Context/Zf/TestApplicationControllerFile.php',
@@ -23458,7 +23794,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Translate/Adapter/XmlTm.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Cannot assign offset (string|false) to string.',
+	'rawMessage' => 'Cannot assign offset string to string.',
 	'identifier' => 'offsetAssign.dimType',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Translate/Plural.php',
@@ -23614,15 +23950,9 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/Barcode.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Property Zend_Validate_Barcode::$_length (int) does not accept (string|false).',
-	'identifier' => 'assign.propertyType',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Validate/Barcode.php',
-];
-$ignoreErrors[] = [
 	'rawMessage' => 'Property Zend_Validate_Barcode::$_length (int) does not accept string.',
 	'identifier' => 'assign.propertyType',
-	'count' => 3,
+	'count' => 4,
 	'path' => __DIR__ . '/library/Zend/Validate/Barcode.php',
 ];
 $ignoreErrors[] = [
@@ -23764,7 +24094,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/EmailAddress.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $decimal_number of function decbin expects int, string given.',
+	'rawMessage' => 'Parameter #1 $num of function decbin expects int, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/EmailAddress.php',
@@ -23776,7 +24106,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/EmailAddress.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #3 $length of function substr expects int, string given.',
+	'rawMessage' => 'Parameter #3 $length of function substr expects int|null, string given.',
 	'identifier' => 'argument.type',
 	'count' => 2,
 	'path' => __DIR__ . '/library/Zend/Validate/EmailAddress.php',
@@ -23800,7 +24130,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/File/Count.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $array of function array_unique expects array, null given.',
+	'rawMessage' => 'Parameter #1 $array of function array_keys expects array, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Crc32.php',
@@ -23809,12 +24139,6 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $file of method Zend_Validate_File_Hash::_throw() expects string, array|null given.',
 	'identifier' => 'argument.type',
 	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Validate/File/Crc32.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_keys expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Crc32.php',
 ];
 $ignoreErrors[] = [
@@ -23896,27 +24220,21 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $array of function array_unique expects array, null given.',
+	'rawMessage' => 'Parameter #1 $array of function array_keys expects array, string given.',
 	'identifier' => 'argument.type',
-	'count' => 2,
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $array of function array_values expects array<T>, string given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
 ];
 $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $file of method Zend_Validate_File_Hash::_throw() expects string, array|null given.',
 	'identifier' => 'argument.type',
 	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_keys expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_values expects array<T>, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Hash.php',
 ];
 $ignoreErrors[] = [
@@ -23950,7 +24268,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/File/IsImage.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $array of function array_unique expects array, null given.',
+	'rawMessage' => 'Parameter #1 $array of function array_keys expects array, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Md5.php',
@@ -23959,12 +24277,6 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $file of method Zend_Validate_File_Hash::_throw() expects string, array|null given.',
 	'identifier' => 'argument.type',
 	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Validate/File/Md5.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_keys expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Md5.php',
 ];
 $ignoreErrors[] = [
@@ -23980,6 +24292,12 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/File/MimeType.php',
 ];
 $ignoreErrors[] = [
+	'rawMessage' => 'Parameter #1 $finfo of function finfo_file expects finfo, resource given.',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Validate/File/MimeType.php',
+];
+$ignoreErrors[] = [
 	'rawMessage' => 'Parameter #2 $code of class Zend_Validate_Exception constructor expects int, null given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
@@ -23989,6 +24307,12 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #3 $previous of class Zend_Validate_Exception constructor expects Throwable|null, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
+	'path' => __DIR__ . '/library/Zend/Validate/File/MimeType.php',
+];
+$ignoreErrors[] = [
+	'rawMessage' => 'Property Zend_Validate_File_MimeType::$_finfo (resource) does not accept finfo|false.',
+	'identifier' => 'assign.propertyType',
+	'count' => 3,
 	'path' => __DIR__ . '/library/Zend/Validate/File/MimeType.php',
 ];
 $ignoreErrors[] = [
@@ -24028,7 +24352,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/Validate/File/NotExists.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $array of function array_unique expects array, null given.',
+	'rawMessage' => 'Parameter #1 $array of function array_keys expects array, string given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Sha1.php',
@@ -24037,12 +24361,6 @@ $ignoreErrors[] = [
 	'rawMessage' => 'Parameter #1 $file of method Zend_Validate_File_Hash::_throw() expects string, array|null given.',
 	'identifier' => 'argument.type',
 	'count' => 3,
-	'path' => __DIR__ . '/library/Zend/Validate/File/Sha1.php',
-];
-$ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $input of function array_keys expects array, string given.',
-	'identifier' => 'argument.type',
-	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/Validate/File/Sha1.php',
 ];
 $ignoreErrors[] = [
@@ -25276,7 +25594,7 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/library/Zend/View/Helper/PaginationControl.php',
 ];
 $ignoreErrors[] = [
-	'rawMessage' => 'Parameter #1 $obj of function get_object_vars expects object, array given.',
+	'rawMessage' => 'Parameter #1 $object of function get_object_vars expects object, array given.',
 	'identifier' => 'argument.type',
 	'count' => 1,
 	'path' => __DIR__ . '/library/Zend/View/Helper/PaginationControl.php',
