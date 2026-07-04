@@ -1,0 +1,549 @@
+<?php $title = '61.10. Buenas prácticas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.10. Buenas prácticas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.advanced.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.serializer.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.best-practice"></a>61.10. Buenas prácticas</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.field-names"></a>61.10.1. Nombres de campos</h3></div></div></div>
+<p>
+            No existen limitaciones para los nombres de campos en <code class="classname">Zend_Search_Lucene</code>.
+        </p>
+<p>
+            No obstante, es una buena idea no usar los nombres '<span class="emphasis"><em>id</em></span>' y
+            '<span class="emphasis"><em>score</em></span>' para evitar ambigüedad en los nombres de las propiedades de
+            <code class="classname">QueryHit</code>.
+        </p>
+<p>
+            Las propiedades <span class="property">id</span> y <span class="property">score</span> de
+            <code class="classname">Zend_Search_Lucene_Search_QueryHit</code> siempre se refieren al id interno
+            del documento de Lucene y a la <a class="link" href="zend.search.lucene.searching.phtml#zend.search.lucene.searching.results-scoring" title="61.3.4. Results Scoring">puntuación</a>
+            del resultado. Si el documento indexado tiene los mismos campos almacenados, debe usar el
+            método <code class="methodname">getDocument()</code> para acceder a ellos:
+        </p>
+<pre class="programlisting">
+$hits = $index-&gt;find($query);
+
+foreach ($hits as $hit) {
+    // Get 'title' document field
+    $title = $hit-&gt;title;
+
+    // Get 'contents' document field
+    $contents = $hit-&gt;contents;
+
+    // Get internal Lucene document id
+    $id = $hit-&gt;id;
+
+    // Get query hit score
+    $score = $hit-&gt;score;
+
+    // Get 'id' document field
+    $docId = $hit-&gt;getDocument()-&gt;id;
+
+    // Get 'score' document field
+    $docId = $hit-&gt;getDocument()-&gt;score;
+
+    // Another way to get 'title' document field
+    $title = $hit-&gt;getDocument()-&gt;title;
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.indexing-performance"></a>61.10.2. Rendimiento de la indexación</h3></div></div></div>
+<p>
+            El rendimiento de la indexación es un compromiso entre los recursos usados, el tiempo de
+            indexación y la calidad del índice.
+        </p>
+<p>
+            La calidad del índice está completamente determinada por el número de segmentos del índice.
+        </p>
+<p>
+            Cada segmento de índice es una porción de datos totalmente independiente. Por eso, los
+            índices que contienen más segmentos necesitan más memoria y tiempo para la búsqueda.
+        </p>
+<p>
+            La optimización del índice es un proceso que combina varios segmentos en uno nuevo. Un
+            índice totalmente optimizado contiene un único segmento.
+        </p>
+<p>
+            La optimización completa del índice se puede realizar con el método
+            <code class="methodname">optimize()</code>:
+        </p>
+<pre class="programlisting">
+$index = Zend_Search_Lucene::open($indexPath);
+
+$index-&gt;optimize();
+</pre>
+<p>
+            La optimización del índice trabaja con flujos de datos y no requiere mucha memoria, pero sí
+            requiere recursos de procesador y tiempo.
+        </p>
+<p>
+            Los segmentos de un índice de Lucene no son actualizables por naturaleza (la operación de
+            actualización requiere que el archivo del segmento se reescriba por completo). Por lo
+            tanto, añadir nuevos documentos a un índice siempre genera un nuevo segmento. Esto, a su
+            vez, disminuye la calidad del índice.
+        </p>
+<p>
+            Después de cada generación de segmento se ejecuta un proceso de auto-optimización del
+            índice que consiste en combinar segmentos parciales.
+        </p>
+<p>
+            Hay tres opciones para controlar el comportamiento de la auto-optimización (vea la sección
+            <a class="link" href="zend.search.lucene.index-creation.phtml#zend.search.lucene.index-creation.optimization" title="61.2.5. Index optimization">Optimización del índice</a>):
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <span class="emphasis"><em>MaxBufferedDocs</em></span> es el número de documentos que se pueden
+                        almacenar en memoria antes de que se genere un nuevo segmento y se escriba en el
+                        disco duro.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>MaxMergeDocs</em></span> es el número máximo de documentos combinados
+                        por el proceso de auto-optimización en un nuevo segmento.
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>MergeFactor</em></span> determina con qué frecuencia se realiza la
+                        auto-optimización.
+                    </p></li>
+</ul></div>
+<p>
+
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Todas estas opciones son propiedades del objeto <code class="classname">Zend_Search_Lucene</code>,
+                    no propiedades del índice. Afectan únicamente al comportamiento del objeto actual
+                    <code class="classname">Zend_Search_Lucene</code> y pueden variar entre distintos scripts.
+                </p></td></tr>
+</table></div>
+<p>
+        </p>
+<p>
+            <span class="emphasis"><em>MaxBufferedDocs</em></span> no tiene ningún efecto si solo indexa un
+            documento por ejecución de script. Por otro lado, es muy importante para la indexación por
+            lotes. Valores mayores aumentan el rendimiento de la indexación, pero también requieren más
+            memoria.
+        </p>
+<p>
+            Simplemente no hay forma de calcular el mejor valor para el parámetro
+            <span class="emphasis"><em>MaxBufferedDocs</em></span> porque depende del tamaño medio de los
+            documentos, del analizador en uso y de la memoria permitida.
+        </p>
+<p>
+            Una buena manera de encontrar el valor adecuado es realizar varias pruebas con el documento
+            más grande que espera añadir al índice
+
+            <a href="#ftn.id47282" class="footnote" name="id47282"><sup class="footnote">[18]</sup></a>
+
+            . Es una buena práctica no usar más de la mitad de la memoria permitida.
+        </p>
+<p>
+            <span class="emphasis"><em>MaxMergeDocs</em></span> limita el tamaño del segmento (en términos de
+            documentos). Por lo tanto, también limita el tiempo de auto-optimización al garantizar que
+            el método <code class="methodname">addDocument()</code> no se ejecute más de un cierto número de
+            veces. Esto es muy importante para las aplicaciones interactivas.
+        </p>
+<p>
+            Reducir el parámetro <span class="emphasis"><em>MaxMergeDocs</em></span> también puede mejorar el
+            rendimiento de la indexación por lotes. La auto-optimización del índice es un proceso
+            iterativo y se realiza de abajo hacia arriba. Los segmentos pequeños se combinan en un
+            segmento más grande, que a su vez se combinan en segmentos aún más grandes, y así
+            sucesivamente. La optimización completa del índice se logra cuando solo queda un gran
+            archivo de segmento.
+        </p>
+<p>
+            Los segmentos pequeños generalmente disminuyen la calidad del índice. Muchos segmentos
+            pequeños también pueden provocar el error "Too many open files" determinado por las
+            limitaciones del sistema operativo
+
+            <a href="#ftn.id47292" class="footnote" name="id47292"><sup class="footnote">[19]</sup></a>.
+        </p>
+<p>
+            en general, la optimización del índice en segundo plano debería realizarse para el modo de
+            indexación interactivo, y <span class="emphasis"><em>MaxMergeDocs</em></span> no debería ser demasiado
+            bajo para la indexación por lotes.
+        </p>
+<p>
+            <span class="emphasis"><em>MergeFactor</em></span> afecta la frecuencia de auto-optimización. Valores
+            más bajos aumentan la calidad de los índices no optimizados. Valores más grandes aumentan
+            el rendimiento de la indexación, pero también aumentan el número de segmentos combinados.
+            Esto de nuevo puede provocar el error "Too many open files".
+        </p>
+<p>
+            <span class="emphasis"><em>MergeFactor</em></span> agrupa los segmentos del índice por su tamaño:
+
+            </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>No mayor que <span class="emphasis"><em>MaxBufferedDocs</em></span>.</p></li>
+<li class="listitem"><p>
+                        Mayor que <span class="emphasis"><em>MaxBufferedDocs</em></span>, pero no mayor que
+                        <span class="emphasis"><em>MaxBufferedDocs</em></span>*<span class="emphasis"><em>MergeFactor</em></span>.
+                    </p></li>
+<li class="listitem"><p>
+                        Mayor que
+                        <span class="emphasis"><em>MaxBufferedDocs</em></span>*<span class="emphasis"><em>MergeFactor</em></span>, pero
+                        no mayor que
+                        <span class="emphasis"><em>MaxBufferedDocs</em></span>*<span class="emphasis"><em>MergeFactor</em></span>*<span class="emphasis"><em>MergeFactor</em></span>.
+                    </p></li>
+<li class="listitem"><p>...</p></li>
+</ol></div>
+<p>
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> comprueba durante cada llamada a
+            <code class="methodname">addDocument()</code> si combinar algunos segmentos puede mover el
+            segmento recién creado al siguiente grupo. Si es así, entonces se realiza la combinación.
+        </p>
+<p>
+            Así, un índice con N grupos puede contener <span class="emphasis"><em>MaxBufferedDocs</em></span> +
+            (N-1)*<span class="emphasis"><em>MergeFactor</em></span> segmentos y contiene al menos
+            <span class="emphasis"><em>MaxBufferedDocs</em></span>*<span class="emphasis"><em>MergeFactor</em></span><sup>(N-1)</sup>
+            documentos.
+        </p>
+<p>
+            Esto proporciona una buena aproximación del número de segmentos en el índice:
+        </p>
+<p>
+            <span class="emphasis"><em>NumberOfSegments</em></span> &lt;= <span class="emphasis"><em>MaxBufferedDocs</em></span> +
+            <span class="emphasis"><em>MergeFactor</em></span>*log
+            <sub><span class="emphasis"><em>MergeFactor</em></span></sub>
+            (<span class="emphasis"><em>NumberOfDocuments</em></span>/<span class="emphasis"><em>MaxBufferedDocs</em></span>)
+        </p>
+<p>
+            <span class="emphasis"><em>MaxBufferedDocs</em></span> está determinado por la memoria permitida. Esto
+            permite obtener el factor de combinación apropiado para lograr un número razonable de
+            segmentos.
+        </p>
+<p>
+            Ajustar el parámetro <span class="emphasis"><em>MergeFactor</em></span> es más efectivo para el
+            rendimiento de la indexación por lotes que <span class="emphasis"><em>MaxMergeDocs</em></span>. Pero
+            también es más grueso. Así que use la estimación anterior para ajustar
+            <span class="emphasis"><em>MergeFactor</em></span>, y luego pruebe con
+            <span class="emphasis"><em>MaxMergeDocs</em></span> para obtener el mejor rendimiento de indexación por
+            lotes.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.shutting-down"></a>61.10.3. El índice durante el cierre</h3></div></div></div>
+<p>
+            La instancia de <code class="classname">Zend_Search_Lucene</code> realiza cierto trabajo al
+            finalizar si se añadieron documentos al índice pero no se escribieron en un nuevo segmento.
+        </p>
+<p>
+            También puede desencadenar un proceso de auto-optimización.
+        </p>
+<p>
+            El objeto índice se cierra automáticamente cuando él, y todos los objetos QueryHit
+            devueltos, salen de ámbito.
+        </p>
+<p>
+            Si el objeto índice se almacena en una variable global, entonces solo se cierra al final de
+            la ejecución del script
+
+            <a href="#ftn.id47351" class="footnote" name="id47351"><sup class="footnote">[20]</sup></a>.
+        </p>
+<p>
+            El procesamiento de excepciones de <acronym class="acronym">PHP</acronym> también se cierra en ese
+            momento.
+        </p>
+<p>
+            Esto no impide el proceso normal de cierre del índice, pero puede impedir un diagnóstico de
+            error preciso si ocurre algún error durante el cierre.
+        </p>
+<p>
+            Hay dos formas de evitar este problema.
+        </p>
+<p>
+            La primera es forzar la salida de ámbito:
+        </p>
+<pre class="programlisting">
+$index = Zend_Search_Lucene::open($indexPath);
+
+...
+
+unset($index);
+</pre>
+<p>
+            Y la segunda es realizar una operación de confirmación (commit) antes del final de la
+            ejecución del script:
+        </p>
+<pre class="programlisting">
+$index = Zend_Search_Lucene::open($indexPath);
+
+$index-&gt;commit();
+</pre>
+<p>
+            Esta posibilidad también se describe en la sección "<a class="link" href="zend.search.lucene.advanced.phtml#zend.search.lucene.advanced.static" title="61.9.2. Using the index as static property">Avanzado. Uso del índice como
+                propiedad estática</a>".
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.unique-id"></a>61.10.4. Recuperar documentos por id único</h3></div></div></div>
+<p>
+            Es una práctica común almacenar algún id único de documento en el índice. Algunos ejemplos
+            incluyen la url, la ruta o el id de base de datos.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> proporciona un método
+            <code class="methodname">termDocs()</code> para recuperar documentos que contengan los términos
+            especificados.
+        </p>
+<p>
+            Esto es más eficiente que usar el método <code class="methodname">find()</code>:
+        </p>
+<pre class="programlisting">
+// Retrieving documents with find() method using a query string
+$query = $idFieldName . ':' . $docId;
+$hits  = $index-&gt;find($query);
+foreach ($hits as $hit) {
+    $title    = $hit-&gt;title;
+    $contents = $hit-&gt;contents;
+    ...
+}
+...
+
+// Retrieving documents with find() method using the query API
+$term = new Zend_Search_Lucene_Index_Term($docId, $idFieldName);
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+foreach ($hits as $hit) {
+    $title    = $hit-&gt;title;
+    $contents = $hit-&gt;contents;
+    ...
+}
+
+...
+
+// Retrieving documents with termDocs() method
+$term = new Zend_Search_Lucene_Index_Term($docId, $idFieldName);
+$docIds  = $index-&gt;termDocs($term);
+foreach ($docIds as $id) {
+    $doc = $index-&gt;getDocument($id);
+    $title    = $doc-&gt;title;
+    $contents = $doc-&gt;contents;
+    ...
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.memory-usage"></a>61.10.5. Uso de memoria</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> es un módulo relativamente intensivo en el uso de
+            memoria.
+        </p>
+<p>
+            Utiliza memoria para almacenar en caché cierta información y optimizar el rendimiento de la
+            búsqueda y la indexación.
+        </p>
+<p>
+            La memoria necesaria varía según los diferentes modos.
+        </p>
+<p>
+            El índice del diccionario de términos se carga durante la búsqueda. En realidad es cada
+            128<sup>º</sup>
+
+            <a href="#ftn.id47381" class="footnote" name="id47381"><sup class="footnote">[21]</sup></a>
+
+            término del diccionario completo.
+        </p>
+<p>
+            Por lo tanto, el uso de memoria aumenta si tiene un número elevado de términos únicos. Esto
+            puede suceder si utiliza frases no tokenizadas como valores de campo o indexa un gran
+            volumen de información no textual.
+        </p>
+<p>
+            Un índice no optimizado consta de varios segmentos. Esto también aumenta el uso de memoria.
+            Los segmentos son independientes, por lo que cada segmento contiene su propio diccionario de
+            términos y su propio índice de diccionario de términos. Si un índice consta de
+            <span class="emphasis"><em>N</em></span> segmentos, puede aumentar el uso de memoria hasta
+            <span class="emphasis"><em>N</em></span> veces en el peor de los casos. Realice la optimización del
+            índice para combinar todos los segmentos en uno y evitar este consumo de memoria.
+        </p>
+<p>
+            La indexación utiliza la misma memoria que la búsqueda, más la memoria para almacenar en
+            búfer los documentos. La cantidad de memoria utilizada puede gestionarse con el parámetro
+            <span class="emphasis"><em>MaxBufferedDocs</em></span>.
+        </p>
+<p>
+            La optimización del índice (total o parcial) utiliza un procesamiento de datos en flujo y no
+            requiere mucha memoria.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.encoding"></a>61.10.6. Codificación</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> trabaja internamente con cadenas UTF-8. Por lo
+            tanto, todas las cadenas devueltas por <code class="classname">Zend_Search_Lucene</code> están
+            codificadas en UTF-8.
+        </p>
+<p>
+            No debería preocuparse por la codificación si trabaja con datos puramente
+            <acronym class="acronym">ASCII</acronym>, pero debería tener cuidado si ese no es el caso.
+        </p>
+<p>
+            Una codificación incorrecta puede provocar avisos de error en el momento de la conversión de
+            codificación o pérdida de datos.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> ofrece una amplia gama de posibilidades de
+            codificación para los documentos indexados y las consultas analizadas.
+        </p>
+<p>
+            La codificación puede especificarse explícitamente como parámetro opcional de los métodos de
+            creación de campos:
+        </p>
+<pre class="programlisting">
+$doc = new Zend_Search_Lucene_Document();
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('title',
+                                              $title,
+                                              'iso-8859-1'));
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('contents',
+                                                  $contents,
+                                                  'utf-8'));
+</pre>
+<p>
+            Esta es la mejor manera de evitar la ambigüedad en la codificación utilizada.
+        </p>
+<p>
+            Si se omite el parámetro opcional de codificación, entonces se utiliza la configuración
+            regional (locale) actual. La configuración regional actual puede contener datos de
+            codificación de caracteres además de la especificación de idioma:
+        </p>
+<pre class="programlisting">
+setlocale(LC_ALL, 'fr_FR');
+...
+
+setlocale(LC_ALL, 'de_DE.iso-8859-1');
+...
+
+setlocale(LC_ALL, 'ru_RU.UTF-8');
+...
+</pre>
+<p>
+            Se utiliza el mismo enfoque para establecer la codificación de la cadena de consulta.
+        </p>
+<p>
+            Si no se especifica la codificación, se utiliza la configuración regional actual para
+            determinarla.
+        </p>
+<p>
+            La codificación puede pasarse como parámetro opcional si la consulta se analiza
+            explícitamente antes de la búsqueda:
+        </p>
+<pre class="programlisting">
+$query =
+    Zend_Search_Lucene_Search_QueryParser::parse($queryStr, 'iso-8859-5');
+$hits = $index-&gt;find($query);
+...
+</pre>
+<p>
+            La codificación por defecto también puede especificarse con el método
+            <code class="methodname">setDefaultEncoding()</code>:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding('iso-8859-1');
+$hits = $index-&gt;find($queryStr);
+...
+</pre>
+<p>
+            La cadena vacía implica la 'configuración regional actual'.
+        </p>
+<p>
+            Si se especifica la codificación correcta, puede ser procesada correctamente por el
+            analizador. El comportamiento real depende de qué analizador se utilice. Consulte la sección
+            <a class="link" href="zend.search.lucene.charset.phtml" title="61.6. Character Set">Conjunto de caracteres</a> para más
+            detalles.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.best-practice.maintenance"></a>61.10.7. Mantenimiento del índice</h3></div></div></div>
+<p>
+            Debe quedar claro que <code class="classname">Zend_Search_Lucene</code>, al igual que cualquier otra
+            implementación de Lucene, no constituye una "base de datos".
+        </p>
+<p>
+            Los índices no deben utilizarse para el almacenamiento de datos. No ofrecen funcionalidad de
+            copia de seguridad/restauración parcial, journaling, registro de transacciones y muchas
+            otras características asociadas con los sistemas de gestión de bases de datos.
+        </p>
+<p>
+            No obstante, <code class="classname">Zend_Search_Lucene</code> intenta mantener los índices en un
+            estado consistente en todo momento.
+        </p>
+<p>
+            La copia de seguridad y restauración del índice debe realizarse copiando el contenido de la
+            carpeta del índice.
+        </p>
+<p>
+            Si se produce corrupción del índice por cualquier motivo, el índice corrupto debe
+            restaurarse o reconstruirse por completo.
+        </p>
+<p>
+            Por lo tanto, es una buena idea hacer copias de seguridad de los índices grandes y almacenar
+            registros de cambios para realizar operaciones de restauración manual y de reaplicación
+            (roll-forward) si es necesario. Esta práctica reduce drásticamente el tiempo de restauración
+            del índice.
+        </p>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id47282" class="footnote"><p><a href="#id47282" class="para"><sup class="para">[18] </sup></a>
+                    <code class="methodname">memory_get_usage()</code> y
+                    <code class="methodname">memory_get_peak_usage()</code> pueden usarse para controlar el uso
+                    de memoria.
+                </p></div>
+<div id="ftn.id47292" class="footnote"><p><a href="#id47292" class="para"><sup class="para">[19] </sup></a>
+                    <code class="classname">Zend_Search_Lucene</code> mantiene cada archivo de segmento
+                    abierto para mejorar el rendimiento de la búsqueda.
+                </p></div>
+<div id="ftn.id47351" class="footnote"><p><a href="#id47351" class="para"><sup class="para">[20] </sup></a>
+                    Esto también puede ocurrir si el índice o las instancias de QueryHit se referencian
+                    en alguna estructura de datos cíclica, ya que <acronym class="acronym">PHP</acronym>
+                    recolecta como basura los objetos con referencias cíclicas solo al final de la
+                    ejecución del script.
+                </p></div>
+<div id="ftn.id47381" class="footnote"><p><a href="#id47381" class="para"><sup class="para">[21] </sup></a>
+                    El formato de archivo de Lucene permite configurar este número, pero
+                    <code class="classname">Zend_Search_Lucene</code> no lo expone en su
+                    <acronym class="acronym">API</acronym>. No obstante, aún tiene la posibilidad de
+                    configurar este valor si el índice se prepara con otra implementación de Lucene.
+                </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.advanced.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.serializer.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.9. Avanzado </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 62. Zend_Serializer</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

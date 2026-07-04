@@ -1,0 +1,724 @@
+<?php $title = '80.3. Zend_XmlRpc_Server'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">80.3. Zend_XmlRpc_Server</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.xmlrpc.client.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 80. Zend_XmlRpc</th>
+<td width="20%" align="right"> <a accesskey="n" href="requirements.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.xmlrpc.server"></a>80.3. Zend_XmlRpc_Server</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.introduction"></a>80.3.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_XmlRpc_Server</code> pretende ser un servidor
+            <acronym class="acronym">XML-RPC</acronym> completo, siguiendo <a class="ulink" href="http://www.xmlrpc.com/spec" target="_top">las
+                especificaciones descritas en www.xmlrpc.com</a>. Además, implementa el
+            método <span class="command"><strong>system.multicall()</strong></span>, permitiendo el empaquetado de peticiones (boxcarring).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.usage"></a>80.3.2. Uso básico</h3></div></div></div>
+<p>
+            Un ejemplo del caso de uso más básico:
+        </p>
+<pre class="programlisting">
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('My_Service_Class');
+echo $server-&gt;handle();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.structure"></a>80.3.3. Estructura del servidor</h3></div></div></div>
+<p>
+            <code class="classname">Zend_XmlRpc_Server</code> está compuesto por una variedad de componentes,
+            que van desde el propio servidor hasta los objetos de petición, respuesta y fallo.
+        </p>
+<p>
+            Para inicializar <code class="classname">Zend_XmlRpc_Server</code>, el desarrollador debe adjuntar
+            una o más clases o funciones al servidor, mediante los métodos
+            <code class="methodname">setClass()</code> y <code class="methodname">addFunction()</code>.
+        </p>
+<p>
+            Una vez hecho esto, puede pasar un objeto <code class="classname">Zend_XmlRpc_Request</code>
+            a <code class="methodname">Zend_XmlRpc_Server::handle()</code>, o de lo contrario
+            se instanciará un objeto <code class="classname">Zend_XmlRpc_Request_Http</code> si no
+            se proporciona ninguno -- obteniendo así la petición desde
+            <code class="filename">php://input</code>.
+        </p>
+<p>
+            <code class="methodname">Zend_XmlRpc_Server::handle()</code> entonces intenta
+            despachar hacia el manejador apropiado según el método
+            solicitado. Luego devuelve ya sea un objeto basado en
+            <code class="classname">Zend_XmlRpc_Response</code> o un objeto
+            <code class="classname">Zend_XmlRpc_Server_Fault</code>. Estos objetos tienen ambos
+            métodos <code class="methodname">__toString()</code> que crean respuestas
+            <acronym class="acronym">XML-RPC</acronym> <acronym class="acronym">XML</acronym> válidas, permitiendo que sean
+            impresas directamente.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.anatomy"></a>80.3.4. Anatomía de un servicio web</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.xmlrpc.server.anatomy.general"></a>80.3.4.1. Consideraciones generales</h4></div></div></div>
+<p>
+                Para un máximo rendimiento se recomienda utilizar un archivo de arranque
+                sencillo para el componente del servidor. Utilizar
+                <code class="classname">Zend_XmlRpc_Server</code> dentro de un
+                <a class="link" href="zend.controller.phtml" title="Chapter 24. Zend_Controller"><code class="classname">Zend_Controller</code></a>
+                se desaconseja firmemente para evitar la sobrecarga.
+            </p>
+<p>
+                Los servicios cambian con el tiempo y aunque los servicios web son generalmente
+                menos propensos a cambios que las <acronym class="acronym">API</acronym>s nativas de código, se
+                recomienda versionar su servicio. Hágalo para sentar las bases para
+                proporcionar compatibilidad a los clientes que utilizan versiones anteriores de su
+                servicio y gestionar el ciclo de vida de su servicio, incluyendo los plazos de
+                obsolescencia. Para hacerlo, simplemente incluya un número de versión en su
+                <acronym class="acronym">URI</acronym>. También se recomienda incluir el
+                nombre del protocolo remoto en la <acronym class="acronym">URI</acronym> para permitir una fácil
+                integración de las próximas tecnologías de acceso remoto.
+                http://myservice.ws/<span class="emphasis"><em>1.0/XMLRPC/</em></span>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.xmlrpc.server.anatomy.expose"></a>80.3.4.2. ¿Qué exponer?</h4></div></div></div>
+<p>
+                La mayoría de las veces no es sensato exponer objetos de negocio
+                directamente. Los objetos de negocio suelen ser pequeños y estar sujetos a
+                cambios frecuentes, porque el cambio es barato en esta capa de su
+                aplicación. Una vez desplegado y adoptado, los servicios web son difíciles de
+                cambiar. Otra preocupación es la <acronym class="acronym">E/S</acronym> y la latencia:
+                las mejores llamadas a servicios web son aquellas que no se producen. Por lo tanto,
+                las llamadas a servicios deben tener un grano más grueso de lo que suele tener la
+                lógica de negocio habitual. A menudo tiene sentido una capa adicional delante de sus
+                objetos de negocio. Esta capa a veces se denomina <a class="ulink" href="http://martinfowler.com/eaaCatalog/remoteFacade.html" target="_top">Remote
+                    Facade</a>.
+                Dicha capa de servicio añade una interfaz de grano grueso sobre
+                su lógica de negocio y agrupa operaciones detalladas en otras más pequeñas.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.conventions"></a>80.3.5. Convenciones</h3></div></div></div>
+<p>
+            <code class="classname">Zend_XmlRpc_Server</code> permite al desarrollador adjuntar funciones y
+            llamadas a métodos de clase como métodos <acronym class="acronym">XML-RPC</acronym> despachables. Mediante
+            <code class="classname">Zend_Server_Reflection</code>, realiza introspección sobre todos los
+            métodos adjuntados, utilizando los docblocks de las funciones y métodos para determinar el
+            texto de ayuda del método y las firmas del método.
+        </p>
+<p>
+            Los tipos <acronym class="acronym">XML-RPC</acronym> no necesariamente se corresponden uno a uno con los
+            tipos de <acronym class="acronym">PHP</acronym>. Sin embargo, el código hará lo posible por adivinar el
+            tipo apropiado en función de los valores indicados en las líneas @param y @return. Algunos
+            tipos <acronym class="acronym">XML-RPC</acronym> no tienen un equivalente inmediato en <acronym class="acronym">PHP</acronym>,
+            sin embargo, y deben ser indicados mediante el tipo <acronym class="acronym">XML-RPC</acronym> en el PHPDoc.
+            Estos incluyen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em><span class="property">dateTime.iso8601</span></em></span>, una cadena con el formato
+                    '<span class="command"><strong>YYYYMMDDTHH:mm:ss</strong></span>'
+                </p></li>
+<li class="listitem"><p><span class="emphasis"><em>base64</em></span>, datos codificados en base64</p></li>
+<li class="listitem"><p><span class="emphasis"><em>struct</em></span>, cualquier array asociativo</p></li>
+</ul></div>
+<p>
+            A continuación se muestra un ejemplo de cómo indicar estos tipos:
+        </p>
+<pre class="programlisting">
+/**
+* This is a sample function
+*
+* @param base64 $val1 Base64-encoded data
+* @param dateTime.iso8601 $val2 An ISO date
+* @param struct $val3 An associative array
+* @return struct
+*/
+function myFunc($val1, $val2, $val3)
+{
+}
+</pre>
+<p>
+            PhpDocumentor no realiza ninguna validación de los tipos especificados para los
+            parámetros o los valores de retorno, por lo que esto no tendrá ningún impacto en su
+            documentación de la <acronym class="acronym">API</acronym>. Sin embargo, proporcionar dichas indicaciones es
+            necesario cuando el servidor valida los parámetros proporcionados a la llamada al método.
+        </p>
+<p>
+            Es perfectamente válido especificar múltiples tipos tanto para los parámetros como para los
+            valores de retorno; la especificación <acronym class="acronym">XML-RPC</acronym> incluso sugiere que
+            system.methodSignature debería devolver un array con todas las firmas de método
+            posibles (es decir, todas las combinaciones posibles de valores de parámetros y
+            de retorno). Puede hacerlo tal como lo haría normalmente con
+            PhpDocumentor, utilizando el operador '|':
+        </p>
+<pre class="programlisting">
+/**
+* This is a sample function
+*
+* @param string|base64 $val1 String or base64-encoded data
+* @param string|dateTime.iso8601 $val2 String or an ISO date
+* @param array|struct $val3 Normal indexed array or an associative array
+* @return boolean|struct
+*/
+function myFunc($val1, $val2, $val3)
+{
+}
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Permitir múltiples firmas puede generar confusión para los desarrolladores
+                que utilizan los servicios; para simplificar las cosas, un método de servicio
+                <acronym class="acronym">XML-RPC</acronym> debería tener una única firma.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.namespaces"></a>80.3.6. Utilizando espacios de nombres</h3></div></div></div>
+<p>
+            <acronym class="acronym">XML-RPC</acronym> tiene un concepto de espacios de nombres; básicamente, permite agrupar
+            métodos <acronym class="acronym">XML-RPC</acronym> mediante espacios de nombres delimitados por puntos. Esto ayuda a evitar
+            colisiones de nombres entre métodos servidos por distintas clases. Como
+            ejemplo, se espera que el servidor <acronym class="acronym">XML-RPC</acronym> sirva varios métodos en
+            el espacio de nombres 'system':
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>system.listMethods</p></li>
+<li class="listitem"><p>system.methodHelp</p></li>
+<li class="listitem"><p>system.methodSignature</p></li>
+</ul></div>
+<p>
+            Internamente, estos se corresponden con los métodos del mismo nombre en
+            <code class="classname">Zend_XmlRpc_Server</code>.
+        </p>
+<p>
+            Si desea añadir espacios de nombres a los métodos que sirve, simplemente
+            proporcione un espacio de nombres al método correspondiente al adjuntar una
+            función o clase:
+        </p>
+<pre class="programlisting">
+// All public methods in My_Service_Class will be accessible as
+// myservice.METHODNAME
+$server-&gt;setClass('My_Service_Class', 'myservice');
+
+// Function 'somefunc' will be accessible as funcs.somefunc
+$server-&gt;addFunction('somefunc', 'funcs');
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.request"></a>80.3.7. Objetos de petición personalizados</h3></div></div></div>
+<p>
+            La mayoría de las veces, simplemente utilizará el tipo de petición predeterminado incluido con
+            <code class="classname">Zend_XmlRpc_Server</code>,
+            <code class="classname">Zend_XmlRpc_Request_Http</code>. Sin embargo, puede haber ocasiones en las que
+            necesite que <acronym class="acronym">XML-RPC</acronym> esté disponible a través de la <acronym class="acronym">CLI</acronym>, una
+            <acronym class="acronym">GUI</acronym>, u otro entorno, o quiera registrar las peticiones entrantes. Para
+            hacerlo, puede crear un objeto de petición personalizado que extienda
+            <code class="classname">Zend_XmlRpc_Request</code>. Lo más importante que debe recordar es
+            asegurarse de que los métodos <code class="methodname">getMethod()</code> y
+            <code class="methodname">getParams()</code> estén implementados de forma que el
+            servidor <acronym class="acronym">XML-RPC</acronym> pueda recuperar esa información para despachar la
+            petición.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.response"></a>80.3.8. Respuestas personalizadas</h3></div></div></div>
+<p>
+            De forma similar a los objetos de petición, <code class="classname">Zend_XmlRpc_Server</code> puede devolver
+            objetos de respuesta personalizados; por defecto, se devuelve un objeto
+            <code class="classname">Zend_XmlRpc_Response_Http</code>, que envía una cabecera <acronym class="acronym">HTTP</acronym>
+            Content-Type apropiada para su uso con <acronym class="acronym">XML-RPC</acronym>. Posibles usos de un objeto
+            personalizado serían registrar las respuestas, o enviar respuestas a
+            <code class="constant">STDOUT</code>.
+        </p>
+<p>
+            Para utilizar una clase de respuesta personalizada, use
+            <code class="methodname">Zend_XmlRpc_Server::setResponseClass()</code> antes de llamar a
+            <code class="methodname">handle()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.fault"></a>80.3.9. Manejo de excepciones mediante faults</h3></div></div></div>
+<p>
+            <code class="classname">Zend_XmlRpc_Server</code> captura las excepciones generadas por un método
+            despachado, y genera una respuesta de fallo (fault) <acronym class="acronym">XML-RPC</acronym> cuando se
+            captura dicha excepción. Sin embargo, por defecto, los mensajes y códigos de
+            excepción no se utilizan en una respuesta de fallo. Esta es una decisión
+            intencionada para proteger su código; muchas excepciones exponen más
+            información sobre el código o el entorno de la que un desarrollador
+            necesariamente pretendería (un ejemplo típico son las excepciones de la capa
+            de abstracción o de acceso a base de datos).
+        </p>
+<p>
+            Sin embargo, las clases de excepción pueden incluirse en una lista blanca para
+            usarse como respuestas de fallo. Para ello, simplemente utilice
+            <code class="methodname">Zend_XmlRpc_Server_Fault::attachFaultException()</code> para pasar una
+            clase de excepción a incluir en la lista blanca:
+        </p>
+<pre class="programlisting">
+Zend_XmlRpc_Server_Fault::attachFaultException('My_Project_Exception');
+</pre>
+<p>
+            Si utiliza una clase de excepción de la que heredan las demás excepciones de su
+            proyecto, puede entonces incluir en la lista blanca toda una familia de excepciones a
+            la vez. Las excepciones de tipo <code class="classname">Zend_XmlRpc_Server_Exception</code> siempre están
+            en la lista blanca, para permitir informar de errores internos específicos (métodos
+            indefinidos, etc.).
+        </p>
+<p>
+            Cualquier excepción que no esté específicamente en la lista blanca generará una
+            respuesta de fallo con un código '404' y un mensaje 'Unknown error'.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.caching"></a>80.3.10. Almacenamiento en caché de las definiciones del servidor entre peticiones</h3></div></div></div>
+<p>
+            Adjuntar muchas clases a una instancia del servidor <acronym class="acronym">XML-RPC</acronym> puede utilizar
+            muchos recursos; cada clase debe hacer introspección utilizando la <acronym class="acronym">API</acronym> de
+            Reflection (mediante <code class="classname">Zend_Server_Reflection</code>), lo que a su
+            vez genera una lista de todas las posibles firmas de método para proporcionar a la clase del servidor.
+        </p>
+<p>
+            Para reducir algo este impacto en el rendimiento, se puede utilizar
+            <code class="classname">Zend_XmlRpc_Server_Cache</code> para almacenar en caché la definición del servidor
+            entre peticiones. Cuando se combina con <code class="methodname">__autoload()</code>, esto
+            puede incrementar considerablemente el rendimiento.
+        </p>
+<p>
+            A continuación se muestra un ejemplo de uso:
+        </p>
+<pre class="programlisting">
+function __autoload($class)
+{
+    Zend_Loader::loadClass($class);
+}
+
+$cacheFile = dirname(__FILE__) . '/xmlrpc.cache';
+$server = new Zend_XmlRpc_Server();
+
+if (!Zend_XmlRpc_Server_Cache::get($cacheFile, $server)) {
+    require_once 'My/Services/Glue.php';
+    require_once 'My/Services/Paste.php';
+    require_once 'My/Services/Tape.php';
+
+    $server-&gt;setClass('My_Services_Glue', 'glue');   // glue. namespace
+    $server-&gt;setClass('My_Services_Paste', 'paste'); // paste. namespace
+    $server-&gt;setClass('My_Services_Tape', 'tape');   // tape. namespace
+
+    Zend_XmlRpc_Server_Cache::save($cacheFile, $server);
+}
+
+echo $server-&gt;handle();
+</pre>
+<p>
+            El ejemplo anterior intenta recuperar una definición del servidor desde
+            <span class="property">xmlrpc.cache</span> en el mismo directorio que el script. Si no lo consigue,
+            carga las clases de servicio que necesita, las adjunta a la instancia del
+            servidor, y luego intenta crear un nuevo archivo de caché con la
+            definición del servidor.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.use"></a>80.3.11. Ejemplos de uso</h3></div></div></div>
+<p>
+            A continuación se muestran varios ejemplos de uso, que muestran todo el espectro
+            de opciones disponibles para los desarrolladores. Los ejemplos de uso se irán
+            construyendo cada uno sobre el ejemplo anterior proporcionado.
+        </p>
+<div class="example">
+<a name="zend.xmlrpc.server.use.attach-function"></a><p class="title"><b>Example 80.8. Basic Usage</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación adjunta una función como un método
+                <acronym class="acronym">XML-RPC</acronym> despachable y gestiona las llamadas entrantes.
+            </p>
+<pre class="programlisting">
+/**
+ * Return the MD5 sum of a value
+ *
+ * @param string $value Value to md5sum
+ * @return string MD5 sum of value
+ */
+function md5Value($value)
+{
+    return md5($value);
+}
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;addFunction('md5Value');
+echo $server-&gt;handle();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.attach-class"></a><p class="title"><b>Example 80.9. Attaching a class</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación ilustra cómo adjuntar los métodos públicos
+                de una clase como métodos <acronym class="acronym">XML-RPC</acronym> despachables.
+            </p>
+<pre class="programlisting">
+require_once 'Services/Comb.php';
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_Comb');
+echo $server-&gt;handle();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.attach-class-with-arguments"></a><p class="title"><b>Example 80.10. Attaching a class with arguments</b></p>
+<div class="example-contents">
+<p>
+                El siguiente ejemplo ilustra cómo adjuntar los métodos públicos de una clase
+                y pasar argumentos a sus métodos. Esto puede utilizarse para especificar ciertos
+                valores predeterminados al registrar clases de servicio.
+            </p>
+<pre class="programlisting">
+class Services_PricingService
+{
+    /**
+     * Calculate current price of product with $productId
+     *
+     * @param ProductRepository $productRepository
+     * @param PurchaseRepository $purchaseRepository
+     * @param integer $productId
+     */
+    public function calculate(ProductRepository $productRepository,
+                              PurchaseRepository $purchaseRepository,
+                              $productId)
+    {
+        ...
+    }
+}
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_PricingService',
+                  'pricing',
+                  new ProductRepository(),
+                  new PurchaseRepository());
+</pre>
+<p>
+                Los argumentos pasados en <code class="methodname">setClass()</code> en el momento de
+                construir el servidor se inyectan en la llamada al método
+                <span class="command"><strong>pricing.calculate()</strong></span> en la invocación remota. En el ejemplo anterior,
+                sólo se espera del cliente el argumento
+                <code class="varname">$purchaseId</code>.
+            </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.attach-class-with-arguments-constructor"></a><p class="title"><b>Example 80.11. Passing arguments only to constructor</b></p>
+<div class="example-contents">
+<p>
+                <code class="classname">Zend_XmlRpc_Server</code> permite restringir el paso de argumentos
+                únicamente a los constructores. Esto puede utilizarse para la inyección de
+                dependencias en el constructor. Para limitar la inyección a los constructores, llame a
+                <code class="methodname">sendArgumentsToAllMethods</code> y pase
+                <code class="constant">FALSE</code> como argumento. Esto deshabilita el comportamiento predeterminado de
+                inyectar todos los argumentos en el método remoto. En el ejemplo siguiente, la instancia
+                de <code class="classname">ProductRepository</code> y
+                <code class="classname">PurchaseRepository</code> sólo se inyecta en el constructor de
+                <code class="classname">Services_PricingService2</code>.
+            </p>
+<pre class="programlisting">
+class Services_PricingService2
+{
+    /**
+     * @param ProductRepository $productRepository
+     * @param PurchaseRepository $purchaseRepository
+     */
+    public function __construct(ProductRepository $productRepository,
+                                PurchaseRepository $purchaseRepository)
+    {
+        ...
+    }
+
+    /**
+     * Calculate current price of product with $productId
+     *
+     * @param integer $productId
+     * @return double
+     */
+    public function calculate($productId)
+    {
+        ...
+    }
+}
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;sendArgumentsToAllMethods(false);
+$server-&gt;setClass('Services_PricingService2',
+                  'pricing',
+                  new ProductRepository(),
+                  new PurchaseRepository());
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.attach-instance"></a><p class="title"><b>Example 80.12. Attaching a class instance</b></p>
+<div class="example-contents"><p>
+                <code class="methodname">setClass()</code> permite registrar en el servidor un objeto
+                previamente instanciado. Simplemente pase una instancia en lugar del nombre de la clase.
+                Obviamente, pasar argumentos al constructor no es posible con objetos
+                ya instanciados.
+            </p></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.attach-several-classes-namespaces"></a><p class="title"><b>Example 80.13. Attaching several classes using namespaces</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación ilustra cómo adjuntar varias clases, cada una
+                con su propio espacio de nombres.
+            </p>
+<pre class="programlisting">
+require_once 'Services/Comb.php';
+require_once 'Services/Brush.php';
+require_once 'Services/Pick.php';
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_Comb', 'comb');   // methods called as comb.*
+$server-&gt;setClass('Services_Brush', 'brush'); // methods called as brush.*
+$server-&gt;setClass('Services_Pick', 'pick');   // methods called as pick.*
+echo $server-&gt;handle();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.exceptions-faults"></a><p class="title"><b>Example 80.14. Specifying exceptions to use as valid fault responses</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación permite que cualquier clase derivada de
+                <code class="classname">Services_Exception</code> informe de su código y mensaje en la respuesta de fallo.
+            </p>
+<pre class="programlisting">
+require_once 'Services/Exception.php';
+require_once 'Services/Comb.php';
+require_once 'Services/Brush.php';
+require_once 'Services/Pick.php';
+
+// Allow Services_Exceptions to report as fault responses
+Zend_XmlRpc_Server_Fault::attachFaultException('Services_Exception');
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_Comb', 'comb');   // methods called as comb.*
+$server-&gt;setClass('Services_Brush', 'brush'); // methods called as brush.*
+$server-&gt;setClass('Services_Pick', 'pick');   // methods called as pick.*
+echo $server-&gt;handle();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.custom-request-object"></a><p class="title"><b>Example 80.15. Utilizing custom request and response objects</b></p>
+<div class="example-contents">
+<p>
+                Algunos casos de uso requieren utilizar un objeto de petición
+                personalizado. Por ejemplo, <acronym class="acronym">XML/RPC</acronym> no está vinculado a
+                <acronym class="acronym">HTTP</acronym> como protocolo de transferencia. Es posible utilizar
+                otros protocolos de transferencia como <acronym class="acronym">SSH</acronym> o telnet para enviar
+                los datos de petición y respuesta a través de la red. Otro caso de uso es
+                la autenticación y autorización. En el caso de un protocolo de transferencia
+                diferente, es necesario cambiar la implementación para leer los datos de la petición.
+            </p>
+<p>
+                El ejemplo a continuación instancia un objeto de petición personalizado y
+                lo pasa al servidor para que lo gestione.
+            </p>
+<pre class="programlisting">
+require_once 'Services/Request.php';
+require_once 'Services/Exception.php';
+require_once 'Services/Comb.php';
+require_once 'Services/Brush.php';
+require_once 'Services/Pick.php';
+
+// Allow Services_Exceptions to report as fault responses
+Zend_XmlRpc_Server_Fault::attachFaultException('Services_Exception');
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_Comb', 'comb');   // methods called as comb.*
+$server-&gt;setClass('Services_Brush', 'brush'); // methods called as brush.*
+$server-&gt;setClass('Services_Pick', 'pick');   // methods called as pick.*
+
+// Create a request object
+$request = new Services_Request();
+
+echo $server-&gt;handle($request);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.xmlrpc.server.use.custom-response-object"></a><p class="title"><b>Example 80.16. Specifying a custom response class</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación ilustra cómo especificar una clase de respuesta
+                personalizada para la respuesta devuelta.
+            </p>
+<pre class="programlisting">
+require_once 'Services/Request.php';
+require_once 'Services/Response.php';
+require_once 'Services/Exception.php';
+require_once 'Services/Comb.php';
+require_once 'Services/Brush.php';
+require_once 'Services/Pick.php';
+
+// Allow Services_Exceptions to report as fault responses
+Zend_XmlRpc_Server_Fault::attachFaultException('Services_Exception');
+
+$server = new Zend_XmlRpc_Server();
+$server-&gt;setClass('Services_Comb', 'comb');   // methods called as comb.*
+$server-&gt;setClass('Services_Brush', 'brush'); // methods called as brush.*
+$server-&gt;setClass('Services_Pick', 'pick');   // methods called as pick.*
+
+// Create a request object
+$request = new Services_Request();
+
+// Utilize a custom response
+$server-&gt;setResponseClass('Services_Response');
+
+echo $server-&gt;handle($request);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.xmlrpc.server.performance"></a>80.3.12. Optimización del rendimiento</h3></div></div></div>
+<div class="example">
+<a name="zend.xmlrpc.server.performance.caching"></a><p class="title"><b>Example 80.17. Cache server definitions between requests</b></p>
+<div class="example-contents">
+<p>
+                El ejemplo a continuación ilustra cómo almacenar en caché las definiciones del servidor entre peticiones.
+            </p>
+<pre class="programlisting">
+// Specify a cache file
+$cacheFile = dirname(__FILE__) . '/xmlrpc.cache';
+
+// Allow Services_Exceptions to report as fault responses
+Zend_XmlRpc_Server_Fault::attachFaultException('Services_Exception');
+
+$server = new Zend_XmlRpc_Server();
+
+// Attempt to retrieve server definition from cache
+if (!Zend_XmlRpc_Server_Cache::get($cacheFile, $server)) {
+    $server-&gt;setClass('Services_Comb', 'comb');   // methods called as comb.*
+    $server-&gt;setClass('Services_Brush', 'brush'); // methods called as brush.*
+    $server-&gt;setClass('Services_Pick', 'pick');   // methods called as pick.*
+
+    // Save cache
+    Zend_XmlRpc_Server_Cache::save($cacheFile, $server);
+}
+
+// Create a request object
+$request = new Services_Request();
+
+// Utilize a custom response
+$server-&gt;setResponseClass('Services_Response');
+
+echo $server-&gt;handle($request);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El archivo de caché del servidor debe ubicarse fuera de la raíz del documento.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.xmlrpc.server.performance.xmlgen"></a><p class="title"><b>Example 80.18. Optimizing XML generation</b></p>
+<div class="example-contents">
+<p>
+                <code class="classname">Zend_XmlRpc_Server</code> utiliza
+                <code class="classname">DOMDocument</code> de la extensión de <acronym class="acronym">PHP</acronym>
+                <span class="emphasis"><em>ext/dom</em></span> para generar su salida
+                <acronym class="acronym">XML</acronym>. Aunque <span class="emphasis"><em>ext/dom</em></span> está
+                disponible en muchos hosts, no es precisamente la más rápida.
+                Los benchmarks han demostrado que <code class="classname">XmlWriter</code>
+                de <span class="emphasis"><em>ext/xmlwriter</em></span> rinde mejor.
+            </p>
+<p>
+                Si <span class="emphasis"><em>ext/xmlwriter</em></span> está disponible en su host, puede
+                seleccionar el generador basado en <code class="classname">XmlWriter</code>
+                para aprovechar las diferencias de rendimiento.
+            </p>
+<pre class="programlisting">
+require_once 'Zend/XmlRpc/Server.php';
+require_once 'Zend/XmlRpc/Generator/XmlWriter.php';
+
+Zend_XmlRpc_Value::setGenerator(new Zend_XmlRpc_Generator_XmlWriter());
+
+$server = new Zend_XmlRpc_Server();
+...
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Benchmark your application">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Realice benchmarks de su aplicación</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El rendimiento está determinado por muchos parámetros y
+                los benchmarks sólo aplican al caso de prueba concreto. Las diferencias
+                provienen de la versión de <acronym class="acronym">PHP</acronym>, las extensiones instaladas, el servidor web y
+                el sistema operativo, por nombrar sólo algunos. Asegúrese de
+                realizar sus propios benchmarks de su aplicación y decidir qué
+                generador utilizar en función de <span class="emphasis"><em>sus</em></span> propios números.
+            </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Benchmark your client">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Realice benchmarks de su cliente</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Esta optimización también tiene sentido en el lado del cliente. Simplemente
+                seleccione el generador <acronym class="acronym">XML</acronym> alternativo antes de
+                realizar cualquier trabajo con <code class="classname">Zend_XmlRpc_Client</code>.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.xmlrpc.client.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.xmlrpc.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="requirements.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">80.2. Zend_XmlRpc_Client </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Apéndice A. Requisitos de Zend Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

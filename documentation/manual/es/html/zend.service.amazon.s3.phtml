@@ -1,0 +1,450 @@
+<?php $title = '64.15. Zend_Service_Amazon_S3'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.15. Zend_Service_Amazon_S3</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.securitygroups.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.sqs.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.s3"></a>64.15. Zend_Service_Amazon_S3</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.introduction"></a>64.15.1. Introducción</h3></div></div></div>
+<p>
+            Amazon S3 proporciona una sencilla interfaz de servicios web que puede utilizarse para
+            almacenar y recuperar cualquier cantidad de datos, en cualquier momento, desde cualquier
+            lugar de la web. Ofrece a cualquier desarrollador acceso a la misma infraestructura de
+            almacenamiento de datos altamente escalable, fiable, rápida y económica que Amazon
+            utiliza para gestionar su propia red global de sitios web. El servicio busca maximizar
+            los beneficios de la escala y trasladarlos a los desarrolladores.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.registering"></a>64.15.2. Registro en Amazon S3</h3></div></div></div>
+<p>
+            Antes de empezar a usar <code class="classname">Zend_Service_Amazon_S3</code>, debe
+            registrarse primero para obtener una cuenta. Consulte la página
+            <a class="ulink" href="http://aws.amazon.com/s3/faqs/" target="_top">S3 FAQ</a>
+            del sitio web de Amazon para obtener más información.
+        </p>
+<p>
+            Tras registrarse, recibirá una clave de aplicación y una clave secreta.
+            Necesitará ambas para acceder al servicio S3.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.apiDocumentation"></a>64.15.3. Documentación de la API</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Service_Amazon_S3</code> proporciona el
+            envoltorio <acronym class="acronym">PHP</acronym> para la interfaz REST de Amazon S3. Consulte la
+            <a class="ulink" href="http://developer.amazonwebservices.com/connect/kbcategory.jspa?categoryID=48" target="_top">documentación
+                de Amazon S3</a> para una descripción detallada del servicio. Necesitará
+            estar familiarizado con los conceptos básicos para poder usar este servicio.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.features"></a>64.15.4. Características</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Amazon_S3</code> proporciona la siguiente funcionalidad:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Un único punto para configurar sus credenciales de autenticación de
+                        amazon.s3 que pueden utilizarse en todos los espacios de nombres de amazon.s3.
+                    </p></li>
+<li class="listitem"><p>
+                        Un objeto proxy más cómodo de usar que un cliente
+                        <acronym class="acronym">HTTP</acronym> por sí solo, eliminando en su mayor parte la necesidad de
+                        construir manualmente peticiones <acronym class="acronym">HTTP</acronym> POST para acceder al servicio REST.
+                    </p></li>
+<li class="listitem"><p>
+                        Un envoltorio de respuesta que analiza el cuerpo de cada respuesta y lanza una
+                        excepción si se produce un error, evitando la necesidad de comprobar
+                        repetidamente el éxito de muchos comandos.
+                    </p></li>
+<li class="listitem"><p>
+                        Métodos de conveniencia adicionales para algunas de las operaciones más comunes.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.storing-your-first"></a>64.15.5. Primeros pasos</h3></div></div></div>
+<p>
+            Una vez que se haya registrado en Amazon S3, estará listo para almacenar su primer
+            objeto de datos en S3. Los objetos en S3 se almacenan en contenedores, llamados
+            "buckets" (cubos). Los nombres de los buckets son únicos en S3, y cada usuario puede
+            tener como máximo 100 buckets simultáneamente. Cada bucket puede contener una cantidad
+            ilimitada de objetos, identificados por nombre.
+        </p>
+<p>
+            El siguiente ejemplo muestra cómo crear un bucket, y cómo almacenar y recuperar los datos.
+        </p>
+<div class="example">
+<a name="zend.service.amazon.s3.storing-your-first.example"></a><p class="title"><b>Ejemplo 64.63. Ejemplo de uso de Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$s3-&gt;createBucket("my-own-bucket");
+
+$s3-&gt;putObject("my-own-bucket/myobject", "somedata");
+
+echo $s3-&gt;getObject("my-own-bucket/myobject");
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Dado que el servicio <code class="classname">Zend_Service_Amazon_S3</code> requiere autenticación,
+            debe pasar sus credenciales (clave de AWS y clave secreta) al constructor.
+            Si solo utiliza una cuenta, puede establecer credenciales predeterminadas para el servicio:
+        </p>
+<pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+Zend_Service_Amazon_S3::setKeys($my_aws_key, $my_aws_secret_key);
+$s3 = new Zend_Service_Amazon_S3();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.buckets"></a>64.15.6. Operaciones con buckets</h3></div></div></div>
+<p>
+            Todos los objetos en el sistema S3 se almacenan en buckets. Es necesario crear un bucket
+            antes de realizar cualquier operación de almacenamiento. El nombre del bucket es único
+            en el sistema, por lo que no puede tener un bucket con el mismo nombre que el de otra persona.
+        </p>
+<p>
+            El nombre del bucket puede contener letras minúsculas, dígitos, puntos (.), guiones bajos (_) y
+            guiones (-). No se permiten otros símbolos. El nombre del bucket debe comenzar con una letra o dígito, y
+            tener entre 3 y 255 caracteres de longitud. No se permiten nombres con aspecto de dirección IP
+            (por ejemplo, "192.168.16.255").
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">createBucket()</code> crea un nuevo bucket.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">cleanBucket()</code> elimina todos los objetos contenidos en
+                    un bucket.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">removeBucket()</code> elimina el bucket del sistema. El
+                    bucket debe estar vacío para poder eliminarlo.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.s3.buckets.remove.example"></a><p class="title"><b>Ejemplo 64.64. Ejemplo de eliminación de un bucket con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$s3-&gt;cleanBucket("my-own-bucket");
+$s3-&gt;removeBucket("my-own-bucket");
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">getBuckets()</code> devuelve la lista de los nombres de todos los
+                    buckets pertenecientes al usuario.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.s3.buckets.list.example"></a><p class="title"><b>Ejemplo 64.65. Ejemplo de listado de buckets con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$list = $s3-&gt;getBuckets();
+foreach($list as $bucket) {
+  echo "I have bucket $bucket\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">isBucketAvailable()</code> comprueba si el bucket existe y
+                    devuelve <code class="constant">TRUE</code> si es así.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.objects"></a>64.15.7. Operaciones con objetos</h3></div></div></div>
+<p>
+            El objeto es la unidad básica de almacenamiento en S3. Un objeto almacena datos no
+            estructurados, que pueden ser de cualquier tamaño hasta 4 gigabytes. No hay límite en
+            cuanto a cuántos objetos pueden almacenarse en el sistema.
+        </p>
+<p>
+            Los objetos están contenidos en buckets. Un objeto se identifica por su nombre, que
+            puede ser cualquier cadena utf-8. Es habitual utilizar nombres jerárquicos (como
+            <code class="code">Pictures/Myself/CodingInPHP.jpg</code>) para organizar los nombres de los
+            objetos. El nombre del objeto se antepone con el nombre del bucket al usar las funciones
+            de objetos, de modo que para el objeto "mydata" en el bucket "my-own-bucket", el nombre
+            sería <code class="code">my-own-bucket/mydata</code>.
+        </p>
+<p>
+            Los objetos pueden reemplazarse (reescribiendo nuevos datos con la misma clave) o
+            eliminarse, pero no modificarse, ampliarse, etc. El objeto siempre se almacena completo.
+        </p>
+<p>
+            Por defecto, todos los objetos son privados y solo pueden ser accedidos por su
+            propietario. Sin embargo, es posible especificar el objeto con acceso público, en cuyo
+            caso estará disponible a través de la <acronym class="acronym">URL</acronym>:
+            <code class="code">http://s3.amazonaws.com/[bucket-name]/[object-name]</code>.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <code class="methodname">putObject($object, $data, $meta)</code> crea un objeto con
+                    nombre <code class="varname">$object</code> (debe contener el nombre del bucket como prefijo)
+                    con <code class="varname">$data</code> como contenido.
+                </p>
+<p>
+                El parámetro opcional <code class="varname">$meta</code> es el array de metadatos, que
+                actualmente admite los siguientes parámetros como claves:
+                </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="constant">S3_CONTENT_TYPE_HEADER</code></span></dt>
+<dd><p>
+                                Tipo de contenido <acronym class="acronym">MIME</acronym> de los datos. Si no se especifica,
+                                el tipo se deducirá según la extensión del archivo del
+                                nombre del objeto.
+                            </p></dd>
+<dt><span class="term"><code class="constant">S3_ACL_HEADER</code></span></dt>
+<dd>
+<p>
+                                El acceso al elemento. Se pueden utilizar las siguientes constantes de
+                                acceso:
+
+                                </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="constant">S3_ACL_PRIVATE</code></span></dt>
+<dd><p>Solo el propietario tiene acceso al elemento.</p></dd>
+<dt><span class="term"><code class="constant">S3_ACL_PUBLIC_READ</code></span></dt>
+<dd><p>
+                                                Cualquiera puede leer el objeto, pero solo el propietario puede
+                                                escribir. Este ajuste puede utilizarse para almacenar contenido
+                                                de acceso público.
+                                            </p></dd>
+<dt><span class="term"><code class="constant">S3_ACL_PUBLIC_WRITE</code></span></dt>
+<dd><p>
+                                                Cualquiera puede leer o escribir el objeto. Esta política es
+                                                raramente útil.
+                                            </p></dd>
+<dt><span class="term"><code class="constant">S3_ACL_AUTH_READ</code></span></dt>
+<dd><p>
+                                                Solo el propietario tiene acceso de escritura al elemento, y
+                                                otros usuarios autenticados de S3 tienen acceso de lectura. Esto
+                                                es útil para compartir datos entre cuentas de S3
+                                                sin exponerlos al público.
+                                            </p></dd>
+</dl></div>
+<p>
+
+                                Por defecto, todos los elementos son privados.
+                            </p>
+<div class="example">
+<a name="zend.service.amazon.s3.objects.public.example"></a><p class="title"><b>Ejemplo 64.66. Ejemplo de objeto público con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$s3-&gt;putObject("my-own-bucket/Pictures/Me.png", file_get_contents("me.png"),
+    array(Zend_Service_Amazon_S3::S3_ACL_HEADER =&gt;
+          Zend_Service_Amazon_S3::S3_ACL_PUBLIC_READ));
+// or:
+$s3-&gt;putFile("me.png", "my-own-bucket/Pictures/Me.png",
+    array(Zend_Service_Amazon_S3::S3_ACL_HEADER =&gt;
+          Zend_Service_Amazon_S3::S3_ACL_PUBLIC_READ));
+echo "Go to http://s3.amazonaws.com/my-own-bucket/Pictures/Me.png to see me!\n";
+</pre></div>
+</div>
+<br class="example-break">
+</dd>
+</dl></div>
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">getObject($object)</code> recupera los datos del objeto desde el
+                    almacenamiento por nombre.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">removeObject($object)</code> elimina el objeto del
+                    almacenamiento.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">getInfo($object)</code> recupera la información de metadatos
+                    sobre el objeto. La función devolverá un array con la información de metadatos. Algunas
+                    de las claves útiles son:
+
+                    </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term"><code class="code">type</code></span></dt>
+<dd><p>El tipo <acronym class="acronym">MIME</acronym> del elemento.</p></dd>
+<dt><span class="term"><code class="code">size</code></span></dt>
+<dd><p>El tamaño de los datos del objeto.</p></dd>
+<dt><span class="term"><code class="code">mtime</code></span></dt>
+<dd><p>
+                                    Marca de tiempo tipo UNIX de la última modificación del objeto.
+                                </p></dd>
+<dt><span class="term"><code class="code">etag</code></span></dt>
+<dd><p>
+                                    El ETag de los datos, que es el hash MD5 de los datos,
+                                    rodeado de comillas (").
+                                </p></dd>
+</dl></div>
+<p>
+
+                    La función devolverá <code class="constant">FALSE</code> si la clave no
+                    corresponde a ningún objeto existente.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">getObjectsByBucket($bucket)</code> devuelve la lista de las
+                    claves de objeto contenidas en el bucket.
+                </p>
+<div class="example">
+<a name="zend.service.amazon.s3.objects.list.example"></a><p class="title"><b>Ejemplo 64.67. Ejemplo de listado de objetos con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$list = $s3-&gt;getObjectsByBucket("my-own-bucket");
+foreach($list as $name) {
+  echo "I have $name key:\n";
+  $data = $s3-&gt;getObject("my-own-bucket/$name");
+  echo "with data: $data\n";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">isObjectAvailable($object)</code> comprueba si el objeto con
+                    el nombre dado existe.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">putFile($path, $object, $meta)</code> coloca el contenido del
+                    archivo en <code class="varname">$path</code> en el objeto llamado
+                    <code class="varname">$object</code>.
+                </p>
+<p>
+                    El argumento opcional <code class="varname">$meta</code> es el mismo que para
+                    <code class="code">putObject</code>. Si se omite el tipo de contenido, se deducirá
+                    basándose en el nombre del archivo de origen.
+                </p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.streaming"></a>64.15.8. Transmisión de datos</h3></div></div></div>
+<p>
+            Es posible obtener y colocar objetos usando no datos de flujo mantenidos en memoria, sino
+            archivos o flujos <acronym class="acronym">PHP</acronym>. Esto es especialmente útil cuando los tamaños de
+            archivo son grandes, para no sobrepasar los límites de memoria.
+        </p>
+<p>
+            Para recibir un objeto usando transmisión, utilice el método
+            <code class="methodname">getObjectStream($object, $filename)</code>. Este método devolverá
+            <code class="classname">Zend_Http_Response_Stream</code>, que puede utilizarse tal como se describe en
+            la sección <a class="link" href="zend.http.client.advanced.phtml#zend.http.client.streaming" title="38.2.8. Data Streaming">Transmisión de datos del cliente HTTP</a>.
+
+            </p>
+<div class="example">
+<a name="zend.service.amazon.s3.streaming.example1"></a><p class="title"><b>Ejemplo 64.68. Ejemplo de transmisión de datos con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+$response = $amazon-&gt;getObjectStream("mybycket/zftest");
+// copy file
+copy($response-&gt;getStreamName(), "my/downloads/file");
+// use stream
+$fp = fopen("my/downloads/file2", "w");
+stream_copy_to_stream($response-&gt;getStream(), $fp);
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+<p>
+            El segundo parámetro de <code class="methodname">getObjectStream()</code> es opcional y
+            especifica el archivo destino en el que escribir los datos. Si no se especifica, se
+            utiliza un archivo temporal, que se eliminará después de que se destruya el objeto de respuesta.
+        </p>
+<p>
+            Para enviar un objeto usando transmisión, utilice <code class="methodname">putFileStream()</code>, que tiene
+            la misma firma que <code class="methodname">putFile()</code> pero utilizará transmisión y no
+            leerá el archivo en memoria.
+        </p>
+<p>
+            Además, puede pasar un recurso de flujo al parámetro de datos del método
+            <code class="methodname">putObject()</code>, en cuyo caso los datos se leerán del flujo al enviar
+            la petición al servidor.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.s3.streams"></a>64.15.9. Envoltorio de flujo</h3></div></div></div>
+<p>
+            Además de las interfaces descritas anteriormente,
+            <code class="classname">Zend_Service_Amazon_S3</code> también admite funcionar como un envoltorio
+            de flujo. Para ello, necesita registrar el objeto cliente como el envoltorio de flujo:
+        </p>
+<div class="example">
+<a name="zend.service.amazon.s3.streams.example"></a><p class="title"><b>Ejemplo 64.69. Ejemplo de flujos con Zend_Service_Amazon_S3</b></p>
+<div class="example-contents"><pre class="programlisting">
+require_once 'Zend/Service/Amazon/S3.php';
+
+$s3 = new Zend_Service_Amazon_S3($my_aws_key, $my_aws_secret_key);
+
+$s3-&gt;registerStreamWrapper("s3");
+
+mkdir("s3://my-own-bucket");
+file_put_contents("s3://my-own-bucket/testdata", "mydata");
+
+echo file_get_contents("s3://my-own-bucket/testdata");
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Las operaciones de directorio (<code class="code">mkdir</code>, <code class="code">rmdir</code>, <code class="code">opendir</code>,
+            etc.) operarán sobre buckets, por lo que sus argumentos deben tener la forma de
+            <code class="code">s3://bucketname</code>. Las operaciones de archivo operan sobre objetos. Se admite la
+            creación, lectura, escritura, eliminación, obtención de estadísticas y listado de directorios de objetos.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.securitygroups.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.sqs.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.14. Zend_Service_Amazon_Ec2: Grupos de seguridad </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.16. Zend_Service_Amazon_Sqs</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

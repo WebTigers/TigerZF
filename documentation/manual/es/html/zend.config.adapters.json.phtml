@@ -1,0 +1,224 @@
+<?php $title = '21.4. Zend_Config_Json'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">21.4. Zend_Config_Json</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.config.adapters.ini.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 21. Zend_Config</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.adapters.xml.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.config.adapters.json"></a>21.4. Zend_Config_Json</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.json.intro"></a>21.4.1. Resumen</h3></div></div></div>
+<p>
+            <a class="ulink" href="http://www.json.org/" target="_top">JSON</a> es un acrónimo de "JavaScript Object
+            Notation"; aunque compatible con JavaScript, también está pensado como un formato de
+            intercambio de datos multilenguaje de propósito general. <code class="classname">Zend_Config_Json</code> es una
+            extensión ligera de <code class="classname">Zend_Config</code> que utiliza <acronym class="acronym">JSON</acronym>
+            como formato de serialización.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.json.quick-start"></a>21.4.2. Inicio rápido</h3></div></div></div>
+<p>
+            A continuación se muestra una versión en <acronym class="acronym">JSON</acronym> de una configuración de aplicación estándar.
+        </p>
+<pre class="programlisting">
+{
+    "production":{
+        "phpSettings":{
+            "display_startup_errors": false,
+            "display_errors": false
+        },
+        "includePaths":{
+            "library": "APPLICATION_PATH/../library"
+        },
+        "bootstrap":{
+            "path": "APPLICATION_PATH/Bootstrap.php",
+            "class": "Bootstrap"
+        },
+        "appnamespace": "Application",,
+        "resources":{
+            "frontController":{
+                "controllerDirectory": "APPLICATION_PATH/controllers",
+                "moduleDirectory": "APPLICATION_PATH/modules",
+                "params":{
+                    "displayExceptions": false
+                }
+            },
+            "modules":[],
+            "db":{
+                "adapter": "pdo_sqlite",
+                "params":{
+                    "dbname": "APPLICATION_PATH/../data/db/application.db"
+                }
+            },
+            "layout":{
+                "layoutPath": "APPLICATION_PATH/layouts/scripts/"
+            }
+        }
+    },
+    "staging":{
+        "_extends": "production"
+    },
+    "testing":{
+        "_extends": "production",
+        "phpSettings":{
+            "display_startup_errors": true,
+            "display_errors": true
+        },
+    },
+    "development":{
+        "_extends": "production",
+        "phpSettings":{
+            "display_startup_errors": true,
+            "display_errors": true
+        },
+        "resources":{
+            "frontController":{
+                "params":{
+                    "displayExceptions": true
+                }
+            }
+        }
+    }
+}
+</pre>
+<p>
+            Para utilizarlo, simplemente se instancia <code class="classname">Zend_Config_Json</code>, apuntando
+            a la ubicación de este archivo e indicando la sección del archivo que se desea cargar. De
+            forma predeterminada, los nombres de constantes encontrados en los valores serán sustituidos por sus
+            valores correspondientes.
+        </p>
+<pre class="programlisting">
+$config = new Zend_Config_Json(
+    APPLICATION_PATH . '/configs/application.json',
+    APPLICATION_ENV
+);
+</pre>
+<p>
+            Una vez instanciado, se utiliza como cualquier otro objeto de configuración.
+        </p>
+<pre class="programlisting">
+$db = Zend_Db::factory($config-&gt;resources-&gt;db);
+</pre>
+<div class="warning"><table border="0" summary="Warning: Use Constants With Care">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Utilice las constantes con precaución</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <acronym class="acronym">JSON</acronym> tiene una estructura estricta en cuanto a los tipos de datos. Por ello,
+                es necesario asegurarse de que las constantes se usan correctamente. Para las constantes que tienen
+                valores de tipo cadena, ponga los valores de la constante entre comillas dobles (""). Para valores
+                que no son de tipo cadena, puede omitir las comillas -- pero asegúrese absolutamente de que no
+                están devolviendo cadenas, ya que de lo contrario encontrará errores de análisis en su
+                archivo de configuración. En caso de duda, encierre la constante entre comillas dobles.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.json.options"></a>21.4.3. Opciones de configuración</h3></div></div></div>
+<p>
+            Las siguientes opciones pueden pasarse como claves al tercer argumento del constructor, <code class="varname">$options</code>.
+        </p>
+<div class="variablelist">
+<p class="title"><b>Opciones de Zend_Config_Json</b></p>
+<dl class="variablelist">
+<dt><span class="term">allow_modifications/allowModifications</span></dt>
+<dd><p>
+                        El comportamiento predeterminado de <code class="classname">Zend_Config</code> es marcar el
+                        objeto como inmutable una vez cargado. Pasar este indicador con un valor booleano
+                        <code class="constant">true</code> habilitará las modificaciones en el objeto.
+                    </p></dd>
+<dt><span class="term">skip_extends/skipExtends</span></dt>
+<dd><p>
+                        De forma predeterminada, cada vez que una sección extiende otra,
+                        <code class="classname">Zend_Config</code> combinará la sección con la sección
+                        que extiende. Especificar un valor booleano <code class="constant">true</code> en esta
+                        opción desactivará esta funcionalidad, proporcionando únicamente la configuración definida
+                        explícitamente en esa sección.
+                    </p></dd>
+<dt><span class="term">ignore_constants</span></dt>
+<dd>
+<p>
+                        De forma predeterminada, <code class="classname">Zend_Config_Json</code> reemplazará los nombres
+                        de constantes encontrados en los valores por el valor de la constante definida. Puede pasar un
+                        valor booleano <code class="constant">true</code> a esta opción para desactivar esta
+                        funcionalidad.
+                    </p>
+<p>
+                        Tenga en cuenta que ignorar las constantes puede provocar potencialmente errores de análisis,
+                        particularmente si está usando constantes para valores enteros, de punto flotante o booleanos.
+                        La práctica más segura es encerrar las constantes entre comillas.
+                    </p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.config.adapters.json.methods"></a>21.4.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.config.adapters.json.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$json, $section = null, $options = false</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Constructor. <code class="varname">$json</code> debe ser bien una cadena
+                        <acronym class="acronym">JSON</acronym> válida, o hacer referencia a una ubicación de sistema de archivos válida
+                        que contenga un archivo de configuración <acronym class="acronym">JSON</acronym>.
+                        <code class="varname">$section</code>, si se especifica, indica una sección específica de
+                        el archivo de configuración a usar. <code class="varname">$options</code> se discute en
+                        la <a class="link" href="zend.config.adapters.json.phtml#zend.config.adapters.json.options" title="21.4.3. Configuration Options">sección de
+                            opciones</a>.
+                    </p></dd>
+<dt>
+<a name="zend.config.adapters.json.methods.set-ignore-constants"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setIgnoreConstants</span>(<span class="methodparam">$flag</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Esta función <span class="emphasis"><em>estática</em></span> puede usarse para sobrescribir globalmente
+                        la configuración predeterminada sobre cómo se gestionan las constantes encontradas en cadenas
+                        <acronym class="acronym">JSON</acronym>. De forma predeterminada, los nombres de constantes se reemplazan por los
+                        valores de constante correspondientes; pasar un valor booleano <code class="constant">true</code>
+                        a este método sobrescribirá ese comportamiento. (También puede sobrescribirlo
+                        por instancia mediante la opción <code class="varname">ignore_constants</code>.)
+                    </p></dd>
+<dt>
+<a name="zend.config.adapters.json.methods.ignore-constants"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">ignoreConstants</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Este método <span class="emphasis"><em>estático</em></span> proporciona la configuración actual para
+                        el indicador <code class="varname">ignore_constants</code>.
+                    </p></dd>
+</dl></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.config.adapters.ini.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.config.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.adapters.xml.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">21.3. Zend_Config_Ini </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 21.5. Zend_Config_Xml</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

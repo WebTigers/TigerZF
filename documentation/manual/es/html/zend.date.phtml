@@ -1,0 +1,236 @@
+<?php $title = 'Capítulo 26. Zend_Date'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 26. Zend_Date</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.additional.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.date.definition.theory.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.date"></a>Capítulo 26. Zend_Date</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.date.phtml#zend.date.introduction">26.1. Introducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.phtml#zend.date.setdefaulttimezone">26.1.1. Establecer siempre una zona horaria predeterminada</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.phtml#zend.date.why">26.1.2. ¿Por qué usar Zend_Date?</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.date.definition.theory.phtml">26.2. Teoría de funcionamiento</a></span></dt>
+<dd><dl><dt><span class="sect2"><a href="zend.date.definition.theory.phtml#zend.date.theory.internals">26.2.1. Aspectos internos</a></span></dt></dl></dd>
+<dt><span class="sect1"><a href="zend.date.basic.phtml">26.3. Métodos básicos</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.basic.phtml#zend.date.basic.creation">26.3.1. Fecha actual</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.basic.phtml#zend.date.basic.functions">26.3.2. Zend_Date mediante ejemplos</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.date.basic.phtml#zend.date.simple.functions.get">26.3.2.1. Mostrar una fecha</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.basic.phtml#zend.date.simple.functions.set">26.3.2.2. Establecer una fecha</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.basic.phtml#zend.date.simple.functions.add">26.3.2.3. Sumar y restar fechas</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.basic.phtml#zend.date.simple.functions.compare">26.3.2.4. Comparación de fechas</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.date.overview.phtml">26.4. Resumen de la API de Zend_Date</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.options">26.4.1. Opciones de Zend_Date</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#zend.date.options.formattype">26.4.1.1. Seleccionar el tipo de formato de fecha</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#zend.date.options.fixdst">26.4.1.2. DST y aritmética de fechas</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#zend.date.options.extendmonth">26.4.1.3. Cálculos de meses</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#zend.date.options.cache">26.4.1.4. Acelerar la localización y normalización de fechas con Zend_Cache</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#zend.date.options.timesync">26.4.1.5. Recibir marcas de tiempo sincronizadas con Zend_TimeSync</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.values">26.4.2. Trabajar con valores de fecha</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#id.date.basic">26.4.3. Operaciones básicas de Zend_Date comunes a muchas partes de fecha</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#id.date.basic.parts">26.4.3.1. Lista de partes de fecha</a></span></dt>
+<dt><span class="sect3"><a href="zend.date.overview.phtml#id.date.basic.operations">26.4.3.2. Lista de operaciones de fecha</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.others.comparison">26.4.4. Comparar fechas</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.others.gettingparts">26.4.5. Obtener fechas y partes de fecha</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.others.fractions">26.4.6. Trabajar con fracciones de segundos</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.overview.phtml#zend.date.other.sun">26.4.7. Amanecer / Atardecer</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.date.creation.phtml">26.5. Creación de fechas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.creation.phtml#zend.date.creation.actual">26.5.1. Crear la fecha actual</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.creation.phtml#zend.date.creation.database">26.5.2. Crear una fecha a partir de la base de datos</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.creation.phtml#zend.date.creation.array">26.5.3. Crear fechas a partir de un array</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.date.constants.phtml">26.6. Constantes para funciones generales de fecha</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.constants.phtml#zend.date.constants.using">26.6.1. Uso de constantes</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.constants.phtml#zend.date.constants.list">26.6.2. Lista de todas las constantes</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.constants.phtml#zend.date.constants.selfdefinedformats">26.6.3. Formatos de SALIDA autodefinidos con ISO</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.constants.phtml#zend.date.constants.phpformats">26.6.4. Formatos de SALIDA autodefinidos usando los especificadores de formato de date() de PHP</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.date.additional.phtml">26.7. Ejemplos de trabajo</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.date.additional.phtml#zend.date.additional.checking">26.7.1. Comprobación de fechas</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.additional.phtml#zend.date.additional.sunrise-sunset">26.7.2. Amanecer y atardecer</a></span></dt>
+<dt><span class="sect2"><a href="zend.date.additional.phtml#zend.date.additional.timezones">26.7.3. Zonas horarias</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.date.introduction"></a>26.1. Introducción</h2></div></div></div>
+<p>
+        El componente <code class="classname">Zend_Date</code> ofrece una <acronym class="acronym">API</acronym> detallada,
+        pero simple, para manipular fechas y horas. Sus métodos aceptan una amplia variedad
+        de tipos de información, incluyendo partes de fecha, en numerosas combinaciones, dando lugar a muchas
+        características y posibilidades por encima de las funciones de fecha existentes en <acronym class="acronym">PHP</acronym>.
+        Para las últimas actualizaciones del manual, consulte <a class="ulink" href="http://framework.zend.com/wiki/display/ZFDOCDEV/Home" target="_top">nuestro manual en línea (sincronizado
+            frecuentemente con Subversion)</a>.
+    </p>
+<p>
+        Aunque la simplicidad sigue siendo el objetivo, trabajar con fechas y horas localizadas al
+        modificar, combinar y comparar partes implica cierta complejidad inevitable. Tanto las fechas
+        como las horas a menudo se escriben de forma diferente en distintas configuraciones regionales. Por ejemplo, algunos ponen
+        primero el mes, mientras que otros escriben primero el año al expresar fechas de calendario. Para más
+        información sobre el manejo de la localización y la normalización, consulte <a class="link" href="zend.locale.date.datesandtimes.phtml" title="43.4. Working with Dates and Times"><code class="classname">Zend_Locale</code></a>.
+    </p>
+<p>
+        <code class="classname">Zend_Date</code> también admite nombres abreviados de meses en muchos
+        idiomas. <code class="classname">Zend_Locale</code> facilita la normalización de nombres localizados
+        de meses y días de la semana a marcas de tiempo, que a su vez pueden mostrarse localizadas para otras
+        regiones.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.setdefaulttimezone"></a>26.1.1. Establecer siempre una zona horaria predeterminada</h3></div></div></div>
+<p>
+            Antes de usar cualquier función relacionada con fechas en <acronym class="acronym">PHP</acronym> o Zend Framework,
+            primero asegúrese de que su aplicación tenga una zona horaria predeterminada correcta, ya sea estableciendo
+            la variable de entorno TZ, usando el ajuste <span class="property">date.timezone</span>
+            de <code class="filename">php.ini</code>, o usando <a class="ulink" href="http://php.net/date_default_timezone_set" target="_top">date_default_timezone_set()</a>.
+            En <acronym class="acronym">PHP</acronym>, podemos ajustar todas las funciones relacionadas con fecha y hora para que funcionen
+            para un usuario particular estableciendo una zona horaria predeterminada según las expectativas del usuario.
+            Para una lista completa de configuraciones de zona horaria, consulte la <a class="ulink" href="http://unicode.org/cldr/data/diff/supplemental/territory_containment_un_m_49.html" target="_top">lista de identificadores
+                de zona horaria de CLDR</a>.
+        </p>
+<div class="example">
+<a name="zend.date.setdefaulttimezone.example-1"></a><p class="title"><b>Ejemplo 26.1. Establecer una zona horaria predeterminada</b></p>
+<div class="example-contents"><pre class="programlisting">
+// timezone for an American in California
+date_default_timezone_set('America/Los_Angeles');
+// timezone for a German in Germany
+date_default_timezone_set('Europe/Berlin');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <span class="emphasis"><em>Al crear instancias de <code class="classname">Zend_Date</code>, su zona horaria se
+            convertirá automáticamente en la zona horaria predeterminada actual!</em></span> Por lo tanto, la configuración de zona horaria
+            tendrá en cuenta cualquier horario de verano (<acronym class="acronym">DST</acronym>) vigente,
+            eliminando la necesidad de especificar explícitamente el <acronym class="acronym">DST</acronym>.
+        </p>
+<p>
+            Tenga en cuenta que las zonas horarias <span class="emphasis"><em><acronym class="acronym">UTC</acronym></em></span> y
+            <span class="emphasis"><em><acronym class="acronym">GMT</acronym></em></span> no incluyen el horario de verano. Esto
+            significa que incluso si define manualmente que <code class="classname">Zend_Date</code> debería funcionar
+            con <acronym class="acronym">DST</acronym>, se desactivaría automáticamente para las instancias
+            de <code class="classname">Zend_Date</code> que se hayan establecido en <acronym class="acronym">UTC</acronym> o
+            <acronym class="acronym">GMT</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.why"></a>26.1.2. ¿Por qué usar Zend_Date?</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Date</code> ofrece las siguientes características, que amplían el alcance
+            de las funciones de fecha de <acronym class="acronym">PHP</acronym>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    <acronym class="acronym">API</acronym> simple
+                </p>
+<p>
+                    <code class="classname">Zend_Date</code> ofrece una <acronym class="acronym">API</acronym> muy simple,
+                    que combina lo mejor de la funcionalidad de fecha y hora de cuatro lenguajes de
+                    programación. Es posible, por ejemplo, sumar o comparar dos horas en una
+                    sola línea.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Completamente internacionalizado
+                </p>
+<p>
+                    Se admiten todos los nombres completos y abreviados de meses y días de la semana para más
+                    de 130 idiomas. Los métodos admiten tanto la entrada como la salida de fechas usando los
+                    nombres localizados de meses y días de la semana, en el formato convencional asociado
+                    a cada configuración regional.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Marcas de tiempo ilimitadas
+                </p>
+<p>
+                    Aunque la documentación de <acronym class="acronym">PHP</acronym> 5.2 indica: "El rango válido de una marca de tiempo
+                    normalmente va desde el vie, 13 dic 1901 20:45:54 <acronym class="acronym">GMT</acronym> hasta el mar, 19
+                    ene 2038 03:14:07 <acronym class="acronym">GMT</acronym>", <code class="classname">Zend_Date</code>
+                    admite un rango casi ilimitado, con la ayuda de la extensión BCMath. Si
+                    BCMath no está disponible, entonces <code class="classname">Zend_Date</code> tendrá soporte
+                    reducido, solo para marcas de tiempo dentro del rango del tipo float
+                    admitido por su servidor. "El tamaño de un float depende de la plataforma, aunque un
+                    máximo de <span class="command"><strong>~1.8e308</strong></span> con una precisión de aproximadamente 14 dígitos
+                    decimales es un valor común (eso es el formato <acronym class="acronym">IEEE</acronym> de 64 bits)." [
+                    <a class="ulink" href="http://www.php.net/float" target="_top">http://www.php.net/float</a> ].
+                    Además, las limitaciones inherentes de los tipos de datos float, y el error de redondeo de
+                    los números float pueden introducir errores en los cálculos. Para evitar estos problemas,
+                    los componentes I18n de Zend Framework usan la extensión BCMath, si está disponible.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Soporte para especificaciones de fecha <acronym class="acronym">ISO-8601</acronym>
+                </p>
+<p>
+                    Se admiten las especificaciones de fecha <acronym class="acronym">ISO-8601</acronym>. Incluso las especificaciones
+                    de fecha <acronym class="acronym">ISO-8601</acronym> parcialmente conformes serán identificadas.
+                    Estos formatos de fecha son particularmente útiles al trabajar con bases de datos. Por
+                    ejemplo, aunque MsSQL y <a class="ulink" href="http://dev.mysql.com/doc/refman/5.0/en/date-and-time-functions.html" target="_top">MySQL</a>
+                    difieren un poco entre sí, ambos son admitidos por
+                    <code class="classname">Zend_Date</code> usando la constante de especificación de formato <a class="link" href="zend.date.constants.phtml#zend.date.constants.list" title="26.6.2. List of All Constants">Zend_Date::ISO_8601</a>.
+                    Cuando las cadenas de fecha se ajustan a "<span class="command"><strong>Y/m/d</strong></span>"
+                    o "<span class="command"><strong>Y-m-d H:i:s</strong></span>", según los tokens de formato de
+                    <code class="methodname">date()</code> de <acronym class="acronym">PHP</acronym>, use
+                    el soporte integrado de <code class="classname">Zend_Date</code> para
+                    fechas con formato <acronym class="acronym">ISO-8601</acronym>.
+                </p>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                    Calcular amanecer y atardecer
+                </p>
+<p>
+                    Para cualquier lugar y día, se pueden mostrar las horas de amanecer y atardecer, para
+                    que no se pierda ni un segundo de luz solar mientras trabaja en su
+                    proyecto <acronym class="acronym">PHP</acronym> favorito :)
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.additional.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.date.definition.theory.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.10. Información adicional sobre Zend_Currency </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 26.2. Teoría de funcionamiento</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

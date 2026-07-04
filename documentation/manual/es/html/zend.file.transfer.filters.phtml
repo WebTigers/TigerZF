@@ -1,0 +1,462 @@
+<?php $title = '34.3. Filtros para Zend_File_Transfer'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">34.3. Filtros para Zend_File_Transfer</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.file.transfer.validators.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 34. Zend_File</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.filter.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.file.transfer.filters"></a>34.3. Filtros para Zend_File_Transfer</h2></div></div></div>
+<p>
+        <code class="classname">Zend_File_Transfer</code> se entrega con varios filtros relacionados
+        con archivos que pueden usarse para automatizar varias tareas que suelen realizarse con archivos.
+        Tenga en cuenta que los filtros de archivo se aplican después de la validación. Además, los filtros
+        de archivo se comportan de forma ligeramente distinta a otros filtros. Siempre devolverán el nombre
+        del archivo y no el contenido modificado (lo cual sería una mala idea al trabajar con archivos de
+        1 GB). Todos los filtros que se proporcionan con
+        <code class="classname">Zend_File_Transfer</code> se pueden encontrar en el componente
+        <code class="classname">Zend_Filter</code> y se denominan
+        <code class="classname">Zend_Filter_File_*</code>. Los siguientes filtros están actualmente disponibles:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="classname">Decrypt</code>: Este filtro puede descifrar un archivo cifrado.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Encrypt</code>: Este filtro puede cifrar un archivo.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">LowerCase</code>: Este filtro puede convertir a minúsculas el
+                contenido de un archivo de texto.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Rename</code>: Este filtro puede renombrar archivos, cambiar la
+                ubicación e incluso forzar la sobrescritura de archivos existentes.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">UpperCase</code>: Este filtro puede convertir a mayúsculas el
+                contenido de un archivo de texto.
+            </p></li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.usage"></a>34.3.1. Uso de filtros con Zend_File_Transfer</h3></div></div></div>
+<p>
+            El uso de filtros es bastante sencillo. Existen varios métodos para agregar y
+            manipular filtros.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">addFilter($filter, $options = null, $files =
+                        null)</code>: Añade el filtro dado a la pila de filtros
+                    (opcionalmente solo al archivo o archivos especificados).
+                    <code class="varname">$filter</code> puede ser una instancia real de filtro,
+                    o un nombre corto que especifique el tipo de filtro
+                    (por ejemplo, 'Rename').
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">addFilters(array $filters, $files =
+                        null)</code>: Añade los filtros dados a la pila de
+                    filtros. Cada entrada puede ser un par tipo/opciones de filtro,
+                    o un array con la clave 'filter'
+                    que especifica el filtro (todas las demás opciones se
+                    considerarán opciones del filtro para su instanciación).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setFilters(array $filters, $files =
+                        null)</code>: Sobrescribe cualquier filtro existente con
+                    los filtros especificados. Los filtros deben seguir la
+                    sintaxis de <code class="methodname">addFilters()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">hasFilter($name)</code>: Indica si se
+                    ha registrado un filtro.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getFilter($name)</code>: Devuelve un filtro
+                    previamente registrado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getFilters($files = null)</code>: Devuelve
+                    los filtros registrados; si se pasa <code class="varname">$files</code>,
+                    devuelve los filtros para ese archivo en particular o conjunto de
+                    archivos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">removeFilter($name)</code>: Elimina un filtro
+                    previamente registrado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">clearFilters()</code>: Elimina todos los
+                    filtros registrados.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.file.transfer.filters.usage.example"></a><p class="title"><b>Ejemplo 34.30. Añadir filtros a una transferencia de archivos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer();
+
+// Establece una nueva ruta de destino
+$upload-&gt;addFilter('Rename', 'C:\picture\uploads');
+
+// Establece una nueva ruta de destino y sobrescribe los archivos existentes
+$upload-&gt;addFilter('Rename',
+                   array('target' =&gt; 'C:\picture\uploads',
+                         'overwrite' =&gt; true));
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.file.transfer.filters.usage.exampletwo"></a><p class="title"><b>Ejemplo 34.31. Limitar filtros a archivos individuales</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">addFilter()</code>, <code class="methodname">addFilters()</code>, y
+                <code class="methodname">setFilters()</code> aceptan cada uno un argumento final
+                <code class="varname">$files</code>. Este argumento puede usarse para
+                especificar un archivo particular o un array de archivos sobre los que aplicar el
+                filtro dado.
+            </p>
+<pre class="programlisting">
+$upload = new Zend_File_Transfer();
+
+// Establece una nueva ruta de destino y la limita solo a 'file2'
+$upload-&gt;addFilter('Rename', 'C:\picture\uploads', 'file2');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Generalmente debería usar simplemente el método <code class="methodname">addFilters()</code>, que
+            puede llamarse varias veces.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.usage.examplemultiple"></a><p class="title"><b>Ejemplo 34.32. Añadir varios filtros</b></p>
+<div class="example-contents">
+<p>
+                A menudo es más sencillo simplemente llamar a <code class="methodname">addFilter()</code> varias veces.
+                Una llamada por cada filtro. Esto también aumenta la legibilidad y hace que su código
+                sea más mantenible. Como todos los métodos ofrecen una interfaz fluida, puede encadenar
+                las llamadas como se muestra a continuación:
+            </p>
+<pre class="programlisting">
+$upload = new Zend_File_Transfer();
+
+// Establece un tamaño de archivo de 20000 bytes
+$upload-&gt;addFilter('Rename', 'C:\picture\newjpg', 'file1')
+       -&gt;addFilter('Rename', 'C:\picture\newgif', 'file2');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Tenga en cuenta que, aunque está permitido establecer el mismo filtro
+                varias veces, hacerlo puede ocasionar problemas al usar
+                diferentes opciones para el mismo filtro.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.decrypt"></a>34.3.2. Filtro Decrypt</h3></div></div></div>
+<p>
+            El filtro <code class="classname">Decrypt</code> permite descifrar un archivo cifrado.
+        </p>
+<p>
+            Este filtro hace uso de <code class="classname">Zend_Filter_Decrypt</code>. Admite las
+            extensiones <code class="classname">Mcrypt</code> y <code class="classname">OpenSSL</code> de
+            <acronym class="acronym">PHP</acronym>. Consulte la sección relacionada para obtener detalles sobre cómo establecer las
+            opciones para el descifrado y qué opciones se admiten.
+        </p>
+<p>
+            Este filtro admite una opción adicional que puede usarse para guardar el archivo descifrado
+            con otro nombre de archivo. Establezca la opción <span class="property">filename</span> para cambiar el
+            nombre de archivo donde se almacenará el archivo descifrado. Si omite esta opción, el
+            archivo descifrado sobrescribirá el archivo cifrado original.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.decrypt.example1"></a><p class="title"><b>Ejemplo 34.33. Uso del filtro Decrypt con Mcrypt</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+
+// Añade un filtro para descifrar el archivo cifrado subido
+// con mcrypt y la clave mykey
+$upload-&gt;addFilter('Decrypt',
+    array('adapter' =&gt; 'mcrypt', 'key' =&gt; 'mykey'));
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.file.transfer.filters.decrypt.example2"></a><p class="title"><b>Ejemplo 34.34. Uso del filtro Decrypt con OpenSSL</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+
+// Añade un filtro para descifrar el archivo cifrado subido
+// con openssl y las claves proporcionadas
+$upload-&gt;addFilter('Decrypt',
+    array('adapter' =&gt; 'openssl',
+          'private' =&gt; '/path/to/privatekey.pem',
+          'envelope' =&gt; '/path/to/envelopekey.pem'));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.encrypt"></a>34.3.3. Filtro Encrypt</h3></div></div></div>
+<p>
+            El filtro <code class="classname">Encrypt</code> permite cifrar un archivo.
+        </p>
+<p>
+            Este filtro hace uso de <code class="classname">Zend_Filter_Encrypt</code>. Admite las
+            extensiones <code class="classname">Mcrypt</code> y <code class="classname">OpenSSL</code> de
+            <acronym class="acronym">PHP</acronym>. Consulte la sección relacionada para obtener detalles sobre cómo establecer las
+            opciones para el cifrado y qué opciones se admiten.
+        </p>
+<p>
+            Este filtro admite una opción adicional que puede usarse para guardar el archivo cifrado
+            con otro nombre de archivo. Establezca la opción <span class="property">filename</span> para cambiar el
+            nombre de archivo donde se almacenará el archivo cifrado. Si omite esta opción, el
+            archivo cifrado sobrescribirá el archivo original.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.encrypt.example1"></a><p class="title"><b>Ejemplo 34.35. Uso del filtro Encrypt con Mcrypt</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+
+// Añade un filtro para cifrar el archivo subido
+// con mcrypt y la clave mykey
+$upload-&gt;addFilter('Encrypt',
+    array('adapter' =&gt; 'mcrypt', 'key' =&gt; 'mykey'));
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.file.transfer.filters.encrypt.example2"></a><p class="title"><b>Ejemplo 34.36. Uso del filtro Encrypt con OpenSSL</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+
+// Añade un filtro para cifrar el archivo subido
+// con openssl y las claves proporcionadas
+$upload-&gt;addFilter('Encrypt',
+    array('adapter' =&gt; 'openssl',
+          'public' =&gt; '/path/to/publickey.pem'));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.lowercase"></a>34.3.4. Filtro LowerCase</h3></div></div></div>
+<p>
+            El filtro <code class="classname">LowerCase</code> permite cambiar a minúsculas el contenido de un
+            archivo. Solo debería usar este filtro en archivos de texto.
+        </p>
+<p>
+            En la inicialización puede indicar una cadena que se usará como codificación. O puede usar
+            el método <code class="methodname">setEncoding()</code> para establecerla posteriormente.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.lowercase.example"></a><p class="title"><b>Ejemplo 34.37. Uso del filtro LowerCase</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+$upload-&gt;addValidator('MimeType', 'text');
+
+// Añade un filtro para convertir a minúsculas el archivo de texto subido
+$upload-&gt;addFilter('LowerCase');
+
+// Añade un filtro para convertir a minúsculas el archivo subido pero solo para uploadfile1
+$upload-&gt;addFilter('LowerCase', null, 'uploadfile1');
+
+// Añade un filtro para convertir a minúsculas con codificación establecida en ISO-8859-1
+$upload-&gt;addFilter('LowerCase', 'ISO-8859-1');
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Tenga en cuenta que, debido a que las opciones para el filtro LowerCase son opcionales,
+                debe indicar <code class="constant">NULL</code> como segundo parámetro (las opciones) cuando
+                desee limitarlo a un único elemento de archivo.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.rename"></a>34.3.5. Filtro Rename</h3></div></div></div>
+<p>
+            El filtro <code class="classname">Rename</code> permite cambiar el destino de la subida,
+            el nombre de archivo y también sobrescribir archivos existentes. Admite las siguientes opciones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="property">source</span>: El nombre y destino del archivo antiguo que
+                    se va a renombrar.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">target</span>: El nuevo directorio, o nombre de archivo del archivo.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="property">overwrite</span>: Establece si el archivo antiguo sobrescribe al nuevo si
+                    ya existe. El valor predeterminado es <code class="constant">FALSE</code>.
+                </p></li>
+</ul></div>
+<p>
+            Adicionalmente también puede usar el método <code class="methodname">setFile()</code> para establecer
+            archivos, lo que elimina todos los establecidos previamente, <code class="methodname">addFile()</code> para añadir un nuevo
+            archivo a los existentes, y <code class="methodname">getFile()</code> para obtener todos los archivos
+            realmente establecidos. Para simplificar las cosas, este filtro entiende varias notaciones y tanto los
+            métodos como el constructor entienden las mismas notaciones.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.rename.example"></a><p class="title"><b>Ejemplo 34.38. Uso del filtro Rename</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+
+// Establece una nueva ruta de destino para todos los archivos
+$upload-&gt;addFilter('Rename', 'C:\mypics\new');
+
+// Establece una nueva ruta de destino solo para uploadfile1
+$upload-&gt;addFilter('Rename', 'C:\mypics\newgifs', 'uploadfile1');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Puede usar diferentes notaciones. A continuación se muestra una tabla en la que encontrará una descripción y
+            la intención de las notaciones admitidas. Tenga en cuenta que cuando use el Adaptador o el
+            Elemento de formulario no podrá usar todas las notaciones descritas.
+        </p>
+<div class="table">
+<a name="zend.file.transfer.filters.rename.notations"></a><p class="title"><b>Tabla 34.1. Diferentes notaciones del filtro rename y su significado</b></p>
+<div class="table-contents"><table class="table" summary="Different notations of the rename filter and their meaning" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">notación</th>
+<th align="left">descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">
+                            <code class="methodname">addFile('C:\uploads')</code>
+                        </td>
+<td align="left">
+                            Especifica una nueva ubicación para todos los archivos cuando la cadena dada es un
+                            directorio. Tenga en cuenta que obtendrá una excepción si el archivo ya
+                            existe; vea el parámetro overwrite.
+                        </td>
+</tr>
+<tr>
+<td align="left">
+                            <code class="methodname">addFile('C:\uploads\file.ext')</code>
+                        </td>
+<td align="left">
+                            Especifica una nueva ubicación y nombre de archivo para todos los archivos cuando la
+                            cadena dada no se detecta como directorio. Tenga en cuenta que obtendrá una excepción
+                            si el archivo ya existe; vea el parámetro overwrite.
+                        </td>
+</tr>
+<tr>
+<td align="left">
+                            <code class="methodname">addFile(array('C:\uploads\file.ext', 'overwrite' =&gt;
+                                true)</code>)
+                        </td>
+<td align="left">
+                            Especifica una nueva ubicación y nombre de archivo para todos los archivos cuando la
+                            cadena dada no se detecta como directorio y sobrescribe un archivo existente con
+                            el mismo nombre de destino. Tenga en cuenta que no recibirá ninguna notificación de que un
+                            archivo fue sobrescrito.
+                        </td>
+</tr>
+<tr>
+<td align="left">
+                            <code class="methodname">addFile(array('source' =&gt; 'C:\temp\uploads', 'target' =&gt;
+                                'C:\uploads')</code>)
+                        </td>
+<td align="left">
+                            Especifica una nueva ubicación para todos los archivos en la ubicación anterior cuando las
+                            cadenas dadas se detectan como directorios. Tenga en cuenta que obtendrá una
+                            excepción si el archivo ya existe; vea el parámetro overwrite.
+                        </td>
+</tr>
+<tr>
+<td align="left">
+                            addFile(array('source' =&gt; 'C:\temp\uploads', 'target' =&gt; 'C:\uploads',
+                            'overwrite' =&gt; true))
+                        </td>
+<td align="left">
+                            Especifica una nueva ubicación para todos los archivos en la ubicación anterior cuando las
+                            cadenas dadas se detectan como directorios y sobrescribe un archivo existente
+                            con el mismo nombre de destino. Tenga en cuenta que no recibirá ninguna notificación de que
+                            un archivo fue sobrescrito.
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.file.transfer.filters.uppercase"></a>34.3.6. Filtro UpperCase</h3></div></div></div>
+<p>
+            El filtro <code class="classname">UpperCase</code> permite cambiar a mayúsculas el contenido de un
+            archivo. Solo debería usar este filtro en archivos de texto.
+        </p>
+<p>
+            En la inicialización puede indicar una cadena que se usará como codificación. O puede usar
+            el método <code class="methodname">setEncoding()</code> para establecerla posteriormente.
+        </p>
+<div class="example">
+<a name="zend.file.transfer.filters.uppercase.example"></a><p class="title"><b>Ejemplo 34.39. Uso del filtro UpperCase</b></p>
+<div class="example-contents"><pre class="programlisting">
+$upload = new Zend_File_Transfer_Adapter_Http();
+$upload-&gt;addValidator('MimeType', 'text');
+
+// Añade un filtro para convertir a mayúsculas el archivo de texto subido
+$upload-&gt;addFilter('UpperCase');
+
+// Añade un filtro para convertir a mayúsculas el archivo subido pero solo para uploadfile1
+$upload-&gt;addFilter('UpperCase', null, 'uploadfile1');
+
+// Añade un filtro para convertir a mayúsculas con codificación establecida en ISO-8859-1
+$upload-&gt;addFilter('UpperCase', 'ISO-8859-1');
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Tenga en cuenta que, debido a que las opciones para el filtro UpperCase son opcionales,
+                debe indicar <code class="constant">NULL</code> como segundo parámetro (las opciones) cuando
+                desee limitarlo a un único elemento de archivo.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.file.transfer.validators.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.file.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.filter.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">34.2. Validadores para Zend_File_Transfer </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 35. Zend_Filter</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

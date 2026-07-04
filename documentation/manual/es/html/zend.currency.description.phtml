@@ -1,0 +1,183 @@
+<?php $title = '25.4. ¿Qué compone una moneda?'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.4. ¿Qué compone una moneda?</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.options.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.currency.position.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.description"></a>25.4. ¿Qué compone una moneda?</h2></div></div></div>
+<p>
+        La moneda consta de varias informaciones. Un nombre, una abreviatura y un signo. Cada
+        una de ellas podría ser relevante para mostrarla, pero solo una a la vez. No sería
+        una buena práctica mostrar algo como "USD 1.000 $".
+    </p>
+<p>
+        Por lo tanto, <code class="classname">Zend_Currency</code> permite definir la
+        información de la moneda que debe renderizarse. Pueden usarse las siguientes constantes:
+    </p>
+<div class="table">
+<a name="zend.currency.description.table-1"></a><p class="title"><b>Tabla 25.1. Informaciones renderizadas para una moneda</b></p>
+<div class="table-contents"><table class="table" summary="Rendered informations for a currency" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Constante</th>
+<th align="left">Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left"><code class="constant">NO_SYMBOL</code></td>
+<td align="left">No se renderizará ninguna representación de la moneda</td>
+</tr>
+<tr>
+<td align="left"><code class="constant">USE_SYMBOL</code></td>
+<td align="left">
+                        Se renderizará el símbolo de la moneda. Para el dólar estadounidense sería '$'
+                    </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">USE_SHORTNAME</code></td>
+<td align="left">
+                        Se renderizará la abreviatura de esta moneda. Para el dólar estadounidense
+                        sería 'USD'. La mayoría de las abreviaturas constan de 3 caracteres
+                    </td>
+</tr>
+<tr>
+<td align="left"><code class="constant">USE_NAME</code></td>
+<td align="left">
+                        Se renderizará el nombre completo de esta moneda. Para el dólar estadounidense el nombre
+                        completo sería "US Dollar"
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="example">
+<a name="zend.currency.description.example-1"></a><p class="title"><b>Ejemplo 25.2. Seleccionando la descripción de la moneda</b></p>
+<div class="example-contents">
+<p>
+            Supongamos que su cliente ha establecido de nuevo "en_US" como configuración regional. Usando ninguna opción el
+            valor devuelto podría verse así:
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value' =&gt; 100,
+    )
+);
+
+print $currency; // Podría devolver '$ 100'
+</pre>
+<p>
+            Proporcionando la opción adecuada puede definir qué información debe
+            renderizarse.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'   =&gt; 100,
+        'display' =&gt; Zend_Currency::USE_SHORTNAME,
+    )
+);
+
+print $currency; // Podría devolver 'USD 100'
+</pre>
+<p>
+             Sin proporcionar <span class="property">display</span> se usará el signo de la moneda al
+            renderizar el objeto. Cuando la moneda no tiene signo, se usará la abreviatura
+            como sustituto.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Not all currencies have signs">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">No todas las monedas tienen signos</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Debe tener en cuenta que no todas las monedas tienen signos de moneda predeterminados. Esto significa
+            que, cuando no hay un signo predeterminado, y usted establece que se renderice el signo, no
+            tendrá ninguna moneda renderizada porque el signo es una cadena vacía.
+        </p></td></tr>
+</table></div>
+<p>
+        A veces es necesario cambiar la información predeterminada. Puede establecer cada una de las
+        tres informaciones de la moneda de forma independiente proporcionando la opción adecuada. Vea el siguiente
+        ejemplo.
+    </p>
+<div class="example">
+<a name="zend.currency.description.example-2"></a><p class="title"><b>Ejemplo 25.3. Cambiando la descripción de la moneda</b></p>
+<div class="example-contents">
+<p>
+            Supongamos que su cliente ha establecido de nuevo "en_US" como configuración regional. Pero ahora no queremos
+            usar la configuración predeterminada sino establecer nuestra propia descripción. Esto puede hacerse simplemente
+            proporcionando la opción adecuada:
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value' =&gt; 100,
+        'name'  =&gt; 'Dollar',
+    )
+);
+
+print $currency; // Podría devolver 'Dollar 100'
+</pre>
+<p>
+            También podría establecer usted mismo un signo o una abreviatura.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 100,
+        'symbol' =&gt; '$$$',
+    )
+);
+
+print $currency; // Podría devolver '$$$ 100'
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Automatic display settings">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Configuración automática de la visualización</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Cuando establece usted mismo un nombre, abreviatura o signo, esta nueva información se
+            establecerá automáticamente para ser renderizada. Esta simplificación le evita tener que establecer
+            la opción <span class="property">display</span> adecuada cuando establece una información.
+        </p>
+<p>
+            Así, usando la opción <span class="property">sign</span> puede omitir
+            <span class="property">display</span> y no necesita establecerla en
+            '<code class="constant">USE_SYMBOL</code>'.
+        </p>
+</td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.options.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.currency.position.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.3. Opciones para las monedas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 25.5. ¿Dónde está la moneda?</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

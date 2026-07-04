@@ -1,0 +1,390 @@
+<?php $title = '72.4. Creación de proveedores para usar con Zend_Tool_Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">72.4. Creación de proveedores para usar con Zend_Tool_Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tool.framework.architecture.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 72. Zend_Tool_Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.tool.framework.system-providers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.tool.framework.writing-providers"></a>72.4. Creación de proveedores para usar con Zend_Tool_Framework</h2></div></div></div>
+<p>
+        En general, un proveedor, por sí solo, no es más que el armazón para que un
+        desarrollador empaquete algunas capacidades que desea despachar con la
+        línea de comandos (u otros) clientes. Es un análogo de lo que es un
+        "controlador" dentro de su aplicación <acronym class="acronym">MVC</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.writing-providers.loading"></a>72.4.1. Cómo Zend_Tool encuentra sus proveedores</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_Tool</code> usa el IncludePathLoader para encontrar todos
+            los proveedores que puede ejecutar. Recorre recursivamente todos
+            los directorios del include path y abre todos los archivos que terminan
+            en "Manifest.php" o "Provider.php". Todas las clases de estos
+            archivos se inspeccionan para ver si implementan
+            <code class="classname">Zend_Tool_Framework_Provider_Interface</code>
+            o <code class="classname">Zend_Tool_Framework_Manifest_ProviderManifestable</code>.
+            Las instancias de la interfaz de proveedor constituyen la funcionalidad
+            real y todos sus métodos públicos son accesibles como acciones del proveedor.
+            La interfaz ProviderManifestable, sin embargo, requiere la implementación de un método
+            <code class="methodname">getProviders()</code> que devuelve un array de
+            instancias de la interfaz de proveedor ya instanciadas.
+        </p>
+<p>
+            Las siguientes reglas de nomenclatura se aplican en cuanto a cómo puede acceder a los proveedores
+            que fueron encontrados por el IncludePathLoader:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    La última parte de su nombre de clase separado por guion bajo se usa
+                    como nombre del proveedor, por ejemplo, "My_Provider_Hello" hace que su
+                    proveedor sea accesible con el nombre "hello".
+                </p></li>
+<li class="listitem"><p>
+                    Si su proveedor tiene un método <code class="methodname">getName()</code>,
+                    este se usará en lugar del método anterior para determinar
+                    el nombre.
+                </p></li>
+<li class="listitem"><p>
+                    Si su proveedor tiene "Provider" como prefijo, por ejemplo se llama
+                    <code class="classname">My_HelloProvider</code>, se eliminará
+                    del nombre de modo que el proveedor se llamará "hello".
+                </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El IncludePathLoader no sigue los enlaces simbólicos, lo que significa
+                que no puede enlazar la funcionalidad de un proveedor a sus include paths;
+                deben estar físicamente presentes en los include paths.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.tool.framework.writing-providers.loading.example"></a><p class="title"><b>Ejemplo 72.1. Exponer sus proveedores con un manifiesto</b></p>
+<div class="example-contents">
+<p>
+                Puede exponer sus proveedores a <code class="classname">Zend_Tool</code> ofreciendo un
+                manifiesto con un nombre de archivo especial que termine en "Manifest.php".
+                Un Provider Manifest es una implementación de
+                <span class="interface">Zend_Tool_Framework_Manifest_ProviderManifestable</span>
+                y requiere que el método <code class="methodname">getProviders()</code> devuelva
+                un array de proveedores ya instanciados. Anticipando nuestro primer
+                proveedor propio <code class="classname">My_Component_HelloProvider</code>,
+                crearemos el siguiente manifiesto:
+            </p>
+<pre class="programlisting">
+class My_Component_Manifest
+    implements Zend_Tool_Framework_Manifest_ProviderManifestable
+{
+    public function getProviders()
+    {
+        return array(
+            new My_Component_HelloProvider()
+        );
+    }
+}
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.writing-providers.basic"></a>72.4.2. Instrucciones básicas para crear proveedores</h3></div></div></div>
+<p>
+            Como ejemplo, si un desarrollador quiere añadir la capacidad de mostrar
+            la versión de un archivo de datos con el que trabaja su componente de terceros,
+            solo hay una clase que el desarrollador necesitaría implementar.
+            Suponiendo que el componente se llama <code class="classname">My_Component</code>, crearía
+            una clase llamada <code class="classname">My_Component_HelloProvider</code> en un
+            archivo llamado <code class="filename">HelloProvider.php</code> en algún lugar del
+            <span class="property">include_path</span>. Esta clase implementaría
+            <code class="classname">Zend_Tool_Framework_Provider_Interface</code>, y el cuerpo de
+            este archivo solo tendría que verse como lo siguiente:
+        </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    implements Zend_Tool_Framework_Provider_Interface
+{
+    public function say()
+    {
+        echo 'Hello from my provider!';
+    }
+}
+</pre>
+<p>
+            Dado el código anterior, y suponiendo que el desarrollador desea acceder a
+            esta funcionalidad a través del cliente de consola, la llamada se vería
+            así:
+        </p>
+<pre class="programlisting">
+% zf say hello
+Hello from my provider!
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.writing-providers.response"></a>72.4.3. El objeto de respuesta</h3></div></div></div>
+<p>
+            Como se comentó en la sección de arquitectura, <code class="classname">Zend_Tool</code> permite
+            enganchar distintos clientes para usar sus proveedores de <code class="classname">Zend_Tool</code>. Para mantener
+            la compatibilidad con distintos clientes debe usar el objeto de respuesta para devolver mensajes
+            desde sus proveedores en lugar de usar <code class="methodname">echo()</code> u otro
+            mecanismo de salida similar. Reescribiendo nuestro proveedor hello con este conocimiento, quedaría así:
+        </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    extends Zend_Tool_Framework_Provider_Abstract
+{
+    public function say()
+    {
+        $this-&gt;_registry-&gt;getResponse
+                        -&gt;appendContent("Hello from my provider!");
+    }
+}
+</pre>
+<p>
+            Como puede ver, es necesario extender
+            <code class="classname">Zend_Tool_Framework_Provider_Abstract</code> para obtener acceso al
+            Registry, que contiene la instancia de <code class="classname">Zend_Tool_Framework_Client_Response</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.writing-providers.advanced"></a>72.4.4. Información avanzada de desarrollo</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.writing-providers.advanced.variables"></a>72.4.4.1. Pasar variables a un proveedor</h4></div></div></div>
+<p>
+                El ejemplo "Hello World" anterior es excelente para comandos simples, pero
+                ¿qué pasa con algo más avanzado? A medida que crecen sus necesidades de scripting y de
+                herramientas, puede que necesite la capacidad de aceptar
+                variables. Al igual que las firmas de funciones tienen parámetros, sus
+                solicitudes de herramientas también pueden aceptar parámetros.
+            </p>
+<p>
+                Del mismo modo que cada solicitud de herramienta puede aislarse en un método dentro de
+                una clase, los parámetros de una solicitud de herramienta también pueden aislarse en un
+                lugar muy conocido. Los parámetros de los métodos de acción de un
+                proveedor pueden incluir los mismos parámetros que desea que su cliente
+                utilice al llamar a esa combinación de proveedor y acción. Por
+                ejemplo, si quisiera aceptar un nombre en el ejemplo anterior,
+                probablemente haría esto en código OO:
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    implements Zend_Tool_Framework_Provider_Interface
+{
+    public function say($name = 'Ralph')
+    {
+        echo 'Hello' . $name . ', from my provider!';
+    }
+}
+</pre>
+<p>
+                El ejemplo anterior puede entonces llamarse a través de la línea de comandos
+                <span class="command"><strong>zf say hello Joe</strong></span>. "Joe" se suministrará al proveedor como
+                un parámetro de la llamada al método. Observe también que, como ve, el
+                parámetro es opcional, lo que significa que también es opcional en la línea de
+                comandos, de modo que <span class="command"><strong>zf say hello</strong></span> seguirá funcionando, y usará por defecto
+                el nombre "Ralph".
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.writing-providers.advanced.prompt"></a>72.4.4.2. Solicitar entrada al usuario</h4></div></div></div>
+<p>
+                Hay casos en los que el flujo de trabajo de su proveedor requiere
+                pedir entrada al usuario. Esto puede hacerse solicitando al
+                cliente que pida la entrada adicional requerida llamando a:
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    extends Zend_Tool_Framework_Provider_Abstract
+{
+    public function say($name = 'Ralph')
+    {
+        $nameResponse = $this-&gt;_registry
+                             -&gt;getClient()
+                             -&gt;promptInteractiveInput("Whats your name?");
+        $name = $nameResponse-&gt;getContent();
+
+        echo 'Hello' . $name . ', from my provider!';
+    }
+}
+</pre>
+<p>
+                Este comando lanza una excepción si el cliente actual no
+                es capaz de manejar solicitudes interactivas. En el caso del Console Client predeterminado,
+                sin embargo, se le pedirá que introduzca el nombre.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.writing-providers.advanced.pretendable"></a>72.4.4.3. Simular la ejecución de una acción del proveedor</h4></div></div></div>
+<p>
+                Otra característica interesante que quizá desee implementar es la
+                <span class="emphasis"><em>pretendability</em></span> (capacidad de simulación). La pretendability es la capacidad
+                de que su proveedor "simule" que está realizando la combinación de acción y
+                proveedor solicitada, y proporcione al usuario toda la
+                información posible sobre lo que <span class="emphasis"><em>haría</em></span>, sin
+                hacerlo realmente. Esto puede ser una noción importante al realizar
+                modificaciones intensivas de base de datos o del sistema de archivos que el usuario podría no
+                querer hacer en otro caso.
+            </p>
+<p>
+                La pretendability es fácil de implementar. Hay dos partes en esta
+                característica: 1) marcar el proveedor como capaz de "simular",
+                y 2) comprobar la solicitud para asegurarse de que a la solicitud actual efectivamente
+                se le pidió que se "simulara". Esta característica se demuestra en el ejemplo de
+                código a continuación.
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    extends    Zend_Tool_Framework_Provider_Abstract
+    implements Zend_Tool_Framework_Provider_Pretendable
+{
+    public function say($name = 'Ralph')
+    {
+        if ($this-&gt;_registry-&gt;getRequest()-&gt;isPretend()) {
+            echo 'I would say hello to ' . $name . '.';
+        } else {
+            echo 'Hello' . $name . ', from my provider!';
+        }
+    }
+}
+</pre>
+<p>
+                Para ejecutar el proveedor en modo simulado, simplemente llame a:
+            </p>
+<pre class="programlisting">
+% zf --pretend say hello Ralph
+I would say hello Ralph.
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.writing-providers.advanced.verbosedebug"></a>72.4.4.4. Modos detallado (verbose) y de depuración (debug)</h4></div></div></div>
+<p>
+                También puede ejecutar las acciones de su proveedor en modos "verbose" o "debug".
+                La semántica respecto a estas acciones debe ser implementada por usted
+                en el contexto de su proveedor. Puede acceder a los modos debug o verbose
+                con:
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    implements Zend_Tool_Framework_Provider_Interface
+{
+    public function say($name = 'Ralph')
+    {
+        if($this-&gt;_registry-&gt;getRequest()-&gt;isVerbose()) {
+            echo "Hello::say has been called\n";
+        }
+        if($this-&gt;_registry-&gt;getRequest()-&gt;isDebug()) {
+            syslog(LOG_INFO, "Hello::say has been called\n");
+        }
+    }
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.tool.framework.writing-providers.advanced.configstorage"></a>72.4.4.5. Acceder a la configuración y al almacenamiento del usuario</h4></div></div></div>
+<p>
+                Usando la variable de entorno <span class="property">ZF_CONFIG_FILE</span> o el
+                archivo .zf.ini de su directorio de inicio, puede inyectar parámetros de configuración en
+                cualquier proveedor de <code class="classname">Zend_Tool</code>. El acceso a esta configuración está
+                disponible a través del registry que se pasa a su proveedor si extiende
+                <code class="classname">Zend_Tool_Framework_Provider_Abstract</code>.
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    extends Zend_Tool_Framework_Provider_Abstract
+{
+    public function say()
+    {
+        $username = $this-&gt;_registry-&gt;getConfig()-&gt;username;
+        if(!empty($username)) {
+            echo "Hello $username!";
+        } else {
+            echo "Hello!";
+        }
+    }
+}
+</pre>
+<p>
+                La configuración devuelta es del tipo
+                <code class="classname">Zend_Tool_Framework_Client_Config</code>, pero internamente los
+                métodos mágicos <code class="methodname">__get()</code> y <code class="methodname">__set()</code>
+                redirigen a un <code class="classname">Zend_Config</code> del tipo de configuración dado.
+            </p>
+<p>
+                El almacenamiento permite guardar datos arbitrarios para referencia posterior. Esto puede ser útil
+                para tareas de procesamiento por lotes o para reejecuciones de sus tareas. Puede acceder al almacenamiento
+                de forma similar a la configuración:
+            </p>
+<pre class="programlisting">
+class My_Component_HelloProvider
+    extends Zend_Tool_Framework_Provider_Abstract
+{
+    public function say()
+    {
+        $aValue = $this-&gt;_registry-&gt;getStorage()-&gt;get("myUsername");
+        echo "Hello $aValue!";
+    }
+}
+</pre>
+<p>
+                La <acronym class="acronym">API</acronym> del almacenamiento es muy simple:
+            </p>
+<pre class="programlisting">
+class Zend_Tool_Framework_Client_Storage
+{
+    public function setAdapter($adapter);
+    public function isEnabled();
+    public function put($name, $value);
+    public function get($name, $defaultValue=null);
+    public function has($name);
+    public function remove($name);
+    public function getStreamUri($name);
+}
+</pre>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td>
+<th align="left">Importante</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Al diseñar sus proveedores conscientes de la configuración o el almacenamiento, recuerde
+                    comprobar si las claves de configuración de usuario o almacenamiento requeridas realmente existen para un usuario.
+                    No obstante, no se encontrará con errores fatales cuando ninguna de ellas se proporcione,
+                    ya que se crean vacías bajo demanda.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tool.framework.architecture.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.tool.framework.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.tool.framework.system-providers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">72.3. Arquitectura </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 72.5. Proveedores del sistema incluidos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

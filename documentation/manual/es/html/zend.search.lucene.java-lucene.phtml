@@ -1,0 +1,108 @@
+<?php $title = '61.8. Interoperando con Java Lucene'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.8. Interoperando con Java Lucene</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.extending.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.advanced.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.java-lucene"></a>61.8. Interoperando con Java Lucene</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.file-formats"></a>61.8.1. Formatos de archivo</h3></div></div></div>
+<p>
+            Los formatos de archivo de índice de <code class="classname">Zend_Search_Lucene</code> son binariamente compatibles con
+            Java Lucene versión 1.4 y posteriores.
+        </p>
+<p>
+            Una descripción detallada de este formato está disponible aquí:
+            <a class="ulink" href="http://lucene.apache.org/java/2_3_0/fileformats.html" target="_top">http://lucene.apache.org/java/2_3_0/fileformats.html</a>
+            <a href="#ftn.id47150" class="footnote" name="id47150"><sup class="footnote">[17]</sup></a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.index-creation.index-directory"></a>61.8.2. Directorio del índice</h3></div></div></div>
+<p>
+            Después de la creación del índice, el directorio del índice contendrá varios archivos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    El archivo <code class="filename">segments</code> es una lista de segmentos del índice.
+                </p></li>
+<li class="listitem"><p>
+                    Los archivos <code class="filename">*.cfs</code> contienen segmentos del índice.
+                    ¡Nota! Un índice optimizado siempre tiene un único segmento.
+                </p></li>
+<li class="listitem"><p>
+                    El archivo <code class="filename">deletable</code> es una lista de archivos que ya no
+                    son utilizados por el índice, pero que no se pudieron eliminar.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.java-lucene.source-code"></a>61.8.3. Código fuente en Java</h3></div></div></div>
+<p>
+            El siguiente listado de programa en Java proporciona un ejemplo de cómo indexar un archivo
+            utilizando Java Lucene:
+        </p>
+<pre class="programlisting">
+/**
+* Index creation:
+*/
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.document.*;
+
+import java.io.*
+
+...
+
+IndexWriter indexWriter = new IndexWriter("/data/my_index",
+                                          new SimpleAnalyzer(), true);
+
+...
+
+String filename = "/path/to/file-to-index.txt"
+File f = new File(filename);
+
+Document doc = new Document();
+doc.add(Field.Text("path", filename));
+doc.add(Field.Keyword("modified",DateField.timeToString(f.lastModified())));
+doc.add(Field.Text("author", "unknown"));
+FileInputStream is = new FileInputStream(f);
+Reader reader = new BufferedReader(new InputStreamReader(is));
+doc.add(Field.Text("contents", reader));
+
+indexWriter.addDocument(doc);
+</pre>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id47150" class="footnote"><p><a href="#id47150" class="para"><sup class="para">[17] </sup></a>
+                    La versión de formato de archivo de índice Lucene actualmente soportada es la 2.3 (a partir de
+                    Zend Framework 1.6).
+                </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.extending.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.advanced.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.7. Extensibilidad </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 61.9. Avanzado</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

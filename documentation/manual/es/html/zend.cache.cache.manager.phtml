@@ -1,0 +1,215 @@
+<?php $title = '17.5. El gestor de caché'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">17.5. El gestor de caché</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cache.backends.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 17. Zend_Cache</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.captcha.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cache.cache.manager"></a>17.5. El gestor de caché</h2></div></div></div>
+<p>
+        Es propio de las aplicaciones requerir multitud de cachés de cualquier
+        tipo, a menudo dependiendo del controlador, la librería o el modelo de dominio al que se
+        accede. Para permitir un medio sencillo de definir por adelantado las opciones de <code class="classname">Zend_Cache</code>
+        (por ejemplo, desde un bootstrap), de modo que acceder a un objeto de caché
+        requiera una configuración mínima dentro del código fuente de la aplicación, se escribió la clase
+        <code class="classname">Zend_Cache_Manager</code>. Esta clase
+        va acompañada de <code class="classname">Zend_Application_Resource_Cachemanager</code>
+        para garantizar que la configuración de arranque esté disponible, y de
+        <code class="classname">Zend_Controller_Action_Helper_Cache</code> para permitir un acceso e instanciación
+        sencillos de la caché desde controladores y otros ayudantes (helpers).
+    </p>
+<p>
+        El funcionamiento básico de este componente es el siguiente. El gestor de caché permite a los usuarios configurar
+        "plantillas de opciones", básicamente opciones para un conjunto de cachés con nombre. Estas se pueden establecer usando el
+        método <code class="methodname">Zend_Cache_Manager::setCacheTemplate()</code>.
+        Estas plantillas no dan lugar a una caché hasta que el usuario intenta recuperar
+        una caché con nombre (asociada a una plantilla de opciones existente) usando el método
+        <code class="methodname">Zend_Cache_Manager::getCache()</code>.
+    </p>
+<pre class="programlisting">
+$manager = new Zend_Cache_Manager;
+
+$dbCache = array(
+    'frontend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'lifetime' =&gt; 7200,
+            'automatic_serialization' =&gt; true
+        )
+    ),
+    'backend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'cache_dir' =&gt; '/path/to/cache'
+        )
+    )
+);
+
+$manager-&gt;setCacheTemplate('database', $dbCache);
+
+/**
+ * Anywhere else where the Cache Manager is available...
+ */
+$databaseCache = $manager-&gt;getCache('database');
+</pre>
+<p>
+        El gestor de caché también permite establecer de forma sencilla cachés ya instanciadas
+        usando el método <code class="methodname">Zend_Cache_Manager::setCache()</code>.
+    </p>
+<pre class="programlisting">
+$frontendOptions = array(
+   'lifetime' =&gt; 7200,
+   'automatic_serialization' =&gt; true
+);
+
+$backendOptions = array(
+    'cache_dir' =&gt; '/path/to/cache'
+);
+
+$dbCache = Zend_Cache::factory('Core',
+                             'File',
+                             $frontendOptions,
+                             $backendOptions);
+
+$manager = new Zend_Cache_Manager;
+$manager-&gt;setCache('database', $dbCache);
+
+/**
+ * Anywhere else where the Cache Manager is available...
+ */
+$databaseCache = $manager-&gt;getCache('database');
+</pre>
+<p>
+        Si por cualquier razón no está seguro de si el gestor de caché contiene una
+        caché ya instanciada o una plantilla de opciones relevante para crear una
+        cuando se solicite, puede comprobar la existencia de una configuración o instancia de caché con nombre
+        usando el método <code class="methodname">Zend_Cache_Manager::hasCache()</code>.
+    </p>
+<pre class="programlisting">
+$manager = new Zend_Cache_Manager;
+
+$dbCache = array(
+    'frontend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'lifetime' =&gt; 7200,
+            'automatic_serialization' =&gt; true
+        )
+    ),
+    'backend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'cache_dir' =&gt; '/path/to/cache'
+        )
+    )
+);
+
+$manager-&gt;setCacheTemplate('database', $dbCache);
+
+/**
+ * Anywhere else where the Cache Manager is available...
+ */
+if ($manager-&gt;hasCache('database')) {
+    $databaseCache = $manager-&gt;getCache('database');
+} else {
+    // create a cache from scratch if none available from Manager
+}
+</pre>
+<p>
+        En algunos escenarios, puede que haya definido varias cachés de uso general
+        usando <code class="classname">Zend_Cache_Manager</code>, pero necesite ajustar
+        sus opciones antes de usarlas dependiendo de las circunstancias. Puede editar
+        plantillas de caché previamente establecidas sobre la marcha antes de que se instancien
+        usando el método <code class="methodname">Zend_Cache_Manager::setTemplateOptions()</code>.
+    </p>
+<pre class="programlisting">
+$manager = new Zend_Cache_Manager;
+
+$dbCache = array(
+    'frontend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'lifetime' =&gt; 7200,
+            'automatic_serialization' =&gt; true
+        )
+    ),
+    'backend' =&gt; array(
+        'name' =&gt; 'Core',
+        'options' =&gt; array(
+            'cache_dir' =&gt; '/path/to/cache'
+        )
+    )
+);
+
+$manager-&gt;setCacheTemplate('database', $dbCache);
+
+/**
+ * Anywhere else where the Cache Manager is available...
+ * Here we decided to store some upcoming database queries to Memcached instead
+ * of the preconfigured File backend.
+ */
+$fineTuning = array(
+    'backend' =&gt; array(
+        'name' =&gt; 'Memcached',
+        'options' =&gt; array(
+            'servers' =&gt; array(
+                array(
+                    'host' =&gt; 'localhost',
+                    'port' =&gt; 11211,
+                    'persistent' =&gt; true,
+                    'weight' =&gt; 1,
+                    'timeout' =&gt; 5,
+                    'retry_interval' =&gt; 15,
+                    'status' =&gt; true,
+                    'failure_callback' =&gt; ''
+                )
+            )
+        )
+    )
+);
+$manager-&gt;setTemplateOptions('database', $fineTuning);
+$databaseCache = $manager-&gt;getCache('database');
+</pre>
+<p>
+        Para ayudar a que el gestor de caché sea más útil, va acompañado de
+        <code class="classname">Zend_Application_Resource_Cachemanager</code> y también
+        del ayudante de acción (Action Helper) <code class="classname">Zend_Controller_Action_Helper_Cache</code>.
+        Ambos se describen en sus áreas relevantes de la
+        Guía de referencia.
+    </p>
+<p>
+        Ya de fábrica, <code class="classname">Zend_Cache_Manager</code> incluye
+        tres plantillas de caché predefinidas llamadas "default", "page" y "pagetag".
+        La caché "default" es una caché sencilla basada en archivos (File) que usa el frontend Core.
+        Las dos cachés restantes se utilizan para implementar una caché de páginas estáticas (Static Page Cache) por defecto
+        en la que <acronym class="acronym">HTML</acronym>, <acronym class="acronym">XML</acronym> o incluso <acronym class="acronym">JSON</acronym> estáticos
+        pueden escribirse en archivos estáticos en <code class="filename">/public</code>. El control sobre una caché de páginas estáticas
+        se ofrece a través de <code class="classname">Zend_Controller_Action_Helper_Cache</code>, aunque
+        puede alterar la configuración de la caché "page" o "pagetag" que utiliza para rastrear etiquetas mediante
+        <code class="methodname">Zend_Cache_Manager::setTemplateOptions()</code> o incluso
+        <code class="methodname">Zend_Cache_Manager::setCacheTemplate()</code> si desea sobrescribir
+        todas sus opciones.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cache.backends.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cache.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.captcha.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">17.4. Backends de Zend_Cache </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 18. Zend_Captcha</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

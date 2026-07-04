@@ -1,0 +1,587 @@
+<?php $title = '38.6. Zend_Http_UserAgent'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">38.6. Zend_Http_UserAgent</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.http.response.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 38. Zend_Http</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.http.user-agent-device.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.http.user-agent"></a>38.6. Zend_Http_UserAgent</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent.intro"></a>38.6.1. Resumen</h3></div></div></div>
+<p>
+            Con la gran cantidad de dispositivos móviles disponibles en el mercado, es cada vez más
+            importante poder identificar las capacidades de esos dispositivos para poder presentar el
+            contenido de una manera adecuada. Por ejemplo, si el dispositivo no es capaz de mostrar
+            imágenes, es posible que desee omitirlas del marcado; alternativamente, si un dispositivo es
+            capaz de usar Flash, tal vez desee proporcionar una interfaz de usuario basada en Flash.
+        </p>
+<p>
+            El proceso de identificar las capacidades de un dispositivo típicamente requiere primero
+            conocer el User Agent HTTP, y luego comparar ese user agent con una base de datos de
+            capacidades de user agents. <code class="classname">Zend_Http_UserAgent</code> fue creado para
+            proporcionar estas capacidades a sus aplicaciones. Consta de varias funciones principales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    La clase principal <code class="classname">Zend_Http_UserAgent</code>, que detecta el
+                    User Agent, y le proporciona un objeto de dispositivo, además de persistir ese
+                    objeto de dispositivo para su posterior recuperación.
+                </p></li>
+<li class="listitem"><p>
+                    Una interfaz <a class="link" href="zend.http.user-agent-device.phtml" title="38.7. The UserAgent Device Interface">Zend_Http_UserAgent_Device</a>,
+                    y varias implementaciones que la implementan. Estos objetos utilizan un adaptador
+                    de características para descubrir las capacidades del dispositivo, y luego le
+                    permiten inspeccionar dichas capacidades.
+                </p></li>
+<li class="listitem"><p>
+                    Una interfaz <a class="link" href="zend.http.user-agent-features.phtml" title="38.8. The UserAgent Features Adapter">Zend_Http_UserAgent_Features_Adapter</a>;
+                    las implementaciones concretas proporcionan la capacidad de descubrir las
+                    capacidades, o características, del dispositivo.
+                </p></li>
+<li class="listitem"><p>
+                    Una interfaz <a class="link" href="zend.http.user-agent-storage.phtml" title="38.12. The UserAgent Storage Interface">Zend_Http_UserAgent_Storage</a>,
+                    que se utiliza para persistir los dispositivos descubiertos para usuarios
+                    determinados, permitiendo un descubrimiento de capacidades del dispositivo más
+                    rápido en visitas de página posteriores.
+                </p></li>
+<li class="listitem"><p>
+                    Un <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.user-agent" title="78.4.1.20. UserAgent View Helper">ayudante de vista</a> que
+                    se puede usar dentro de sus scripts de vista y layouts para ramificar la lógica de
+                    presentación según las capacidades del dispositivo.
+                </p></li>
+<li class="listitem"><p>
+                    Un <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.useragent" title="14.6.15. Zend_Application_Resource_Useragent">recurso</a> de
+                    <code class="classname">Zend_Application</code> para configurar e instanciar el objeto
+                    user agent, además de suministrar al ayudante de vista la instancia del objeto
+                    user agent.
+                </p></li>
+</ul></div>
+<p>
+            En el momento de escribir esto, el componente <code class="classname">UserAgent</code>
+            proporciona tres adaptadores:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <a class="link" href="zend.http.user-agent-features-browscap.phtml" title="38.9. The Browscap UserAgent Features Adapter">Zend_Http_UserAgent_Features_Adapter_Browscap</a>
+                    utiliza la función nativa de PHP <a class="ulink" href="http://php.net/get_browser" target="_top"><code class="function">get_browser()</code></a>
+                    junto con <a class="ulink" href="http://browsers.garykeith.com/" target="_top">browscap</a>.
+                    Aunque el conjunto de características de la base de datos no es tan detallado como
+                    el de otros proyectos, para la mayoría de los propósitos, proporciona resultados
+                    fiables y rápidos.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="link" href="zend.http.user-agent-features-tera-wurfl.phtml" title="38.11. The TeraWurfl UserAgent Features Adapter">Zend_Http_UserAgent_Features_Adapter_TeraWurfl</a>
+                    consume la API de TeraWurfl, que está construida sobre <a class="ulink" href="http://wurfl.sourceforge.net/" target="_top"><acronym class="acronym">WURFL</acronym></a>,
+                    y está orientada a proporcionar un mecanismo de búsqueda de alta disponibilidad y
+                    alto rendimiento.
+                </p></li>
+<li class="listitem"><p>
+                    <a class="link" href="zend.http.user-agent-features-device-atlas.phtml" title="38.10. The DeviceAtlas UserAgent Features Adapter">Zend_Http_UserAgent_Features_Adapter_DeviceAtlas</a>
+                    consume la API de DeviceAtlas, que es una base de datos de capacidades de
+                    dispositivos móviles de pago, de nivel empresarial.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent.quick-start"></a>38.6.2. Inicio rápido</h3></div></div></div>
+<p>
+            Primero, deberá descargar el <code class="filename">php_browscap.ini</code> si aún no lo tiene
+            instalado en su sistema:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                    <a class="ulink" href="http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI" target="_top">php_browscap.ini</a>
+                </p></li></ul></div>
+<p>
+            Sugerimos que coloque el archivo en el mismo directorio que su
+            <code class="filename">php.ini</code>.
+        </p>
+<p>
+            A continuación, notifique a PHP sobre el archivo browscap mediante el ajuste
+            <code class="varname">browscap</code>. Debido a que este ajuste es de tipo
+            <code class="constant">PHP_INI_SYSTEM</code>, esto debe hacerse en su
+            <code class="filename">php.ini</code> o en la configuración de su servidor web; no puede
+            hacerse en <code class="filename">htaccess</code> ni mediante <code class="function">ini_set()</code>.
+            Recomendamos añadirlo a su <code class="filename">php.ini</code>.
+        </p>
+<pre class="programlisting">
+browscap = /path/to/php_browscap.ini
+</pre>
+<p>
+            Si colocó <code class="varname">php_browscap.ini</code> en el mismo directorio que su
+            <code class="filename">php.ini</code>, esto se puede reducir simplemente a:
+        </p>
+<pre class="programlisting">
+browscap = php_browscap.ini
+</pre>
+<p>
+            Ahora, edite su <code class="filename">application.ini</code> para añadir las siguientes líneas
+            en su sección <code class="varname">[production]</code>:
+        </p>
+<pre class="programlisting">
+resources.useragent.mobile.features.classname = "Zend_Http_UserAgent_Device_Features_Browscap"
+</pre>
+<p>
+            Llegados a este punto, todo está configurado. Cada solicitud contendrá información
+            detallada sobre el user agent.
+        </p>
+<p>
+            Puede acceder a esta información de varias maneras. Desde dentro de la parte MVC de su
+            aplicación, puede acceder a ella a través del bootstrap. Dentro de los plugins, esto se
+            hace obteniendo el bootstrap desde el controlador frontal.
+        </p>
+<pre class="programlisting">
+$bootstrap = Zend_Controller_Front::getInstance()-&gt;getParam('bootstrap');
+$userAgent = $bootstrap-&gt;getResource('useragent');
+</pre>
+<p>
+            Desde su controlador de acción, use <code class="methodname">getInvokeArg()</code> para
+            obtener el bootstrap, y desde ahí, el objeto user agent.
+        </p>
+<pre class="programlisting">
+$bootstrap = $this-&gt;getInvokeArg('bootstrap');
+$userAgent = $bootstrap-&gt;getResource('useragent');
+</pre>
+<p>
+            Dentro de su vista, puede obtenerlo usando el ayudante de vista
+            <code class="classname">UserAgent</code>.
+        </p>
+<pre class="programlisting">
+$userAgent = $this-&gt;userAgent();
+</pre>
+<p>
+            Una vez que tenga el objeto user agent, puede consultarlo para conocer las distintas
+            capacidades. Como ejemplo, puede que desee usar un script de layout alternativo según las
+            capacidades del user agent.
+        </p>
+<pre class="programlisting">
+$device = $userAgent-&gt;getDevice();
+
+$cssSupport    = $device-&gt;getFeature('cssversion');
+$jsSupport     = $device-&gt;getFeature('javascript');
+
+switch (true) {
+    case ($jsSupport &amp;&amp; $cssSupport &gt;= 3):
+        $layout-&gt;setLayout('layout-html5');
+        break;
+    case ($jsSupport &amp;&amp; $cssSupport &lt; 3):
+        $layout-&gt;setLayout('layout-xhtml');
+        break;
+    case (!$jsSupport &amp;&amp; $cssSupport &lt; 3):
+        $layout-&gt;setLayout('layout-html-transitional');
+        break;
+    default:
+        $layout-&gt;setLayout('layout-web-1');
+        break;
+}
+</pre>
+<p>
+            Finalmente, cada dispositivo a menudo tendrá un gran número de capacidades no
+            representadas de inmediato en la interfaz del dispositivo. Puede consultarlas usando los
+            métodos <code class="methodname">hasFeature()</code> y <code class="methodname">getFeature()</code>,
+            o simplemente obtenerlas todas con <code class="methodname">getAllFeatures()</code>.
+        </p>
+<pre class="programlisting">
+if ($userAgent-&gt;hasFeature('mp3') &amp;&amp; $userAgent-&gt;getFeature('mp3')) {
+    // embed HTML5 audio tag...
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent.options"></a>38.6.3. Opciones de configuración</h3></div></div></div>
+<div class="variablelist">
+<p class="title"><b>Opciones de UserAgent</b></p>
+<p>
+                Las siguientes opciones pueden pasarse al constructor o dentro de la configuración de
+                su aplicación. Un "." indica otro nivel de profundidad en el array de configuración.
+            </p>
+<p>
+                Cada adaptador de características también tiene sus propias opciones disponibles, las
+                cuales se pueden combinar con las opciones generales de UserAgent.
+            </p>
+<dl class="variablelist">
+<dt><span class="term">browser_type</span></dt>
+<dd><p>
+                        Se utiliza para inicializar la lista de dispositivos que el componente
+                        buscará. Vea también <code class="varname">identification_sequence</code>; este
+                        valor se antepondrá a esa lista durante el descubrimiento del dispositivo
+                        user agent.
+                    </p></dd>
+<dt><span class="term">http_accept</span></dt>
+<dd><p>
+                        El valor de la cabecera <acronym class="acronym">HTTP</acronym>
+                        <code class="varname">Accept</code>; usado por algunos user agents para determinar
+                        capacidades. Establezca esto para inicializar el valor explícitamente.
+                    </p></dd>
+<dt><span class="term">identification_sequence</span></dt>
+<dd><p>
+                        Una lista separada por comas de tipos de dispositivo a explorar en busca de
+                        coincidencias; por defecto es "mobile,desktop".
+                    </p></dd>
+<dt><span class="term">storage.adapter</span></dt>
+<dd><p>
+                        El nombre de un adaptador de almacenamiento usado para persistir las
+                        capacidades del dispositivo, típicamente dentro de una sesión de usuario
+                        determinada. El valor puede ser un nombre de clase totalmente cualificado, o
+                        un nombre corto que resuelva el cargador de plugins para las clases de
+                        almacenamiento. Por defecto, usa "Session" como valor, resolviéndose a
+                        <code class="classname">Zend_Http_UserAgent_Storage_Session</code>.
+                    </p></dd>
+<dt><span class="term">storage.options[]</span></dt>
+<dd><p>
+                        Un array de opciones a pasar al constructor de un adaptador de
+                        almacenamiento. Por defecto, la opción <code class="varname">browser_type</code>
+                        estará presente.
+                    </p></dd>
+<dt><span class="term">plugin_loader.[type] = [class]</span></dt>
+<dd><p>
+                        Configuración del cargador de plugins; le permite especificar una clase de
+                        extensión de <code class="classname">Zend_Loader_PluginLoader</code>
+                        preconfigurada para usar en uno de los tipos de cargador de plugins
+                        gestionados por <code class="classname">UserAgent</code> (actualmente "storage" y
+                        "device").
+                    </p></dd>
+<dt><span class="term">server[]</span></dt>
+<dd><p>
+                        Típicamente, no establecerá esto; simplemente permite la inyección de la
+                        superglobal <code class="varname">$_SERVER</code> (o una versión filtrada de la
+                        misma). El valor debe ser un array asociativo.
+                    </p></dd>
+<dt><span class="term">user_agent</span></dt>
+<dd><p>
+                        La cadena real de User-Agent <acronym class="acronym">HTTP</acronym> que desea
+                        intentar comparar. Típicamente, esto se descubrirá automáticamente a partir
+                        del array <code class="varname">server</code>.
+                    </p></dd>
+<dt><span class="term">[browser_type].device.classname</span></dt>
+<dd>
+<p>
+                        La clase de dispositivo a usar para un tipo de navegador determinado;
+                        típicamente, <code class="varname">browser_type</code> será uno de los dispositivos
+                        de navegador admitidos, incluyendo:
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Bot</p></li>
+<li class="listitem"><p>Checker</p></li>
+<li class="listitem"><p>Console</p></li>
+<li class="listitem"><p>Desktop</p></li>
+<li class="listitem"><p>Email</p></li>
+<li class="listitem"><p>Feed</p></li>
+<li class="listitem"><p>Mobile</p></li>
+<li class="listitem"><p>Offline</p></li>
+<li class="listitem"><p>Probe</p></li>
+<li class="listitem"><p>Spam</p></li>
+<li class="listitem"><p>Text</p></li>
+<li class="listitem"><p>Validator</p></li>
+</ul></div>
+<p>
+                        El <code class="varname">browser_type</code> debe normalizarse a minúsculas para
+                        efectos de configuración.
+                    </p>
+</dd>
+<dt><span class="term">[browser_type].device.path and [browser_type].device.prefix</span></dt>
+<dd>
+<p>
+                        Una forma alternativa de especificar la clase de dispositivo para un tipo de
+                        navegador determinado es asumir que se llama según el dispositivo, y que
+                        todas las clases de dispositivo están en la misma ruta compartiendo el mismo
+                        prefijo. Configure el prefijo y la ruta usando estas claves.
+                    </p>
+<p>
+                        Como ejemplo, lo siguiente buscaría una clase llamada
+                        "Mobile_Device_Bot" en la ruta "Mobile/Device/" bajo la biblioteca de la
+                        aplicación.
+                    </p>
+<pre class="programlisting">
+resources.useragent.bot.device.path = APPLICATION_PATH '/../library/Mobile/Device"
+resources.useragent.bot.device.prefix = "Mobile_Device"
+</pre>
+</dd>
+<dt><span class="term">[browser_type].features.path and [browser_type].features.classname</span></dt>
+<dd><p>
+                        Estos ajustes se utilizan para cargar la clase de detección de capacidades de
+                        características para un tipo de navegador determinado. La clase se nombrará
+                        usando la clave <code class="varname">classname</code>, y se espera que exista en el
+                        archivo denotado por la clave <code class="varname">path</code>. La clase debe
+                        implementar <code class="classname">Zend_Http_UserAgent_Features_Adapter</code>.
+                    </p></dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent.methods"></a>38.6.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.http.user-agent.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$options = null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        El constructor intenta determinar el User-Agent actual basándose en las
+                        opciones proporcionadas, la información de la solicitud actual, y/o la
+                        información previamente descubierta y persistida en el almacenamiento. Una
+                        vez instanciado, el dispositivo detectado está disponible de inmediato.
+                    </p>
+<p>
+                        Vea la sección de <a class="link" href="zend.http.user-agent.phtml#zend.http.user-agent.options" title="38.6.3. Configuration Options">opciones
+                            de configuración</a> para más detalles sobre el array
+                            <code class="varname">$options</code>.
+                    </p>
+</dd>
+<dt>
+<a name="zend.http.user-agent.methods.serialize"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">serialize</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Definido por la interfaz <code class="interfacename">Serializable</code>, este
+                        método realiza la lógica necesaria para determinar qué dentro del objeto
+                        debe serializarse cuando el objeto es serializado por un adaptador de
+                        almacenamiento.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.unserialize"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">unserialize</span>(<span class="methodparam">$serialized</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Definido por la interfaz <code class="interfacename">Serializable</code>, este
+                        método realiza la lógica necesaria para determinar cómo deserializar una
+                        instancia previamente serializada.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-options"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setOptions</span>(<span class="methodparam">$options</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Inicializa el estado del objeto. Vea la sección de
+                        <a class="link" href="zend.http.user-agent.phtml#zend.http.user-agent.options" title="38.6.3. Configuration Options">opciones de configuración</a>
+                        para más información sobre el array <code class="varname">$options</code>.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-user-agent"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getUserAgent</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la cadena de User-Agent descubierta. A menos que se establezca
+                        explícitamente, esto se autodescubrirá a partir del array server.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-user-agent"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setUserAgent</span>(<span class="methodparam">$userAgent</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Establece la cadena de User-Agent explícitamente. Una vez que se ha llamado a
+                        <code class="methodname">getDevice()</code>, esta propiedad se marca como
+                        inmutable, y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-http-accept"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getHttpAccept</span>(<span class="methodparam">$httpAccept = null</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el valor de la cabecera HTTP Accept.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-http-accept"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setHttpAccept</span>(<span class="methodparam">$httpAccept</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Establece explícitamente el valor de la cabecera HTTP Accept. Una vez que se
+                        ha llamado a <code class="methodname">getDevice()</code>, esta propiedad se marca
+                        como inmutable, y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-storage"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getStorage</span>(<span class="methodparam">$browser = null</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera un objeto de almacenamiento persistente para un tipo de navegador
+                        determinado.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-storage"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setStorage</span>(<span class="methodparam">Zend_Http_UserAgent_Storage $storage</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Use esto para establecer explícitamente el objeto de almacenamiento
+                        persistente. Una vez que se ha llamado a <code class="methodname">getDevice()</code>,
+                        el almacenamiento se marca como inmutable (es decir: no puede inyectar un
+                        nuevo objeto de almacenamiento), y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.clear-storage"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">clearStorage</span>(<span class="methodparam">$browser = null</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Borra cualquier información en el objeto de almacenamiento persistente.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-config"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getConfig</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera los parámetros de configuración.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-device"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getDevice</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Use este método para obtener el objeto User-Agent Device; este es el objeto
+                        que contendrá las diversas capacidades descubiertas del dispositivo.
+                    </p>
+<p>
+                        El descubrimiento del dispositivo User-Agent ocurre en este método. Una vez
+                        que se ha recuperado el dispositivo, el array server, el tipo de navegador,
+                        el user agent, el http accept, y las propiedades de almacenamiento se marcan
+                        como inmutables.
+                    </p>
+</dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-browser-type"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getBrowserType</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Recupera el tipo de navegador descubierto; normalmente uno de:
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Bot</p></li>
+<li class="listitem"><p>Checker</p></li>
+<li class="listitem"><p>Console</p></li>
+<li class="listitem"><p>Desktop</p></li>
+<li class="listitem"><p>Email</p></li>
+<li class="listitem"><p>Feed</p></li>
+<li class="listitem"><p>Mobile</p></li>
+<li class="listitem"><p>Offline</p></li>
+<li class="listitem"><p>Probe</p></li>
+<li class="listitem"><p>Spam</p></li>
+<li class="listitem"><p>Text</p></li>
+<li class="listitem"><p>Validator</p></li>
+</ul></div>
+<p>
+                        A menos que se establezca explícitamente, el tipo de navegador es
+                        desconocido hasta que se ha llamado a <code class="methodname">getDevice()</code>.
+                    </p>
+</dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-browser-type"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setBrowserType</span>(<span class="methodparam">$browserType</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Establece explícitamente el tipo de navegador a anteponer a la secuencia de
+                        identificación. Una vez que se ha llamado a
+                        <code class="methodname">getDevice()</code>, el tipo de navegador se marca como
+                        inmutable, y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServer</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el array de cabeceras HTTP y variables de entorno usadas para
+                        realizar el descubrimiento del dispositivo. Si el array aún no se ha
+                        establecido, se inicializa con la superglobal <code class="varname">$_SERVER</code>.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setServer</span>(<span class="methodparam">$server</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Establece explícitamente el array "server" de cabeceras HTTP y variables de
+                        entorno a usar durante el descubrimiento del dispositivo. Una vez que se ha
+                        llamado a <code class="methodname">getDevice()</code>, el array server se marca
+                        como inmutable, y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-server-value"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServerValue</span>(<span class="methodparam">$key</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera un único valor del array server por clave.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-server-value"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setServerValue</span>(<span class="methodparam">$key, $value</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Sobrescribe o define un valor en el array server interno. Una vez que se ha
+                        llamado a <code class="methodname">getDevice()</code>, el array server se marca
+                        como inmutable, y llamar a este método lanzará una excepción.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.set-plugin-loader"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setPluginLoader</span>(<span class="methodparam">$type, $loader</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        <code class="varname">$type</code> puede ser "device" o "storage"; el primero se
+                        usa al intentar encontrar clases de dispositivo, el segundo para encontrar
+                        clases de almacenamiento. <code class="varname">$loader</code> puede ser una
+                        instancia de <code class="classname">Zend_Loader_PluginLoader</code>, o una cadena
+                        con el nombre de clase de una clase de extensión de
+                        <code class="classname">Zend_Loader_PluginLoader</code>.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent.methods.get-plugin-loader"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getPluginLoader</span>(<span class="methodparam">$type</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la instancia del cargador de plugins "device" o "storage".
+                    </p></dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent.examples"></a>38.6.5. Ejemplos</h3></div></div></div>
+<p>
+            Por el momento, vea el <a class="link" href="zend.http.user-agent.phtml#zend.http.user-agent.quick-start" title="38.6.2. Quick Start">inicio rápido</a>
+            para ver ejemplos.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.http.response.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.http.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.http.user-agent-device.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">38.5. Zend_Http_Response </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 38.7. La interfaz UserAgent Device</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

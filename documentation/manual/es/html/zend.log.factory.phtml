@@ -1,0 +1,486 @@
+<?php $title = '44.5. Uso de la Factory para crear un Log'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">44.5. Uso de la Factory para crear un Log</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.log.filters.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 44. Zend_Log</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mail.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.log.factory"></a>44.5. Uso de la Factory para crear un Log</h2></div></div></div>
+<p>
+        Además de la instanciación directa, también puede usar el método estático
+        <code class="methodname">factory()</code> para instanciar un objeto Log, así como para
+        configurar los writers adjuntos y sus filtros. Usando la factory, puede adjuntar cero o
+        más writers. La configuración puede pasarse como un array o como una instancia de
+        <code class="classname">Zend_Config</code>. Si desea crear una instancia de
+        una clase personalizada (que extienda de Zend_Log), puede pasar una opción
+        <code class="varname">className</code> al método <code class="methodname">factory()</code>.
+    </p>
+<p>
+        Como ejemplo:
+    </p>
+<pre class="programlisting">
+$logger = Zend_Log::factory(array(
+    'timestampFormat' =&gt; 'Y-m-d',
+    array(
+        'writerName'   =&gt; 'Stream',
+        'writerParams' =&gt; array(
+            'stream'   =&gt; '/tmp/zend.log',
+        ),
+        'formatterName' =&gt; 'Simple',
+        'formatterParams' =&gt; array(
+            'format'   =&gt; '%timestamp%: %message% -- %info%',
+        ),
+        'filterName'   =&gt; 'Priority',
+        'filterParams' =&gt; array(
+            'priority' =&gt; Zend_Log::WARN,
+        ),
+    ),
+    array(
+        'writerName'   =&gt; 'Firebug',
+        'filterName'   =&gt; 'Priority',
+        'filterParams' =&gt; array(
+            'priority' =&gt; Zend_Log::INFO,
+        ),
+    ),
+));
+</pre>
+<p>
+        Lo anterior instanciará un logger con dos writers, uno para escribir en un archivo
+        local, y otro para enviar datos a Firebug. Cada uno tiene un filtro de prioridad
+        adjunto, con diferentes prioridades máximas.
+    </p>
+<p>
+        Por defecto, los eventos se registran con el formato de fecha ISO 8601. Puede elegir su
+        propio formato con la opción <span class="emphasis"><em>timestampFormat</em></span>.
+    </p>
+<p>
+        Cada writer puede definirse con las siguientes claves:
+    </p>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">writerName (requerido)</span></dt>
+<dd><p>
+                    El nombre "corto" de un writer de log; el nombre del writer de log sin el
+                    prefijo/espacio de nombres de clase inicial. Consulte la entrada "writerNamespace"
+                    más abajo para más detalles. Ejemplos: "Mock", "Stream", "Firebug".
+                </p></dd>
+<dt><span class="term">writerParams (opcional)</span></dt>
+<dd><p>
+                    Un array asociativo de parámetros a usar al instanciar el writer de log.
+                    El método <code class="methodname">factory()</code> de cada writer de log los
+                    mapeará a argumentos del constructor, según se indica más abajo.
+                </p></dd>
+<dt><span class="term">writerNamespace (opcional)</span></dt>
+<dd><p>
+                    El prefijo/espacio de nombres de clase a usar al construir el nombre de clase
+                    final del writer de log. Por defecto, si no se proporciona, se asume
+                    "Zend_Log_Writer"; sin embargo, puede pasar su propio espacio de nombres si
+                    está usando un writer de log personalizado.
+                </p></dd>
+<dt><span class="term">formatterName (opcional)</span></dt>
+<dd><p>
+                    El nombre "corto" de un formatter a usar con el writer de log dado; el nombre
+                    del formatter sin el prefijo/espacio de nombres de clase inicial. Consulte la
+                    entrada "formatterNamespace" más abajo para más detalles. Ejemplos: "Simple", "Xml".
+                </p></dd>
+<dt><span class="term">formatterParams (opcional)</span></dt>
+<dd><p>
+                    Un array asociativo de parámetros a usar al instanciar el formatter de log.
+                    El método <code class="methodname">factory()</code> de cada formatter de log
+                    los mapeará a argumentos del constructor, según se indica más abajo.
+                </p></dd>
+<dt><span class="term">formatterNamespace (opcional)</span></dt>
+<dd><p>
+                    El prefijo/espacio de nombres de clase a usar al construir el nombre de clase
+                    final del formatter de log. Por defecto, si no se proporciona, se asume
+                    "Zend_Log_Formatter"; sin embargo, puede pasar su propio espacio de nombres si
+                    está usando un formatter de log personalizado.
+                </p></dd>
+<dt><span class="term">filterName (opcional)</span></dt>
+<dd><p>
+                    El nombre "corto" de un filtro a usar con el writer de log dado; el nombre del
+                    filtro sin el prefijo/espacio de nombres de clase inicial. Consulte la entrada
+                    "filterNamespace" más abajo para más detalles. Ejemplos: "Message", "Priority".
+                </p></dd>
+<dt><span class="term">filterParams (opcional)</span></dt>
+<dd><p>
+                    Un array asociativo de parámetros a usar al instanciar el filtro de log.
+                    El método <code class="methodname">factory()</code> de cada filtro de log
+                    los mapeará a argumentos del constructor, según se indica más abajo.
+                </p></dd>
+<dt><span class="term">filterNamespace (opcional)</span></dt>
+<dd><p>
+                    El prefijo/espacio de nombres de clase a usar al construir el nombre de clase
+                    final del filtro de log. Por defecto, si no se proporciona, se asume
+                    "Zend_Log_Filter"; sin embargo, puede pasar su propio espacio de nombres si
+                    está usando un filtro de log personalizado.
+                </p></dd>
+</dl></div>
+<p>
+        Cada writer y cada filtro tiene opciones específicas.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.factory.writer-options"></a>44.5.1. Opciones de writer</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.db"></a>44.5.1.1. Opciones de Zend_Log_Writer_Db</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">db</span></dt>
+<dd><p>
+                            Una instancia de <code class="classname">Zend_Db_Adapter</code>.
+                        </p></dd>
+<dt><span class="term">table</span></dt>
+<dd><p>
+                            El nombre de la tabla en el RDBMS que contendrá las entradas del log.
+                        </p></dd>
+<dt><span class="term">columnMap</span></dt>
+<dd><p>
+                            Un array asociativo que mapea nombres de columna de la tabla de base de
+                            datos con campos del evento de log.
+                        </p></dd>
+</dl></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.firebug"></a>44.5.1.2. Opciones de Zend_Log_Writer_Firebug</h4></div></div></div>
+<p>
+                Este writer de log no toma opciones; cualquiera que se proporcione será ignorada.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.mail"></a>44.5.1.3. Opciones de Zend_Log_Writer_Mail</h4></div></div></div>
+<div class="table">
+<a name="zend.log.factory.writer-options.mail.table"></a><p class="title"><b>Tabla 44.3. Opciones de Zend_Log_Writer_Mail</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Log_Writer_Mail Options" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Tipo de dato</th>
+<th>Valor por defecto</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em>mail</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="classname">Zend_Mail</code></td>
+<td>
+                                Una instancia de <code class="classname">Zend_Mail</code>
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>charset</em></span></td>
+<td><span class="type">String</span></td>
+<td>iso-8859-1</td>
+<td>
+                                Charset del correo
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>from</em></span></td>
+<td>
+<span class="type">String</span> o <span class="type">Array</span>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Remitente del correo
+
+                                Los parámetros para el tipo <span class="type">Array</span> son:
+                                <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                            <span class="property">email</span> : dirección del remitente
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="property">name</span> : nombre del remitente
+                                        </p></li>
+</ul></div>
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>to</em></span></td>
+<td>
+<span class="type">String</span> o <span class="type">Array</span>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Destinatario(s) del correo
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>cc</em></span></td>
+<td>
+<span class="type">String</span> o <span class="type">Array</span>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Destinatario(s) en copia del correo
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>bcc</em></span></td>
+<td>
+<span class="type">String</span> o <span class="type">Array</span>
+</td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Destinatario(s) en copia oculta del correo
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>subject</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Asunto del correo
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>subjectPrependText</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Se añade al asunto del correo un resumen del número de errores
+                                por prioridad
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>layout</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Una instancia de <code class="classname">Zend_Layout</code>
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>layoutOptions</em></span></td>
+<td><span class="type">Array</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Vea la sección <a class="xref" href="zend.layout.options.phtml" title="40.3. Zend_Layout Configuration Options">Sección 40.3, “Opciones de configuración de Zend_Layout”</a>
+                            </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em>layoutFormatter</em></span></td>
+<td><span class="type">String</span></td>
+<td><code class="constant">NULL</code></td>
+<td>
+                                Una instancia de <code class="classname">Zend_Log_Formatter_Interface</code>
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.mock"></a>44.5.1.4. Opciones de Zend_Log_Writer_Mock</h4></div></div></div>
+<p>
+                Este writer de log no toma opciones; cualquiera que se proporcione será ignorada.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.null"></a>44.5.1.5. Opciones de Zend_Log_Writer_Null</h4></div></div></div>
+<p>
+                Este writer de log no toma opciones; cualquiera que se proporcione será ignorada.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.stream"></a>44.5.1.6. Opciones de Zend_Log_Writer_Stream</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">stream|url</span></dt>
+<dd><p>
+                            Un identificador de stream válido de <acronym class="acronym">PHP</acronym> en el que registrar el log.
+                        </p></dd>
+<dt><span class="term">mode</span></dt>
+<dd><p>
+                            El modo de E/S con el que registrar el log; por defecto es "a", de "append" (añadir).
+                        </p></dd>
+</dl></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.syslog"></a>44.5.1.7. Opciones de Zend_Log_Writer_Syslog</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">application</span></dt>
+<dd><p>
+                            Nombre de la aplicación usado por el writer de syslog.
+                        </p></dd>
+<dt><span class="term">facility</span></dt>
+<dd><p>
+                            Facility usada por el writer de syslog.
+                        </p></dd>
+</dl></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.writer-options.zendmonitor"></a>44.5.1.8. Opciones de Zend_Log_Writer_ZendMonitor</h4></div></div></div>
+<p>
+                Este writer de log no toma opciones; cualquiera que se proporcione será ignorada.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.factory.filter-options"></a>44.5.2. Opciones de filtro</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.filter-options.message"></a>44.5.2.1. Opciones de Zend_Log_Filter_Message</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">regexp</span></dt>
+<dd><p>
+                            Expresión regular que debe coincidir para registrar un mensaje.
+                        </p></dd>
+</dl></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.filter-options.priority"></a>44.5.2.2. Opciones de Zend_Log_Filter_Priority</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt><span class="term">priority</span></dt>
+<dd><p>
+                            El nivel máximo de prioridad con el que se registrarán los mensajes.
+                        </p></dd>
+<dt><span class="term">operator</span></dt>
+<dd><p>
+                            El operador de comparación con el que se realizan las comparaciones de
+                            prioridad; por defecto es "&lt;=".
+                        </p></dd>
+</dl></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.log.factory.filter-options.suppress"></a>44.5.2.3. Opciones de Zend_Log_Filter_Suppress</h4></div></div></div>
+<p>
+                Este filtro de log no toma opciones; cualquiera que se proporcione será ignorada.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.log.factory.custom"></a>44.5.3. Creación de writers y filtros configurables</h3></div></div></div>
+<p>
+            Si en algún momento necesita escribir sus propios writers y/o filtros de log, puede
+            hacerlos compatibles con <code class="methodname">Zend_Log::factory()</code> muy fácilmente.
+        </p>
+<p>
+            Como mínimo, necesita implementar
+            <code class="interfacename">Zend_Log_FactoryInterface</code>, que espera un método estático
+            <code class="methodname">factory()</code> que acepte un único argumento,
+            <code class="varname">$config</code>, que puede ser un array o un objeto
+            <code class="classname">Zend_Config</code>. Si su writer de log extiende de
+            <code class="classname">Zend_Log_Writer_Abstract</code>, o su filtro de log extiende de
+            <code class="classname">Zend_Log_Filter_Abstract</code>, obtendrá esto de forma gratuita.
+        </p>
+<p>
+            Luego, simplemente defina los mapeos entre la configuración aceptada y los
+            argumentos del constructor. Como ejemplo:
+        </p>
+<pre class="programlisting">
+class My_Log_Writer_Foo extends Zend_Log_Writer_Abstract
+{
+    public function __construct($bar, $baz)
+    {
+        // ...
+    }
+
+    public static function factory($config)
+    {
+        if ($config instanceof Zend_Config) {
+            $config = $config-&gt;toArray();
+        }
+        if (!is_array($config)) {
+            throw new Exception(
+                'factory expects an array or Zend_Config instance'
+            );
+        }
+
+        $default = array(
+            'bar' =&gt; null,
+            'baz' =&gt; null,
+        );
+        $config = array_merge($default, $config);
+
+        return new self(
+            $config['bar'],
+            $config['baz']
+        );
+    }
+}
+</pre>
+<p>
+            Alternativamente, podría llamar a los setters apropiados tras la instanciación, pero
+            antes de devolver el objeto:
+        </p>
+<pre class="programlisting">
+class My_Log_Writer_Foo extends Zend_Log_Writer_Abstract
+{
+    public function __construct($bar = null, $baz = null)
+    {
+        // ...
+    }
+
+    public function setBar($value)
+    {
+        // ...
+    }
+
+    public function setBaz($value)
+    {
+        // ...
+    }
+
+    public static function factory($config)
+    {
+        if ($config instanceof Zend_Config) {
+            $config = $config-&gt;toArray();
+        }
+        if (!is_array($config)) {
+            throw new Exception(
+                'factory expects an array or Zend_Config instance'
+            );
+        }
+
+        $writer = new self();
+        if (isset($config['bar'])) {
+            $writer-&gt;setBar($config['bar']);
+        }
+        if (isset($config['baz'])) {
+            $writer-&gt;setBaz($config['baz']);
+        }
+        return $writer;
+    }
+}
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.log.filters.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.log.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mail.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">44.4. Filtros </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 45. Zend_Mail</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

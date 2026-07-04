@@ -1,0 +1,148 @@
+<?php $title = '9.2. Gestión de sesiones de usuario en ZF'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">9.2. Gestión de sesiones de usuario en ZF</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.multiuser.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.multiuser.authentication.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.multiuser.sessions"></a>9.2. Gestión de sesiones de usuario en ZF</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.sessions.intro"></a>9.2.1. Introducción a las sesiones</h3></div></div></div>
+<p>
+            El éxito de la web está profundamente arraigado en el protocolo que impulsa la web:
+            <acronym class="acronym">HTTP</acronym>. <acronym class="acronym">HTTP</acronym> sobre TCP es por su propia naturaleza
+            sin estado (stateless), lo que significa que, en esencia, la web también carece de estado. Aunque este
+            aspecto es uno de los factores dominantes por los que la web se ha convertido en un medio tan popular,
+            también causa un problema interesante para los desarrolladores que desean usar la web como
+            plataforma de aplicaciones.
+        </p>
+<p>
+            El acto de interactuar con una aplicación web se define típicamente por la suma
+            de todas las peticiones enviadas a un servidor web. Dado que puede haber muchos consumidores siendo atendidos
+            simultáneamente, la aplicación debe decidir qué peticiones pertenecen a qué consumidor.
+            Estas peticiones se conocen habitualmente como una "sesión".
+        </p>
+<p>
+            En <acronym class="acronym">PHP</acronym>, el problema de la sesión se resuelve mediante la extensión de sesiones, que
+            utiliza algún tipo de seguimiento de estado, típicamente cookies, y alguna forma de almacenamiento local que se
+            expone a través de la superglobal $_SESSION. En Zend Framework, el componente
+            <code class="classname">Zend_Session</code> añade valor a la extensión de sesiones de <acronym class="acronym">PHP</acronym>
+            facilitando su uso y su integración dentro de aplicaciones orientadas a objetos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.sessions.basic-usage"></a>9.2.2. Uso básico de Zend_Session</h3></div></div></div>
+<p>
+            El componente <code class="classname">Zend_Session</code> es tanto un gestor de sesiones como
+            una <acronym class="acronym">API</acronym> para almacenar datos en un objeto de sesión para su
+            persistencia a largo plazo. La <acronym class="acronym">API</acronym> de <code class="classname">Zend_Session</code> sirve para
+            gestionar las opciones y el comportamiento de una sesión, como las opciones, el inicio y la detención de una
+            sesión, mientras que <code class="classname">Zend_Session_Namespace</code> es el objeto real utilizado
+            para almacenar datos.
+        </p>
+<p>
+            Aunque generalmente es una buena práctica iniciar una sesión dentro de un proceso de arranque, esto
+            en general no es necesario, ya que todas las sesiones se iniciarán automáticamente en la primera
+            creación de un objeto <code class="classname">Zend_Session_Namespace</code>.
+        </p>
+<p>
+            <code class="classname">Zend_Application</code> es capaz de configurar
+            <code class="classname">Zend_Session</code> por usted como parte del
+            sistema <code class="classname">Zend_Application_Resource</code>. Para usar esto, suponiendo que su
+            proyecto utiliza <code class="classname">Zend_Application</code> para el arranque, tendría que añadir el
+            siguiente código a su archivo application.ini:
+        </p>
+<pre class="programlisting">
+resources.session.save_path = APPLICATION_PATH "/../data/session"
+resources.session.use_only_cookies = true
+resources.session.remember_me_seconds = 864000
+</pre>
+<p>
+            Como puede ver, las opciones que se pasan son las mismas opciones que cabría esperar encontrar
+            en la extensión ext/session de <acronym class="acronym">PHP</acronym>. Esas opciones configuran la ruta
+            hacia los archivos de sesión donde se almacenarán los datos dentro del proyecto. Dado que
+            los archivos <acronym class="acronym">INI</acronym> pueden además usar constantes, lo anterior usará la
+            constante APPLICATION_PATH y apuntará de forma relativa a un directorio de datos de sesión.
+        </p>
+<p>
+            La mayoría de los componentes de Zend Framework que utilizan sesiones no necesitan nada más para usar
+            <code class="classname">Zend_Session</code>. Llegados a este punto, puede usar un componente que
+            consuma <code class="classname">Zend_Session</code>, o comenzar a almacenar sus propios datos dentro de una
+            sesión con <code class="classname">Zend_Session_Namespace</code>.
+        </p>
+<p>
+            <code class="classname">Zend_Session_Namespace</code> es una clase simple que redirige datos a través de una
+            <acronym class="acronym">API</acronym> fácil de usar hacia la superglobal $_SESSION gestionada por
+            <code class="classname">Zend_Session</code>. La razón por la que se llama
+            <code class="classname">Zend_Session_Namespace</code> es que en efecto crea un espacio de nombres para los datos
+            dentro de $_SESSION, permitiendo así que múltiples componentes y objetos almacenen y
+            recuperen datos de forma segura. En el siguiente código, exploraremos cómo construir un simple
+            contador de sesión incremental, comenzando en 1000 y reiniciándose a sí mismo después de 1999.
+        </p>
+<pre class="programlisting">
+$mysession = new Zend_Session_Namespace('mysession');
+
+if (!isset($mysession-&gt;counter)) {
+    $mysession-&gt;counter = 1000;
+} else {
+    $mysession-&gt;counter++;
+}
+
+if ($mysession-&gt;counter &gt; 1999) {
+    unset($mysession-&gt;counter);
+}
+</pre>
+<p>
+            Como puede ver arriba, el objeto de espacio de nombres de sesión utiliza los métodos mágicos __get, __set,
+            __isset y __unset para permitirle interactuar de forma fluida y sin complicaciones con la sesión.
+            La información almacenada en el ejemplo anterior se guarda en
+            $_SESSION['mysession']['counter'].
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.multiuser.sessions.advanced-usage"></a>9.2.3. Uso avanzado de Zend_Session</h3></div></div></div>
+<p>
+            Además, si quisiera usar el gestor de almacenamiento (save handler) DbTable
+            para <code class="classname">Zend_Session</code>, tendría que añadir el siguiente código a
+            su application.ini:
+        </p>
+<pre class="programlisting">
+resources.session.saveHandler.class = "Zend_Session_SaveHandler_DbTable"
+resources.session.saveHandler.options.name = "session"
+resources.session.saveHandler.options.primary.session_id = "session_id"
+resources.session.saveHandler.options.primary.save_path = "save_path"
+resources.session.saveHandler.options.primary.name = "name"
+resources.session.saveHandler.options.primaryAssignment.sessionId = "sessionId"
+resources.session.saveHandler.options.primaryAssignment.sessionSavePath = "sessionSavePath"
+resources.session.saveHandler.options.primaryAssignment.sessionName = "sessionName"
+resources.session.saveHandler.options.modifiedColumn = "modified"
+resources.session.saveHandler.options.dataColumn = "session_data"
+resources.session.saveHandler.options.lifetimeColumn = "lifetime"
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.multiuser.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.multiuser.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.multiuser.authentication.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 9. Primeros pasos con Zend_Session, Zend_Auth y Zend_Acl </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 9.3. Autenticación de usuarios en Zend Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

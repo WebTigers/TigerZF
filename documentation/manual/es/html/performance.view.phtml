@@ -1,0 +1,353 @@
+<?php $title = 'F.5. Renderizado de vistas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">F.5. Renderizado de vistas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="performance.localization.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice F. Guía de rendimiento de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="copyrights.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="performance.view"></a>F.5. Renderizado de vistas</h2></div></div></div>
+<p>
+        Cuando se utiliza la capa <acronym class="acronym">MVC</acronym> de Zend Framework, es muy probable que utilice
+        <code class="classname">Zend_View</code>. <code class="classname">Zend_View</code> tiene un buen rendimiento
+        en comparación con otros motores de vistas o de plantillas; puesto que los scripts de vista
+        están escritos en <acronym class="acronym">PHP</acronym>, no incurre en la sobrecarga de compilar marcado
+        personalizado a <acronym class="acronym">PHP</acronym>, ni necesita preocuparse de que el
+        <acronym class="acronym">PHP</acronym> compilado no esté optimizado. Sin embargo, <code class="classname">Zend_View</code> presenta
+        sus propios problemas: la extensión se realiza mediante sobrecarga (helpers de vista), y varios
+        helpers de vista, aunque llevan a cabo funcionalidad clave, lo hacen con un coste
+        de rendimiento.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.view.pluginloader"></a>F.5.1. ¿Cómo puedo acelerar la resolución de helpers de vista?</h3></div></div></div>
+<p>
+            La mayoría de los "métodos" de <code class="classname">Zend_View</code> se proporcionan en realidad mediante
+            sobrecarga al sistema de helpers. Esto proporciona una flexibilidad importante a
+            <code class="classname">Zend_View</code>; en lugar de necesitar extender
+            <code class="classname">Zend_View</code> y proporcionar todos los métodos de helper que pueda
+            utilizar en su aplicación, puede definir sus métodos de helper en clases
+            separadas y consumirlos a voluntad como si fueran métodos directos de
+            <code class="classname">Zend_View</code>. Esto mantiene el propio objeto de vista relativamente
+            ligero, y garantiza que los objetos se crean solo cuando es necesario.
+        </p>
+<p>
+            Internamente, <code class="classname">Zend_View</code> utiliza el <a class="link" href="zend.loader.pluginloader.phtml" title="42.4. Loading Plugins">PluginLoader</a> para buscar
+            las clases de helper. Esto significa que por cada helper que invoca,
+            <code class="classname">Zend_View</code> necesita pasar el nombre del helper al
+            PluginLoader, que a su vez necesita determinar el nombre de la clase, cargar el
+            archivo de la clase si es necesario, y luego devolver el nombre de la clase para que
+            pueda instanciarse. Los usos posteriores del helper son mucho más rápidos, ya que
+            <code class="classname">Zend_View</code> mantiene un registro interno de los helpers cargados,
+            pero si utiliza muchos helpers, las llamadas se acumulan.
+        </p>
+<p>
+            La pregunta, entonces, es: ¿cómo se puede acelerar la resolución de helpers?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.view.pluginloader.cache"></a>F.5.1.1. Utilizar la caché de archivos include del PluginLoader</h4></div></div></div>
+<p>
+                La solución más simple y económica es la misma que para el <a class="link" href="performance.classloading.phtml#performance.classloading.pluginloader" title="F.2.3. How can I speed up plugin loading?">rendimiento
+                    general del PluginLoader</a>: <a class="link" href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.performance.example" title="Example 42.6. Using the PluginLoader class file include cache">utilizar
+                    la caché de archivos include del PluginLoader</a>. La
+                evidencia anecdótica ha demostrado que esta técnica proporciona una ganancia de rendimiento
+                del 25-30% en sistemas sin una caché de opcode, y una
+                ganancia del 40-65% en sistemas con una caché de opcode.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.view.pluginloader.extend"></a>F.5.1.2. Extender Zend_View para proporcionar los métodos de helper más utilizados</h4></div></div></div>
+<p>
+                Otra solución para quienes buscan ajustar el rendimiento aún
+                más es extender <code class="classname">Zend_View</code> para añadir manualmente los
+                métodos de helper que más utilicen en su aplicación. Dichos métodos
+                de helper pueden simplemente instanciar manualmente la clase de helper apropiada
+                y actuar como proxy hacia ella, o incorporar la implementación completa del helper
+                dentro del método.
+            </p>
+<pre class="programlisting">
+class My_View extends Zend_View
+{
+    /**
+     * @var array Registry of helper classes used
+     */
+    protected $_localHelperObjects = array();
+
+    /**
+     * Proxy to url view helper
+     *
+     * @param  array $urlOptions Options passed to the assemble method
+     *                           of the Route object.
+     * @param  mixed $name The name of a Route to use. If null it will
+     *                     use the current Route
+     * @param  bool $reset Whether or not to reset the route defaults
+     *                     with those provided
+     * @return string Url for the link href attribute.
+     */
+    public function url(array $urlOptions = array(), $name = null,
+        $reset = false, $encode = true
+    ) {
+        if (!array_key_exists('url', $this-&gt;_localHelperObjects)) {
+            $this-&gt;_localHelperObjects['url'] = new Zend_View_Helper_Url();
+            $this-&gt;_localHelperObjects['url']-&gt;setView($this);
+        }
+        $helper = $this-&gt;_localHelperObjects['url'];
+        return $helper-&gt;url($urlOptions, $name, $reset, $encode);
+    }
+
+    /**
+     * Echo a message
+     *
+     * Direct implementation.
+     *
+     * @param  string $string
+     * @return string
+     */
+    public function message($string)
+    {
+        return "&lt;h1&gt;" . $this-&gt;escape($message) . "&lt;/h1&gt;\n";
+    }
+}
+</pre>
+<p>
+                En cualquier caso, esta técnica reducirá sustancialmente la
+                sobrecarga del sistema de helpers al evitar por completo las llamadas al
+                PluginLoader, y beneficiándose de la autocarga o
+                evitándola por completo.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.view.partial"></a>F.5.2. ¿Cómo puedo acelerar las vistas parciales?</h3></div></div></div>
+<p>
+            Quienes utilizan mucho los parciales y perfilan sus aplicaciones
+            a menudo notarán inmediatamente que el helper de vista <code class="methodname">partial()</code>
+            incurre en mucha sobrecarga, debido a la necesidad de clonar el objeto
+            de vista. ¿Es posible acelerar esto?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.view.partial.render"></a>F.5.2.1. Utilizar partial() solo cuando sea realmente necesario</h4></div></div></div>
+<p>
+                El helper de vista <code class="methodname">partial()</code> acepta tres argumentos:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="varname">$name</code>: el nombre del script de vista a renderizar
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="varname">$module</code>: el nombre del módulo en el que reside el
+                        script de vista; o, si no se proporciona un tercer argumento
+                        y este es un array u objeto, será el
+                        argumento <code class="varname">$model</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="varname">$model</code>: un array u objeto a pasar al
+                        parcial que representa los datos limpios a asignar a la vista.
+                    </p></li>
+</ul></div>
+<p>
+                El poder y la utilidad de <code class="methodname">partial()</code> provienen del segundo
+                y tercer argumento. El argumento <code class="varname">$module</code> permite a
+                <code class="methodname">partial()</code> añadir temporalmente una ruta de scripts para el
+                módulo dado, de modo que el script de vista parcial se resuelva a
+                ese módulo; el argumento <code class="varname">$model</code> le permite
+                pasar explícitamente variables para usar con la vista parcial.
+                Si no está pasando ninguno de los dos argumentos, <span class="emphasis"><em>utilice
+                    <code class="methodname">render()</code> en su lugar</em></span>!
+            </p>
+<p>
+                Básicamente, a menos que realmente esté pasando variables al
+                parcial y necesite el ámbito de variable limpio, o esté renderizando un script de vista
+                de otro módulo <acronym class="acronym">MVC</acronym>, no hay razón para incurrir en la
+                sobrecarga de <code class="methodname">partial()</code>; en su lugar, utilice
+                el método integrado <code class="methodname">render()</code> de
+                <code class="classname">Zend_View</code> para renderizar el script de vista.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.view.action"></a>F.5.3. ¿Cómo puedo acelerar las llamadas al helper de vista action()?</h3></div></div></div>
+<p>
+            La versión 1.5.0 introdujo el helper de vista <code class="methodname">action()</code>,
+            que le permite despachar una acción <acronym class="acronym">MVC</acronym> y capturar su contenido
+            renderizado. Esto proporciona un paso importante hacia el principio <acronym class="acronym">DRY</acronym>,
+            y promueve la reutilización de código. Sin embargo, como quienes perfilan sus
+            aplicaciones se darán cuenta rápidamente, también es una operación
+            costosa. Internamente, el helper de vista <code class="methodname">action()</code> necesita
+            clonar nuevos objetos de petición y respuesta, invocar el despachador,
+            invocar el controlador y la acción solicitados, etc.
+        </p>
+<p>
+            ¿Cómo se puede acelerar?
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.view.action.actionstack"></a>F.5.3.1. Utilizar el ActionStack cuando sea posible</h4></div></div></div>
+<p>
+                Introducido al mismo tiempo que el helper de vista <code class="methodname">action()</code>,
+                el <a class="link" href="zend.controller.actionhelpers.phtml#zend.controller.actionhelpers.actionstack" title="24.8.4.1. ActionStack">ActionStack</a>
+                consiste en un helper de acción y un plugin de controlador frontal.
+                Juntos, le permiten insertar acciones adicionales para invocar
+                durante el ciclo de despacho en una pila. Si está llamando a
+                <code class="methodname">action()</code> desde sus scripts de vista de layout, quizá
+                quiera utilizar en su lugar el ActionStack, y renderizar sus vistas a
+                segmentos de respuesta discretos. Como ejemplo, podría escribir un
+                plugin <code class="methodname">dispatchLoopStartup()</code> como el siguiente para
+                añadir un cuadro de formulario de inicio de sesión a cada página:
+            </p>
+<pre class="programlisting">
+class LoginPlugin extends Zend_Controller_Plugin_Abstract
+{
+    protected $_stack;
+
+    public function dispatchLoopStartup(
+        Zend_Controller_Request_Abstract $request
+    ) {
+        $stack = $this-&gt;getStack();
+        $loginRequest = new Zend_Controller_Request_Simple();
+        $loginRequest-&gt;setControllerName('user')
+                     -&gt;setActionName('index')
+                     -&gt;setParam('responseSegment', 'login');
+        $stack-&gt;pushStack($loginRequest);
+    }
+
+    public function getStack()
+    {
+        if (null === $this-&gt;_stack) {
+            $front = Zend_Controller_Front::getInstance();
+            if (!$front-&gt;hasPlugin('Zend_Controller_Plugin_ActionStack')) {
+                $stack = new Zend_Controller_Plugin_ActionStack();
+                $front-&gt;registerPlugin($stack);
+            } else {
+                $stack = $front-&gt;getPlugin('ActionStack')
+            }
+            $this-&gt;_stack = $stack;
+        }
+        return $this-&gt;_stack;
+    }
+}
+</pre>
+<p>
+                El método <code class="methodname">UserController::indexAction()</code> podría entonces
+                utilizar el parámetro <code class="varname">$responseSegment</code> para indicar a qué
+                segmento de respuesta renderizar. En el script de layout, entonces
+                simplemente renderizaría ese segmento de respuesta:
+            </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;layout()-&gt;login ?&gt;
+</pre>
+<p>
+                Aunque el ActionStack todavía requiere un ciclo de despacho, esto sigue
+                siendo más económico que el helper de vista <code class="methodname">action()</code>, ya que
+                no necesita clonar objetos ni reiniciar el estado interno.
+                Además, garantiza que se invoquen todos los plugins de pre y post despacho,
+                lo cual puede ser de particular interés si está utilizando
+                plugins de controlador frontal para gestionar <acronym class="acronym">ACL</acronym>'s de determinadas
+                acciones.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.view.action.model"></a>F.5.3.2. Preferir helpers que consultan el modelo en lugar de action()</h4></div></div></div>
+<p>
+                En la mayoría de los casos, utilizar <code class="methodname">action()</code> es simplemente excesivo.
+                Si tiene la mayor parte de la lógica de negocio anidada en sus modelos y
+                simplemente consulta el modelo y pasa los resultados a un script
+                de vista, típicamente será más rápido y limpio simplemente escribir
+                un helper de vista que obtenga el modelo, lo consulte, y haga
+                algo con esa información.
+            </p>
+<p>
+                Como ejemplo, considere la siguiente acción de controlador y el siguiente
+                script de vista:
+            </p>
+<pre class="programlisting">
+class BugController extends Zend_Controller_Action
+{
+    public function listAction()
+    {
+        $model = new Bug();
+        $this-&gt;view-&gt;bugs = $model-&gt;fetchActive();
+    }
+}
+
+// bug/list.phtml:
+echo "&lt;ul&gt;\n";
+foreach ($this-&gt;bugs as $bug) {
+    printf("&lt;li&gt;&lt;b&gt;%s&lt;/b&gt;: %s&lt;/li&gt;\n",
+        $this-&gt;escape($bug-&gt;id),
+        $this-&gt;escape($bug-&gt;summary)
+    );
+}
+echo "&lt;/ul&gt;\n";
+</pre>
+<p>
+                Utilizando <code class="methodname">action()</code>, lo invocaría entonces con lo
+                siguiente:
+            </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;action('list', 'bug') ?&gt;
+</pre>
+<p>
+                Esto podría refactorizarse a un helper de vista que se vea de la
+                siguiente manera:
+            </p>
+<pre class="programlisting">
+class My_View_Helper_BugList extends Zend_View_Helper_Abstract
+{
+    public function bugList()
+    {
+        $model = new Bug();
+        $html  = "&lt;ul&gt;\n";
+        foreach ($model-&gt;fetchActive() as $bug) {
+            $html .= sprintf(
+                "&lt;li&gt;&lt;b&gt;%s&lt;/b&gt;: %s&lt;/li&gt;\n",
+                $this-&gt;view-&gt;escape($bug-&gt;id),
+                $this-&gt;view-&gt;escape($bug-&gt;summary)
+            );
+        }
+        $html .= "&lt;/ul&gt;\n";
+        return $html;
+    }
+}
+</pre>
+<p>
+                A continuación, invocaría el helper de la siguiente manera:
+            </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;bugList() ?&gt;
+</pre>
+<p>
+                Esto tiene dos beneficios: ya no incurre en la sobrecarga del
+                helper de vista <code class="methodname">action()</code>, y también presenta una <acronym class="acronym">API</acronym> más
+                comprensible semánticamente.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="performance.localization.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="performance.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="copyrights.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">F.4. Internacionalización (i18n) y localización (l10n) </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Apéndice G. Información de copyright</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

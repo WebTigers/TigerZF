@@ -1,0 +1,382 @@
+<?php $title = '74.6. Notaciones de plural para la traducción'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">74.6. Notaciones de plural para la traducción</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.translate.additional.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 74. Zend_Translate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.uri.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.translate.plurals"></a>74.6. Notaciones de plural para la traducción</h2></div></div></div>
+<p>
+        Desde Zend Framework 1.9, <code class="classname">Zend_Translate</code> es capaz de proporcionar soporte
+        para plurales. La traducción profesional siempre tendrá la necesidad de usar plurales, ya que son
+        nativos en casi todos los idiomas.
+    </p>
+<p>
+        Entonces, ¿qué son los plurales? En general, hablando de forma amplia, los plurales son palabras que tienen en cuenta
+        significados numéricos. Pero como puede imaginar, cada idioma tiene su propia definición de plurales.
+        El inglés, por ejemplo, admite un solo plural. Tenemos una definición singular, por ejemplo
+        "car", que significa implícitamente un coche, y tenemos la definición plural, "cars", que podría
+        significar más de un coche pero también cero coches. Otros idiomas como el ruso o el polaco tienen
+        más plurales y además las reglas para los plurales son diferentes.
+    </p>
+<p>
+        Cuando desee usar plurales con <code class="classname">Zend_Translate</code> no necesita
+        saber cómo se definen los plurales, solo el traductor debe saberlo, ya que es quien realiza la
+        traducción. La única información que necesita tener es el idioma.
+    </p>
+<p>
+        Hay dos formas de usar plurales... la tradicional, que significa que usa un
+        método propio, y una moderna, que le permite hacer traducciones de plural con el mismo método
+        que las traducciones normales.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.plurals.traditional"></a>74.6.1. Traducciones de plural tradicionales</h3></div></div></div>
+<p>
+            Las personas que hayan trabajado con gettext en el pasado estarán más familiarizadas con las traducciones
+            de plural tradicionales. Existe un método propio <code class="methodname">plural()</code> que puede
+            usarse para traducciones de plural.
+        </p>
+<div class="example">
+<a name="zend.translate.plurals.traditional.example1"></a><p class="title"><b>Ejemplo 74.18. Ejemplo de traducciones de plural tradicionales</b></p>
+<div class="example-contents">
+<p>
+                El método <code class="methodname">plural()</code> acepta 4 parámetros. El primer
+                parámetro es el messageId singular, el segundo es el messageId plural y el
+                tercero es el número o cantidad.
+            </p>
+<p>
+                El número se utilizará para detectar el plural que debe devolverse. Se puede
+                usar un cuarto parámetro opcional para indicar un locale que se utilizará para devolver la
+                traducción.
+            </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/german.mo',
+        'locale'  =&gt; 'de'
+    )
+);
+$translate-&gt;plural('Car', 'Cars', $number);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.plurals.modern"></a>74.6.2. Traducciones de plural modernas</h3></div></div></div>
+<p>
+            Dado que las traducciones de plural tradicionales están restringidas a código fuente que usa plurales en inglés,
+            hemos añadido una nueva forma de traducciones de plural. Permite usar el mismo
+            <code class="methodname">translate()</code> tanto para traducciones estándar como para traducciones de plural.
+        </p>
+<p>
+            Para usar traducciones de plural con <code class="methodname">translate()</code> necesita dar
+            un array como messageId en lugar de una cadena. Este array debe tener los messageId's originales
+            del plural, luego la cantidad y por último un locale opcional cuando los messageId's dados
+            no estén en notación inglesa.
+        </p>
+<div class="example">
+<a name="zend.translate.plurals.modern.example1"></a><p class="title"><b>Ejemplo 74.19. Ejemplo de traducciones de plural modernas</b></p>
+<div class="example-contents">
+<p>
+                Cuando queremos traducir las mismas definiciones de plural que en el ejemplo
+                anterior, tendría que definirse como se muestra a continuación.
+            </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/german.mo',
+        'locale'  =&gt; 'de'
+    )
+);
+$translate-&gt;translate(array('Car', 'Cars', $number));
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Usando traducciones de plural modernas también es posible usar cualquier idioma como fuente
+            para los messageId's.
+        </p>
+<div class="example">
+<a name="zend.translate.plurals.modern.example2"></a><p class="title"><b>Ejemplo 74.20. Ejemplo de traducciones de plural modernas usando un idioma de origen diferente</b></p>
+<div class="example-contents">
+<p>
+                Supongamos que queremos usar el ruso y también supongamos que los
+                messageId's dados están en ruso y no en inglés.
+            </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/german.mo',
+        'locale'  =&gt; 'de'
+    )
+);
+$translate-&gt;translate(
+    array(
+        'Car',
+        'Cars first plural',
+        'Cars second plural',
+        $number,
+        'ru'
+    )
+);
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Como puede ver, puede dar más de un solo plural en inglés. Pero en este caso debe dar
+            el idioma de origen para que <code class="classname">Zend_Translate</code> sepa qué
+            reglas de plural debe aplicar.
+        </p>
+<p>
+            Cuando omite el idioma del plural, entonces se utilizará el inglés por defecto y cualquier
+            definición de plural adicional será ignorada.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.plurals.source"></a>74.6.3. Archivos de origen de plural</h3></div></div></div>
+<p>
+            No todos los formatos de origen admiten formas plurales. Consulte esta lista para más detalles:
+        </p>
+<div class="table">
+<a name="zend.translate.plurals.source.supportedadapters"></a><p class="title"><b>Tabla 74.3. Soporte de plurales</b></p>
+<div class="table-contents"><table class="table" summary="Plural support" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Adaptador</th>
+<th>Plurales soportados</th>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr></thead>
+<tbody>
+<tr>
+<td>Array</td>
+<td><span class="emphasis"><em>sí</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Csv</td>
+<td><span class="emphasis"><em>sí</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Gettext</td>
+<td><span class="emphasis"><em>sí</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Ini</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Qt</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Tbx</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Tmx</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>Xliff</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td>XmlTm</td>
+<td><span class="emphasis"><em>no</em></span></td>
+<td class="auto-generated"> </td>
+<td class="auto-generated"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            A continuación puede encontrar ejemplos de archivos de origen con plurales definidos.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.plurals.source.array"></a>74.6.3.1. Origen array con definiciones de plural</h4></div></div></div>
+<p>
+                Un array con definiciones de plural debe tener el aspecto del siguiente ejemplo.
+            </p>
+<pre class="programlisting">
+array(
+    'plural_0' =&gt; array(
+        'plural_0 (ru)',
+        'plural_1 (ru)',
+        'plural_2 (ru)',
+        'plural_3 (ru)'
+    ),
+    'plural_1' =&gt; ''
+);
+</pre>
+<p>
+                En el ejemplo anterior, 'plural_0' y 'plural_1' son las
+                definiciones de plural del código fuente. Y el array en 'plural_0'
+                tiene disponibles todas las formas plurales traducidas. Eche un vistazo al siguiente ejemplo
+                con contenido real y traducción de origen en inglés a alemán.
+            </p>
+<pre class="programlisting">
+array(
+    'Car' =&gt; array(
+        'Auto',
+        'Autos'
+    ),
+    'Cars' =&gt; ''
+);
+</pre>
+<p>
+                Cuando su idioma traducido admita más formas plurales, simplemente añádalas
+                al array debajo de la primera forma plural. Cuando su idioma de origen admita más
+                formas plurales, simplemente añada una nueva traducción vacía.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.plurals.source.csv"></a>74.6.3.2. Origen Csv con definiciones de plural</h4></div></div></div>
+<p>
+                Un archivo csv con definiciones de plural debe tener el aspecto del siguiente ejemplo.
+            </p>
+<pre class="programlisting">
+"plural_0";"plural_0 (ru)";"plural_1 (ru)";"plural_2 (ru)";"plural_3 (ru)"
+"plural_1";
+</pre>
+<p>
+                Todas las formas plurales traducidas deben añadirse después del primer plural del idioma
+                de origen. Y todas las demás formas plurales del idioma de origen deben añadirse
+                debajo pero sin traducción. Tenga en cuenta que debe añadir un delimitador a los
+                plurales de origen vacíos.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.plurals.source.gettext"></a>74.6.3.3. Origen Gettext con definiciones de plural</h4></div></div></div>
+<p>
+                Los orígenes gettext admiten formas plurales de fábrica. No es necesaria ninguna adaptación,
+                ya que el archivo <code class="filename">*.mo</code> contendrá todos los datos necesarios.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Tenga en cuenta que gettext no admite el uso de idiomas de origen que no
+                    utilicen formas plurales inglesas. Cuando planee usar un idioma de origen que
+                    admita otras formas plurales, como el ruso por ejemplo, entonces no podrá usar
+                    orígenes gettext.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.plurals.customrules"></a>74.6.4. Reglas de plural personalizadas</h3></div></div></div>
+<p>
+            En casos poco frecuentes puede ser útil poder definir reglas de plural propias. Vea el chino como
+            ejemplo. Este idioma define dos reglas de plural. Por defecto no usa plurales.
+            Pero en casos poco frecuentes usa una regla como <span class="emphasis"><em>(number == 1) ? 0 : 1</em></span>.
+        </p>
+<p>
+            También cuando desee usar un idioma que no tenga reglas de plural conocidas, y quisiera
+            definir sus propias reglas.
+        </p>
+<p>
+            Esto puede hacerse usando <code class="methodname">Zend_Translate_Plural::setRule()</code>.
+            El método espera dos parámetros que deben proporcionarse. Una regla, que es simplemente un
+            callback a un método definido por uno mismo. Y un locale para el cual se usará la regla.
+        </p>
+<p>
+            Su regla podría verse así:
+        </p>
+<pre class="programlisting">
+public function MyRule($number) {
+    return ($number == 10) ? 0 : 1;
+}
+</pre>
+<p>
+            Como puede ver, su regla debe aceptar un parámetro. Es el número que usará para
+            determinar qué plural debe usar la traducción. En nuestro ejemplo definimos que cuando
+            obtengamos un '10' debe usarse la definición de plural 0, en todos los demás casos usamos la 1.
+        </p>
+<p>
+            Sus reglas pueden ser tan simples o tan complicadas como quiera. Solo debe devolver un
+            valor entero. La definición de plural 0 representa la traducción singular, y 1 representa
+            la primera regla de plural.
+        </p>
+<p>
+            Para activar su regla, y vincularla al locale deseado, debe llamarla de este
+            modo:
+        </p>
+<pre class="programlisting">
+Zend_Translate_Plural::setPlural('MyPlural', 'zh');
+</pre>
+<p>
+            Ahora hemos vinculado nuestra definición de plural al idioma chino.
+        </p>
+<p>
+            Puede definir una regla de plural para cada idioma. Pero debe tener en cuenta que debe establecer
+            las reglas de plural antes de realizar traducciones.
+        </p>
+<div class="note"><table border="0" summary="Note: Define custom plurals only when needed">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Defina plurales personalizados solo cuando sea necesario</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_Translate</code> define plurales para la mayoría de los idiomas conocidos.
+                No debería definir plurales propios cuando no lo necesite. Las reglas por defecto funcionan
+                la mayor parte del tiempo.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.translate.additional.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.translate.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.uri.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">74.5. Características adicionales para la traducción </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 75. Zend_Uri</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

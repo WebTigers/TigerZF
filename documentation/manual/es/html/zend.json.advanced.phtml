@@ -1,0 +1,140 @@
+<?php $title = '39.3. Uso avanzado de Zend_Json'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">39.3. Uso avanzado de Zend_Json</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.json.basics.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 39. Zend_Json</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.json.xml2json.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.json.advanced"></a>39.3. Uso avanzado de Zend_Json</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.json.advanced.objects1"></a>39.3.1. Objetos JSON</h3></div></div></div>
+<p>
+            Al codificar objetos <acronym class="acronym">PHP</acronym> como <acronym class="acronym">JSON</acronym>, todas las propiedades
+            públicas de ese objeto se codificarán en un objeto <acronym class="acronym">JSON</acronym>.
+        </p>
+<p>
+            <acronym class="acronym">JSON</acronym> no permite referencias a objetos, por lo que debe tenerse cuidado de no
+            codificar objetos con referencias recursivas. Si tiene problemas con
+            la recursión, <code class="methodname">Zend_Json::encode()</code> y
+            <code class="methodname">Zend_Json_Encoder::encode()</code> permiten un segundo
+            parámetro opcional para comprobar la recursión; si un objeto se serializa dos veces, se
+            lanzará una excepción.
+        </p>
+<p>
+            Sin embargo, decodificar objetos <acronym class="acronym">JSON</acronym> plantea una dificultad adicional, ya que
+            los objetos de Javascript se corresponden más estrechamente con el array
+            asociativo de <acronym class="acronym">PHP</acronym>. Algunos sugieren que se debería pasar un identificador de clase, y se debería crear una
+            instancia de un objeto de esa clase y rellenarla con los
+            pares clave/valor del objeto <acronym class="acronym">JSON</acronym>; otros consideran que esto podría suponer un
+            riesgo de seguridad considerable.
+        </p>
+<p>
+            Por defecto, <code class="classname">Zend_Json</code> decodificará los objetos <acronym class="acronym">JSON</acronym>
+            como arrays asociativos. Sin embargo, si desea que se devuelva un objeto, puede especificar esto:
+        </p>
+<pre class="programlisting">
+// Decode JSON objects as PHP objects
+$phpNative = Zend_Json::decode($encodedValue, Zend_Json::TYPE_OBJECT);
+</pre>
+<p>
+            Cualquier objeto decodificado de esta forma se devuelve como objetos <code class="classname">StdClass</code>
+            con propiedades correspondientes a los pares clave/valor en la notación
+            <acronym class="acronym">JSON</acronym>.
+        </p>
+<p>
+            La recomendación de Zend Framework es que cada
+            desarrollador decida cómo decodificar los objetos <acronym class="acronym">JSON</acronym>. Si se debe crear un objeto de un
+            tipo especificado, puede crearse en el código del desarrollador
+            y rellenarse con los valores decodificados usando <code class="classname">Zend_Json</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.json.advanced.objects2"></a>39.3.2. Codificación de objetos PHP</h3></div></div></div>
+<p>
+            Si está codificando objetos <acronym class="acronym">PHP</acronym>, por defecto el mecanismo de codificación
+            solo puede acceder a las propiedades públicas de esos objetos. Cuando un método
+            <code class="methodname">toJson()</code> está implementado en un objeto a codificar,
+            <code class="classname">Zend_Json</code> llama a este método y espera que el objeto devuelva una
+            representación <acronym class="acronym">JSON</acronym> de su estado interno.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.json.advanced.internal"></a>39.3.3. Codificador/decodificador interno</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Json</code> tiene dos modos diferentes dependiendo de si ext/json está
+            habilitado en su instalación de <acronym class="acronym">PHP</acronym> o no. Si ext/json está instalado, por
+            defecto se usan las funciones <code class="methodname">json_encode()</code> y
+            <code class="methodname">json_decode()</code> para codificar y decodificar
+            <acronym class="acronym">JSON</acronym>. Si ext/json no está instalado, se usa una implementación de Zend Framework en
+            código <acronym class="acronym">PHP</acronym> para la codificación/decodificación. Esto es considerablemente más lento que
+            usar la extensión de <acronym class="acronym">PHP</acronym>, pero se comporta exactamente igual.
+        </p>
+<p>
+            Aun así, a veces puede querer usar el codificador/decodificador interno aunque
+            tenga ext/json instalado. Puede lograrlo llamando a:
+        </p>
+<pre class="programlisting">
+Zend_Json::$useBuiltinEncoderDecoder = true:
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.json.advanced.expr"></a>39.3.4. Expresiones JSON</h3></div></div></div>
+<p>
+            Javascript hace un uso intensivo de funciones de callback anónimas, que se pueden guardar
+            dentro de variables de objeto <acronym class="acronym">JSON</acronym>. Aun así, solo funcionan si no se
+            devuelven dentro de comillas dobles, lo cual <code class="classname">Zend_Json</code> hace naturalmente.
+            Con el soporte de expresiones para <code class="classname">Zend_Json</code>, puede codificar
+            objetos <acronym class="acronym">JSON</acronym> con callbacks de javascript válidos. Esto funciona tanto para
+            <code class="methodname">json_encode()</code> como para el codificador interno.
+        </p>
+<p>
+            Un callback de javascript se representa usando el objeto <code class="classname">Zend_Json_Expr</code>.
+            Este implementa el patrón de objeto de valor y es inmutable. Puede establecer la
+            expresión de javascript como el primer argumento del constructor. Por defecto,
+            <code class="classname">Zend_Json::encode</code> no codifica los callbacks de javascript, tiene
+            que pasar la opción <span class="property">enableJsonExprFinder</span> y establecerla en
+            <code class="constant">TRUE</code> en la función <code class="methodname">encode()</code>. Si
+            está habilitada, el soporte de expresiones funciona para todas las expresiones anidadas en estructuras
+            de objetos grandes. Un ejemplo de uso sería el siguiente:
+        </p>
+<pre class="programlisting">
+$data = array(
+    'onClick' =&gt; new Zend_Json_Expr('function() {'
+              . 'alert("I am a valid javascript callback '
+              . 'created by Zend_Json"); }'),
+    'other' =&gt; 'no expression',
+);
+$jsonObjectWithExpression = Zend_Json::encode(
+    $data,
+    false,
+    array('enableJsonExprFinder' =&gt; true)
+);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.json.basics.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.json.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.json.xml2json.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">39.2. Uso básico </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 39.4. Conversión de XML a JSON</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

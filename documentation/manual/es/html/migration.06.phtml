@@ -1,0 +1,240 @@
+<?php $title = 'B.11. Zend Framework 0.6'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">B.11. Zend Framework 0.6</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="migration.08.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice B. Notas de migración de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="coding-standard.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="migration.06"></a>B.11. Zend Framework 0.6</h2></div></div></div>
+<p>
+        Al actualizar desde una versión anterior a Zend Framework 0.6 o superior, debe
+        tener en cuenta las siguientes notas de migración.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.06.zend.controller"></a>B.11.1. Zend_Controller</h3></div></div></div>
+<p>
+            El uso más básico de los componentes <acronym class="acronym">MVC</acronym> no ha cambiado; todavía puede
+            hacer cada una de las siguientes acciones:
+        </p>
+<pre class="programlisting">
+Zend_Controller_Front::run('/path/to/controllers');
+</pre>
+<pre class="programlisting">
+/* -- create a router -- */
+$router = new Zend_Controller_RewriteRouter();
+$router-&gt;addRoute('user',
+                  'user/:username',
+                  array('controller' =&gt; 'user', 'action' =&gt; 'info')
+);
+
+/* -- set it in a controller -- */
+$ctrl = Zend_Controller_Front::getInstance();
+$ctrl-&gt;setRouter($router);
+
+/* -- set controller directory and dispatch -- */
+$ctrl-&gt;setControllerDirectory('/path/to/controllers');
+$ctrl-&gt;dispatch();
+</pre>
+<p>
+            Recomendamos el uso del objeto Response para agregar contenido y
+            cabeceras. Esto permitirá un cambio más flexible del formato de salida
+            (por ejemplo, <acronym class="acronym">JSON</acronym> o <acronym class="acronym">XML</acronym> en lugar de
+            <acronym class="acronym">XHTML</acronym>) en sus aplicaciones.
+            Por defecto, <code class="methodname">dispatch()</code> renderizará la respuesta, enviando tanto
+            las cabeceras como renderizando cualquier contenido. También puede hacer que el front
+            controller devuelva la respuesta usando <code class="methodname">returnResponse()</code>,
+            y luego renderizar la respuesta usando su propia lógica. Una futura versión
+            del front controller puede forzar el uso del objeto response mediante
+            almacenamiento en búfer de salida (output buffering).
+        </p>
+<p>
+            Hay muchas características adicionales que extienden la <acronym class="acronym">API</acronym> existente,
+            y estas se indican en la documentación.
+        </p>
+<p>
+            Los principales cambios de los que debe ser consciente se encontrarán al
+            subclasificar los diversos componentes. Entre los más destacados:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <code class="methodname">Zend_Controller_Front::dispatch()</code> por defecto
+                    captura las excepciones en el objeto response, y no las renderiza,
+                    para evitar que se muestre información sensible del sistema.
+                    Puede anular esto de varias formas:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem">
+<p>
+                            Establecer <code class="methodname">throwExceptions()</code> en el front
+                            controller:
+                        </p>
+<pre class="programlisting">
+$front-&gt;throwExceptions(true);
+</pre>
+</li>
+<li class="listitem">
+<p>
+                            Establecer <code class="methodname">renderExceptions()</code> en el objeto
+                            response:
+                        </p>
+<pre class="programlisting">
+$response-&gt;renderExceptions(true);
+$front-&gt;setResponse($response);
+$front-&gt;dispatch();
+
+// or:
+$front-&gt;returnResponse(true);
+$response = $front-&gt;dispatch();
+$response-&gt;renderExceptions(true);
+echo $response;
+</pre>
+</li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Controller_Dispatcher_Interface::dispatch()</code>
+                    ahora acepta y devuelve un <a class="link" href="zend.controller.request.phtml" title="24.4. The Request Object">El
+                    objeto Request</a> en lugar de un token de dispatcher.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Controller_Router_Interface::route()</code>
+                    ahora acepta y devuelve un <a class="link" href="zend.controller.request.phtml" title="24.4. The Request Object">El
+                    objeto Request</a> en lugar de un token de dispatcher.
+                </p></li>
+<li class="listitem">
+<p><code class="classname">Zend_Controller_Action</code> cambios incluidos:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                            El constructor ahora acepta exactamente tres argumentos,
+                            <code class="classname">Zend_Controller_Request_Abstract</code>
+                            <code class="varname">$request</code>,
+                            <code class="classname">Zend_Controller_Response_Abstract</code>
+                            <code class="varname">$response</code>,
+                            y <span class="type">Array</span> <code class="varname">$params</code> (opcional).
+                            <code class="methodname">Zend_Controller_Action::__construct()</code> usa
+                            estos para establecer las propiedades request, response e invokeArgs
+                            del objeto, y si se anula el
+                            constructor, debe hacer lo mismo. Aún mejor, use
+                            el método <code class="methodname">init()</code> para realizar cualquier configuración
+                            de instancia, ya que este método se llama como acción final
+                            del constructor.
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="methodname">run()</code> ya no está definido como final, pero
+                            tampoco lo utiliza ya el front controller; su único
+                            propósito es usar la clase como page controller. Ahora
+                            toma dos argumentos opcionales, un
+                            <code class="classname">Zend_Controller_Request_Abstract</code>
+                            <code class="varname">$request</code>
+                            y un <code class="classname">Zend_Controller_Response_Abstract</code>
+                            <code class="varname">$response</code>.
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="methodname">indexAction()</code> ya no necesita ser
+                            definido, pero se recomienda como acción por defecto. Esto
+                            permite usar el RewriteRouter y los action controllers para
+                            especificar diferentes métodos de acción por defecto.
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="methodname">__call()</code> debe ser anulado para manejar
+                            automáticamente cualquier acción indefinida.
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="methodname">_redirect()</code> ahora toma un segundo argumento
+                            opcional, el código <acronym class="acronym">HTTP</acronym> con el que responder en la redirección,
+                            y un tercer argumento opcional, <code class="varname">$prependBase</code>,
+                            que puede indicar que la <acronym class="acronym">URL</acronym> base registrada con
+                            el objeto request debe anteponerse a la url especificada.
+                        </p></li>
+<li class="listitem">
+<p>
+                            La propiedad <code class="varname">$_action</code> ya no se establece. Esta propiedad
+                            era un <code class="classname">Zend_Controller_Dispatcher_Token</code>,
+                            que ya no existe en la encarnación actual.
+                            El único propósito del token era proporcionar
+                            información sobre el controlador, la acción
+                            y los parámetros de <acronym class="acronym">URL</acronym> solicitados. Esta información ahora está
+                            disponible en el objeto request, y se puede acceder
+                            de la siguiente manera:
+                        </p>
+<pre class="programlisting">
+// Retrieve the requested controller name
+// Access used to be via: $this-&gt;_action-&gt;getControllerName().
+// The example below uses getRequest(), though you may also directly
+// access the $_request property; using getRequest() is recommended as
+// a parent class may override access to the request object.
+$controller = $this-&gt;getRequest()-&gt;getControllerName();
+
+// Retrieve the requested action name
+// Access used to be via: $this-&gt;_action-&gt;getActionName().
+$action = $this-&gt;getRequest()-&gt;getActionName();
+
+// Retrieve the request parameters
+// This hasn't changed; the _getParams() and _getParam() methods simply
+// proxy to the request object now.
+$params = $this-&gt;_getParams();
+// request 'foo' parameter, using 'default' as default value if not found
+$foo = $this-&gt;_getParam('foo', 'default');
+</pre>
+</li>
+<li class="listitem">
+<p>
+                            <code class="methodname">noRouteAction()</code> ha sido eliminado. La
+                            forma adecuada de manejar métodos de acción inexistentes,
+                            si desea enrutarlos a una acción por defecto, es usar
+                            <code class="methodname">__call()</code>:
+                        </p>
+<pre class="programlisting">
+public function __call($method, $args)
+{
+    // If an unmatched 'Action' method was requested, pass on to the
+    // default action method:
+    if ('Action' == substr($method, -6)) {
+        return $this-&gt;defaultAction();
+    }
+
+    throw new Zend_Controller_Exception('Invalid method called');
+}
+</pre>
+</li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Controller_RewriteRouter::setRewriteBase()</code> ha
+                    sido eliminado. Use <code class="methodname">Zend_Controller_Front::setBaseUrl()</code>
+                    en su lugar (o <code class="methodname">Zend_Controller_Request_Http::setBaseUrl()</code>,
+                    si utiliza esa clase request).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Controller_Plugin_Interface</code> fue reemplazado
+                    por <code class="classname">Zend_Controller_Plugin_Abstract</code>. Todos los métodos ahora
+                    aceptan y devuelven un <a class="link" href="zend.controller.request.phtml" title="24.4. The Request Object">El objeto
+                    Request</a> en lugar de un token de dispatcher.
+                </p></li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="migration.08.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="migration.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="coding-standard.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">B.10. Zend Framework 0.8 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Apéndice C. Estándar de codificación de Zend Framework para PHP</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

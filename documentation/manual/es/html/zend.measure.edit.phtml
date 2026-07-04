@@ -1,0 +1,272 @@
+<?php $title = '47.4. Manipulación de mediciones'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">47.4. Manipulación de mediciones</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.measure.output.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 47. Zend_Measure</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.measure.types.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.measure.edit"></a>47.4. Manipulación de mediciones</h2></div></div></div>
+<p>
+        El análisis y la normalización de la entrada, combinados con la salida en notaciones localizadas, hacen que los datos
+        sean accesibles a los usuarios en diferentes locales. Existen muchos métodos adicionales en
+        los componentes <code class="classname">Zend_Measure_*</code> para manipular y trabajar con estos datos,
+        una vez que han sido normalizados.
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.convert" title="47.4.1. Convert">Convertir</a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.add" title="47.4.2. Add and subtract">Sumar y restar</a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.equal" title="47.4.3. Compare">Comparar con booleano</a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.compare" title="47.4.4. Compare">Comparar mayor/menor</a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.changevalue" title="47.4.5. Manually change values">Cambiar valores manualmente</a>
+            </p></li>
+<li class="listitem"><p>
+                <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.changetype" title="47.4.6. Manually change types">Cambiar tipos manualmente</a>
+            </p></li>
+</ul></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.convert"></a>47.4.1. Convertir</h3></div></div></div>
+<p>
+            Probablemente la característica más importante es la conversión a diferentes unidades de
+            medida. La conversión de una unidad se puede realizar cualquier número de veces usando el método
+            <code class="methodname">convertTo()</code>. Las unidades de medida solo se pueden convertir a
+            otras unidades del mismo tipo (clase). Por lo tanto, no es posible convertir (por ejemplo) una
+            longitud en un peso, lo cual podría fomentar malas prácticas de programación y permitir
+            que los errores se propaguen sin excepciones.
+        </p>
+<p>
+            El método <code class="methodname">convertTo()</code> acepta un parámetro opcional. Con
+            este parámetro puede definir una precisión para la salida devuelta. La precisión
+            estándar es '2'.
+        </p>
+<div class="example">
+<a name="zend.measure.edit.convert.example-1"></a><p class="title"><b>Ejemplo 47.9. Convertir</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de');
+$mystring = "1.234.567,89";
+$unit = new Zend_Measure_Weight($mystring,'POND', $locale);
+
+print "Kilo:".$unit-&gt;convertTo('KILOGRAM');
+
+// constants are considered "better practice" than strings
+print "Ton:".$unit-&gt;convertTo(Zend_Measure_Weight::TON);
+
+// define a precision for the output
+print "Ton:".$unit-&gt;convertTo(Zend_Measure_Weight::TON, 3);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.add"></a>47.4.2. Sumar y restar</h3></div></div></div>
+<p>
+            Las mediciones se pueden sumar usando <code class="methodname">add()</code> y restar
+            usando <code class="methodname">sub()</code>. El resultado usará el mismo tipo que el
+            objeto de origen. Los objetos dinámicos admiten un estilo de programación fluido, donde secuencias
+            complejas de operaciones se pueden anidar sin riesgo de efectos secundarios que alteren los objetos
+            de entrada.
+        </p>
+<p>
+            </p>
+<div class="example">
+<a name="zend.measure.edit.add.example-1"></a><p class="title"><b>Ejemplo 47.10. Sumar unidades</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Define objects
+$unit = new Zend_Measure_Length(200, Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure_Length(1, Zend_Measure_Length::METER);
+
+// Add $unit2 to $unit
+$sum = $unit-&gt;add($unit2);
+
+echo $sum; // outputs "300 cm"
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+<div class="note"><table border="0" summary="Note: Automatic conversion">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Conversión automática</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Sumar un objeto a otro lo convertirá automáticamente a la unidad correcta. No
+                es necesario llamar a <a class="link" href="zend.measure.edit.phtml#zend.measure.edit.convert" title="47.4.1. Convert"><code class="methodname">convertTo()</code></a>
+                antes de sumar unidades diferentes.
+            </p></td></tr>
+</table></div>
+<p>
+            </p>
+<div class="example">
+<a name="zend.measure.edit.add.example-2"></a><p class="title"><b>Ejemplo 47.11. Restar</b></p>
+<div class="example-contents">
+<p>
+                    La resta de mediciones funciona igual que la suma.
+                </p>
+<pre class="programlisting">
+// Define objects
+$unit = new Zend_Measure_Length(200, Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure_Length(1, Zend_Measure_Length::METER);
+
+// Subtract $unit2 from $unit
+$sum = $unit-&gt;sub($unit2);
+
+echo $sum;
+</pre>
+</div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.equal"></a>47.4.3. Comparar</h3></div></div></div>
+<p>
+            Las mediciones también se pueden comparar, pero sin conversión automática de unidades. Así,
+            <code class="methodname">equals()</code> devuelve <code class="constant">TRUE</code> solo si tanto el
+            valor como la unidad de medida son idénticos.
+        </p>
+<p>
+            </p>
+<div class="example">
+<a name="zend.measure.edit.equal.example-1"></a><p class="title"><b>Ejemplo 47.12. Mediciones diferentes</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Define measurements
+$unit = new Zend_Measure_Length(100, Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure_Length(1, Zend_Measure_Length::METER);
+
+if ($unit-&gt;equals($unit2)) {
+    print "Both measurements are identical";
+} else {
+    print "These are different measurements";
+}
+</pre></div>
+</div>
+<p><br class="example-break">
+
+            </p>
+<div class="example">
+<a name="zend.measure.edit.equal.example-2"></a><p class="title"><b>Ejemplo 47.13. Mediciones idénticas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Define measurements
+$unit = new Zend_Measure_Length(100, Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure_Length(1, Zend_Measure_Length::METER);
+
+$unit2-&gt;setType(Zend_Measure_Length::CENTIMETER);
+
+if ($unit-&gt;equals($unit2)) {
+    print "Both measurements are identical";
+} else {
+    print "These are different measurements";
+}
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.compare"></a>47.4.4. Comparar</h3></div></div></div>
+<p>
+            Para determinar si una medición es menor o mayor que otra, use
+            <code class="methodname">compare()</code>, que devuelve 0, -1 o 1 según la diferencia
+            entre los dos objetos. Las mediciones idénticas devolverán 0. Las menores devolverán un
+            valor negativo, y las mayores un valor positivo.
+        </p>
+<p>
+            </p>
+<div class="example">
+<a name="zend.measure.edit.compare.example-1"></a><p class="title"><b>Ejemplo 47.14. Diferencia</b></p>
+<div class="example-contents"><pre class="programlisting">
+$unit = new Zend_Measure_Length(100, Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure_Length(1, Zend_Measure_Length::METER);
+$unit3 = new Zend_Measure_Length(1.2, Zend_Measure_Length::METER);
+
+print "Equal:".$unit2-&gt;compare($unit);
+print "Lesser:".$unit2-&gt;compare($unit3);
+print "Greater:".$unit3-&gt;compare($unit2);
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.changevalue"></a>47.4.5. Cambiar valores manualmente</h3></div></div></div>
+<p>
+            Para cambiar el valor de una medición explícitamente, use
+            <code class="methodname">setValue()</code> para sobrescribir el valor actual. Los parámetros son
+            los mismos que los del constructor.
+        </p>
+<p>
+            </p>
+<div class="example">
+<a name="zend.measure.edit.changevalue.example-1"></a><p class="title"><b>Ejemplo 47.15. Cambiar un valor</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+$unit = new Zend_Measure_Length(1,Zend_Measure_Length::METER);
+
+$unit-&gt;setValue(1.2);
+echo $unit;
+
+$unit-&gt;setValue(1.2, Zend_Measure_Length::KILOMETER);
+echo $unit;
+
+$unit-&gt;setValue("1.234,56", Zend_Measure_Length::MILLIMETER,$locale);
+echo $unit;
+</pre></div>
+</div>
+<p><br class="example-break">
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.measure.edit.changetype"></a>47.4.6. Cambiar tipos manualmente</h3></div></div></div>
+<p>
+            Para cambiar el tipo de una medición sin alterar su valor, use
+            <code class="methodname">setType()</code>.
+        </p>
+<div class="example">
+<a name="zend.measure.edit.changetype.example-1"></a><p class="title"><b>Ejemplo 47.16. Cambiar el tipo</b></p>
+<div class="example-contents"><pre class="programlisting">
+$unit = new Zend_Measure_Length(1,Zend_Measure_Length::METER);
+echo $unit; // outputs "1 m"
+
+$unit-&gt;setType(Zend_Measure_Length::KILOMETER);
+echo $unit; // outputs "1000 km"
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.measure.output.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.measure.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.measure.types.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">47.3. Salida de mediciones </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 47.5. Tipos de mediciones</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

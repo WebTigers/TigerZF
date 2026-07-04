@@ -1,0 +1,915 @@
+<?php $title = '55.6. Características interactivas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">55.6. Características interactivas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.pdf.drawing.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 55. Zend_Pdf</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.pdf.info.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.pdf.interactive-features"></a>55.6. Características interactivas</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations"></a>55.6.1. Destinos</h3></div></div></div>
+<p>
+            Un destino define una vista particular de un documento, formada por los
+            siguientes elementos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>La página del documento que se mostrará.</p></li>
+<li class="listitem"><p>La ubicación de la ventana del documento en esa página.</p></li>
+<li class="listitem"><p>El factor de ampliación (zoom) que se usará al mostrar la página.</p></li>
+</ul></div>
+<p>
+            Los destinos pueden asociarse con elementos de esquema (<a class="link" href="zend.pdf.interactive-features.phtml#zend.pdf.pages.interactive-features.outlines" title="55.6.3. Document Outline (bookmarks)">Esquema
+            del documento (marcadores)</a>), anotaciones (<a class="link" href="zend.pdf.interactive-features.phtml#zend.pdf.pages.interactive-features.annotations" title="55.6.4. Annotations">Anotaciones</a>), o
+            acciones (<a class="link" href="zend.pdf.interactive-features.phtml#zend.pdf.pages.interactive-features.actions" title="55.6.2. Actions">Acciones</a>).
+            En cada caso, el destino especifica la vista del documento que se presentará
+            cuando se abra el elemento de esquema o la anotación, o cuando se ejecute la
+            acción. Además, se puede especificar la acción opcional de apertura del documento.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types"></a>55.6.1.1. Tipos de destino admitidos</h4></div></div></div>
+<p>
+                El componente <code class="classname">Zend_Pdf</code> admite los siguientes tipos.
+            </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.zoom"></a>55.6.1.1.1. Zend_Pdf_Destination_Zoom</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con las coordenadas (left, top) posicionadas
+                    en la esquina superior izquierda de la ventana y el contenido de la página
+                    ampliado por el factor zoom.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_Zoom::create($page, $left = null, $top = null,
+                        $zoom = null)</code>.
+                </p>
+<p>
+                    Donde:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$left</code> es el borde izquierdo de la página mostrada (float).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$top</code> es el borde superior de la página mostrada (float).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$zoom</code> es un factor de ampliación (float).
+                        </p></li>
+</ul></div>
+<p>
+                   <code class="constant">NULL</code>, especificado para el parámetro <code class="varname">$left</code>,
+                   <code class="varname">$top</code> o <code class="varname">$zoom</code>, significa
+                   "valor actual de la aplicación de visualización".
+                </p>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_Zoom</code> también proporciona
+                    los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getLeftEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setLeftEdge(float $left)</code>;</p></li>
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getTopEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setTopEdge(float $top)</code>;</p></li>
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getZoomFactor()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setZoomFactor(float $zoom)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit"></a>55.6.1.1.2. Zend_Pdf_Destination_Fit</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con las coordenadas (left, top) posicionadas
+                    en la esquina superior izquierda de la ventana y el contenido de la página
+                    ampliado por el factor zoom.
+                    Muestra la página especificada, con su contenido ampliado lo justo para que
+                    encaje toda la página dentro de la ventana, tanto horizontal como
+                    verticalmente. Si los factores de ampliación horizontal y vertical
+                    requeridos son diferentes, se usa el menor de los dos, centrando la
+                    página dentro de la ventana en la otra dimensión.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_Fit::create($page)</code>.
+                </p>
+<p>
+                    Donde <code class="varname">$page</code> es una página de destino
+                    (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-horizontally"></a>55.6.1.1.3. Zend_Pdf_Destination_FitHorizontally</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con la coordenada vertical top posicionada
+                    en el borde superior de la ventana y el contenido de la página ampliado lo
+                    justo para que encaje todo el ancho de la página dentro de la ventana.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitHorizontally::create($page,
+                        $top)</code>.
+                </p>
+<p>
+                    Donde:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$top</code> es el borde superior de la página mostrada
+                            (float).
+                        </p></li>
+</ul></div>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_FitHorizontally</code> también
+                    proporciona los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getTopEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setTopEdge(float $top)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-vertically"></a>55.6.1.1.4. Zend_Pdf_Destination_FitVertically</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con la coordenada horizontal left posicionada
+                    en el borde izquierdo de la ventana y el contenido de la página ampliado lo
+                    justo para que encaje toda la altura de la página dentro de la ventana.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitVertically::create($page,
+                        $left)</code>.
+                </p>
+<p>
+                    Donde:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$left</code> es el borde izquierdo de la página mostrada
+                            (float).
+                        </p></li>
+</ul></div>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_FitVertically</code> también
+                    proporciona los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getLeftEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setLeftEdge(float $left)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-rectangle"></a>55.6.1.1.5. Zend_Pdf_Destination_FitRectangle</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con su contenido ampliado lo justo para que
+                    el rectángulo especificado por las coordenadas left, bottom, right y top
+                    encaje por completo dentro de la ventana, tanto horizontal como
+                    verticalmente. Si los factores de ampliación horizontal y vertical
+                    requeridos son diferentes, se usa el menor de los dos, centrando el
+                    rectángulo dentro de la ventana en la otra dimensión.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitRectangle::create($page, $left, $bottom,
+                        $right, $top)</code>.
+                </p>
+<p>
+                    Donde:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$left</code> es el borde izquierdo de la página mostrada
+                            (float).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$bottom</code> es el borde inferior de la página mostrada
+                            (float).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$right</code> es el borde derecho de la página mostrada (float).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$top</code> es el borde superior de la página mostrada (float).
+                        </p></li>
+</ul></div>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_FitRectangle</code> también
+                    proporciona los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getLeftEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setLeftEdge(float $left)</code>;</p></li>
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getBottomEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setBottomEdge(float $bottom)</code>;</p></li>
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getRightEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setRightEdge(float $right)</code>;</p></li>
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getTopEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setTopEdge(float $top)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-bounding-box"></a>55.6.1.1.6. Zend_Pdf_Destination_FitBoundingBox</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con su contenido ampliado lo justo para que
+                    su caja delimitadora encaje por completo dentro de la ventana, tanto
+                    horizontal como verticalmente.
+                    Si los factores de ampliación horizontal y vertical requeridos son
+                    diferentes, se usa el menor de los dos, centrando la caja delimitadora
+                    dentro de la ventana en la otra dimensión.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitBoundingBox::create($page, $left, $bottom,
+                        $right, $top)</code>.
+                </p>
+<p>
+                    Donde <code class="varname">$page</code> es una página de destino
+                    (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-bounding-box-horizontally"></a>55.6.1.1.7. Zend_Pdf_Destination_FitBoundingBoxHorizontally</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con la coordenada vertical top posicionada
+                    en el borde superior de la ventana y el contenido de la página ampliado lo
+                    justo para que encaje todo el ancho de su caja delimitadora dentro de la
+                    ventana.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitBoundingBoxHorizontally::create($page,
+                        $top)</code>.
+                </p>
+<p>
+                    Donde
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$top</code> es el borde superior de la página mostrada
+                            (float).
+                        </p></li>
+</ul></div>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_FitBoundingBoxHorizontally</code>
+                    también proporciona los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getTopEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setTopEdge(float $top)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.fit-bounding-box-vertically"></a>55.6.1.1.8. Zend_Pdf_Destination_FitBoundingBoxVertically</h5></div></div></div>
+<p>
+                    Muestra la página especificada, con la coordenada horizontal left posicionada en
+                    el borde izquierdo de la ventana y el contenido de la página ampliado lo
+                    justo para que encaje toda la altura de su caja delimitadora dentro de la ventana.
+                </p>
+<p>
+                    El objeto destino puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_FitBoundingBoxVertically::create($page,
+                        $left)</code>.
+                </p>
+<p>
+                    Donde
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                            <code class="varname">$page</code> es una página de destino
+                            (un objeto <code class="classname">Zend_Pdf_Page</code> o un número de página).
+                        </p></li>
+<li class="listitem"><p>
+                            <code class="varname">$left</code> es el borde izquierdo de la página mostrada
+                            (float).
+                        </p></li>
+</ul></div>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_FitBoundingBoxVertically</code>
+                    también proporciona los siguientes métodos:
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><span class="type">Float</span><code class="methodname">getLeftEdge()</code>;</p></li>
+<li class="listitem"><p><code class="methodname">setLeftEdge(float $left)</code>;</p></li>
+</ul></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.types.named"></a>55.6.1.1.9. Zend_Pdf_Destination_Named</h5></div></div></div>
+<p>
+                    Todos los destinos indicados anteriormente son "Destinos explícitos".
+                </p>
+<p>
+                    Además de esto, un documento <acronym class="acronym">PDF</acronym> puede contener un diccionario
+                    de dichos destinos que puede usarse para hacer referencia desde fuera del
+                    <acronym class="acronym">PDF</acronym> (p. ej.
+                    '<code class="filename">http://www.mycompany.com/document.pdf#chapter3</code>').
+                </p>
+<p>
+                    Los objetos <code class="classname">Zend_Pdf_Destination_Named</code> permiten referirse
+                    a destinos del diccionario de destinos con nombre del documento.
+                </p>
+<p>
+                    El objeto de destino con nombre puede crearse usando el método
+                    <code class="methodname">Zend_Pdf_Destination_Named::create(string $name)</code>.
+                </p>
+<p>
+                    La clase <code class="classname">Zend_Pdf_Destination_Named</code> proporciona un único
+                    método adicional:
+                </p>
+<p>
+                    <span class="type">String</span><code class="methodname">getName()</code>;
+                </p>
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.pdf.pages.interactive-features.destinations.processing"></a>55.6.1.2. Procesamiento de destinos a nivel de documento</h4></div></div></div>
+<p>
+                La clase <code class="classname">Zend_Pdf</code> proporciona un conjunto de métodos
+                para el procesamiento de destinos.
+            </p>
+<p>
+                Cada objeto destino (incluidos los destinos con nombre) puede resolverse usando el
+                método <code class="methodname">resolveDestination($destination)</code>. Devuelve
+                el objeto <code class="classname">Zend_Pdf_Page</code> correspondiente, si se encuentra
+                el destino objetivo, o <code class="constant">NULL</code> en caso contrario.
+            </p>
+<p>
+                El método <code class="methodname">Zend_Pdf::resolveDestination()</code> también admite
+                un parámetro booleano opcional <code class="varname">$refreshPageCollectionHashes</code>,
+                que por defecto es <code class="constant">TRUE</code>. Obliga
+                al objeto <code class="classname">Zend_Pdf</code> a actualizar los hashes internos de la
+                colección de páginas, ya que la lista de páginas del documento puede haberse
+                actualizado mediante la propiedad
+                <code class="varname">Zend_Pdf::$pages</code>
+                (<a class="link" href="zend.pdf.pages.phtml" title="55.4. Working with Pages">Trabajando con páginas</a>).
+                Puede desactivarse por motivos de rendimiento,
+                si se sabe que la lista de páginas del documento no ha cambiado desde la
+                última solicitud al método.
+            </p>
+<p>
+                La lista completa de destinos con nombre puede obtenerse usando el
+                método <code class="methodname">Zend_Pdf::getNamedDestinations()</code>. Devuelve
+                un array de objetos <code class="classname">Zend_Pdf_Target</code>, que en realidad son
+                un destino explícito o una acción GoTo
+                (<a class="link" href="zend.pdf.interactive-features.phtml#zend.pdf.pages.interactive-features.actions" title="55.6.2. Actions">Acciones</a>).
+            </p>
+<p>
+                El método <code class="methodname">Zend_Pdf::getNamedDestination(string $name)</code> devuelve
+                el destino con nombre especificado (un destino explícito o una acción GoTo).
+            </p>
+<p>
+                El diccionario de destinos con nombre del documento <acronym class="acronym">PDF</acronym> puede
+                actualizarse con el método
+                <code class="methodname">Zend_Pdf::setNamedDestination(string $name, $destination)</code>,
+                donde <code class="varname">$destination</code> es un destino explícito
+                (cualquier destino salvo <code class="classname">Zend_Pdf_Destination_Named</code>) o
+                una acción GoTo.
+            </p>
+<p>
+                Si se especifica <code class="constant">NULL</code> en lugar de
+                <code class="varname">$destination</code>, entonces se elimina el destino con nombre especificado.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Los destinos con nombre no resolubles se eliminan automáticamente de un
+                    documento al guardarlo.
+                </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.pdf.interactive-features.destinations.example-1"></a><p class="title"><b>Ejemplo 55.21. Ejemplo de uso de destinos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$pdf = new Zend_Pdf();
+$page1 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+$page2 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+$page3 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+// Page created, but not included into pages list
+
+$pdf-&gt;pages[] = $page1;
+$pdf-&gt;pages[] = $page2;
+
+$destination1 = Zend_Pdf_Destination_Fit::create($page2);
+$destination2 = Zend_Pdf_Destination_Fit::create($page3);
+
+// Returns $page2 object
+$page = $pdf-&gt;resolveDestination($destination1);
+
+// Returns null, page 3 is not included into document yet
+$page = $pdf-&gt;resolveDestination($destination2);
+
+$pdf-&gt;setNamedDestination('Page2', $destination1);
+$pdf-&gt;setNamedDestination('Page3', $destination2);
+
+// Returns $destination2
+$destination = $pdf-&gt;getNamedDestination('Page3');
+
+// Returns $destination1
+$pdf-&gt;resolveDestination(Zend_Pdf_Destination_Named::create('Page2'));
+
+// Returns null, page 3 is not included into document yet
+$pdf-&gt;resolveDestination(Zend_Pdf_Destination_Named::create('Page3'));
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.pdf.pages.interactive-features.actions"></a>55.6.2. Acciones</h3></div></div></div>
+<p>
+            En lugar de simplemente saltar a un destino en el documento, una anotación o
+            un elemento de esquema puede especificar una acción para que la aplicación de
+            visualización la ejecute, como lanzar una aplicación, reproducir un sonido o
+            cambiar el estado de apariencia de una anotación.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.pdf.pages.interactive-features.actions.types"></a>55.6.2.1. Tipos de acción admitidos</h4></div></div></div>
+<p>
+                Los siguientes tipos de acción se reconocen al cargar un documento
+                <acronym class="acronym">PDF</acronym>:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_GoTo</code> - ir a
+                        un destino en el documento actual.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_GoToR</code> - ir a
+                        un destino en otro documento.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_GoToE</code> - ir a
+                        un destino en un archivo incrustado.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Launch</code> - lanzar
+                        una aplicación o abrir o imprimir un documento.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Thread</code> - comenzar a leer
+                        un hilo de artículo.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_URI</code> - resolver una
+                        <acronym class="acronym">URI</acronym>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Sound</code> - reproducir un sonido.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Movie</code> - reproducir una película.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Hide</code> - oculta o muestra
+                        una o más anotaciones en pantalla.
+                    </p></li>
+<li class="listitem">
+<p>
+                        <code class="classname">Zend_Pdf_Action_Named</code> - ejecuta una acción
+                        predefinida por la aplicación de visualización:
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                <span class="emphasis"><em>NextPage</em></span> - Ir a la página siguiente
+                                del documento.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>PrevPage</em></span> - Ir a la página
+                                anterior del documento.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>FirstPage</em></span> - Ir a la primera página
+                                del documento.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>LastPage</em></span> - Ir a la última página
+                                del documento.
+                            </p></li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_SubmitForm</code> - enviar datos a
+                        una dirección de recurso uniforme.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_ResetForm</code> - restablecer campos
+                        a sus valores por defecto.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_ImportData</code> - importar valores
+                        de campos desde un archivo.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_JavaScript</code> - ejecutar
+                        un script JavaScript.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_SetOCGState</code> - establecer el estado de
+                        uno o más grupos de contenido opcional.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Rendition</code> - controlar la
+                        reproducción de contenido multimedia (iniciar, detener, pausar o reanudar
+                        una reproducción en curso).
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_Trans</code> - actualizar la visualización
+                        de un documento, usando un diccionario de transición.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">Zend_Pdf_Action_GoTo3DView</code> - establecer
+                        la vista actual de una anotación 3D.
+                    </p></li>
+</ul></div>
+<p>
+                Actualmente el usuario solo puede crear las acciones
+                <code class="classname">Zend_Pdf_Action_GoTo</code> y
+                <code class="classname">Zend_Pdf_Action_URI</code>.
+            </p>
+<p>
+                El objeto de acción GoTo puede crearse usando el método
+                <code class="methodname">Zend_Pdf_Action_GoTo::create($destination)</code>,
+                donde <code class="varname">$destination</code> es un objeto
+                <code class="classname">Zend_Pdf_Destination</code> o una cadena que puede usarse
+                para identificar un destino con nombre.
+            </p>
+<p>
+                Debe usarse el método
+                <code class="methodname">Zend_Pdf_Action_URI::create($uri[, $isMap])</code> para
+                crear una acción URI (consulte la documentación de la <acronym class="acronym">API</acronym> para más
+                detalles). El parámetro opcional <code class="varname">$isMap</code> es
+                <code class="constant">FALSE</code> por defecto.
+            </p>
+<p>
+                También admite los siguientes métodos:
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.pdf.pages.interactive-features.actions.chaining"></a>55.6.2.2. Encadenamiento de acciones</h4></div></div></div>
+<p>
+                Los objetos de acción pueden encadenarse usando la propiedad pública
+                <code class="varname">Zend_Pdf_Action::$next</code>.
+            </p>
+<p>
+                Es un array de objetos <code class="classname">Zend_Pdf_Action</code>, que a su vez
+                pueden tener sus propias subacciones.
+            </p>
+<p>
+                La clase <code class="classname">Zend_Pdf_Action</code> implementa la interfaz RecursiveIterator,
+                por lo que las acciones hijas pueden iterarse recursivamente:
+            </p>
+<pre class="programlisting">
+$pdf = new Zend_Pdf();
+$page1 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+$page2 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+// Page created, but not included into pages list
+$page3 = $pdf-&gt;newPage(Zend_Pdf_Page::SIZE_A4);
+
+$pdf-&gt;pages[] = $page1;
+$pdf-&gt;pages[] = $page2;
+
+$action1 = Zend_Pdf_Action_GoTo::create(
+                            Zend_Pdf_Destination_Fit::create($page2));
+$action2 = Zend_Pdf_Action_GoTo::create(
+                            Zend_Pdf_Destination_Fit::create($page3));
+$action3 = Zend_Pdf_Action_GoTo::create(
+                            Zend_Pdf_Destination_Named::create('Chapter1'));
+$action4 = Zend_Pdf_Action_GoTo::create(
+                            Zend_Pdf_Destination_Named::create('Chapter5'));
+
+$action2-&gt;next[] = $action3;
+$action2-&gt;next[] = $action4;
+
+$action1-&gt;next[] = $action2;
+
+$actionsCount = 1; // Note! Iteration doesn't include top level action and
+                   // walks through children only
+$iterator = new RecursiveIteratorIterator(
+                                        $action1,
+                                        RecursiveIteratorIterator::SELF_FIRST);
+foreach ($iterator as $chainedAction) {
+    $actionsCount++;
+}
+
+// Prints 'Actions in a tree: 4'
+printf("Actions in a tree: %d\n", $actionsCount++);
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.pdf.pages.interactive-features.actions.open-action"></a>55.6.2.3. Acción de apertura del documento</h4></div></div></div>
+<p>
+                Una acción de apertura especial puede especificar un destino que se mostrará
+                o una acción que se ejecutará cuando se abra el documento.
+            </p>
+<p>
+                El método <code class="methodname">Zend_Pdf_Target Zend_Pdf::getOpenAction()</code>
+                devuelve la acción de apertura actual del documento (o <code class="constant">NULL</code> si
+                no se ha establecido ninguna acción de apertura).
+            </p>
+<p>
+                El método <code class="methodname">setOpenAction(Zend_Pdf_Target $openAction = null)</code>
+                establece la acción de apertura del documento, o la elimina si
+                <code class="varname">$openAction</code> es <code class="constant">NULL</code>.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.pdf.pages.interactive-features.outlines"></a>55.6.3. Esquema del documento (marcadores)</h3></div></div></div>
+<p>
+            Un documento PDF puede mostrar opcionalmente un esquema del documento en pantalla,
+            permitiendo al usuario navegar de forma interactiva de una parte del documento a
+            otra. El esquema consiste en una jerarquía en forma de árbol de elementos de
+            esquema (a veces llamados marcadores), que sirven como una tabla de contenidos
+            visual para mostrar al usuario la estructura del documento. El usuario puede abrir
+            y cerrar elementos individuales de forma interactiva haciendo clic en ellos con
+            el ratón. Cuando un elemento está abierto, sus hijos inmediatos en la jerarquía
+            se vuelven visibles en pantalla; cada hijo puede a su vez estar abierto o
+            cerrado, revelando u ocultando selectivamente otras partes de la jerarquía.
+            Cuando un elemento está cerrado, todos sus descendientes en la jerarquía quedan
+            ocultos. Al hacer clic en el texto de cualquier elemento visible, se activa el
+            elemento, provocando que la aplicación de visualización salte a un destino o
+            active una acción asociada con el elemento.
+        </p>
+<p>
+            La clase <code class="classname">Zend_Pdf</code> proporciona la propiedad pública
+            <code class="varname">$outlines</code>, que es un array de objetos
+            <code class="classname">Zend_Pdf_Outline</code>.
+
+            </p>
+<pre class="programlisting">
+$pdf = Zend_Pdf::load($path);
+
+// Remove outline item
+unset($pdf-&gt;outlines[0]-&gt;childOutlines[1]);
+
+// Set Outline to be displayed in bold
+$pdf-&gt;outlines[0]-&gt;childOutlines[3]-&gt;setIsBold(true);
+
+// Add outline entry
+$pdf-&gt;outlines[0]-&gt;childOutlines[5]-&gt;childOutlines[] =
+    Zend_Pdf_Outline::create('Chapter 2', 'chapter_2');
+
+$pdf-&gt;save($path, true);
+</pre>
+<p>
+        </p>
+<p>
+            Los atributos del esquema pueden obtenerse o establecerse usando los siguientes métodos:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">string getTitle()</code> - obtiene el título del elemento de esquema.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTitle(string $title)</code> - establece el título del elemento de esquema.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">boolean isOpen()</code> - <code class="constant">TRUE</code> si el esquema
+                    está abierto por defecto.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setIsOpen(boolean $isOpen)</code> - establece el estado isOpen.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">boolean isItalic()</code> - <code class="constant">TRUE</code> si
+                    el elemento de esquema se muestra en cursiva.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setIsItalic(boolean $isItalic)</code> - establece
+                    el estado isItalic.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">boolean isBold()</code> - <code class="constant">TRUE</code> si el elemento
+                    de esquema se muestra en negrita.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setIsBold(boolean $isBold)</code> - establece
+                    el estado isBold.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Color_Rgb getColor()</code> - obtiene el color
+                    del texto del esquema (<code class="constant">NULL</code> significa negro).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setColor(Zend_Pdf_Color_Rgb $color)</code> - establece
+                    el color del texto del esquema (<code class="constant">NULL</code> significa negro).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Target getTarget()</code> - obtiene el
+                    objetivo del esquema (objeto de acción, destino explícito o con nombre).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setTarget(Zend_Pdf_Target|string $target)</code> - establece
+                    el objetivo del esquema (acción o destino). Puede usarse una cadena para
+                    identificar un destino con nombre. <code class="constant">NULL</code> significa 'sin objetivo'.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">array getOptions()</code> - obtiene los atributos del esquema
+                    como un array.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">setOptions(array $options)</code> - establece las opciones del esquema.
+                    Se reconocen las siguientes opciones: 'title', 'open', 'color', 'italic',
+                    'bold' y 'target'.
+                </p></li>
+</ul></div>
+<p>
+            Un nuevo esquema puede crearse de dos formas:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Outline::create(string $title[, Zend_Pdf_Target|string
+                        $target])</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Outline::create(array $options)</code>
+                </p></li>
+</ul></div>
+<p>
+            Cada objeto de esquema puede tener elementos de esquema hijos listados en la
+            propiedad pública <code class="varname">Zend_Pdf_Outline::$childOutlines</code>.
+            Es un array de objetos <code class="classname">Zend_Pdf_Outline</code>,
+            por lo que los esquemas se organizan en un árbol.
+        </p>
+<p>
+            La clase <code class="classname">Zend_Pdf_Outline</code> implementa la interfaz RecursiveArray,
+            por lo que los esquemas hijos pueden iterarse recursivamente usando RecursiveIteratorIterator:
+        </p>
+<pre class="programlisting">
+$pdf = Zend_Pdf::load($path);
+
+foreach ($pdf-&gt;outlines as $documentRootOutlineEntry) {
+    $iterator = new RecursiveIteratorIterator(
+                    $documentRootOutlineEntry,
+                    RecursiveIteratorIterator::SELF_FIRST
+                );
+    foreach ($iterator as $childOutlineItem) {
+        $OutlineItemTarget = $childOutlineItem-&gt;getTarget();
+        if ($OutlineItemTarget instanceof Zend_Pdf_Destination) {
+            if ($pdf-&gt;resolveDestination($OutlineItemTarget) === null) {
+                // Mark Outline item with unresolvable destination
+                // using RED color
+                $childOutlineItem-&gt;setColor(new Zend_Pdf_Color_Rgb(1, 0, 0));
+            }
+        } else if ($OutlineItemTarget instanceof Zend_Pdf_Action_GoTo) {
+            $OutlineItemTarget-&gt;setDestination();
+            if ($pdf-&gt;resolveDestination($OutlineItemTarget) === null) {
+                // Mark Outline item with unresolvable destination
+                // using RED color
+                $childOutlineItem-&gt;setColor(new Zend_Pdf_Color_Rgb(1, 0, 0));
+            }
+        }
+    }
+}
+
+$pdf-&gt;save($path, true);
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Todos los elementos de esquema con destinos no resueltos (o destinos de acciones
+                GoTo) se actualizan al guardar el documento, estableciendo sus objetivos a
+                <code class="constant">NULL</code>. Así el documento no quedará corrupto al eliminar páginas
+                referenciadas por esquemas.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.pdf.pages.interactive-features.annotations"></a>55.6.4. Anotaciones</h3></div></div></div>
+<p>
+            Una anotación asocia un objeto, como una nota, un sonido o una película, con una
+            ubicación en una página de un documento PDF, o proporciona una forma de interactuar
+            con el usuario mediante el ratón y el teclado.
+        </p>
+<p>
+            Todas las anotaciones están representadas por la clase abstracta
+            <code class="classname">Zend_Pdf_Annotation</code>.
+        </p>
+<p>
+            Una anotación puede adjuntarse a una página usando el método
+            <code class="methodname">Zend_Pdf_Page::attachAnnotation(Zend_Pdf_Annotation
+                $annotation)</code>.
+        </p>
+<p>
+            Actualmente el usuario puede crear tres tipos de anotaciones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Annotation_Link::create($x1, $y1, $x2, $y2,
+                        $target)</code> donde <code class="varname">$target</code> es un objeto de acción,
+                    un destino, o una cadena (que puede usarse en lugar de un objeto de destino
+                    con nombre).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Annotation_Text::create($x1, $y1, $x2, $y2,
+                        $text)</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Annotation_FileAttachment::create($x1, $y1, $x2, $y2,
+                        $fileSpecification)</code>
+                </p></li>
+</ul></div>
+<p>
+            Una anotación de enlace representa un hipervínculo a un destino en otra parte del
+            documento, o una acción a ejecutar.
+        </p>
+<p>
+            Una anotación de texto representa una "nota adhesiva" adjunta a un punto del documento PDF.
+        </p>
+<p>
+            Una anotación de archivo adjunto contiene una referencia a un archivo.
+        </p>
+<p>
+            Los siguientes métodos son compartidos por todos los tipos de anotación:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="methodname">setLeft(float $left)</code></p></li>
+<li class="listitem"><p><code class="methodname">float getLeft()</code></p></li>
+<li class="listitem"><p><code class="methodname">setRight(float $right)</code></p></li>
+<li class="listitem"><p><code class="methodname">float getRight()</code></p></li>
+<li class="listitem"><p><code class="methodname">setTop(float $top)</code></p></li>
+<li class="listitem"><p><code class="methodname">float getTop()</code></p></li>
+<li class="listitem"><p><code class="methodname">setBottom(float $bottom)</code></p></li>
+<li class="listitem"><p><code class="methodname">float getBottom()</code></p></li>
+<li class="listitem"><p><code class="methodname">setText(string $text)</code></p></li>
+<li class="listitem"><p><code class="methodname">string getText()</code></p></li>
+</ul></div>
+<p>
+            La propiedad de texto de la anotación es el texto que se mostrará para la anotación
+            o, si este tipo de anotación no muestra texto, una descripción alternativa del
+            contenido de la anotación en forma legible por humanos.
+        </p>
+<p>
+            Los objetos de anotación de enlace también proporcionan dos métodos adicionales:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setDestination(Zend_Pdf_Target|string $target)</code>
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Pdf_Target getDestination()</code>
+                </p></li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.pdf.drawing.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.pdf.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.pdf.info.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">55.5. Dibujo </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 55.7. Información y metadatos del documento</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

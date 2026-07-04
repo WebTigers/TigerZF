@@ -1,0 +1,248 @@
+<?php $title = '64.14. Zend_Service_Amazon_Ec2: Grupos de seguridad'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.14. Zend_Service_Amazon_Ec2: Grupos de seguridad</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.zones.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.s3.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.amazon.ec2.securitygroups"></a>64.14. Zend_Service_Amazon_Ec2: Grupos de seguridad</h2></div></div></div>
+<p>
+         Un grupo de seguridad es una colección con nombre de reglas de acceso. Estas reglas
+         de acceso especifican qué tráfico de red entrante (es decir, de entrada) debe
+         entregarse a su instancia. Todo el demás tráfico entrante se
+         descartará.
+    </p>
+<p>
+        Puede modificar las reglas de un grupo en cualquier momento. Las nuevas reglas se
+        aplican automáticamente a todas las instancias en ejecución e instancias
+        lanzadas en el futuro.
+    </p>
+<div class="note"><table border="0" summary="Note: Maximum Security Groups">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Máximo de grupos de seguridad</th>
+</tr>
+<tr><td align="left" valign="top"><p>Puede crear hasta 100 grupos de seguridad.</p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.securitygroups.maintenance"></a>64.14.1. Mantenimiento de grupos de seguridad</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.maintenance.create"></a><p class="title"><b>Ejemplo 64.56. Crear un nuevo grupo de seguridad</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">create</code> crea un nuevo grupo de seguridad. Cada instancia se
+                lanza en un grupo de seguridad. Si no se especifica ningún grupo de seguridad
+                durante el lanzamiento, las instancias se lanzan en el grupo de seguridad
+                predeterminado. Las instancias dentro del mismo grupo de seguridad tienen acceso de red
+                irrestricto entre sí. Las instancias rechazarán los intentos de acceso de red
+                provenientes de otras instancias en un grupo de seguridad diferente.
+            </p>
+<p>
+                <code class="code">create</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;create('mygroup', 'my group description');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.maintenance.describe"></a><p class="title"><b>Ejemplo 64.57. Describir un grupo de seguridad</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">describe</code> devuelve información sobre los grupos de seguridad que
+                usted posee.
+            </p>
+<p>
+                Si especifica nombres de grupos de seguridad, se devuelve información sobre esos grupos
+                de seguridad. De lo contrario, se devuelve información sobre todos los grupos de seguridad. Si especifica un
+                grupo que no existe, se devuelve un error (fault).
+            </p>
+<p>
+                <code class="code">describe</code> devolverá un array que contiene información
+                sobre los grupos de seguridad, el cual incluye el ownerId, groupName,
+                groupDescription y un array que contiene todas las reglas de ese grupo
+                de seguridad.
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;describe('mygroup');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.maintenance.delete"></a><p class="title"><b>Ejemplo 64.58. Eliminar un grupo de seguridad</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">delete</code> eliminará el grupo de seguridad. Si intenta
+                eliminar un grupo de seguridad que contiene instancias, se devuelve un error (fault).
+                Si intenta eliminar un grupo de seguridad al que hace referencia otro
+                grupo de seguridad, se devuelve un error (fault). Por ejemplo, si el grupo de seguridad B
+                tiene una regla que permite el acceso desde el grupo de seguridad A, el grupo de seguridad A
+                no se puede eliminar hasta que se elimine la regla de permiso.
+            </p>
+<p>
+                <code class="code">delete</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;delete('mygroup');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.securitygroups.authorize"></a>64.14.2. Autorizar acceso</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.authorize.ip"></a><p class="title"><b>Ejemplo 64.59. Autorizar por IP</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">authorizeIp</code> añade permisos a un grupo de seguridad basándose en
+                una dirección IP, un tipo de protocolo y un rango de puertos.
+            </p>
+<p>
+                Los permisos se especifican por el protocolo IP (TCP, UDP o ICMP), el
+                origen de la solicitud (por rango de IP o por un par usuario-grupo de Amazon EC2),
+                los rangos de puertos de origen y destino (para <acronym class="acronym">TCP</acronym> y UDP), y los
+                códigos y tipos ICMP (para ICMP). Al autorizar ICMP, se puede usar -1
+                como comodín en los campos de tipo y código.
+            </p>
+<p>
+                Los cambios de permisos se propagan a las instancias dentro del grupo de seguridad
+                lo más rápido posible. Sin embargo, dependiendo del número de instancias, puede
+                producirse un pequeño retraso.
+            </p>
+<p>
+                <code class="code">authorizeIp</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;authorizeIp('mygroup',
+                                'protocol',
+                                'fromPort',
+                                'toPort',
+                                'ipRange');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.authorize.group"></a><p class="title"><b>Ejemplo 64.60. Autorizar por grupo</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">authorizeGroup</code> añade permisos a un grupo de seguridad.
+            </p>
+<p>
+                Los cambios de permisos se propagan a las instancias dentro del grupo de seguridad
+                lo más rápido posible. Sin embargo, dependiendo del número de instancias, puede
+                producirse un pequeño retraso.
+            </p>
+<p>
+                <code class="code">authorizeGroup</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;authorizeGroup('mygroup', 'securityGroupName', 'ownerId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.amazon.ec2.securitygroups.revoke"></a>64.14.3. Revocar acceso</h3></div></div></div>
+<div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.revoke.ip"></a><p class="title"><b>Ejemplo 64.61. Revocar por IP</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">revokeIp</code> revoca permisos de un grupo de seguridad basándose en
+                una dirección IP, un tipo de protocolo y un rango de puertos. Los permisos que se revocan
+                deben especificarse usando los mismos valores usados para conceder los permisos.
+            </p>
+<p>
+                Los permisos se especifican por el protocolo IP (TCP, UDP o ICMP), el
+                origen de la solicitud (por rango de IP o por un par usuario-grupo de Amazon EC2),
+                los rangos de puertos de origen y destino (para <acronym class="acronym">TCP</acronym> y UDP), y los
+                códigos y tipos ICMP (para ICMP). Al autorizar ICMP, se puede usar -1
+                como comodín en los campos de tipo y código.
+            </p>
+<p>
+                Los cambios de permisos se propagan a las instancias dentro del grupo de seguridad
+                lo más rápido posible. Sin embargo, dependiendo del número de instancias, puede
+                producirse un pequeño retraso.
+            </p>
+<p>
+                <code class="code">revokeIp</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;revokeIp('mygroup',
+                             'protocol',
+                             'fromPort',
+                             'toPort',
+                             'ipRange');
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.amazon.ec2.securitygroups.revoke.group"></a><p class="title"><b>Ejemplo 64.62. Revocar por grupo</b></p>
+<div class="example-contents">
+<p>
+                <code class="code">revokeGroup</code> añade permisos a un grupo de seguridad. Los permisos
+                que se van a revocar deben especificarse usando los mismos valores usados para conceder los
+                permisos.
+            </p>
+<p>
+                Los cambios de permisos se propagan a las instancias dentro del grupo de seguridad
+                lo más rápido posible. Sin embargo, dependiendo del número de instancias, puede
+                producirse un pequeño retraso.
+            </p>
+<p>
+                <code class="code">revokeGroup</code> devuelve un booleano <code class="constant">TRUE</code> o
+                <code class="constant">FALSE</code>.
+            </p>
+<pre class="programlisting">
+$ec2_sg = new Zend_Service_Amazon_Ec2_Securitygroups('aws_key',
+                                                     'aws_secret_key');
+$return = $ec2_sg-&gt;revokeGroup('mygroup', 'securityGroupName', 'ownerId');
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.amazon.ec2.zones.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.s3.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.13. Zend_Service_Amazon_Ec2: Regiones y zonas de disponibilidad </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.15. Zend_Service_Amazon_S3</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

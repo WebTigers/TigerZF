@@ -1,0 +1,448 @@
+<?php $title = '53.3. Zend_OpenId_Provider'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">53.3. Zend_OpenId_Provider</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.openid.consumer.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 53. Zend_OpenId</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.paginator.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.openid.provider"></a>53.3. Zend_OpenId_Provider</h2></div></div></div>
+<p>
+        <code class="classname">Zend_OpenId_Provider</code> puede usarse para implementar servidores
+        OpenID. Este capítulo ofrece ejemplos que muestran cómo
+        construir un servidor muy básico. Sin embargo, para la implementación de un servidor OpenID
+        de producción (como <a class="ulink" href="http://www.myopenid.com" target="_top">www.myopenid.com</a>) puede
+        que tenga que lidiar con problemas más complejos.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.provider.start"></a>53.3.1. Inicio rápido</h3></div></div></div>
+<p>
+            El siguiente ejemplo incluye código para crear una cuenta de usuario
+            usando <code class="classname">Zend_OpenId_Provider::register</code>. El elemento link con
+            <span class="command"><strong>rel="openid.server"</strong></span> apunta a nuestro propio script de servidor. Si
+            envía esta identidad a un sitio habilitado para OpenID, se realizará
+            la autenticación en este servidor.
+        </p>
+<p>
+            El código antes de la etiqueta &lt;html&gt; es solo un truco que
+            crea automáticamente una cuenta de usuario. No necesitará ese código cuando use
+            identidades reales.
+        </p>
+<div class="example">
+<a name="zend.openid.provider.example-1"></a><p class="title"><b>Ejemplo 53.11. La identidad</b></p>
+<div class="example-contents"><pre class="programlisting">
+&lt;?php
+// Set up test identity
+define("TEST_SERVER", Zend_OpenId::absoluteURL("example-8.php"));
+define("TEST_ID", Zend_OpenId::selfURL());
+define("TEST_PASSWORD", "123");
+$server = new Zend_OpenId_Provider();
+if (!$server-&gt;hasUser(TEST_ID)) {
+    $server-&gt;register(TEST_ID, TEST_PASSWORD);
+}
+?&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;link rel="openid.server" href="&lt;?php echo TEST_SERVER;?&gt;" /&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;?php echo TEST_ID;?&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El siguiente script de servidor de identidad maneja dos tipos de solicitudes
+            de sitios habilitados para OpenID (para asociación y autenticación). Ambos
+            son gestionados por el mismo método:
+            <code class="classname">Zend_OpenId_Provider::handle</code>. Los dos argumentos del
+            constructor de <code class="classname">Zend_OpenId_Provider</code> son <acronym class="acronym">URL</acronym>s de
+            las páginas de inicio de sesión y confianza, que solicitan entrada del usuario final.
+        </p>
+<p>
+            En caso de éxito, el método <code class="classname">Zend_OpenId_Provider::handle</code>
+            devuelve una cadena que debe pasarse de vuelta al sitio habilitado para OpenID. En
+            caso de fallo, devuelve <code class="constant">FALSE</code>. Este ejemplo devolverá una
+            respuesta <acronym class="acronym">HTTP</acronym> 403 si
+            <code class="classname">Zend_OpenId_Provider::handle</code> falla. Obtendrá esta respuesta si
+            abre este script con un navegador web, porque envía una solicitud que no
+            cumple con OpenID.
+        </p>
+<div class="example">
+<a name="zend.openid.provider.example-2"></a><p class="title"><b>Ejemplo 53.12. Proveedor de identidad simple</b></p>
+<div class="example-contents"><pre class="programlisting">
+$server = new Zend_OpenId_Provider("example-8-login.php",
+                                   "example-8-trust.php");
+$ret = $server-&gt;handle();
+if (is_string($ret)) {
+    echo $ret;
+} else if ($ret !== true) {
+    header('HTTP/1.0 403 Forbidden');
+    echo 'Forbidden';
+}
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Es una buena idea usar una conexión segura (HTTPS) para estos scripts,
+                especialmente para los siguientes scripts interactivos, para evitar la
+                divulgación de contraseñas.
+            </p></td></tr>
+</table></div>
+<p>
+            El siguiente script implementa una pantalla de inicio de sesión para un servidor
+            de identidad usando <code class="classname">Zend_OpenId_Provider</code> y redirige a esta página cuando
+            un usuario requerido aún no ha iniciado sesión. En esta página, un usuario introducirá su contraseña
+            para iniciar sesión.
+        </p>
+<p>
+            Debe usar la contraseña "123" que se usó en el script de identidad anterior.
+        </p>
+<p>
+            Al enviar, el script llama a <code class="classname">Zend_OpenId_Provider::login</code>
+            con la identidad y contraseña del usuario aceptado, y luego redirige de vuelta
+            al script principal del proveedor de identidad. En caso de éxito, el
+            método <code class="classname">Zend_OpenId_Provider::login</code> establece una sesión entre el
+            usuario y el proveedor de identidad y almacena la información sobre
+            el usuario, que ahora ha iniciado sesión. Todas las solicitudes siguientes del mismo usuario no
+            requerirán un procedimiento de inicio de sesión, incluso si provienen de otro sitio web
+            habilitado para OpenID.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Tenga en cuenta que esta sesión es solo entre el usuario final y el proveedor de identidad.
+                Los sitios habilitados para OpenID no saben nada de ella.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.openid.provider.example-3"></a><p class="title"><b>Ejemplo 53.13. Pantalla de inicio de sesión simple</b></p>
+<div class="example-contents"><pre class="programlisting">
+&lt;?php
+$server = new Zend_OpenId_Provider();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' &amp;&amp;
+    isset($_POST['openid_action']) &amp;&amp;
+    $_POST['openid_action'] === 'login' &amp;&amp;
+    isset($_POST['openid_identifier']) &amp;&amp;
+    isset($_POST['openid_password'])) {
+    $server-&gt;login($_POST['openid_identifier'],
+                   $_POST['openid_password']);
+    Zend_OpenId::redirect("example-8.php", $_GET);
+}
+?&gt;
+&lt;html&gt;
+&lt;body&gt;
+&lt;form method="post"&gt;
+&lt;fieldset&gt;
+&lt;legend&gt;OpenID Login&lt;/legend&gt;
+&lt;table border=0&gt;
+&lt;tr&gt;
+&lt;td&gt;Name:&lt;/td&gt;
+&lt;td&gt;
+&lt;input type="text"
+       name="openid_identifier"
+       value="&lt;?php echo htmlspecialchars($_GET['openid_identity']);?&gt;"&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Password:&lt;/td&gt;
+&lt;td&gt;
+&lt;input type="text"
+       name="openid_password"
+       value=""&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td&gt;
+&lt;input type="submit"
+       name="openid_action"
+       value="login"&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/fieldset&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El hecho de que el usuario ya haya iniciado sesión no significa que la
+            autenticación deba tener éxito necesariamente. El usuario puede decidir no confiar en
+            sitios habilitados para OpenID particulares. La siguiente pantalla de confianza permite al
+            usuario final tomar esa decisión. Esta elección puede hacerse únicamente para las solicitudes
+            actuales o para siempre. En el segundo caso, la información sobre
+            sitios de confianza/no confianza se almacena en una base de datos interna, y todas
+            las siguientes solicitudes de autenticación de este sitio se manejarán
+            automáticamente sin interacción del usuario.
+        </p>
+<div class="example">
+<a name="zend.openid.provider.example-4"></a><p class="title"><b>Ejemplo 53.14. Pantalla de confianza simple</b></p>
+<div class="example-contents"><pre class="programlisting">
+&lt;?php
+$server = new Zend_OpenId_Provider();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' &amp;&amp;
+    isset($_POST['openid_action']) &amp;&amp;
+    $_POST['openid_action'] === 'trust') {
+
+    if (isset($_POST['allow'])) {
+        if (isset($_POST['forever'])) {
+            $server-&gt;allowSite($server-&gt;getSiteRoot($_GET));
+        }
+        $server-&gt;respondToConsumer($_GET);
+    } else if (isset($_POST['deny'])) {
+        if (isset($_POST['forever'])) {
+            $server-&gt;denySite($server-&gt;getSiteRoot($_GET));
+        }
+        Zend_OpenId::redirect($_GET['openid_return_to'],
+                              array('openid.mode'=&gt;'cancel'));
+    }
+}
+?&gt;
+&lt;html&gt;
+&lt;body&gt;
+&lt;p&gt;A site identifying as
+&lt;a href="&lt;?php echo htmlspecialchars($server-&gt;getSiteRoot($_GET));?&gt;"&gt;
+&lt;?php echo htmlspecialchars($server-&gt;getSiteRoot($_GET));?&gt;
+&lt;/a&gt;
+has asked us for confirmation that
+&lt;a href="&lt;?php echo htmlspecialchars($server-&gt;getLoggedInUser());?&gt;"&gt;
+&lt;?php echo htmlspecialchars($server-&gt;getLoggedInUser());?&gt;
+&lt;/a&gt;
+is your identity URL.
+&lt;/p&gt;
+&lt;form method="post"&gt;
+&lt;input type="checkbox" name="forever"&gt;
+&lt;label for="forever"&gt;forever&lt;/label&gt;&lt;br&gt;
+&lt;input type="hidden" name="openid_action" value="trust"&gt;
+&lt;input type="submit" name="allow" value="Allow"&gt;
+&lt;input type="submit" name="deny" value="Deny"&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Los servidores OpenID de producción normalmente admiten la Simple Registration
+            Extension, que permite a los consumidores solicitar cierta información sobre el usuario al
+            proveedor. En este caso, la página de confianza puede extenderse para permitir
+            la introducción de los campos solicitados o la selección de un perfil de usuario específico.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.provider.all"></a>53.3.2. Scripts de proveedor combinados</h3></div></div></div>
+<p>
+            Es posible combinar toda la funcionalidad del proveedor en un solo script. En
+            este caso, las <acronym class="acronym">URL</acronym>s de inicio de sesión y confianza se omiten, y
+            <code class="classname">Zend_OpenId_Provider</code> asume que apuntan a la misma página
+            con el argumento <code class="constant">GET</code> adicional "openid.action".
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El siguiente ejemplo no está completo. No proporciona código de interfaz gráfica para
+                el usuario; en su lugar, realiza un inicio de sesión automático y una relación de confianza automática.
+                Esto se hace solo para simplificar el ejemplo; un servidor de producción debería incluir algo
+                de código de los ejemplos anteriores.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.openid.provider.example-5"></a><p class="title"><b>Ejemplo 53.15. Todo junto</b></p>
+<div class="example-contents"><pre class="programlisting">
+$server = new Zend_OpenId_Provider();
+
+define("TEST_ID", Zend_OpenId::absoluteURL("example-9-id.php"));
+define("TEST_PASSWORD", "123");
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET' &amp;&amp;
+    isset($_GET['openid_action']) &amp;&amp;
+    $_GET['openid_action'] === 'login') {
+    $server-&gt;login(TEST_ID, TEST_PASSWORD);
+    unset($_GET['openid_action']);
+    Zend_OpenId::redirect(Zend_OpenId::selfUrl(), $_GET);
+} else if ($_SERVER['REQUEST_METHOD'] == 'GET' &amp;&amp;
+    isset($_GET['openid_action']) &amp;&amp;
+    $_GET['openid_action'] === 'trust') {
+    unset($_GET['openid_action']);
+    $server-&gt;respondToConsumer($_GET);
+} else {
+    $ret = $server-&gt;handle();
+    if (is_string($ret)) {
+        echo $ret;
+    } else if ($ret !== true) {
+        header('HTTP/1.0 403 Forbidden');
+        echo 'Forbidden';
+    }
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Si compara este ejemplo con los ejemplos anteriores divididos en
+            páginas separadas, verá solo una
+            diferencia además del código de despacho:
+            <code class="methodname">unset($_GET['openid_action'])</code>. Esta llamada a
+            <code class="methodname">unset()</code> es necesaria para enrutar la siguiente solicitud al manejador principal.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.provider.sreg"></a>53.3.3. Simple Registration Extension</h3></div></div></div>
+<p>
+            De nuevo, el código antes de la etiqueta &lt;html&gt; es solo un truco para demostrar
+            la funcionalidad. Crea una nueva cuenta de usuario y la asocia con un perfil (apodo
+            y contraseña). Estos trucos no son necesarios en proveedores desplegados donde los usuarios finales se registran
+            en servidores OpenID y completan sus perfiles. Implementar esta interfaz gráfica queda fuera del alcance de
+            este manual.
+        </p>
+<div class="example">
+<a name="zend.openid.provider.example-6"></a><p class="title"><b>Ejemplo 53.16. Identidad con perfil</b></p>
+<div class="example-contents"><pre class="programlisting">
+&lt;?php
+define("TEST_SERVER", Zend_OpenId::absoluteURL("example-10.php"));
+define("TEST_ID", Zend_OpenId::selfURL());
+define("TEST_PASSWORD", "123");
+$server = new Zend_OpenId_Provider();
+if (!$server-&gt;hasUser(TEST_ID)) {
+    $server-&gt;register(TEST_ID, TEST_PASSWORD);
+    $server-&gt;login(TEST_ID, TEST_PASSWORD);
+    $sreg = new Zend_OpenId_Extension_Sreg(array(
+        'nickname' =&gt;'test',
+        'email' =&gt; 'test@test.com'
+    ));
+    $root = Zend_OpenId::absoluteURL(".");
+    Zend_OpenId::normalizeUrl($root);
+    $server-&gt;allowSite($root, $sreg);
+    $server-&gt;logout();
+}
+?&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;link rel="openid.server" href="&lt;?php echo TEST_SERVER;?&gt;" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;?php echo TEST_ID;?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Ahora debería pasar esta identidad al sitio web habilitado para OpenID (use el ejemplo de la Simple
+            Registration Extension de la sección anterior), y este debería usar el
+            siguiente script de servidor OpenID.
+        </p>
+<p>
+            Este script es una variación del script del ejemplo "Todo junto". Usa
+            el mismo mecanismo de inicio de sesión automático, pero no contiene ningún código para una página
+            de confianza. El usuario ya confía para siempre en los scripts de ejemplo. Esta confianza fue
+            establecida llamando al método <code class="methodname">Zend_OpenId_Provider::allowSite()</code>
+            en el script de identidad. El mismo método asocia el perfil con la
+            <acronym class="acronym">URL</acronym> de confianza. Este perfil se devolverá automáticamente ante una solicitud de
+            la <acronym class="acronym">URL</acronym> de confianza.
+        </p>
+<p>
+            Para hacer que la Simple Registration Extension funcione, simplemente debe
+            pasar una instancia de <code class="classname">Zend_OpenId_Extension_Sreg</code> como segundo
+            argumento del método <code class="methodname">Zend_OpenId_Provider::handle()</code>.
+        </p>
+<div class="example">
+<a name="zend.openid.provider.example-7"></a><p class="title"><b>Ejemplo 53.17. Proveedor con SREG</b></p>
+<div class="example-contents"><pre class="programlisting">
+$server = new Zend_OpenId_Provider();
+$sreg = new Zend_OpenId_Extension_Sreg();
+
+define("TEST_ID", Zend_OpenId::absoluteURL("example-10-id.php"));
+define("TEST_PASSWORD", "123");
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET' &amp;&amp;
+    isset($_GET['openid_action']) &amp;&amp;
+    $_GET['openid_action'] === 'login') {
+    $server-&gt;login(TEST_ID, TEST_PASSWORD);
+    unset($_GET['openid_action']);
+    Zend_OpenId::redirect(Zend_OpenId::selfUrl(), $_GET);
+} else if ($_SERVER['REQUEST_METHOD'] == 'GET' &amp;&amp;
+    isset($_GET['openid_action']) &amp;&amp;
+    $_GET['openid_action'] === 'trust') {
+   echo "UNTRUSTED DATA" ;
+} else {
+    $ret = $server-&gt;handle(null, $sreg);
+    if (is_string($ret)) {
+        echo $ret;
+    } else if ($ret !== true) {
+        header('HTTP/1.0 403 Forbidden');
+        echo 'Forbidden';
+    }
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.openid.provider.else"></a>53.3.4. ¿Algo más?</h3></div></div></div>
+<p>
+            Construir proveedores OpenID es mucho menos común que construir
+            sitios habilitados para OpenID, por lo que este manual no cubre todas
+            las características de <code class="classname">Zend_OpenId_Provider</code> de forma exhaustiva, como se hizo con
+            <code class="classname">Zend_OpenId_Consumer</code>.
+        </p>
+<p>
+            En resumen, <code class="classname">Zend_OpenId_Provider</code> contiene:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Un conjunto de métodos para construir una interfaz gráfica de usuario final que permite a
+                    los usuarios registrar y gestionar sus sitios de confianza y perfiles
+                </p></li>
+<li class="listitem"><p>
+                    Una capa de almacenamiento abstracta para almacenar información sobre usuarios,
+                    sus sitios y sus perfiles. También almacena asociaciones entre
+                    el proveedor y los sitios habilitados para OpenID. Esta capa es muy similar
+                    a la de la clase <code class="classname">Zend_OpenId_Consumer</code>. También usa
+                    almacenamiento en archivos de forma predeterminada, pero puede usarse con otro backend.
+                </p></li>
+<li class="listitem"><p>
+                    Una capa abstracta de asociación de usuarios que puede asociar
+                    el navegador web de un usuario con una identidad que ha iniciado sesión
+                </p></li>
+</ul></div>
+<p>
+            La clase <code class="classname">Zend_OpenId_Provider</code> no intenta cubrir todas
+            las posibles características que pueden implementar los servidores OpenID, por ejemplo, certificados
+            digitales, pero puede extenderse fácilmente usando
+            <code class="classname">Zend_OpenId_Extension</code>s o mediante la extensión orientada a objetos estándar.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.openid.consumer.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.openid.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.paginator.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">53.2. Fundamentos de Zend_OpenId_Consumer </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 54. Zend_Paginator</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,175 @@
+<?php $title = '26.5. Creación de fechas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">26.5. Creación de fechas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.date.overview.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 26. Zend_Date</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.date.constants.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.date.creation"></a>26.5. Creación de fechas</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Date</code> proporciona varias formas diferentes de crear una nueva instancia de
+        sí mismo. Como existen distintas necesidades, las formas más convenientes se mostrarán en este capítulo.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.creation.actual"></a>26.5.1. Crear la fecha actual</h3></div></div></div>
+<p>
+            La forma más sencilla de crear un objeto de fecha es crear la fecha actual. Puede
+            crear una nueva instancia con <span class="command"><strong>new Zend_Date()</strong></span> o usar el conveniente
+            método estático <code class="methodname">Zend_Date::now()</code>, ambos devolverán la
+            fecha actual como una nueva instancia de <code class="classname">Zend_Date</code>. La fecha actual siempre
+            incluye la fecha y hora actuales para la zona horaria actualmente establecida.
+        </p>
+<div class="example">
+<a name="zend.date.creation.actual.example-1"></a><p class="title"><b>Ejemplo 26.10. Creación de fecha por instancia</b></p>
+<div class="example-contents">
+<p>
+                La creación de fecha mediante la creación de una nueva instancia significa que no necesita
+                proporcionar ningún parámetro. Por supuesto hay varios parámetros que se describirán más adelante,
+                pero normalmente esta es la forma más sencilla y más utilizada de obtener la fecha actual como
+                instancia de <code class="classname">Zend_Date</code>.
+            </p>
+<pre class="programlisting">
+$date = new Zend_Date();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.date.creation.actual.example-2"></a><p class="title"><b>Ejemplo 26.11. Creación estática de fecha</b></p>
+<div class="example-contents">
+<p>
+                A veces es más sencillo usar un método estático para la creación de fechas. Para ello puede
+                usar el método <span class="emphasis"><em><code class="methodname">now()</code></em></span>. Devuelve una
+                nueva instancia de <code class="classname">Zend_Date</code> de la misma forma que si usara
+                <span class="command"><strong>new Zend_Date()</strong></span>. Pero siempre devolverá la fecha actual y
+                no puede modificarse proporcionando parámetros opcionales.
+            </p>
+<pre class="programlisting">
+$date = Zend_Date::now();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.creation.database"></a>26.5.2. Crear una fecha desde una base de datos</h3></div></div></div>
+<p>
+            Las bases de datos se usan a menudo para almacenar valores de fecha. Pero el problema es que cada
+            base de datos genera sus valores de fecha de una forma diferente. Las bases de datos <span class="emphasis"><em>MsSQL</em></span> usan una
+            salida de fecha estándar bastante diferente a las bases de datos <span class="emphasis"><em>MySQL</em></span>. Pero para
+            simplificar, <code class="classname">Zend_Date</code> facilita enormemente la creación de una fecha
+            a partir de valores de fecha de base de datos.
+        </p>
+<p>
+            Por supuesto, se puede indicar a cada base de datos que convierta la salida de una columna definida a
+            un valor especial. Por ejemplo, podría convertir un valor <span class="emphasis"><em>datetime</em></span> para
+            que muestre un valor de minutos. Pero esto consume mucho tiempo y a menudo necesita gestionar
+            las fechas de una forma distinta a la esperada al crear la consulta a la base de datos.
+        </p>
+<p>
+            Así que tenemos una forma rápida y otra conveniente de crear fechas a partir de valores de base de datos.
+        </p>
+<div class="example">
+<a name="zend.date.creation.database.example-1"></a><p class="title"><b>Ejemplo 26.12. Creación rápida de fechas a partir de valores de fecha de la base de datos</b></p>
+<div class="example-contents">
+<p>
+                Se sabe que todas las bases de datos gestionan las consultas lo más rápido posible. Están construidas para
+                actuar y responder con rapidez. La forma más rápida de gestionar fechas es obtener marcas de tiempo unix
+                de la base de datos. Todas las bases de datos almacenan los valores de fecha internamente como timestamp (no como marca de
+                tiempo unix). Esto significa que el tiempo necesario para crear una marca de tiempo mediante una consulta es
+                mucho menor que convertirla a un formato específico.
+            </p>
+<pre class="programlisting">
+// SELECT UNIX_TIMESTAMP(my_datetime_column) FROM my_table
+$date = new Zend_Date($unixtimestamp, Zend_Date::TIMESTAMP);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.date.creation.database.example-2"></a><p class="title"><b>Ejemplo 26.13. Creación conveniente de fechas a partir de valores de fecha de la base de datos</b></p>
+<div class="example-contents">
+<p>
+                La salida estándar de todas las bases de datos es bastante diferente, incluso si parece la misma a
+                primera vista. Pero todas forman parte del estándar <acronym class="acronym">ISO</acronym> y se
+                explican a través de él. Así que la forma más sencilla de crear fechas es el uso de
+                <code class="constant">Zend_Date::ISO_8601</code>. Entre las bases de datos que se sabe que son
+                reconocidas por <code class="constant">Zend_Date::ISO_8601</code> están
+                <span class="emphasis"><em>MySQL</em></span>, <span class="emphasis"><em>MsSQL</em></span>, por ejemplo. Pero todas las
+                bases de datos también pueden devolver una representación <acronym class="acronym">ISO-8601</acronym> de una
+                columna de fecha. <acronym class="acronym">ISO-8601</acronym> tiene la gran ventaja de que es legible por
+                humanos. La desventaja es que <acronym class="acronym">ISO-8601</acronym> necesita más tiempo para su
+                cómputo que una simple marca de tiempo unix. Pero también debe mencionarse que las marcas de
+                tiempo unix solo se admiten para fechas posteriores al 1 de enero de 1970.
+            </p>
+<pre class="programlisting">
+// SELECT datecolumn FROM my_table
+$date = new Zend_Date($datecolumn, Zend_Date::ISO_8601);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.creation.array"></a>26.5.3. Crear fechas a partir de un array</h3></div></div></div>
+<p>
+            Las fechas también pueden crearse mediante el uso de un array. Esta es una forma sencilla y fácil. Las
+            claves de array utilizadas son:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>day</em></span>: día de la fecha como número</p></li>
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>month</em></span>: mes de la fecha como número</p></li>
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>year</em></span>: año completo de la fecha</p></li>
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>hour</em></span>: hora de la fecha</p></li>
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>minute</em></span>: minuto de la fecha</p></li>
+<li class="listitem" style="list-style-type: circle"><p><span class="emphasis"><em>second</em></span>: segundo de la fecha</p></li>
+</ul></div>
+<div class="example">
+<a name="zend.date.creation.array.example"></a><p class="title"><b>Ejemplo 26.14. Creación de fecha por array</b></p>
+<div class="example-contents">
+<p>
+                Normalmente proporcionará un array de fecha completo para la creación de una nueva instancia de fecha.
+                Pero cuando no proporciona todos los valores, los valores del array no proporcionados se ponen a cero. Esto
+                significa que si, por ejemplo, no se proporciona la hora, se usa la hora <span class="emphasis"><em>0</em></span>.
+            </p>
+<pre class="programlisting">
+$datearray = array('year' =&gt; 2006,
+                   'month' =&gt; 4,
+                   'day' =&gt; 18,
+                   'hour' =&gt; 12,
+                   'minute' =&gt; 3,
+                   'second' =&gt; 10);
+$date = new Zend_Date($datearray);
+</pre>
+<pre class="programlisting">
+$datearray = array('year' =&gt; 2006, 'month' =&gt; 4, 'day' =&gt; 18);
+$date = new Zend_Date($datearray);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.date.overview.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.date.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.date.constants.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">26.4. Resumen de la API de Zend_Date </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 26.6. Constantes para funciones generales de fecha</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

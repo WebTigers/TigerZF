@@ -1,0 +1,115 @@
+<?php $title = '49.2. Zend_Mime_Message'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">49.2. Zend_Mime_Message</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mime.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 49. Zend_Mime</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.mime.part.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.mime.message"></a>49.2. Zend_Mime_Message</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mime.message.introduction"></a>49.2.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Mime_Message</code> representa un mensaje compatible con
+            <acronym class="acronym">MIME</acronym> que puede contener una o más partes independientes (representadas como
+            objetos <a class="link" href="zend.mime.part.phtml" title="49.3. Zend_Mime_Part"><code class="classname">Zend_Mime_Part</code></a>). Con
+            <code class="classname">Zend_Mime_Message</code>, se pueden generar mensajes multiparte compatibles con
+            <acronym class="acronym">MIME</acronym> a partir de objetos <code class="classname">Zend_Mime_Part</code>. La codificación
+            y el manejo de los límites (boundary) son gestionados de forma transparente por la clase.
+            Los objetos <code class="classname">Zend_Mime_Message</code> también pueden reconstruirse a partir de cadenas
+            dadas (experimental). Usado por <a class="link" href="zend.mail.phtml" title="Chapter 45. Zend_Mail"><code class="classname">Zend_Mail</code></a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mime.message.instantiation"></a>49.2.2. Instanciación</h3></div></div></div>
+<p>
+            No existe un constructor explícito para <code class="classname">Zend_Mime_Message</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mime.message.addparts"></a>49.2.3. Añadir partes MIME</h3></div></div></div>
+<p>
+            Los objetos <a class="link" href="zend.mime.part.phtml" title="49.3. Zend_Mime_Part"><code class="classname">Zend_Mime_Part</code></a>
+            pueden añadirse a un objeto <code class="classname">Zend_Mime_Message</code> dado
+            llamando a <code class="methodname">addPart($part)</code>
+        </p>
+<p>
+            El método <code class="methodname">getParts()</code> devuelve un array con todos los objetos
+            <a class="link" href="zend.mime.part.phtml" title="49.3. Zend_Mime_Part"><code class="classname">Zend_Mime_Part</code></a>
+            del <code class="classname">Zend_Mime_Message</code>. Los objetos
+            <code class="classname">Zend_Mime_Part</code> pueden entonces modificarse ya que se almacenan en el array
+            como referencias. Si se añaden partes al array o se cambia la secuencia, el array debe
+            devolverse al objeto <a class="link" href="zend.mime.part.phtml" title="49.3. Zend_Mime_Part"><code class="classname">Zend_Mime_Part</code></a>
+            llamando a <code class="methodname">setParts($partsArray)</code>.
+        </p>
+<p>
+            La función <code class="methodname">isMultiPart()</code> devolverá
+            <code class="constant">TRUE</code> si hay más de una parte registrada en el objeto
+            <code class="classname">Zend_Mime_Message</code> y, por lo tanto, el objeto generaría un
+            mensaje MIME multiparte al generar la salida real.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mime.message.bondary"></a>49.2.4. Manejo del límite (boundary)</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Mime_Message</code> normalmente crea y usa su propio
+            objeto <code class="classname">Zend_Mime</code> para generar un límite. Si necesita definir
+            el límite o desea cambiar el comportamiento del objeto <code class="classname">Zend_Mime</code>
+            usado por <code class="classname">Zend_Mime_Message</code>, puede instanciar el objeto
+            <code class="classname">Zend_Mime</code> usted mismo y luego registrarlo en
+            <code class="classname">Zend_Mime_Message</code>. Normalmente no necesitará hacer esto.
+            <code class="methodname">setMime(Zend_Mime $mime)</code> establece una instancia especial de
+            <code class="classname">Zend_Mime</code> que será usada por este
+            <code class="classname">Zend_Mime_Message</code>
+        </p>
+<p>
+            <code class="methodname">getMime()</code> devuelve la instancia de
+            <code class="classname">Zend_Mime</code> que se usará para renderizar el mensaje cuando se
+            llame a <code class="methodname">generateMessage()</code>.
+        </p>
+<p>
+            <code class="methodname">generateMessage()</code> renderiza el contenido de
+            <code class="classname">Zend_Mime_Message</code> como una cadena.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.mime.message.parse"></a>49.2.5. Analizar una cadena para crear un objeto Zend_Mime_Message (experimental)</h3></div></div></div>
+<p>
+            Un mensaje compatible con <acronym class="acronym">MIME</acronym> dado en forma de cadena puede usarse para
+            reconstruir a partir de él un objeto <code class="classname">Zend_Mime_Message</code>.
+            <code class="classname">Zend_Mime_Message</code> tiene un método de fábrica estático para analizar esta
+            cadena y devolver un objeto <code class="classname">Zend_Mime_Message</code>.
+        </p>
+<p>
+            <code class="methodname">Zend_Mime_Message::createFromMessage($str, $boundary)</code>
+            decodifica la cadena dada y devuelve un objeto <code class="classname">Zend_Mime_Message</code>
+            que luego puede examinarse usando <code class="methodname">getParts()</code>
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mime.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.mime.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.mime.part.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 49. Zend_Mime </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 49.3. Zend_Mime_Part</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

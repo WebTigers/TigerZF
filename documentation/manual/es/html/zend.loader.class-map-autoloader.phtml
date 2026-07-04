@@ -1,0 +1,172 @@
+<?php $title = '42.8. El ClassMapAutoloader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">42.8. El ClassMapAutoloader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.loader.standard-autoloader.methods.register.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 42. Zend_Loader</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.loader.class-map-autoloader.methods.constructor.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.loader.class-map-autoloader"></a>42.8. El ClassMapAutoloader</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.class-map-autoloader.intro"></a>42.8.1. Resumen</h3></div></div></div>
+<p>
+            El <code class="classname">ClassMapAutoloader</code> está diseñado pensando en el rendimiento. La
+            idea detrás de él es sencilla: cuando se le pide cargar una clase, comprueba si está en el mapa
+            y, si es así, carga el archivo asociado a la clase en el mapa. Esto evita operaciones
+            innecesarias en el sistema de archivos, y también puede asegurar que el autoloader "juegue bien"
+            con las cachés de opcode y la caché de realpath de PHP.
+        </p>
+<p>
+            Para usar el <code class="classname">ClassMapAutoloader</code>, primero necesita mapas de
+            clases. Zend Framework también proporciona una herramienta para generar estos mapas de clases; puede
+            encontrarla en <code class="filename">bin/classmap_generator.php</code> de la distribución. La documentación
+            completa de esta herramienta se ofrece en <a class="xref" href="zend.loader.classmap-generator.phtml" title="42.9. The Class Map Generator utility: bin/classmap_generator.php">Sección 42.9, “The Class Map Generator utility: bin/classmap_generator.php”</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.class-map-autoloader.quick-start"></a>42.8.2. Inicio rápido</h3></div></div></div>
+<p>
+            El primer paso es generar un archivo de mapa de clases. Puede ejecutarlo sobre cualquier
+            directorio que contenga código fuente en cualquier lugar debajo de él.
+        </p>
+<pre class="programlisting">
+php classmap_generator.php Some/Directory/
+</pre>
+<p>
+            Esto creará un archivo llamado <code class="filename">Some/Directory/autoload_classmap.php</code>, que
+            es un archivo PHP que devuelve un array asociativo que representa el mapa de clases.
+        </p>
+<p>
+            Dentro de su código, ahora instanciará el
+            <code class="classname">ClassMapAutoloader</code>, y le proporcionará la ubicación del mapa.
+        </p>
+<pre class="programlisting">
+// This example assumes ZF is on your include_path.
+// You could also load the autoloader class from a path relative to the
+// current script, or via an absolute path.
+require_once 'Zend/Loader/ClassMapAutoloader.php';
+$loader = new Zend_Loader_ClassMapAutoloader();
+
+// Register the class map:
+$loader-&gt;registerAutoloadMap('Some/Directory/autoload_classmap.php');
+
+// Register with spl_autoload:
+$loader-&gt;register();
+</pre>
+<p>
+            Llegado este punto, ya puede usar cualquier clase referenciada en su mapa de clases.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.class-map-autoloader.options"></a>42.8.3. Opciones de configuración</h3></div></div></div>
+<p>
+            El <code class="classname">ClassMapAutoloader</code> define las siguientes opciones.
+        </p>
+<div class="variablelist">
+<p class="title"><b>Opciones de ClassMapAutoloader</b></p>
+<dl class="variablelist">
+<dt><span class="term">$options</span></dt>
+<dd>
+<p>
+                        El <code class="classname">ClassMapAutoloader</code> espera un array de opciones,
+                        donde cada opción es un nombre de archivo que referencia un mapa de clases, o un
+                        array asociativo de pares nombre de clase/nombre de archivo.
+                    </p>
+<p>
+                        Como ejemplo:
+                    </p>
+<pre class="programlisting">
+// Configuration defining both a file-based class map, and an array map
+$config = array(
+    __DIR__ . '/library/autoload_classmap.php', // file-based class map
+    array(                                      // array class map
+        'Application_Bootstrap' =&gt; __DIR__ . '/application/Bootstrap.php',
+        'Test_Bootstrap'        =&gt; __DIR__ . '/tests/Bootstrap.php',
+    ),
+);
+</pre>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2"><div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.class-map-autoloader.methods"></a>42.8.4. Métodos disponibles</h3></div></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.class-map-autoloader.examples"></a>42.8.5. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.loader.class-map-autoloader.examples.configuration"></a><p class="title"><b>Ejemplo 42.9. Uso de configuración para inicializar ClassMapAutoloader</b></p>
+<div class="example-contents">
+<p>
+                A menudo, querrá configurar su <code class="classname">ClassMapAutoloader</code>.
+                Estos valores pueden provenir de un archivo de configuración, una caché (como ShMem o
+                memcached), o un simple array de PHP. Lo siguiente es un ejemplo de un array de PHP que
+                podría usarse para configurar el autoloader:
+            </p>
+<pre class="programlisting">
+// Configuration defining both a file-based class map, and an array map
+$config = array(
+APPLICATION_PATH . '/../library/autoload_classmap.php', // file-based class map
+    array(                              // array class map
+        'Application_Bootstrap' =&gt; APPLICATION_PATH . '/Bootstrap.php',
+        'Test_Bootstrap'        =&gt; APPLICATION_PATH . '/../tests/Bootstrap.php',
+    ),
+);
+</pre>
+<p>
+                Una configuración equivalente en estilo INI podría verse así:
+            </p>
+<pre class="programlisting">
+classmap.library = APPLICATION_PATH "/../library/autoload_classmap.php"
+classmap.resources.Application_Bootstrap = APPLICATION_PATH "/Bootstrap.php"
+classmap.resources.Test_Bootstrap = APPLICATION_PATH "/../tests/Bootstrap.php"
+</pre>
+<p>
+                Una vez que tenga su configuración, puede pasarla al constructor del
+                <code class="classname">ClassMapAutoloader</code>, a su método
+                <code class="methodname">setOptions()</code>, o a
+                <code class="methodname">registerAutoloadMaps()</code>.
+            </p>
+<pre class="programlisting">
+/* The following are all equivalent */
+
+// To the constructor:
+$loader = new Zend_Loader_ClassMapAutoloader($config);
+
+// To setOptions():
+$loader = new Zend_Loader_ClassMapAutoloader();
+$loader-&gt;setOptions($config);
+
+// To registerAutoloadMaps():
+$loader = new Zend_Loader_ClassMapAutoloader();
+$loader-&gt;registerAutoloadMaps($config);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.loader.standard-autoloader.methods.register.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.loader.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.loader.class-map-autoloader.methods.constructor.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">register </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> __construct</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

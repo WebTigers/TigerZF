@@ -1,0 +1,144 @@
+<?php $title = 'B.7. Zend Framework 1.5'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">B.7. Zend Framework 1.5</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="migration.16.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice B. Notas de migración de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="migration.10.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="migration.15"></a>B.7. Zend Framework 1.5</h2></div></div></div>
+<p>
+        Al actualizar desde una versión anterior a Zend Framework 1.5 o superior debe
+        tener en cuenta las siguientes notas de migración.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="migration.15.zend.controller"></a>B.7.1. Zend_Controller</h3></div></div></div>
+<p>
+            Aunque la mayor parte de la funcionalidad básica permanece igual, y toda la funcionalidad
+            documentada permanece igual, hay una "característica"
+            <span class="emphasis"><em>no documentada</em></span> en particular que ha cambiado.
+        </p>
+<p>
+            Al escribir <acronym class="acronym">URL</acronym>s, la forma documentada de escribir nombres de acción en
+            camelCase es usar un separador de palabras; estos son '.' o '-' por defecto,
+            pero pueden configurarse en el dispatcher. El dispatcher internamente
+            convierte el nombre de la acción a minúsculas, y usa estos separadores de palabras para
+            reensamblar el método de acción usando camelCasing. Sin embargo, debido a que las funciones de <acronym class="acronym">PHP</acronym>
+            no distinguen entre mayúsculas y minúsculas, <span class="emphasis"><em>podía</em></span>
+            escribir <acronym class="acronym">URL</acronym>s usando camelCasing, y el dispatcher resolvería
+            estas a la misma ubicación. Por ejemplo, 'camel-cased' se convertiría en
+            'camelCasedAction' por el dispatcher, mientras que 'camelCased' se
+            convertiría en 'camelcasedAction'; sin embargo, debido a la insensibilidad a mayúsculas/minúsculas de
+            <acronym class="acronym">PHP</acronym>, ambos ejecutarán el mismo método.
+        </p>
+<p>
+            Esto causa problemas con el ViewRenderer al resolver los scripts de vista.
+            La forma canónica y documentada es que todos los separadores de palabras
+            se convierten en guiones, y las palabras se ponen en minúsculas. Esto crea
+            un vínculo semántico entre las acciones y los scripts de vista, y la
+            normalización garantiza que los scripts puedan encontrarse. Sin embargo, si se
+            llama a la acción 'camelCased' y esta realmente se resuelve, el separador
+            de palabras ya no está presente, y el ViewRenderer intenta
+            resolver a una ubicación diferente -- <code class="filename">camelcased.phtml</code> en lugar de
+            <code class="filename">camel-cased.phtml</code>.
+        </p>
+<p>
+            Algunos desarrolladores dependían de esta "característica", que nunca fue intencional.
+            Sin embargo, varios cambios en el árbol 1.5.0 hicieron que
+            el ViewRenderer ya no resuelva estas rutas; el vínculo semántico ahora se
+            aplica de forma estricta. En primer lugar, el dispatcher ahora aplica la sensibilidad
+            a mayúsculas/minúsculas en los nombres de las acciones. Esto significa que referirse a
+            sus acciones en la url usando camelCasing ya no resolverá al
+            mismo método que usando separadores de palabras (es decir, 'camel-casing').
+            Esto hace que el ViewRenderer ahora solo reconozca las acciones separadas
+            por palabras al resolver los scripts de vista.
+        </p>
+<p>
+            Si descubre que dependía de esta "característica", tiene varias
+            opciones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Mejor opción: renombre sus scripts de vista. Pros: compatibilidad
+                    hacia adelante. Contras: si tiene muchos scripts de vista que
+                    dependían del comportamiento anterior, no intencional, tendrá
+                    mucho renombrado por hacer.
+                </p></li>
+<li class="listitem">
+<p>
+                    Segunda mejor opción: El ViewRenderer ahora delega la resolución de
+                    scripts de vista a <code class="classname">Zend_Filter_Inflector</code>; puede
+                    modificar las reglas del inflector para que ya no separe
+                    las palabras de una acción con un guion:
+                </p>
+<pre class="programlisting">
+$viewRenderer =
+    Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer');
+$inflector = $viewRenderer-&gt;getInflector();
+$inflector-&gt;setFilterRule(':action', array(
+    new Zend_Filter_PregReplace(
+        '#[^a-z0-9' . preg_quote(DIRECTORY_SEPARATOR, '#') . ']+#i',
+        ''
+    ),
+    'StringToLower'
+));
+</pre>
+<p>
+                    El código anterior modificará el inflector para que ya no
+                    separe las palabras con guion; también puede querer eliminar
+                    el filtro 'StringToLower' si <span class="emphasis"><em>desea</em></span>
+                    que los nombres reales de los scripts de vista sean también camelCase.
+                </p>
+<p>
+                    Si renombrar sus scripts de vista fuera demasiado tedioso o llevara mucho
+                    tiempo, esta es su mejor opción hasta que pueda encontrar el
+                    tiempo para hacerlo.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    Opción menos deseable: puede forzar al dispatcher a
+                    despachar nombres de acción en camelCase con una nueva bandera del front controller,
+                    <span class="property">useCaseSensitiveActions</span>:
+                </p>
+<pre class="programlisting">
+$front-&gt;setParam('useCaseSensitiveActions', true);
+</pre>
+<p>
+                    Esto le permitirá usar camelCasing en la url y aun así
+                    hacer que se resuelva a la misma acción que cuando usa separadores
+                    de palabras. Sin embargo, esto significará que los problemas originales
+                    se propagarán en cascada; probablemente necesitará usar la
+                    segunda opción anterior además de esta para que las cosas funcionen
+                    de forma fiable en todos los casos.
+                </p>
+<p>
+                    Tenga en cuenta, además, que el uso de esta bandera generará un aviso de que
+                    este uso está en desuso.
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="migration.16.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="migration.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="migration.10.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">B.6. Zend Framework 1.6 </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> B.8. Zend Framework 1.0</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

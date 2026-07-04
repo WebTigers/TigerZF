@@ -1,0 +1,454 @@
+<?php $title = '24.4. El objeto Request'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">24.4. El objeto Request</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.controller.front.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 24. Zend_Controller</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.controller.router.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.controller.request"></a>24.4. El objeto Request</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.request.introduction"></a>24.4.1. Introducción</h3></div></div></div>
+<p>
+            El objeto request es un simple objeto de valor que se pasa entre
+            <code class="classname">Zend_Controller_Front</code> y las clases router, dispatcher y
+            controller. Empaqueta los nombres del módulo, controlador, acción y
+            parámetros opcionales solicitados, así como el resto del entorno de la
+            petición, ya sea <acronym class="acronym">HTTP</acronym>, la <acronym class="acronym">CLI</acronym>, o
+            <acronym class="acronym">PHP</acronym>-GTK.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Se accede al nombre del módulo mediante <code class="methodname">getModuleName()</code> y
+                    <code class="methodname">setModuleName()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Se accede al nombre del controlador mediante <code class="methodname">getControllerName()</code>
+                    y <code class="methodname">setControllerName()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Se accede al nombre de la acción a llamar dentro de ese controlador
+                    mediante <code class="methodname">getActionName()</code> y
+                    <code class="methodname">setActionName()</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Los parámetros accesibles por la acción son un array
+                    asociativo de pares clave-valor que se obtienen con
+                    <code class="methodname">getParams()</code> y se establecen con
+                    <code class="methodname">setParams()</code>, o individualmente con
+                    <code class="methodname">getParam()</code> y <code class="methodname">setParam()</code>.
+                </p></li>
+</ul></div>
+<p>
+            Según el tipo de petición, puede haber más métodos disponibles.
+            El request usado por defecto, <code class="classname">Zend_Controller_Request_Http</code>,
+            por ejemplo, tiene métodos para obtener el <acronym class="acronym">URI</acronym> de la petición, la
+            información de ruta, los parámetros <code class="varname">$_GET</code> y <code class="varname">$_POST</code>,
+            etc.
+        </p>
+<p>
+            El objeto request se pasa al controlador frontal, o si no se
+            proporciona ninguno, se instancia al comienzo del proceso de
+            despacho, antes de que ocurra el enrutamiento. Se pasa a través de
+            cada objeto en la cadena de despacho.
+        </p>
+<p>
+            Adicionalmente, el objeto request es particularmente útil en
+            pruebas. El desarrollador puede fabricar el entorno de la petición,
+            incluyendo módulo, controlador, acción, parámetros, <acronym class="acronym">URI</acronym>, etc, y pasar
+            el objeto request al controlador frontal para probar el flujo de la
+            aplicación. Cuando se combina con el <a class="link" href="zend.controller.response.phtml" title="24.9. The Response Object">objeto
+                response</a>, se vuelven posibles pruebas unitarias elaboradas y precisas de
+            aplicaciones <acronym class="acronym">MVC</acronym>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.request.http"></a>24.4.2. Peticiones HTTP</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.controller.request.http.dataacess"></a>24.4.2.1. Acceso a los datos de la petición</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Controller_Request_Http</code> encapsula el acceso a
+                valores relevantes como el nombre de clave y el valor para las
+                variables de router del controlador y la acción, y todos los
+                parámetros adicionales analizados desde el <acronym class="acronym">URI</acronym>. Además permite
+                acceder a valores contenidos en las superglobales como miembros
+                públicos, y gestiona la <acronym class="acronym">URL</acronym> base actual y el URI de la petición.
+                No es posible establecer valores de superglobales en un objeto request; en su
+                lugar, utilice los métodos <code class="methodname">setParam()</code> y <code class="methodname">getParam()</code>
+                para establecer o recuperar parámetros de usuario.
+            </p>
+<div class="note"><table border="0" summary="Note: Superglobal Data">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Datos de superglobales</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Al acceder a los datos de superglobales a través de
+                    <code class="classname">Zend_Controller_Request_Http</code> como propiedades públicas
+                    de miembro, es necesario tener en cuenta que el
+                    nombre de la propiedad (clave del array superglobal) se
+                    corresponde con una superglobal en un orden de precedencia
+                    específico: 1. <code class="constant">GET</code>, 2.
+                    <code class="constant">POST</code>, 3. <code class="constant">COOKIE</code>, 4.
+                    <code class="constant">SERVER</code>, 5. <code class="constant">ENV</code>.
+                </p></td></tr>
+</table></div>
+<p>
+                Como alternativa, se puede acceder a superglobales específicas
+                utilizando un método público. Por ejemplo, el valor bruto de
+                <code class="varname">$_POST['user']</code> se puede obtener llamando a
+                <code class="methodname">getPost('user')</code> en el objeto request. Estos
+                incluyen <code class="methodname">getQuery()</code> para obtener
+                elementos de <code class="varname">$_GET</code>, y <code class="methodname">getHeader()</code> para
+                obtener las cabeceras de la petición.
+            </p>
+<div class="note"><table border="0" summary="Note: GET and POST Data">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Datos GET y POST</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Tenga cuidado al acceder a los datos desde el objeto request, ya
+                    que no se filtran de ninguna manera. El router y el dispatcher
+                    validan y filtran los datos para sus propias tareas, pero dejan
+                    los datos intactos en el objeto request.
+                </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Retrieving the Raw POST Data">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Obtención de los datos POST en bruto</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Desde la versión 1.5.0, también puede obtener los datos POST en
+                    bruto a través del método <code class="methodname">getRawBody()</code>. Este método
+                    devuelve <code class="constant">FALSE</code> si no se enviaron datos de esa forma, pero
+                    devuelve el cuerpo completo del post en caso contrario.
+                </p>
+<p>
+                    Esto es útil principalmente para aceptar contenido al
+                    desarrollar una aplicación <acronym class="acronym">MVC</acronym> RESTful.
+                </p>
+</td></tr>
+</table></div>
+<p>
+                También puede establecer parámetros de usuario en el objeto request usando
+                <code class="methodname">setParam()</code> y recuperarlos posteriormente usando
+                <code class="methodname">getParam()</code>. El router utiliza esta
+                funcionalidad para establecer en el objeto request los parámetros
+                encontrados en el <acronym class="acronym">URI</acronym> de la petición.
+            </p>
+<div class="note"><table border="0" summary="Note: getParam() Retrieves More than User Parameters">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">getParam() obtiene más que parámetros de usuario</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Para realizar parte de su trabajo, <code class="methodname">getParam()</code> en
+                    realidad obtiene datos de varias fuentes. En orden de
+                    prioridad, estas incluyen: los parámetros de usuario establecidos
+                    mediante <code class="methodname">setParam()</code>, los parámetros
+                    <code class="constant">GET</code>, y finalmente los parámetros
+                    <code class="constant">POST</code>. Tenga esto en cuenta al obtener
+                    datos mediante este método.
+                </p>
+<p>
+                    Si desea obtener solo de los parámetros que estableció mediante
+                    <code class="methodname">setParam()</code>, use
+                    <code class="methodname">getUserParam()</code>.
+                </p>
+<p>
+                    Además, desde la versión 1.5.0, puede restringir qué fuentes
+                    de parámetros se consultarán. <code class="methodname">setParamSources()</code>
+                    le permite especificar un array vacío o un array con uno o
+                    más de los valores '_GET' o '_POST' indicando qué
+                    fuentes de parámetros están permitidas (por defecto, ambas
+                    están permitidas); si desea restringir el acceso solo a '_GET'
+                    especifique <code class="methodname">setParamSources(array('_GET'))</code>.
+                </p>
+</td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Apache Quirks">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Peculiaridades de Apache</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Si está usando el manejador 404 de Apache para pasar las
+                    peticiones entrantes al controlador frontal, o usando un flag PT con
+                    reglas de reescritura, <code class="varname">$_SERVER['REDIRECT_URL']</code>
+                    contiene el <acronym class="acronym">URI</acronym> que necesita, no
+                    <code class="varname">$_SERVER['REQUEST_URI']</code>. Si está usando una
+                    configuración así y obtiene un enrutamiento no válido, debería usar
+                    la clase <code class="classname">Zend_Controller_Request_Apache404</code> en lugar
+                    de la clase <acronym class="acronym">HTTP</acronym> por defecto para su objeto request:
+                </p>
+<pre class="programlisting">
+$request = new Zend_Controller_Request_Apache404();
+$front-&gt;setRequest($request);
+</pre>
+<p>
+                    Esta clase extiende la clase
+                    <code class="classname">Zend_Controller_Request_Http</code> y simplemente
+                    modifica la autodetección del <acronym class="acronym">URI</acronym> de la petición. Puede
+                    usarse como un reemplazo directo.
+                </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.controller.request.http.baseurl"></a>24.4.2.2. URL base y subdirectorios</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Controller_Request_Http</code> permite que
+                <code class="classname">Zend_Controller_Router_Rewrite</code> se use en subdirectorios.
+                <code class="classname">Zend_Controller_Request_Http</code> intentará detectar
+                automáticamente su <acronym class="acronym">URL</acronym> base y establecerla en consecuencia.
+            </p>
+<p>
+                Por ejemplo, si mantiene su <code class="filename">index.php</code> en un
+                subdirectorio del servidor web llamado
+                <code class="filename">/projects/myapp/index.php</code>, la <acronym class="acronym">URL</acronym> base (base de
+                reescritura) debería establecerse en <code class="filename">/projects/myapp</code>. Esta cadena
+                se eliminará entonces del inicio de la ruta antes de
+                calcular cualquier coincidencia de ruta. Esto libera de la necesidad
+                de anteponerla a cualquiera de sus rutas. Una ruta
+                <span class="command"><strong>'user/:username'</strong></span> coincidirá con <acronym class="acronym">URI</acronym>s como
+                <code class="filename">http://localhost/projects/myapp/user/martel</code> y
+                <code class="filename">http://example.com/user/martel</code>.
+            </p>
+<div class="note"><table border="0" summary="Note: URL Detection is Case Sensitive">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">La detección de URL distingue mayúsculas de minúsculas</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    La detección automática de la <acronym class="acronym">URL</acronym> base distingue entre
+                    mayúsculas y minúsculas, así que asegúrese de que su <acronym class="acronym">URL</acronym>
+                    coincida con el nombre de un subdirectorio en un sistema de archivos (incluso
+                    en máquinas Windows). Si no coincide, se lanzará una excepción.
+                </p></td></tr>
+</table></div>
+<p>
+                Si la <acronym class="acronym">URL</acronym> base se detecta incorrectamente, puede sobrescribirla
+                con su propia ruta base con la ayuda del
+                método <code class="methodname">setBaseUrl()</code> de la clase
+                <code class="classname">Zend_Controller_Request_Http</code>, o de la clase
+                <code class="classname">Zend_Controller_Front</code>. El método más
+                sencillo es establecerla en <code class="classname">Zend_Controller_Front</code>,
+                que la trasladará al objeto request. Ejemplo de uso para
+                establecer una <acronym class="acronym">URL</acronym> base personalizada:
+            </p>
+<pre class="programlisting">
+/**
+ * Dispatch Request with custom base URL with Zend_Controller_Front.
+ */
+$router     = new Zend_Controller_Router_Rewrite();
+$controller = Zend_Controller_Front::getInstance();
+$controller-&gt;setControllerDirectory('./application/controllers')
+           -&gt;setRouter($router)
+           -&gt;setBaseUrl('/projects/myapp'); // set the base url!
+$response   = $controller-&gt;dispatch();
+</pre>
+<div class="note"><table border="0" summary="Note: Fully-Qualified URL is not supported">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">No se admite una URL totalmente cualificada</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    No se admite pasar una URL totalmente cualificada (por ejemplo: http://example.com/) al
+                    método <code class="methodname">setBaseUrl</code>, y
+                    causará problemas tanto para el uso descrito anteriormente como al usar
+                    el helper de vista URL. Consulte el ticket
+                    <a class="ulink" href="http://framework.zend.com/issues/browse/ZF-10923" target="_top">
+                        ZF-10923
+                    </a> para más detalles.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.controller.request.http.method"></a>24.4.2.3. Determinación del método de la petición</h4></div></div></div>
+<p>
+                <code class="methodname">getMethod()</code> le permite determinar el
+                método de petición <acronym class="acronym">HTTP</acronym> usado para solicitar el recurso actual.
+                Adicionalmente, existen varios métodos que le permiten obtener
+                respuestas booleanas al preguntar si se ha realizado un tipo
+                específico de petición:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="methodname">isGet()</code></p></li>
+<li class="listitem"><p><code class="methodname">isPost()</code></p></li>
+<li class="listitem"><p><code class="methodname">isPut()</code></p></li>
+<li class="listitem"><p><code class="methodname">isDelete()</code></p></li>
+<li class="listitem"><p><code class="methodname">isHead()</code></p></li>
+<li class="listitem"><p><code class="methodname">isOptions()</code></p></li>
+</ul></div>
+<p>
+                El principal caso de uso para estos es la creación de arquitecturas <acronym class="acronym">MVC</acronym>
+                RESTful.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.controller.request.http.ajax"></a>24.4.2.4. Detección de peticiones AJAX</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Controller_Request_Http</code> tiene un
+                método rudimentario para detectar peticiones <acronym class="acronym">AJAX</acronym>:
+                <code class="methodname">isXmlHttpRequest()</code>. Este método busca una
+                cabecera de petición <acronym class="acronym">HTTP</acronym> <span class="emphasis"><em>X-Requested-With</em></span> con
+                el valor 'XMLHttpRequest'; si la encuentra, devuelve <code class="constant">TRUE</code>.
+            </p>
+<p>
+                Actualmente, se sabe que esta cabecera se envía por defecto con las
+                siguientes bibliotecas JS:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Prototype y Scriptaculous (y bibliotecas derivadas de Prototype)</p></li>
+<li class="listitem"><p>Yahoo! UI Library</p></li>
+<li class="listitem"><p>jQuery</p></li>
+<li class="listitem"><p>MochiKit</p></li>
+</ul></div>
+<p>
+                La mayoría de las bibliotecas <acronym class="acronym">AJAX</acronym> le permiten enviar
+                cabeceras de petición <acronym class="acronym">HTTP</acronym> personalizadas; si su biblioteca no envía esta cabecera,
+                simplemente añádala como cabecera de petición para asegurarse de que el
+                método <code class="methodname">isXmlHttpRequest()</code> funcione para usted.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.controller.request.subclassing"></a>24.4.3. Creación de subclases del objeto Request</h3></div></div></div>
+<p>
+            La clase request base usada para todos los objetos request es la clase
+            abstracta <code class="classname">Zend_Controller_Request_Abstract</code>. En su forma más
+            básica, define los siguientes métodos:
+        </p>
+<pre class="programlisting">
+abstract class Zend_Controller_Request_Abstract
+{
+    /**
+     * @return string
+     */
+    public function getControllerName();
+
+    /**
+     * @param string $value
+     * @return self
+     */
+    public function setControllerName($value);
+
+    /**
+     * @return string
+     */
+    public function getActionName();
+
+    /**
+     * @param string $value
+     * @return self
+     */
+    public function setActionName($value);
+
+    /**
+     * @return string
+     */
+    public function getControllerKey();
+
+    /**
+     * @param string $key
+     * @return self
+     */
+    public function setControllerKey($key);
+
+    /**
+     * @return string
+     */
+    public function getActionKey();
+
+    /**
+     * @param string $key
+     * @return self
+     */
+    public function setActionKey($key);
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function getParam($key);
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function setParam($key, $value);
+
+    /**
+     * @return array
+     */
+     public function getParams();
+
+    /**
+     * @param array $array
+     * @return self
+     */
+    public function setParams(array $array);
+
+    /**
+     * @param boolean $flag
+     * @return self
+     */
+    public function setDispatched($flag = true);
+
+    /**
+     * @return boolean
+     */
+    public function isDispatched();
+}
+</pre>
+<p>
+            El objeto request es un contenedor para el entorno de la petición. La
+            cadena del controlador solo necesita saber cómo establecer y obtener el
+            controlador, la acción, los parámetros opcionales y el estado de despacho. Por
+            defecto, el request buscará en sus propios parámetros usando las
+            claves de controlador o acción para determinar el controlador y la
+            acción.
+        </p>
+<p>
+            Extienda esta clase, o una de sus derivadas, cuando necesite que la
+            clase request interactúe con un entorno específico para
+            obtener datos para usar en las tareas anteriores. Ejemplos incluyen <a class="link" href="zend.controller.request.phtml#zend.controller.request.http" title="24.4.2. HTTP Requests">el entorno
+                <acronym class="acronym">HTTP</acronym></a>, un entorno <acronym class="acronym">CLI</acronym>, o un
+            entorno <acronym class="acronym">PHP</acronym>-GTK.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.controller.front.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.controller.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.controller.router.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">24.3. El controlador frontal </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 24.5. El router estándar</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

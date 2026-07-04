@@ -1,0 +1,417 @@
+<?php $title = 'Capítulo 41. Zend_Ldap'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 41. Zend_Ldap</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.layout.advanced.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.ldap.api.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.ldap"></a>Capítulo 41. Zend_Ldap</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.ldap.phtml#zend.ldap.introduction">41.1. Introducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations">41.1.1. Teoría de funcionamiento</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations.automatic-username-canonicalization">41.1.1.1. Canonicalización automática del nombre de usuario al enlazar</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations.account-name-canonicalization">41.1.1.2. Canonicalización del nombre de cuenta</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.phtml#zend.ldap.introduction.theory-of-operations.multi-domain-failover">41.1.1.3. Autenticación multidominio y conmutación por error</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.api.phtml">41.2. Resumen de la API</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.api.phtml#zend.ldap.api.configuration">41.2.1. Configuración / opciones</a></span></dt>
+<dt><span class="sect2"><a href="zend.ldap.api.phtml#zend.ldap.api.reference">41.2.2. Referencia de la API</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap">41.2.2.1. Zend_Ldap</a></span></dt>
+<dd><dl><dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap.zend-ldap-collection">41.2.2.1.1. Zend_Ldap_Collection</a></span></dt></dl></dd>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-attribute">41.2.2.2. Zend_Ldap_Attribute</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-dn">41.2.2.3. Zend_Ldap_Dn</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-filter">41.2.2.4. Zend_Ldap_Filter</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node">41.2.2.5. Zend_Ldap_Node</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-rootdse">41.2.2.6. Zend_Ldap_Node_RootDse</a></span></dt>
+<dd><dl>
+<dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-rootdse.openldap">41.2.2.6.1. OpenLDAP</a></span></dt>
+<dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-rootdse.activedirectory">41.2.2.6.2. ActiveDirectory</a></span></dt>
+<dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-rootdse.edirectory">41.2.2.6.3. eDirectory</a></span></dt>
+</dl></dd>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-schema">41.2.2.7. Zend_Ldap_Node_Schema</a></span></dt>
+<dd><dl>
+<dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-schema.openldap">41.2.2.7.1. OpenLDAP</a></span></dt>
+<dt><span class="sect4"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-node-schema.activedirectory">41.2.2.7.2. ActiveDirectory</a></span></dt>
+</dl></dd>
+<dt><span class="sect3"><a href="zend.ldap.api.phtml#zend.ldap.api.reference.zend-ldap-ldif-encoder">41.2.2.8. Zend_Ldif_Encoder</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.usage.phtml">41.3. Escenarios de uso</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.usage.phtml#zend.ldap.usage.authentication">41.3.1. Escenarios de autenticación</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.authentication.openldap">41.3.1.1. OpenLDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.authentication.activedirectory">41.3.1.2. ActiveDirectory</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.ldap.usage.phtml#zend.ldap.usage.basic">41.3.2. Operaciones CRUD básicas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.basic.retrieve">41.3.2.1. Recuperar datos del LDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.basic.add">41.3.2.2. Añadir datos al LDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.basic.delete">41.3.2.3. Eliminar del LDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.basic.update">41.3.2.4. Actualizar el LDAP</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.ldap.usage.phtml#zend.ldap.usage.extended">41.3.3. Operaciones extendidas</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.ldap.usage.phtml#zend.ldap.usage.extended.copy-and-move">41.3.3.1. Copiar y mover entradas en el LDAP</a></span></dt></dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.tools.phtml">41.4. Herramientas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.tools.phtml#zend.ldap.tools.dn">41.4.1. Creación y modificación de cadenas DN</a></span></dt>
+<dt><span class="sect2"><a href="zend.ldap.tools.phtml#zend.ldap.tools.filter">41.4.2. Uso de la API de filtros para crear filtros de búsqueda</a></span></dt>
+<dt><span class="sect2"><a href="zend.ldap.tools.phtml#zend.ldap.tools.attribute">41.4.3. Modificar entradas LDAP usando la API de Attribute</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.node.phtml">41.5. Acceso orientado a objetos al árbol LDAP usando Zend_Ldap_Node</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.node.phtml#zend.ldap.node.basic">41.5.1. Operaciones CRUD básicas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.retrieve">41.5.1.1. Recuperar datos del LDAP</a></span></dt>
+<dd><dl>
+<dt><span class="sect4"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.retrieve.dn">41.5.1.1.1. Obtener un nodo por su DN</a></span></dt>
+<dt><span class="sect4"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.retrieve.search">41.5.1.1.2. Buscar en el subárbol de un nodo</a></span></dt>
+</dl></dd>
+<dt><span class="sect3"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.add">41.5.1.2. Añadir un nuevo nodo al LDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.delete">41.5.1.3. Eliminar un nodo del LDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.node.phtml#zend.ldap.node.basic.update">41.5.1.4. Actualizar un nodo en el LDAP</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.ldap.node.phtml#zend.ldap.node.extended">41.5.2. Operaciones extendidas</a></span></dt>
+<dd><dl><dt><span class="sect3"><a href="zend.ldap.node.phtml#zend.ldap.node.extended.copy-and-move">41.5.2.1. Copiar y mover nodos en el LDAP</a></span></dt></dl></dd>
+<dt><span class="sect2"><a href="zend.ldap.node.phtml#zend.ldap.node.traversal">41.5.3. Recorrido del árbol</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.server.phtml">41.6. Obtener información del servidor LDAP</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.server.phtml#zend.ldap.server.rootdse">41.6.1. RootDSE</a></span></dt>
+<dt><span class="sect2"><a href="zend.ldap.server.phtml#zend.ldap.server.schema">41.6.2. Exploración de esquemas</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.ldap.server.phtml#zend.ldap.server.schema.openldap">41.6.2.1. OpenLDAP</a></span></dt>
+<dt><span class="sect3"><a href="zend.ldap.server.phtml#zend.ldap.server.schema.activedirectory">41.6.2.2. ActiveDirectory</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.ldap.ldif.phtml">41.7. Serializar datos LDAP hacia y desde LDIF</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.ldap.ldif.phtml#zend.ldap.ldif.encode">41.7.1. Serializar una entrada LDAP a LDIF</a></span></dt>
+<dt><span class="sect2"><a href="zend.ldap.ldif.phtml#zend.ldap.ldif.decode">41.7.2. Deserializar una cadena LDIF en una entrada LDAP</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.ldap.introduction"></a>41.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Ldap</code> es una clase para realizar operaciones <acronym class="acronym">LDAP</acronym>
+        que incluyen, entre otras, el enlace (binding), la búsqueda y la modificación de entradas
+        en un directorio <acronym class="acronym">LDAP</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.ldap.introduction.theory-of-operations"></a>41.1.1. Teoría de funcionamiento</h3></div></div></div>
+<p>
+            Este componente consiste actualmente en la clase principal <code class="classname">Zend_Ldap</code>,
+            que representa conceptualmente un enlace a un único servidor <acronym class="acronym">LDAP</acronym>
+            y permite ejecutar operaciones contra un servidor <acronym class="acronym">LDAP</acronym> como
+            OpenLDAP o servidores ActiveDirectory (AD). Los parámetros para el enlace pueden
+            proporcionarse explícitamente o en forma de un array de opciones.
+            <code class="classname">Zend_Ldap_Node</code> proporciona una interfaz orientada a objetos
+            para nodos <acronym class="acronym">LDAP</acronym> individuales y puede usarse para formar la base de una
+            interfaz similar a un registro activo para un modelo de dominio basado en <acronym class="acronym">LDAP</acronym>.
+        </p>
+<p>
+            El componente proporciona varias clases auxiliares para realizar operaciones en
+            entradas <acronym class="acronym">LDAP</acronym> (<code class="classname">Zend_Ldap_Attribute</code>) tales como
+            establecer y recuperar atributos (valores de fecha, contraseñas, valores booleanos, ...), para
+            crear y modificar cadenas de filtro <acronym class="acronym">LDAP</acronym>
+            (<code class="classname">Zend_Ldap_Filter</code>) y para manipular nombres distinguidos (DN)
+            de <acronym class="acronym">LDAP</acronym> (<code class="classname">Zend_Ldap_Dn</code>).
+        </p>
+<p>
+            Adicionalmente el componente abstrae la exploración de esquemas <acronym class="acronym">LDAP</acronym>
+            para servidores OpenLDAP y ActiveDirectoy <code class="classname">Zend_Ldap_Node_Schema</code>
+            y la recuperación de información del servidor para servidores OpenLDAP, ActiveDirectory y Novell
+            eDirectory (<code class="classname">Zend_Ldap_Node_RootDse</code>).
+        </p>
+<p>
+            El uso de la clase <code class="classname">Zend_Ldap</code> depende del tipo de
+            servidor <acronym class="acronym">LDAP</acronym> y se resume mejor con algunos ejemplos sencillos.
+        </p>
+<p>
+            Si está usando OpenLDAP, un ejemplo sencillo se ve como sigue
+            (tenga en cuenta que la opción <span class="emphasis"><em>bindRequiresDn</em></span> es importante si
+            <span class="emphasis"><em>no</em></span> está usando AD):
+        </p>
+<pre class="programlisting">
+$options = array(
+    'host'              =&gt; 's0.foo.net',
+    'username'          =&gt; 'CN=user1,DC=foo,DC=net',
+    'password'          =&gt; 'pass1',
+    'bindRequiresDn'    =&gt; true,
+    'accountDomainName' =&gt; 'foo.net',
+    'baseDn'            =&gt; 'OU=Sales,DC=foo,DC=net',
+);
+$ldap = new Zend_Ldap($options);
+$acctname = $ldap-&gt;getCanonicalAccountName('abaker',
+                                           Zend_Ldap::ACCTNAME_FORM_DN);
+echo "$acctname\n";
+</pre>
+<p>
+            Si está usando Microsoft AD un ejemplo sencillo es:
+        </p>
+<pre class="programlisting">
+$options = array(
+    'host'                   =&gt; 'dc1.w.net',
+    'useStartTls'            =&gt; true,
+    'username'               =&gt; 'user1@w.net',
+    'password'               =&gt; 'pass1',
+    'accountDomainName'      =&gt; 'w.net',
+    'accountDomainNameShort' =&gt; 'W',
+    'baseDn'                 =&gt; 'CN=Users,DC=w,DC=net',
+);
+$ldap = new Zend_Ldap($options);
+$acctname = $ldap-&gt;getCanonicalAccountName('bcarter',
+                                           Zend_Ldap::ACCTNAME_FORM_DN);
+echo "$acctname\n";
+</pre>
+<p>
+            Tenga en cuenta que usamos el método <code class="methodname">getCanonicalAccountName()</code>
+            para recuperar el DN de la cuenta aquí solamente porque es lo que ejercita
+            la mayor parte del poco código actualmente presente en esta clase.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.introduction.theory-of-operations.automatic-username-canonicalization"></a>41.1.1.1. Canonicalización automática del nombre de usuario al enlazar</h4></div></div></div>
+<p>
+                Si se llama a <code class="methodname">bind()</code> con un nombre de usuario que no es un DN pero
+                <span class="emphasis"><em>bindRequiresDN</em></span> es <code class="constant">TRUE</code> y no se proporcionó ningún nombre de usuario en
+                forma de DN como opción, el enlace fallará. Sin embargo, si se proporciona un nombre de usuario en forma
+                de DN en el array de opciones, <code class="classname">Zend_Ldap</code>
+                primero se enlazará con ese nombre de usuario, recuperará el DN de la cuenta para el nombre de usuario
+                proporcionado a <code class="methodname">bind()</code> y luego se volverá a enlazar con ese DN.
+            </p>
+<p>
+                Este comportamiento es crítico para <a class="link" href="zend.auth.adapter.ldap.phtml" title="15.5. LDAP Authentication"><code class="classname">Zend_Auth_Adapter_Ldap</code></a>,
+                que pasa el nombre de usuario proporcionado por el usuario directamente a
+                <code class="methodname">bind()</code>.
+            </p>
+<p>
+                El siguiente ejemplo ilustra cómo el nombre de usuario que no es un DN
+                '<span class="emphasis"><em>abaker</em></span>' puede usarse con <code class="methodname">bind()</code>:
+            </p>
+<pre class="programlisting">
+$options = array(
+        'host'              =&gt; 's0.foo.net',
+        'username'          =&gt; 'CN=user1,DC=foo,DC=net',
+        'password'          =&gt; 'pass1',
+        'bindRequiresDn'    =&gt; true,
+        'accountDomainName' =&gt; 'foo.net',
+        'baseDn'            =&gt; 'OU=Sales,DC=foo,DC=net',
+);
+$ldap = new Zend_Ldap($options);
+$ldap-&gt;bind('abaker', 'moonbike55');
+$acctname = $ldap-&gt;getCanonicalAccountName('abaker',
+                                           Zend_Ldap::ACCTNAME_FORM_DN);
+echo "$acctname\n";
+</pre>
+<p>
+                La llamada a <code class="methodname">bind()</code> en este ejemplo ve que
+                el nombre de usuario '<span class="emphasis"><em>abaker</em></span>' no está en forma de DN, encuentra que
+                <span class="emphasis"><em>bindRequiresDn</em></span> es <code class="constant">TRUE</code>, usa
+                '<span class="command"><strong>CN=user1,DC=foo,DC=net</strong></span>' y '<span class="emphasis"><em>pass1</em></span>' para
+                enlazar, recupera el DN de '<span class="emphasis"><em>abaker</em></span>', desenlaza y luego vuelve a enlazar
+                con el recién descubierto
+                '<span class="command"><strong>CN=Alice Baker,OU=Sales,DC=foo,DC=net</strong></span>'.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.introduction.theory-of-operations.account-name-canonicalization"></a>41.1.1.2. Canonicalización del nombre de cuenta</h4></div></div></div>
+<p>
+                Las opciones <span class="emphasis"><em>accountDomainName</em></span> y
+                <span class="emphasis"><em>accountDomainNameShort</em></span>
+                se usan para dos propósitos: (1) facilitan la capacidad de autenticación
+                multidominio y conmutación por error, y (2) también se usan para
+                canonicalizar los nombres de usuario. Específicamente, los nombres se canonicalizan a la
+                forma especificada por la opción <span class="emphasis"><em>accountCanonicalForm</em></span>.
+                Esta opción puede ser uno de los siguientes valores:
+            </p>
+<div class="table">
+<a name="zend.ldap.using.theory-of-operation.account-name-canonicalization.table"></a><p class="title"><b>Tabla 41.1. Opciones para accountCanonicalForm</b></p>
+<div class="table-contents"><table class="table" summary="Options for accountCanonicalForm" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Valor</th>
+<th>Ejemplo</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="constant">ACCTNAME_FORM_DN</code></td>
+<td>1</td>
+<td>CN=Alice Baker,CN=Users,DC=example,DC=com</td>
+</tr>
+<tr>
+<td><code class="constant">ACCTNAME_FORM_USERNAME</code></td>
+<td>2</td>
+<td>abaker</td>
+</tr>
+<tr>
+<td><code class="constant">ACCTNAME_FORM_BACKSLASH</code></td>
+<td>3</td>
+<td>EXAMPLE\abaker</td>
+</tr>
+<tr>
+<td><code class="constant">ACCTNAME_FORM_PRINCIPAL</code></td>
+<td>4</td>
+<td><code class="filename">abaker@example.com</code></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+                La canonicalización predeterminada depende de qué opciones de nombre de dominio de cuenta se hayan
+                proporcionado. Si se proporcionó <span class="emphasis"><em>accountDomainNameShort</em></span>, el
+                valor predeterminado de <span class="emphasis"><em>accountCanonicalForm</em></span> es
+                <code class="constant">ACCTNAME_FORM_BACKSLASH</code>. De lo contrario, si se proporcionó
+                <span class="emphasis"><em>accountDomainName</em></span>, el
+                valor predeterminado es <code class="constant">ACCTNAME_FORM_PRINCIPAL</code>.
+            </p>
+<p>
+                La canonicalización del nombre de cuenta garantiza que la cadena usada para identificar
+                una cuenta sea consistente independientemente de lo que se haya proporcionado a
+                <code class="methodname">bind()</code>. Por ejemplo, si el usuario proporciona un nombre de cuenta
+                de <code class="filename">abaker@example.com</code> o simplemente
+                <span class="emphasis"><em>abaker</em></span> y <span class="emphasis"><em>accountCanonicalForm</em></span>
+                se establece en 3, el nombre canonicalizado resultante sería
+                <span class="emphasis"><em>EXAMPLE\abaker</em></span>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.ldap.introduction.theory-of-operations.multi-domain-failover"></a>41.1.1.3. Autenticación multidominio y conmutación por error</h4></div></div></div>
+<p>
+                El componente <code class="classname">Zend_Ldap</code> por sí mismo no intenta
+                autenticarse con múltiples servidores. Sin embargo, <code class="classname">Zend_Ldap</code>
+                está diseñado específicamente para manejar este escenario con elegancia. La
+                técnica requerida es simplemente iterar sobre un array de arrays de opciones
+                 de servidor e intentar enlazar con cada servidor. Como se describió anteriormente,
+                 <code class="methodname">bind()</code> canonicalizará automáticamente cada nombre, por lo que
+                no importa si el usuario pasa <code class="filename">abaker@foo.net</code> o
+                <span class="emphasis"><em>W\bcarter</em></span> o <span class="emphasis"><em>cdavis</em></span>: el
+                método <code class="methodname">bind()</code> solo tendrá éxito si las credenciales se
+                usaron correctamente en el enlace.
+            </p>
+<p>
+                Considere el siguiente ejemplo que ilustra la técnica requerida para
+                implementar autenticación multidominio y conmutación por error:
+            </p>
+<pre class="programlisting">
+$acctname = 'W\\user2';
+$password = 'pass2';
+
+$multiOptions = array(
+    'server1' =&gt; array(
+        'host'                   =&gt; 's0.foo.net',
+        'username'               =&gt; 'CN=user1,DC=foo,DC=net',
+        'password'               =&gt; 'pass1',
+        'bindRequiresDn'         =&gt; true,
+        'accountDomainName'      =&gt; 'foo.net',
+        'accountDomainNameShort' =&gt; 'FOO',
+        'accountCanonicalForm'   =&gt; 4, // ACCT_FORM_PRINCIPAL
+        'baseDn'                 =&gt; 'OU=Sales,DC=foo,DC=net',
+    ),
+    'server2' =&gt; array(
+        'host'                   =&gt; 'dc1.w.net',
+        'useSsl'                 =&gt; true,
+        'username'               =&gt; 'user1@w.net',
+        'password'               =&gt; 'pass1',
+        'accountDomainName'      =&gt; 'w.net',
+        'accountDomainNameShort' =&gt; 'W',
+        'accountCanonicalForm'   =&gt; 4, // ACCT_FORM_PRINCIPAL
+        'baseDn'                 =&gt; 'CN=Users,DC=w,DC=net',
+    ),
+);
+
+$ldap = new Zend_Ldap();
+
+foreach ($multiOptions as $name =&gt; $options) {
+
+    echo "Trying to bind using server options for '$name'\n";
+
+    $ldap-&gt;setOptions($options);
+    try {
+        $ldap-&gt;bind($acctname, $password);
+        $acctname = $ldap-&gt;getCanonicalAccountName($acctname);
+        echo "SUCCESS: authenticated $acctname\n";
+        return;
+    } catch (Zend_Ldap_Exception $zle) {
+        echo '  ' . $zle-&gt;getMessage() . "\n";
+        if ($zle-&gt;getCode() === Zend_Ldap_Exception::LDAP_X_DOMAIN_MISMATCH) {
+            continue;
+        }
+    }
+}
+</pre>
+<p>
+                Si el enlace falla por cualquier motivo, se intenta con el siguiente conjunto de opciones de servidor.
+            </p>
+<p>
+                La llamada a <code class="methodname">getCanonicalAccountName()</code> obtiene el nombre de cuenta canónico
+                que la aplicación presumiblemente usaría para asociar datos, como
+                las preferencias. El <span class="emphasis"><em>accountCanonicalForm = 4</em></span> en todas las opciones
+                de servidor garantiza que la forma canónica sea consistente independientemente de qué
+                servidor se haya usado finalmente.
+            </p>
+<p>
+                La excepción especial <code class="constant">LDAP_X_DOMAIN_MISMATCH</code> ocurre cuando se proporcionó un
+                nombre de cuenta con un componente de dominio (por ejemplo,
+                <code class="filename">abaker@foo.net</code> o <span class="emphasis"><em>FOO\abaker</em></span> y no solamente
+                <span class="emphasis"><em>abaker</em></span>) pero el componente de dominio no coincidió con ninguno de los dominios
+                en las opciones de servidor actualmente seleccionadas. Esta excepción indica
+                que el servidor no es una autoridad para la cuenta. En este
+                caso, el enlace no se realizará, eliminando así la comunicación innecesaria
+                con el servidor. Tenga en cuenta que la instrucción <span class="emphasis"><em>continue</em></span>
+                no tiene efecto en este ejemplo, pero en la práctica, por motivos de manejo de errores y
+                depuración, probablemente querrá comprobar
+                <code class="constant">LDAP_X_DOMAIN_MISMATCH</code> así como
+                <code class="constant">LDAP_NO_SUCH_OBJECT</code> y
+                <code class="constant">LDAP_INVALID_CREDENTIALS</code>.
+            </p>
+<p>
+                El código anterior es muy similar al código usado dentro de <a class="link" href="zend.auth.adapter.ldap.phtml" title="15.5. LDAP Authentication"><code class="classname">Zend_Auth_Adapter_Ldap</code></a>.
+                De hecho, recomendamos que simplemente use ese adaptador de autenticación para
+                la autenticación <acronym class="acronym">LDAP</acronym> multidominio + conmutación por error
+                (o copie el código).
+            </p>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.layout.advanced.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.ldap.api.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">40.4. Uso avanzado de Zend_Layout </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 41.2. Resumen de la API</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

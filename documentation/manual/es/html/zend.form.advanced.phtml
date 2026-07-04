@@ -1,0 +1,731 @@
+<?php $title = '36.9. Uso avanzado de Zend_Form'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">36.9. Uso avanzado de Zend_Form</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.form.i18n.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 36. Zend_Form</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.gdata.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.form.advanced"></a>36.9. Uso avanzado de Zend_Form</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Form</code> cuenta con una gran cantidad de funcionalidad, gran parte de
+        ella orientada a desarrolladores experimentados. Este capítulo tiene como objetivo documentar parte de esta
+        funcionalidad con ejemplos y casos de uso.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.advanced.arrayNotation"></a>36.9.1. Notación de array</h3></div></div></div>
+<p>
+            A muchos desarrolladores web experimentados les gusta agrupar elementos de formulario relacionados
+            utilizando notación de array en los nombres de los elementos. Por ejemplo, si tiene
+            dos direcciones que desea capturar, una de envío y otra de facturación,
+            podría tener elementos idénticos; agrupándolos en un array,
+            puede asegurarse de que se capturen por separado. Tome el siguiente formulario
+            como ejemplo:
+        </p>
+<pre class="programlisting">
+&lt;form&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;Shipping Address&lt;/legend&gt;
+        &lt;dl&gt;
+            &lt;dt&gt;&lt;label for="recipient"&gt;Ship to:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="recipient" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="address"&gt;Address:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="address" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="municipality"&gt;City:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="municipality" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="province"&gt;State:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="province" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="postal"&gt;Postal Code:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="postal" type="text" value="" /&gt;&lt;/dd&gt;
+        &lt;/dl&gt;
+    &lt;/fieldset&gt;
+
+    &lt;fieldset&gt;
+        &lt;legend&gt;Billing Address&lt;/legend&gt;
+        &lt;dl&gt;
+            &lt;dt&gt;&lt;label for="payer"&gt;Bill To:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="payer" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="address"&gt;Address:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="address" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="municipality"&gt;City:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="municipality" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="province"&gt;State:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="province" type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="postal"&gt;Postal Code:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="postal" type="text" value="" /&gt;&lt;/dd&gt;
+        &lt;/dl&gt;
+    &lt;/fieldset&gt;
+
+    &lt;dl&gt;
+        &lt;dt&gt;&lt;label for="terms"&gt;I agree to the Terms of Service&lt;/label&gt;&lt;/dt&gt;
+        &lt;dd&gt;&lt;input name="terms" type="checkbox" value="" /&gt;&lt;/dd&gt;
+
+        &lt;dt&gt;&lt;/dt&gt;
+        &lt;dd&gt;&lt;input name="save" type="submit" value="Save" /&gt;&lt;/dd&gt;
+    &lt;/dl&gt;
+&lt;/form&gt;
+</pre>
+<p>
+            En este ejemplo, la dirección de facturación y la de envío contienen algunos
+            campos idénticos, lo que significa que uno sobrescribiría al otro. Podemos
+            resolver esta situación utilizando notación de array:
+        </p>
+<pre class="programlisting">
+&lt;form&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;Shipping Address&lt;/legend&gt;
+        &lt;dl&gt;
+            &lt;dt&gt;&lt;label for="shipping-recipient"&gt;Ship to:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="shipping[recipient]" id="shipping-recipient"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="shipping-address"&gt;Address:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="shipping[address]" id="shipping-address"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="shipping-municipality"&gt;City:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="shipping[municipality]" id="shipping-municipality"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="shipping-province"&gt;State:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="shipping[province]" id="shipping-province"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="shipping-postal"&gt;Postal Code:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="shipping[postal]" id="shipping-postal"
+                type="text" value="" /&gt;&lt;/dd&gt;
+        &lt;/dl&gt;
+    &lt;/fieldset&gt;
+
+    &lt;fieldset&gt;
+        &lt;legend&gt;Billing Address&lt;/legend&gt;
+        &lt;dl&gt;
+            &lt;dt&gt;&lt;label for="billing-payer"&gt;Bill To:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="billing[payer]" id="billing-payer"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="billing-address"&gt;Address:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="billing[address]" id="billing-address"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="billing-municipality"&gt;City:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="billing[municipality]" id="billing-municipality"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="billing-province"&gt;State:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="billing[province]" id="billing-province"
+                type="text" value="" /&gt;&lt;/dd&gt;
+
+            &lt;dt&gt;&lt;label for="billing-postal"&gt;Postal Code:&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;input name="billing[postal]" id="billing-postal"
+                type="text" value="" /&gt;&lt;/dd&gt;
+        &lt;/dl&gt;
+    &lt;/fieldset&gt;
+
+    &lt;dl&gt;
+        &lt;dt&gt;&lt;label for="terms"&gt;I agree to the Terms of Service&lt;/label&gt;&lt;/dt&gt;
+        &lt;dd&gt;&lt;input name="terms" type="checkbox" value="" /&gt;&lt;/dd&gt;
+
+        &lt;dt&gt;&lt;/dt&gt;
+        &lt;dd&gt;&lt;input name="save" type="submit" value="Save" /&gt;&lt;/dd&gt;
+    &lt;/dl&gt;
+&lt;/form&gt;
+</pre>
+<p>
+            En el ejemplo anterior, ahora obtenemos direcciones separadas. En el formulario
+            enviado, ahora tendremos tres elementos: el elemento 'save' para el
+            envío, y luego dos arrays, 'shipping' y 'billing', cada uno con
+            claves para sus distintos elementos.
+        </p>
+<p>
+            <code class="classname">Zend_Form</code> intenta automatizar este proceso mediante sus
+            <a class="link" href="zend.form.forms.phtml#zend.form.forms.subforms" title="36.4.4. Sub Forms">subformularios</a>. Por
+            defecto, los subformularios se renderizan utilizando la notación de array mostrada en el
+            listado <acronym class="acronym">HTML</acronym> anterior, con sus correspondientes ids. El nombre del array está
+            basado en el nombre del subformulario, con las claves basadas en los elementos
+            contenidos en el subformulario. Los subformularios pueden anidarse a una profundidad arbitraria,
+            y esto creará arrays anidados que reflejen dicha estructura.
+            Además, las distintas rutinas de validación de
+            <code class="classname">Zend_Form</code> respetan la estructura del array, garantizando que su
+            formulario valide correctamente, sin importar la profundidad con la que anide
+            sus subformularios. No es necesario hacer nada para beneficiarse de esto; este
+            comportamiento está habilitado por defecto.
+        </p>
+<p>
+            Además, existen mecanismos que le permiten activar la notación de array
+            de forma condicional, así como especificar el array concreto al
+            que pertenece un elemento o colección:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <code class="methodname">Zend_Form::setIsArray($flag)</code>: Al establecer el
+                    indicador en <code class="constant">TRUE</code>, puede indicar que un formulario completo debe
+                    tratarse como un array. Por defecto, se utilizará el nombre del formulario
+                    como nombre del array, a menos que se haya llamado a
+                    <code class="methodname">setElementsBelongTo()</code>. Si el
+                    formulario no tiene un nombre especificado, o si
+                    no se ha establecido <code class="methodname">setElementsBelongTo()</code>, este
+                    indicador se ignorará (ya que no hay ningún nombre de array al que
+                    puedan pertenecer los elementos).
+                </p>
+<p>
+                    Puede determinar si un formulario está siendo tratado como un array
+                    utilizando el accesor <code class="methodname">isArray()</code>.
+                </p>
+</li>
+<li class="listitem"><p>
+                    <code class="methodname">Zend_Form::setElementsBelongTo($array)</code>:
+                    Mediante este método, puede especificar el nombre de un array al
+                    que pertenecen todos los elementos del formulario. Puede determinar el
+                    nombre utilizando el accesor <code class="methodname">getElementsBelongTo()</code>.
+                </p></li>
+</ul></div>
+<p>
+            Además, a nivel de elemento, puede especificar que elementos individuales
+            pertenezcan a arrays concretos utilizando el
+            método <code class="methodname">Zend_Form_Element::setBelongsTo()</code>.
+            Para descubrir cuál es este valor -- ya sea establecido explícitamente o
+            implícitamente a través del formulario -- puede utilizar el
+            accesor <code class="methodname">getBelongsTo()</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.form.advanced.multiPage"></a>36.9.2. Formularios multi-página</h3></div></div></div>
+<p>
+            Actualmente, los formularios multi-página no están oficialmente soportados en
+            <code class="classname">Zend_Form</code>; sin embargo, la mayor parte del soporte necesario para implementarlos
+            está disponible y puede utilizarse con un poco de herramientas adicionales.
+        </p>
+<p>
+            La clave para crear un formulario multi-página es utilizar subformularios, pero
+            mostrar solo uno de esos subformularios por página. Esto le permite
+            enviar un único subformulario a la vez y validarlo, pero no procesar
+            el formulario hasta que todos los subformularios estén completos.
+        </p>
+<div class="example">
+<a name="zend.form.advanced.multiPage.registration"></a><p class="title"><b>Ejemplo 36.13. Ejemplo de formulario de registro</b></p>
+<div class="example-contents">
+<p>
+                Usemos un formulario de registro como ejemplo. Para nuestros propósitos,
+                queremos capturar el nombre de usuario y la contraseña deseados en la
+                primera página, luego los metadatos del usuario -- nombre de pila, apellido
+                y ubicación -- y finalmente permitirles decidir a qué listas de correo,
+                si es que a alguna, desean suscribirse.
+            </p>
+<p>
+                Primero, creemos nuestro propio formulario, y definamos varios subformularios
+                dentro de él:
+            </p>
+<pre class="programlisting">
+class My_Form_Registration extends Zend_Form
+{
+    public function init()
+    {
+        // Create user sub form: username and password
+        $user = new Zend_Form_SubForm();
+        $user-&gt;addElements(array(
+            new Zend_Form_Element_Text('username', array(
+                'required'   =&gt; true,
+                'label'      =&gt; 'Username:',
+                'filters'    =&gt; array('StringTrim', 'StringToLower'),
+                'validators' =&gt; array(
+                    'Alnum',
+                    array('Regex',
+                          false,
+                          array('/^[a-z][a-z0-9]{2,}$/'))
+                )
+            )),
+
+            new Zend_Form_Element_Password('password', array(
+                'required'   =&gt; true,
+                'label'      =&gt; 'Password:',
+                'filters'    =&gt; array('StringTrim'),
+                'validators' =&gt; array(
+                    'NotEmpty',
+                    array('StringLength', false, array(6))
+                )
+            )),
+        ));
+
+        // Create demographics sub form: given name, family name, and
+        // location
+        $demog = new Zend_Form_SubForm();
+        $demog-&gt;addElements(array(
+            new Zend_Form_Element_Text('givenName', array(
+                'required'   =&gt; true,
+                'label'      =&gt; 'Given (First) Name:',
+                'filters'    =&gt; array('StringTrim'),
+                'validators' =&gt; array(
+                    array('Regex',
+                          false,
+                          array('/^[a-z][a-z0-9., \'-]{2,}$/i'))
+                )
+            )),
+
+            new Zend_Form_Element_Text('familyName', array(
+                'required'   =&gt; true,
+                'label'      =&gt; 'Family (Last) Name:',
+                'filters'    =&gt; array('StringTrim'),
+                'validators' =&gt; array(
+                    array('Regex',
+                          false,
+                          array('/^[a-z][a-z0-9., \'-]{2,}$/i'))
+                )
+            )),
+
+            new Zend_Form_Element_Text('location', array(
+                'required'   =&gt; true,
+                'label'      =&gt; 'Your Location:',
+                'filters'    =&gt; array('StringTrim'),
+                'validators' =&gt; array(
+                    array('StringLength', false, array(2))
+                )
+            )),
+        ));
+
+        // Create mailing lists sub form
+        $listOptions = array(
+            'none'        =&gt; 'No lists, please',
+            'fw-general'  =&gt; 'Zend Framework General List',
+            'fw-mvc'      =&gt; 'Zend Framework MVC List',
+            'fw-auth'     =&gt; 'Zend Framwork Authentication and ACL List',
+            'fw-services' =&gt; 'Zend Framework Web Services List',
+        );
+        $lists = new Zend_Form_SubForm();
+        $lists-&gt;addElements(array(
+            new Zend_Form_Element_MultiCheckbox('subscriptions', array(
+                'label'        =&gt;
+                    'Which lists would you like to subscribe to?',
+                'multiOptions' =&gt; $listOptions,
+                'required'     =&gt; true,
+                'filters'      =&gt; array('StringTrim'),
+                'validators'   =&gt; array(
+                    array('InArray',
+                          false,
+                          array(array_keys($listOptions)))
+                )
+            )),
+        ));
+
+        // Attach sub forms to main form
+        $this-&gt;addSubForms(array(
+            'user'  =&gt; $user,
+            'demog' =&gt; $demog,
+            'lists' =&gt; $lists
+        ));
+    }
+}
+</pre>
+<p>
+                Observe que no hay botones de envío, y que no hemos hecho
+                nada con los decoradores de los subformularios -- lo que significa que por
+                defecto se mostrarán como fieldsets. Necesitaremos poder
+                sobrescribir esto al mostrar cada subformulario individual, y
+                añadir botones de envío para poder procesarlos realmente --
+                lo cual también requerirá propiedades de acción y método. Añadamos
+                algo de andamiaje a nuestra clase para proporcionar esa información:
+            </p>
+<pre class="programlisting">
+class My_Form_Registration extends Zend_Form
+{
+    // ...
+
+    /**
+     * Prepare a sub form for display
+     *
+     * @param  string|Zend_Form_SubForm $spec
+     * @return Zend_Form_SubForm
+     */
+    public function prepareSubForm($spec)
+    {
+        if (is_string($spec)) {
+            $subForm = $this-&gt;{$spec};
+        } elseif ($spec instanceof Zend_Form_SubForm) {
+            $subForm = $spec;
+        } else {
+            throw new Exception('Invalid argument passed to ' .
+                                __FUNCTION__ . '()');
+        }
+        $this-&gt;setSubFormDecorators($subForm)
+             -&gt;addSubmitButton($subForm)
+             -&gt;addSubFormActions($subForm);
+        return $subForm;
+    }
+
+    /**
+     * Add form decorators to an individual sub form
+     *
+     * @param  Zend_Form_SubForm $subForm
+     * @return My_Form_Registration
+     */
+    public function setSubFormDecorators(Zend_Form_SubForm $subForm)
+    {
+        $subForm-&gt;setDecorators(array(
+            'FormElements',
+            array('HtmlTag', array('tag' =&gt; 'dl',
+                                   'class' =&gt; 'zend_form')),
+            'Form',
+        ));
+        return $this;
+    }
+
+    /**
+     * Add a submit button to an individual sub form
+     *
+     * @param  Zend_Form_SubForm $subForm
+     * @return My_Form_Registration
+     */
+    public function addSubmitButton(Zend_Form_SubForm $subForm)
+    {
+        $subForm-&gt;addElement(new Zend_Form_Element_Submit(
+            'save',
+            array(
+                'label'    =&gt; 'Save and continue',
+                'required' =&gt; false,
+                'ignore'   =&gt; true,
+            )
+        ));
+        return $this;
+    }
+
+    /**
+     * Add action and method to sub form
+     *
+     * @param  Zend_Form_SubForm $subForm
+     * @return My_Form_Registration
+     */
+    public function addSubFormActions(Zend_Form_SubForm $subForm)
+    {
+        $subForm-&gt;setAction('/registration/process')
+                -&gt;setMethod('post');
+        return $this;
+    }
+}
+</pre>
+<p>
+                A continuación, necesitamos añadir algo de andamiaje en nuestro controlador de acción,
+                y tener en cuenta varias consideraciones. Primero, debemos asegurarnos de
+                persistir los datos del formulario entre peticiones, para poder determinar
+                cuándo finalizar. Segundo, necesitamos algo de lógica para determinar qué
+                segmentos del formulario ya se han enviado, y qué subformulario
+                mostrar en función de esa información. Utilizaremos
+                <code class="classname">Zend_Session_Namespace</code> para persistir los datos, lo que
+                también nos ayudará a responder a la pregunta de qué formulario enviar.
+            </p>
+<p>
+                Creemos nuestro controlador, y añadamos un método para obtener una
+                instancia del formulario:
+            </p>
+<pre class="programlisting">
+class RegistrationController extends Zend_Controller_Action
+{
+    protected $_form;
+
+    public function getForm()
+    {
+        if (null === $this-&gt;_form) {
+            $this-&gt;_form = new My_Form_Registration();
+        }
+        return $this-&gt;_form;
+    }
+}
+</pre>
+<p>
+                Ahora, añadamos algo de funcionalidad para determinar qué formulario
+                mostrar. Básicamente, hasta que el formulario completo se considere válido,
+                necesitamos seguir mostrando segmentos del formulario. Además,
+                probablemente queramos asegurarnos de que estén en un orden particular: user,
+                demog, y luego lists. Podemos determinar qué datos se han
+                enviado comprobando nuestro espacio de nombres de sesión en busca de determinadas claves
+                que representan cada subformulario.
+            </p>
+<pre class="programlisting">
+class RegistrationController extends Zend_Controller_Action
+{
+    // ...
+
+    protected $_namespace = 'RegistrationController';
+    protected $_session;
+
+    /**
+     * Get the session namespace we're using
+     *
+     * @return Zend_Session_Namespace
+     */
+    public function getSessionNamespace()
+    {
+        if (null === $this-&gt;_session) {
+            $this-&gt;_session =
+                new Zend_Session_Namespace($this-&gt;_namespace);
+        }
+
+        return $this-&gt;_session;
+    }
+
+    /**
+     * Get a list of forms already stored in the session
+     *
+     * @return array
+     */
+    public function getStoredForms()
+    {
+        $stored = array();
+        foreach ($this-&gt;getSessionNamespace() as $key =&gt; $value) {
+            $stored[] = $key;
+        }
+
+        return $stored;
+    }
+
+    /**
+     * Get list of all subforms available
+     *
+     * @return array
+     */
+    public function getPotentialForms()
+    {
+        return array_keys($this-&gt;getForm()-&gt;getSubForms());
+    }
+
+    /**
+     * What sub form was submitted?
+     *
+     * @return false|Zend_Form_SubForm
+     */
+    public function getCurrentSubForm()
+    {
+        $request = $this-&gt;getRequest();
+        if (!$request-&gt;isPost()) {
+            return false;
+        }
+
+        foreach ($this-&gt;getPotentialForms() as $name) {
+            if ($data = $request-&gt;getPost($name, false)) {
+                if (is_array($data)) {
+                    return $this-&gt;getForm()-&gt;getSubForm($name);
+                    break;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the next sub form to display
+     *
+     * @return Zend_Form_SubForm|false
+     */
+    public function getNextSubForm()
+    {
+        $storedForms    = $this-&gt;getStoredForms();
+        $potentialForms = $this-&gt;getPotentialForms();
+
+        foreach ($potentialForms as $name) {
+            if (!in_array($name, $storedForms)) {
+                return $this-&gt;getForm()-&gt;getSubForm($name);
+            }
+        }
+
+        return false;
+    }
+}
+</pre>
+<p>
+                Los métodos anteriores nos permiten utilizar notaciones como "<span class="command"><strong>$subForm =
+                    $this-&gt;getCurrentSubForm();</strong></span>" para recuperar el
+                subformulario actual para su validación, o "<span class="command"><strong>$next =
+                    $this-&gt;getNextSubForm();</strong></span>" para obtener el siguiente a
+                mostrar.
+            </p>
+<p>
+                Ahora, averigüemos cómo procesar y mostrar los distintos subformularios.
+                Podemos utilizar <code class="methodname">getCurrentSubForm()</code> para determinar
+                si se ha enviado algún subformulario (los valores de retorno <code class="constant">FALSE</code>
+                indican que no se ha mostrado ni enviado ninguno), y
+                <code class="methodname">getNextSubForm()</code> para recuperar un formulario a mostrar. Luego
+                podemos utilizar el método <code class="methodname">prepareSubForm()</code> del formulario para
+                asegurarnos de que el formulario esté listo para mostrarse.
+            </p>
+<p>
+                Cuando tenemos un envío de formulario, podemos validar el subformulario,
+                y luego comprobar si el formulario completo ya es válido. Para realizar
+                estas tareas, necesitaremos métodos adicionales que se aseguren de que
+                los datos enviados se añadan a la sesión, y de que, al validar
+                el formulario completo, validemos contra todos los segmentos almacenados en la
+                sesión:
+            </p>
+<pre class="programlisting">
+class RegistrationController extends Zend_Controller_Action
+{
+    // ...
+
+    /**
+     * Is the sub form valid?
+     *
+     * @param  Zend_Form_SubForm $subForm
+     * @param  array $data
+     * @return bool
+     */
+    public function subFormIsValid(Zend_Form_SubForm $subForm,
+                                   array $data)
+    {
+        $name = $subForm-&gt;getName();
+        if ($subForm-&gt;isValid($data)) {
+            $this-&gt;getSessionNamespace()-&gt;$name = $subForm-&gt;getValues();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Is the full form valid?
+     *
+     * @return bool
+     */
+    public function formIsValid()
+    {
+        $data = array();
+        foreach ($this-&gt;getSessionNamespace() as $key =&gt; $info) {
+            $data[$key] = $info;
+        }
+
+        return $this-&gt;getForm()-&gt;isValid($data);
+    }
+}
+</pre>
+<p>
+                Ahora que ya tenemos el trabajo preliminar hecho, construyamos las
+                acciones de este controlador. Necesitaremos una página de aterrizaje para el
+                formulario, y luego una acción 'process' para procesarlo.
+            </p>
+<pre class="programlisting">
+class RegistrationController extends Zend_Controller_Action
+{
+    // ...
+
+    public function indexAction()
+    {
+        // Either re-display the current page, or grab the "next"
+        // (first) sub form
+        if (!$form = $this-&gt;getCurrentSubForm()) {
+            $form = $this-&gt;getNextSubForm();
+        }
+        $this-&gt;view-&gt;form = $this-&gt;getForm()-&gt;prepareSubForm($form);
+    }
+
+    public function processAction()
+    {
+        if (!$form = $this-&gt;getCurrentSubForm()) {
+            return $this-&gt;_forward('index');
+        }
+
+        if (!$this-&gt;subFormIsValid($form,
+                                   $this-&gt;getRequest()-&gt;getPost())) {
+            $this-&gt;view-&gt;form = $this-&gt;getForm()-&gt;prepareSubForm($form);
+            return $this-&gt;render('index');
+        }
+
+        if (!$this-&gt;formIsValid()) {
+            $form = $this-&gt;getNextSubForm();
+            $this-&gt;view-&gt;form = $this-&gt;getForm()-&gt;prepareSubForm($form);
+            return $this-&gt;render('index');
+        }
+
+        // Valid form!
+        // Render information in a verification page
+        $this-&gt;view-&gt;info = $this-&gt;getSessionNamespace();
+        $this-&gt;render('verification');
+    }
+}
+</pre>
+<p>
+                Como notará, el código real para procesar el formulario es
+                relativamente simple. Comprobamos si tenemos un envío de subformulario
+                actual, y si no, volvemos a la página de aterrizaje. Si
+                tenemos un subformulario, intentamos validarlo, volviendo a mostrarlo si
+                falla. Si el subformulario es válido, comprobamos entonces si el
+                formulario es válido, lo que indicaría que hemos terminado; si no, se
+                muestra el siguiente segmento del formulario. Finalmente, mostramos una
+                página de verificación con el contenido de la sesión.
+            </p>
+<p>
+                Los scripts de vista son muy simples:
+            </p>
+<pre class="programlisting">
+&lt;?php // registration/index.phtml ?&gt;
+&lt;h2&gt;Registration&lt;/h2&gt;
+&lt;?php echo $this-&gt;form ?&gt;
+
+&lt;?php // registration/verification.phtml ?&gt;
+&lt;h2&gt;Thank you for registering!&lt;/h2&gt;
+&lt;p&gt;
+    Here is the information you provided:
+&lt;/p&gt;
+
+&lt;?
+// Have to do this construct due to how items are stored in session
+// namespaces
+foreach ($this-&gt;info as $info):
+    foreach ($info as $form =&gt; $data): ?&gt;
+&lt;h4&gt;&lt;?php echo ucfirst($form) ?&gt;:&lt;/h4&gt;
+&lt;dl&gt;
+    &lt;?php foreach ($data as $key =&gt; $value): ?&gt;
+    &lt;dt&gt;&lt;?php echo ucfirst($key) ?&gt;&lt;/dt&gt;
+    &lt;?php if (is_array($value)):
+        foreach ($value as $label =&gt; $val): ?&gt;
+    &lt;dd&gt;&lt;?php echo $val ?&gt;&lt;/dd&gt;
+        &lt;?php endforeach;
+       else: ?&gt;
+    &lt;dd&gt;&lt;?php echo $this-&gt;escape($value) ?&gt;&lt;/dd&gt;
+    &lt;?php endif;
+    endforeach; ?&gt;
+&lt;/dl&gt;
+&lt;?php endforeach;
+endforeach ?&gt;
+</pre>
+<p>
+                Las próximas versiones de Zend Framework incluirán componentes para
+                simplificar los formularios multi-página abstrayendo la lógica de sesión y
+                ordenación. Mientras tanto, el ejemplo anterior debería servir
+                como una guía razonable de cómo llevar a cabo esta tarea en
+                su sitio.
+            </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.form.i18n.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.form.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.gdata.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">36.8. Internacionalización de Zend_Form </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 37. Zend_Gdata</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

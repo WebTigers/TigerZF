@@ -1,0 +1,185 @@
+<?php $title = '61.9. Avanzado'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.9. Avanzado</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.java-lucene.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.best-practice.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.advanced"></a>61.9. Avanzado</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.advanced.format_migration"></a>61.9.1. A partir de la versión 1.6, manejo de las transformaciones del formato de índice</h3></div></div></div>
+<p>
+            El componente <code class="classname">Zend_Search_Lucene</code> funciona con los formatos de índice de Java Lucene 1.4-1.9, 2.1
+            y 2.3.
+        </p>
+<p>
+            El formato de índice actual puede solicitarse mediante la llamada <code class="code">$index-&gt;getFormatVersion()</code>.
+            Devuelve uno de los siguientes valores:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">Zend_Search_Lucene::FORMAT_PRE_2_1</code> para el formato de índice de Java Lucene
+                        1.4-1.9.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Zend_Search_Lucene::FORMAT_2_1</code> para el formato de índice de Java Lucene 2.1
+                        (también se usa para Lucene 2.2).
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Zend_Search_Lucene::FORMAT_2_3</code> para el formato de índice de Java Lucene
+                        2.3.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Las modificaciones del índice se realizan <span class="emphasis"><em>únicamente</em></span> si se realiza alguna actualización del índice.
+            Eso ocurre si se añade un nuevo documento a un índice o si se inicia manualmente la optimización del índice
+            mediante la llamada <code class="code">$index-&gt;optimize()</code>.
+        </p>
+<p>
+            En tal caso, <code class="classname">Zend_Search_Lucene</code> puede convertir el índice a la versión de formato
+            superior. Eso <span class="emphasis"><em>siempre</em></span> ocurre con los índices en
+            formato <code class="constant">Zend_Search_Lucene::FORMAT_PRE_2_1</code>, que se convierten automáticamente
+            al formato 2.1.
+        </p>
+<p>
+            Puede gestionar el proceso de conversión y asignar el formato de índice objetivo mediante
+            <code class="code">$index-&gt;setFormatVersion()</code>, que toma la constante
+            <code class="constant">Zend_Search_Lucene::FORMAT_2_1</code> o
+            <code class="constant">Zend_Search_Lucene::FORMAT_2_3</code> como parámetro:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="constant">Zend_Search_Lucene::FORMAT_2_1</code> en realidad no hace nada
+                        ya que los índices anteriores a 2.1 se convierten automáticamente al formato 2.1.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">Zend_Search_Lucene::FORMAT_2_3</code> fuerza la conversión al
+                        formato 2.3.
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Las conversiones hacia atrás no están soportadas.
+        </p>
+<div class="note"><table border="0" summary="Note: Important!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Importante!</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Una vez que el índice se convierte a una versión superior, no se puede volver a convertir. Así que haga una
+                copia de seguridad de su índice cuando planee migrar a una versión superior, pero desee tener la
+                posibilidad de volver atrás.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.advanced.static"></a>61.9.2. Uso del índice como propiedad estática</h3></div></div></div>
+<p>
+            El objeto <code class="classname">Zend_Search_Lucene</code> utiliza el método destructor para
+            confirmar los cambios y liberar recursos.
+        </p>
+<p>
+            Almacena los documentos añadidos en memoria y vuelca el nuevo segmento de índice en disco dependiendo del
+            parámetro <code class="code">MaxBufferedDocs</code>.
+        </p>
+<p>
+            Si no se alcanza el límite de <code class="code">MaxBufferedDocs</code>, entonces hay algunos documentos
+            "no guardados" que se guardan como un nuevo segmento en el método destructor del objeto. El procedimiento
+            de auto-optimización del índice se invoca si es necesario dependiendo de los valores de los parámetros
+            <code class="code">MaxBufferedDocs</code>, <code class="code">MaxMergeDocs</code> y <code class="code">MergeFactor</code>.
+        </p>
+<p>
+            Las propiedades estáticas de los objetos (véase más abajo) se destruyen <span class="emphasis"><em>después</em></span> de la última
+            línea del script ejecutado.
+        </p>
+<pre class="programlisting">
+class Searcher {
+    private static $_index;
+
+    public static function initIndex() {
+        self::$_index = Zend_Search_Lucene::open('path/to/index');
+    }
+}
+
+Searcher::initIndex();
+</pre>
+<p>
+            Aun así, el destructor de las propiedades estáticas se invoca correctamente en este punto de la
+            ejecución del programa.
+        </p>
+<p>
+            Un problema potencial es el manejo de excepciones. Las excepciones lanzadas por los destructores de
+            objetos estáticos no tienen contexto, porque el destructor se ejecuta después de que el script ya
+            haya finalizado.
+        </p>
+<p>
+            Puede ver un mensaje de error del tipo "Fatal error: Exception thrown without a stack frame in Unknown on line
+            0" en lugar de la descripción de la excepción en tales casos.
+        </p>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> proporciona una solución alternativa a este problema con el
+            método <code class="methodname">commit()</code>. Guarda todos los cambios no guardados y libera la memoria
+            usada para almacenar los nuevos segmentos. Es libre de usar la operación commit en cualquier momento, o
+            incluso varias veces, durante la ejecución del script. Todavía puede usar el objeto
+            <code class="classname">Zend_Search_Lucene</code> para buscar, añadir o eliminar
+            documentos después de la operación commit. Pero la llamada a <code class="methodname">commit()</code>
+            garantiza que si no se añade ni elimina ningún documento después de la llamada a
+            <code class="methodname">commit()</code>, entonces el destructor de <code class="classname">Zend_Search_Lucene</code>
+            no tendrá nada que hacer y no lanzará ninguna excepción:
+        </p>
+<pre class="programlisting">
+class Searcher {
+    private static $_index;
+
+    public static function initIndex() {
+        self::$_index = Zend_Search_Lucene::open('path/to/index');
+    }
+
+    ...
+
+    public static function commit() {
+        self::$_index-&gt;commit();
+    }
+}
+
+Searcher::initIndex();
+
+...
+
+// Script shutdown routine
+...
+Searcher::commit();
+...
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.java-lucene.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.best-practice.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.8. Interoperación con Java Lucene </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 61.10. Buenas prácticas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

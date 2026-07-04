@@ -1,0 +1,139 @@
+<?php $title = 'E.4. Guía de configuración de Rewrite'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">E.4. Guía de configuración de Rewrite</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="project-structure.filesystem.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice E. Estructura de proyecto recomendada para aplicaciones MVC de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="performance.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="project-structure.rewrite"></a>E.4. Guía de configuración de Rewrite</h2></div></div></div>
+<p>
+            La reescritura de <acronym class="acronym">URL</acronym> es una función común de los servidores
+            <acronym class="acronym">HTTP</acronym>. Sin embargo, las reglas y la configuración difieren
+            ampliamente entre ellos. A continuación se muestran algunos enfoques comunes en una
+            variedad de servidores web populares disponibles en el momento de escribir esto.
+        </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="project-structure.rewrite.apache"></a>E.4.1. Servidor HTTP Apache</h3></div></div></div>
+<p>
+                Todos los ejemplos siguientes usan <span class="property">mod_rewrite</span>, un módulo
+                oficial que viene incluido con Apache. Para usarlo,
+                <span class="property">mod_rewrite</span> debe estar incluido en tiempo de compilación o
+                habilitado como un objeto compartido dinámico (<acronym class="acronym">DSO</acronym>). Consulte la
+                <a class="ulink" href="http://httpd.apache.org/docs/" target="_top">documentación de Apache</a> para su
+                versión para más información.
+            </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="project-structure.rewrite.apache.vhost"></a>E.4.1.1. Reescritura dentro de un VirtualHost</h4></div></div></div>
+<p>
+                    Aquí se muestra una definición de host virtual muy básica. Estas reglas dirigen todas
+                    las peticiones a <code class="filename">index.php</code>, excepto cuando se encuentra un
+                    archivo coincidente bajo el <span class="property">document_root</span>.
+                </p>
+<pre class="programlisting">
+&lt;VirtualHost my.domain.com:80&gt;
+    ServerName   my.domain.com
+    DocumentRoot /path/to/server/root/my.domain.com/public
+
+    RewriteEngine off
+
+    &lt;Location /&gt;
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} -s [OR]
+        RewriteCond %{REQUEST_FILENAME} -l [OR]
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^.*$ - [NC,L]
+        RewriteRule ^.*$ /index.php [NC,L]
+    &lt;/Location&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<p>
+                    Observe la barra ("/") que precede a <code class="filename">index.php</code>; las reglas para
+                    <code class="filename">.htaccess</code> difieren en este aspecto.
+                </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="project-structure.rewrite.apache.htaccess"></a>E.4.1.2. Reescritura dentro de un archivo .htaccess</h4></div></div></div>
+<p>
+                    A continuación se muestra un archivo <code class="filename">.htaccess</code> de ejemplo que
+                    utiliza <span class="property">mod_rewrite</span>. Es similar a la configuración del host
+                    virtual, excepto que especifica únicamente las reglas de reescritura, y se omite la
+                    barra inicial de <code class="filename">index.php</code>.
+                </p>
+<pre class="programlisting">
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+RewriteRule ^.*$ index.php [NC,L]
+</pre>
+<p>
+                    Hay muchas formas de configurar <span class="property">mod_rewrite</span>; si desea
+                    más información, consulte el artículo de Jayson Minard <a class="ulink" href="http://devzone.zend.com/a/70" target="_top">Blueprint for PHP Applications:
+                    Bootstrapping</a>.
+                </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="project-structure.rewrite.iis"></a>E.4.2. Microsoft Internet Information Server</h3></div></div></div>
+<p>
+                A partir de la versión 7.0, <acronym class="acronym">IIS</acronym> ahora incluye un motor de
+                reescritura estándar. Puede usar la siguiente configuración para crear las reglas de
+                reescritura apropiadas.
+            </p>
+<pre class="programlisting">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;configuration&gt;
+    &lt;system.webServer&gt;
+        &lt;rewrite&gt;
+            &lt;rules&gt;
+                &lt;rule name="Imported Rule 1" stopProcessing="true"&gt;
+                    &lt;match url="^.*$" /&gt;
+                    &lt;conditions logicalGrouping="MatchAny"&gt;
+                        &lt;add input="{REQUEST_FILENAME}"
+                             matchType="IsFile" pattern=""
+                             ignoreCase="false" /&gt;
+                        &lt;add input="{REQUEST_FILENAME}"
+                             matchType="IsDirectory"
+                             pattern=""
+                             ignoreCase="false" /&gt;
+                    &lt;/conditions&gt;
+                    &lt;action type="None" /&gt;
+                &lt;/rule&gt;
+                &lt;rule name="Imported Rule 2" stopProcessing="true"&gt;
+                    &lt;match url="^.*$" /&gt;
+                    &lt;action type="Rewrite" url="index.php" /&gt;
+                &lt;/rule&gt;
+            &lt;/rules&gt;
+        &lt;/rewrite&gt;
+    &lt;/system.webServer&gt;
+&lt;/configuration&gt;
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="project-structure.filesystem.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="project-structure.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="performance.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">E.3. Estructura de módulos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Apéndice F. Guía de rendimiento de Zend Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

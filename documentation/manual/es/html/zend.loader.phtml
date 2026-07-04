@@ -1,0 +1,354 @@
+<?php $title = 'Capítulo 42. Zend_Loader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 42. Zend_Loader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.ldap.ldif.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.loader.autoloader.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.loader"></a>Capítulo 42. Zend_Loader</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.loader.phtml#zend.loader.load">42.1. Carga dinámica de archivos y clases</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.phtml#zend.loader.load.file">42.1.1. Carga de archivos</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.phtml#zend.loader.load.class">42.1.2. Carga de clases</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.phtml#zend.loader.load.isreadable">42.1.3. Comprobación de si un archivo es legible</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.phtml#zend.loader.load.autoload">42.1.4. Uso del autoloader</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.autoloader.phtml">42.2. El autoloader</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.autoloader.phtml#zend.loader.autoloader.usage">42.2.1. Uso del autoloader</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader.phtml#zend.loader.autoloader.zf-version">42.2.2. Selección de una versión de Zend Framework</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader.phtml#zend.loader.autoloader.interface">42.2.3. La interfaz Autoloader</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader.phtml#zend.loader.autoloader.reference">42.2.4. Referencia del autoloader</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.autoloader-resource.phtml">42.3. Autoloaders de recursos</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.usage">42.3.1. Uso del autoloader de recursos</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.module">42.3.2. El autoloader de recursos de módulos</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.factory">42.3.3. Uso de autoloaders de recursos como fábricas de objetos</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.reference">42.3.4. Referencia del autoloader de recursos</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.pluginloader.phtml">42.4. Carga de plugins</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.usage">42.4.1. Caso de uso básico</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.paths">42.4.2. Manipulación de rutas de plugins</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.checks">42.4.3. Comprobación de plugins y recuperación de nombres de clase</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.pluginloader.phtml#zend.loader.pluginloader.performance">42.4.4. Obtención de mejor rendimiento para los plugins</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.spl-autoloader.phtml">42.5. La interfaz SplAutoloader</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.intro">42.5.1. Resumen</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.quick-start">42.5.2. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.options">42.5.3. Opciones de configuración</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.methods">42.5.4. Métodos disponibles</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.examples">42.5.5. Ejemplos</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.autoloader-factory.phtml">42.6. El AutoloaderFactory</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.autoloader-factory.phtml#zend.loader.autoloader-factory.intro">42.6.1. Resumen</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-factory.phtml#zend.loader.autoloader-factory.quick-start">42.6.2. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-factory.phtml#zend.loader.autoloader-factory.options">42.6.3. Opciones de configuración</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-factory.phtml#zend.loader.autoloader-factory.methods">42.6.4. Métodos disponibles</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.autoloader-factory.phtml#zend.loader.autoloader-factory.examples">42.6.5. Ejemplos</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.standard-autoloader.phtml">42.7. El StandardAutoloader</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.intro">42.7.1. Resumen</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.quick-start">42.7.2. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.options">42.7.3. Opciones de configuración</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.methods">42.7.4. Métodos disponibles</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.examples">42.7.5. Ejemplos</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.class-map-autoloader.phtml">42.8. El ClassMapAutoloader</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.class-map-autoloader.phtml#zend.loader.class-map-autoloader.intro">42.8.1. Resumen</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.class-map-autoloader.phtml#zend.loader.class-map-autoloader.quick-start">42.8.2. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.class-map-autoloader.phtml#zend.loader.class-map-autoloader.options">42.8.3. Opciones de configuración</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.class-map-autoloader.phtml#zend.loader.class-map-autoloader.methods">42.8.4. Métodos disponibles</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.class-map-autoloader.phtml#zend.loader.class-map-autoloader.examples">42.8.5. Ejemplos</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.loader.classmap-generator.phtml">42.9. La utilidad de generación de mapas de clases: bin/classmap_generator.php</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.loader.classmap-generator.phtml#zend.loader.classmap-generator.intro">42.9.1. Resumen</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.classmap-generator.phtml#zend.loader.classmap-generator.quick-start">42.9.2. Inicio rápido</a></span></dt>
+<dt><span class="sect2"><a href="zend.loader.classmap-generator.phtml#zend.loader.classmap-generator.options">42.9.3. Opciones de configuración</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.loader.load"></a>42.1. Carga dinámica de archivos y clases</h2></div></div></div>
+<p>
+        La clase <code class="classname">Zend_Loader</code> incluye métodos para ayudarle a cargar archivos
+        de forma dinámica.
+    </p>
+<div class="tip"><table border="0" summary="Tip: Zend_Loader vs. require_once()">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td>
+<th align="left">Zend_Loader frente a require_once()</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Los métodos de <code class="classname">Zend_Loader</code> se usan mejor si el nombre del archivo que
+            necesita cargar es variable. Por ejemplo, si se basa en un parámetro procedente de
+            la entrada del usuario o de un argumento de método. Si está cargando un archivo o una
+            clase cuyo nombre es constante, no hay ningún beneficio en usar
+            <code class="classname">Zend_Loader</code> en lugar de las funciones tradicionales de <acronym class="acronym">PHP</acronym>
+            como <a class="ulink" href="http://php.net/require_once" target="_top"><code class="methodname">require_once()</code></a>.
+        </p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.load.file"></a>42.1.1. Carga de archivos</h3></div></div></div>
+<p>
+            El método estático <code class="methodname">Zend_Loader::loadFile()</code> carga un
+            archivo <acronym class="acronym">PHP</acronym>. El archivo cargado puede contener cualquier código
+            <acronym class="acronym">PHP</acronym>. El método es un envoltorio para la función <acronym class="acronym">PHP</acronym>
+            <a class="ulink" href="http://php.net/include" target="_top"><code class="methodname">include()</code></a>,
+            que emite un aviso de <acronym class="acronym">PHP</acronym> en caso de fallo, por ejemplo
+            si el archivo especificado no existe.
+        </p>
+<div class="example">
+<a name="zend.loader.load.file.example"></a><p class="title"><b>Ejemplo 42.1. Ejemplo del método loadFile()</b></p>
+<div class="example-contents"><pre class="programlisting">
+Zend_Loader::loadFile($filename, $dirs=null, $once=false);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El argumento <code class="varname">$filename</code> especifica el nombre de archivo a cargar,
+            que no debe contener ninguna información de ruta.
+            Se realiza una comprobación de seguridad sobre <code class="varname">$filename</code>.
+            <code class="varname">$filename</code> solo puede contener caracteres alfanuméricos,
+            guiones ("-"), guiones bajos ("_") o puntos (".").
+            No se impone ninguna restricción de este tipo sobre el argumento <code class="varname">$dirs</code>.
+        </p>
+<p>
+            El argumento <code class="varname">$dirs</code> especifica en qué directorios buscar el
+            archivo. Si el valor es <code class="constant">NULL</code>, solo se busca en el include_path;
+            si el valor es una cadena o un array, se buscará en el directorio o directorios
+            especificados, seguidos del <span class="property">include_path</span>.
+        </p>
+<p>
+            El argumento <code class="varname">$once</code> es un booleano. Si es <code class="constant">TRUE</code>,
+            <code class="methodname">Zend_Loader::loadFile()</code> usa la función <acronym class="acronym">PHP</acronym>
+            <a class="ulink" href="http://php.net/include" target="_top"><code class="methodname">include_once()</code></a>
+            para cargar el archivo; en caso contrario se usa la función <acronym class="acronym">PHP</acronym>
+            <a class="ulink" href="http://php.net/include_once" target="_top"><code class="methodname">include()</code></a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.load.class"></a>42.1.2. Carga de clases</h3></div></div></div>
+<p>
+            El método estático <code class="methodname">Zend_Loader::loadClass($class, $dirs)</code>
+            carga un archivo <acronym class="acronym">PHP</acronym> y luego comprueba la existencia de la clase.
+        </p>
+<div class="example">
+<a name="zend.loader.load.class.example"></a><p class="title"><b>Ejemplo 42.2. Ejemplo del método loadClass()</b></p>
+<div class="example-contents"><pre class="programlisting">
+Zend_Loader::loadClass('Container_Tree',
+    array(
+        '/home/production/mylib',
+        '/home/production/myapp'
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            La cadena que especifica la clase se convierte en una ruta relativa
+            sustituyendo los guiones bajos por separadores de directorio de su sistema operativo, y añadiendo
+            '.php'. En el ejemplo anterior, 'Container_Tree' se convierte en 'Container\\Tree.php' en Windows.
+        </p>
+<p>
+            Si <code class="varname">$dirs</code> es una cadena o un array,
+            <code class="methodname">Zend_Loader::loadClass()</code> busca en los directorios en
+            el orden proporcionado. Se carga el primer archivo coincidente. Si el archivo
+            no existe en los <code class="varname">$dirs</code> especificados, entonces se busca en el
+            <span class="property">include_path</span> del entorno <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Si el archivo no se encuentra o la clase no existe tras la carga,
+            <code class="methodname">Zend_Loader::loadClass()</code> lanza una
+            <code class="classname">Zend_Exception</code>.
+        </p>
+<p>
+            <code class="methodname">Zend_Loader::loadFile()</code> se usa para la carga, por lo que el
+            nombre de la clase solo puede contener caracteres alfanuméricos y el guion
+            ('-'), el guion bajo ('_') y el punto ('.').
+        </p>
+<div class="note"><table border="0" summary="Note: Loading Classes from PHP Namespaces">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Carga de clases desde espacios de nombres de PHP</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                A partir de la versión 1.10.0, Zend Framework permite ahora cargar clases desde
+                espacios de nombres de <acronym class="acronym">PHP</acronym>. Este soporte sigue las mismas directrices e
+                implementación que se encuentran en la implementación de referencia <a class="ulink" href="http://groups.google.com/group/php-standards/web/psr-0-final-proposal" target="_top">PHP
+                Framework Interop Group PSR-0</a>.
+            </p>
+<p>
+                Según esta directriz, se aplican las siguientes reglas:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Cada separador de espacio de nombres se convierte en un
+                        <code class="constant">DIRECTORY_SEPARATOR</code> al cargar desde el sistema de archivos.
+                    </p></li>
+<li class="listitem"><p>
+                        Cada carácter "_" en el <span class="emphasis"><em>NOMBRE DE CLASE</em></span> se convierte en un
+                        <code class="constant">DIRECTORY_SEPARATOR</code>. El carácter "_" no tiene ningún significado
+                        especial en el espacio de nombres.
+                    </p></li>
+<li class="listitem"><p>
+                        El espacio de nombres y la clase completamente calificados se sufijan con ".php" al cargar
+                        desde el sistema de archivos.
+                    </p></li>
+</ul></div>
+<p>
+                Como ejemplos:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="classname">\Doctrine\Common\IsolatedClassLoader</code> =&gt;
+                        <code class="filename">/path/to/project/lib/vendor/Doctrine/Common/IsolatedClassLoader.php</code>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">\namespace\package\Class_Name</code> =&gt;
+                        <code class="filename">/path/to/project/lib/vendor/namespace/package/Class/Name.php</code>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="classname">\namespace\package_name\Class_Name</code> =&gt;
+                        <code class="filename">/path/to/project/lib/vendor/namespace/package_name/Class/Name.php</code>
+                    </p></li>
+</ul></div>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.load.isreadable"></a>42.1.3. Comprobación de si un archivo es legible</h3></div></div></div>
+<p>
+            El método estático <code class="methodname">Zend_Loader::isReadable($pathname)</code>
+            devuelve <code class="constant">TRUE</code> si existe un archivo en la ruta especificada
+            y es legible, y <code class="constant">FALSE</code> en caso contrario.
+        </p>
+<div class="example">
+<a name="zend.loader.load.isreadable.example"></a><p class="title"><b>Ejemplo 42.3. Ejemplo del método isReadable()</b></p>
+<div class="example-contents"><pre class="programlisting">
+if (Zend_Loader::isReadable($filename)) {
+    // do something with $filename
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El argumento <code class="varname">$filename</code> especifica el nombre de archivo a
+            comprobar. Puede contener información de ruta.
+            Este método es un envoltorio para la función <acronym class="acronym">PHP</acronym>
+            <a class="ulink" href="http://php.net/is_readable" target="_top"><code class="methodname">is_readable()</code></a>.
+            La función <acronym class="acronym">PHP</acronym> no busca en el
+            <span class="property">include_path</span>, mientras que
+            <code class="methodname">Zend_Loader::isReadable()</code> sí lo hace.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.load.autoload"></a>42.1.4. Uso del autoloader</h3></div></div></div>
+<p>
+            La clase <code class="classname">Zend_Loader</code> contiene un método que puede registrar con el
+            autoloader SPL de <acronym class="acronym">PHP</acronym>. <code class="methodname">Zend_Loader::autoload()</code>
+            es el método de callback. Como comodidad, <code class="classname">Zend_Loader</code> proporciona
+            la función <code class="methodname">registerAutoload()</code> para registrar su
+            método <code class="methodname">autoload()</code>. Si la extensión <span class="property">spl_autoload</span>
+            no está presente en su entorno <acronym class="acronym">PHP</acronym>, entonces el método
+            <code class="methodname">registerAutoload()</code> lanza una
+            <code class="classname">Zend_Exception</code>.
+        </p>
+<div class="example">
+<a name="zend.loader.load.autoload.example"></a><p class="title"><b>Ejemplo 42.4. Ejemplo de registro del método de callback del autoloader</b></p>
+<div class="example-contents"><pre class="programlisting">
+Zend_Loader::registerAutoload();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Tras registrar el callback de autocarga de Zend Framework, puede
+            hacer referencia a clases de Zend Framework sin tener que cargarlas
+            explícitamente. El método <code class="methodname">autoload()</code> usa
+            <code class="methodname">Zend_Loader::loadClass()</code> automáticamente cuando usted
+            hace referencia a una clase.
+        </p>
+<p>
+            Si ha extendido la clase <code class="classname">Zend_Loader</code>, puede proporcionar un
+            argumento opcional a <code class="methodname">registerAutoload()</code>, para especificar
+            la clase desde la cual registrar un método <code class="methodname">autoload()</code>.
+        </p>
+<div class="example">
+<a name="zend.loader.load.autoload.example-extended"></a><p class="title"><b>Ejemplo 42.5. Ejemplo de registro del método de callback de autocarga desde una
+                clase extendida</b></p>
+<div class="example-contents">
+<p>
+                Debido a la semántica de las referencias de funciones estáticas en <acronym class="acronym">PHP</acronym>,
+                debe implementar código tanto para <code class="methodname">loadClass()</code>
+                como para <code class="methodname">autoload()</code>, y <code class="methodname">autoload()</code>
+                debe llamar a <code class="methodname">self::loadClass()</code>. Si su método
+                <code class="methodname">autoload()</code> delega en su padre para
+                llamar a <code class="methodname">self::loadClass()</code>, entonces llama al
+                método de ese nombre en la clase padre, no en la subclase.
+            </p>
+<pre class="programlisting">
+class My_Loader extends Zend_Loader
+{
+    public static function loadClass($class, $dirs = null)
+    {
+        parent::loadClass($class, $dirs);
+    }
+
+    public static function autoload($class)
+    {
+        try {
+            self::loadClass($class);
+            return $class;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+}
+
+Zend_Loader::registerAutoload('My_Loader');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Puede eliminar un callback de autocarga. El método
+            <code class="methodname">registerAutoload()</code> tiene un segundo argumento opcional,
+            que es <code class="constant">TRUE</code> por defecto. Si este argumento es
+            <code class="constant">FALSE</code>, el callback de autocarga se elimina de la
+            pila de autocarga de SPL.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.ldap.ldif.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.loader.autoloader.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">41.7. Serialización de datos LDAP hacia y desde LDIF </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 42.2. El autoloader</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

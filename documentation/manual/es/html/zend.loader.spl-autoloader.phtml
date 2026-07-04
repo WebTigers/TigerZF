@@ -1,0 +1,191 @@
+<?php $title = '42.5. La interfaz SplAutoloader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">42.5. La interfaz SplAutoloader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.loader.pluginloader.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 42. Zend_Loader</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.loader.autoloader-factory.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.loader.spl-autoloader"></a>42.5. La interfaz SplAutoloader</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.spl-autoloader.intro"></a>42.5.1. Resumen</h3></div></div></div>
+<p>
+            Aunque cualquier callback de PHP válido puede registrarse con
+            <code class="function">spl_autoload_register()</code>, los autoloaders de Zend Framework a menudo
+            proporcionan más flexibilidad al ser con estado y permitir configuración. Para proporcionar una
+            interfaz común, Zend Framework ofrece la interfaz <code class="interfacename">SplAutoloader</code>.
+        </p>
+<p>
+            Los objetos que implementan esta interfaz proporcionan un mecanismo estándar de configuración, un
+            método que puede invocarse para intentar cargar una clase, y un método para registrarse con el
+            mecanismo de autocarga de SPL.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.spl-autoloader.quick-start"></a>42.5.2. Inicio rápido</h3></div></div></div>
+<p>
+            Para crear su propio mecanismo de autocarga, simplemente cree una clase que implemente la
+            interfaz <code class="interfacename">SplAutoloader</code> (puede revisar los métodos
+            definidos en la <a class="link" href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.methods" title="42.5.4. Available Methods">sección de
+            Métodos</a>). Como ejemplo sencillo, considere el siguiente autoloader, que buscará
+            un archivo de clase con el nombre de la clase dentro de una lista de directorios registrados.
+        </p>
+<pre class="programlisting">
+require_once 'Zend/Loader/SplAutoloader.php';
+
+class Custom_ModifiedIncludePathAutoloader implements Zend_Loader_SplAutoloader
+{
+    protected $paths = array();
+
+    public function __construct($options = null)
+    {
+        if (null !== $options) {
+            $this-&gt;setOptions($options);
+        }
+    }
+
+    public function setOptions($options)
+    {
+        if (!is_array($options) &amp;&amp; !($options instanceof Traversable)) {
+            throw new InvalidArgumentException();
+        }
+
+        foreach ($options as $path) {
+            if (!in_array($path, $this-&gt;paths)) {
+                $this-&gt;paths[] = $path;
+            }
+        }
+        return $this;
+    }
+
+    public function autoload($classname)
+    {
+        $filename = $classname . '.php';
+        foreach ($this-&gt;paths as $path) {
+            $test = $path . DIRECTORY_SEPARATOR . $filename;
+            if (file_exists($test)) {
+                return include($test);
+            }
+        }
+        return false;
+    }
+
+    public function register()
+    {
+        spl_autoload_register(array($this, 'autoload'));
+    }
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.spl-autoloader.options"></a>42.5.3. Opciones de configuración</h3></div></div></div>
+<p>
+            Este componente no define opciones de configuración, ya que es una interfaz.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.spl-autoloader.methods"></a>42.5.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.loader.spl-autoloader.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$options = null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Inicializa y configura un autoloader
+                    </p>
+<p>
+                        Los constructores de los autoloaders deben recibir opcionalmente opciones de
+                        configuración. Normalmente, si se reciben, se pasarán al método
+                        <code class="methodname">setOptions()</code> para procesarlas.
+                    </p>
+</dd>
+<dt>
+<a name="zend.loader.spl-autoloader.methods.set-options"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setOptions</span>(<span class="methodparam">$options</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Configura el estado del autoloader
+                    </p>
+<p>
+                        Se utiliza para configurar el autoloader. Normalmente, debería esperar un array o
+                        un objeto <code class="interfacename">Traversable</code>, aunque la validación de las
+                        opciones se deja a la implementación. Además, se recomienda que el
+                        método devuelva la instancia del autoloader para implementar una interfaz fluida.
+                    </p>
+</dd>
+<dt>
+<a name="zend.loader.spl-autoloader.methods.autoload"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">autoload</span>(<span class="methodparam">$classname</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Intenta resolver un nombre de clase al archivo que la define
+                    </p>
+<p>
+                        Este método debe usarse para resolver un nombre de clase al archivo que la define.
+                        Cuando se encuentra una coincidencia positiva, devuelve el nombre de la clase; de lo
+                        contrario, devuelve un booleano false.
+                    </p>
+</dd>
+<dt>
+<a name="zend.loader.spl-autoloader.methods.register"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">register</span>();</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Registra el autoloader con el autoloader de SPL
+                    </p>
+<p>
+                        Debe usarse para registrar la instancia del autoloader con
+                        <code class="function">spl_autoload_register()</code>. Invariablemente, el método
+                        debería tener el siguiente aspecto:
+                    </p>
+<pre class="programlisting">
+public function register()
+{
+    spl_autoload_register(array($this, 'autoload'));
+}
+</pre>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.spl-autoloader.examples"></a>42.5.5. Ejemplos</h3></div></div></div>
+<p>
+            Consulte el <a class="link" href="zend.loader.spl-autoloader.phtml#zend.loader.spl-autoloader.quick-start" title="42.5.2. Quick Start">Inicio rápido</a>
+            para ver un ejemplo completo.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.loader.pluginloader.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.loader.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.loader.autoloader-factory.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">42.4. Carga de plugins </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 42.6. El AutoloaderFactory</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,485 @@
+<?php $title = '43.4. Trabajar con fechas y horas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">43.4. Trabajar con fechas y horas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.locale.parsing.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 43. Zend_Locale</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.locale.appendix.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.locale.date.datesandtimes"></a>43.4. Trabajar con fechas y horas</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Locale_Format</code> proporciona varios métodos para trabajar con fechas
+        y horas, para ayudar a convertir y normalizar entre distintos formatos para distintas configuraciones
+        regionales. Use <code class="classname">Zend_Date</code> para manipular fechas, y para trabajar con cadenas
+        de fecha que ya se ajusten a <a class="link" href="zend.date.constants.phtml" title="26.6. Constants for General Date Functions">uno de los muchos formatos
+            estándar reconocidos internacionalmente, o uno de los formatos de fecha localizados admitidos por
+            <code class="classname">Zend_Date</code></a>. Usar un formato existente y predefinido ofrece
+        ventajas, incluyendo el uso de código bien probado, y la garantía de cierto grado de
+        portabilidad e interoperabilidad (según el estándar utilizado). Los ejemplos siguientes no
+        siguen estas recomendaciones, ya que usar formatos de fecha no estándar aumentaría innecesariamente
+        la dificultad para entender estos ejemplos.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.locale.date.normalize"></a>43.4.1. Normalizar fechas y horas</h3></div></div></div>
+<p>
+            El método <code class="methodname">getDate()</code> analiza cadenas que contienen fechas en
+            formatos localizados. Los resultados se devuelven en un array estructurado, con claves
+            bien definidas para cada parte de la fecha. Además, el array contendrá una clave 'date_format'
+            que muestra la cadena de formato usada para analizar la cadena de fecha de entrada. Dado que una cadena
+            de fecha localizada puede no contener todas las partes de una fecha/hora, los pares clave-valor son opcionales. Por
+            ejemplo, si solo se proporcionan el año, el mes y el día, entonces todos los valores de hora se suprimen
+            del array devuelto, y viceversa si solo se proporcionaron la hora, el minuto y el segundo como
+            entrada. Si no se puede encontrar ninguna fecha u hora dentro de la entrada dada, se lanzará una excepción.
+        </p>
+<p>
+            Si se establece <code class="methodname">setOption(array('fix_date' =&gt; true))</code>, el
+            método <code class="methodname">getDate()</code> añade una clave 'fixed' con un valor numérico entero
+            que indica si la cadena de fecha de entrada requirió "arreglos" reorganizando el día, el mes o el
+            año en la entrada para ajustarse al formato utilizado.
+        </p>
+<div class="table">
+<a name="zend.locale.date.normalize.table-1"></a><p class="title"><b>Tabla 43.5. Valores clave para getDate() con la opción 'fix_date'</b></p>
+<div class="table-contents"><table class="table" summary="Key values for getDate() with option 'fix_date'" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>valor</th>
+<th>significado</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>nada que arreglar</td>
+</tr>
+<tr>
+<td>1</td>
+<td>mes incorrecto arreglado</td>
+</tr>
+<tr>
+<td>2</td>
+<td>día y año intercambiados</td>
+</tr>
+<tr>
+<td>3</td>
+<td>mes y año intercambiados</td>
+</tr>
+<tr>
+<td>4</td>
+<td>mes y día intercambiados</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Para quienes necesiten especificar explícitamente el formato de la cadena de fecha, se admiten los
+            siguientes especificadores de token de formato. Si se usa un especificador de formato no válido, como
+            el especificador 'i' de <acronym class="acronym">PHP</acronym> en el modo de formato <acronym class="acronym">ISO</acronym>,
+            entonces se lanzará un error por los métodos de <code class="classname">Zend_Locale_Format</code>
+            que admiten formatos definidos por el usuario.
+        </p>
+<p>
+            Estos especificadores (a continuación) son un pequeño subconjunto del conjunto "ISO" completo admitido por
+            <code class="methodname">toString()</code> de <code class="classname">Zend_Date</code>. Si necesita
+            usar especificadores de formato compatibles con <code class="methodname">date()</code> de
+            <acronym class="acronym">PHP</acronym>, primero llame a <code class="methodname">setOptions(array('format_type' =&gt; 'php'))</code>. Y
+            si desea convertir solo una cadena de formato especial del formato compatible con
+            <code class="methodname">date()</code> de <acronym class="acronym">PHP</acronym> al formato "ISO", use
+            <code class="methodname">convertPhpToIsoFormat()</code>. Actualmente, la única diferencia
+            práctica se refiere al especificador de minutos ('m' usando el valor
+            predeterminado <acronym class="acronym">ISO</acronym>, y 'i' usando el formato de fecha de <acronym class="acronym">PHP</acronym>).
+        </p>
+<div class="table">
+<a name="zend.locale.date.normalize.table-2"></a><p class="title"><b>Tabla 43.6. Valores de retorno</b></p>
+<div class="table-contents"><table class="table" summary="Return values" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>carácter de formato de getDate()</th>
+<th>Clave del array</th>
+<th>Valor devuelto</th>
+<th>Mínimo</th>
+<th>Máximo</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>day</td>
+<td>entero</td>
+<td>1</td>
+<td>31</td>
+</tr>
+<tr>
+<td>M</td>
+<td>month</td>
+<td>entero</td>
+<td>1</td>
+<td>12</td>
+</tr>
+<tr>
+<td>y</td>
+<td>year</td>
+<td>entero</td>
+<td>sin límite</td>
+<td>Máximo de un entero de PHP</td>
+</tr>
+<tr>
+<td>h</td>
+<td>hour</td>
+<td>entero</td>
+<td>0</td>
+<td>Máximo de un entero de PHP</td>
+</tr>
+<tr>
+<td>m</td>
+<td>minute</td>
+<td>entero</td>
+<td>0</td>
+<td>Máximo de un entero de PHP</td>
+</tr>
+<tr>
+<td>s</td>
+<td>second</td>
+<td>entero</td>
+<td>0</td>
+<td>Máximo de un entero de PHP</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="example">
+<a name="zend.locale.date.normalize.example-1"></a><p class="title"><b>Ejemplo 43.43. Normalizar una fecha</b></p>
+<div class="example-contents"><pre class="programlisting">
+$dateString = Zend_Locale_Format::getDate(
+    '13.04.2006',
+    array(
+        'date_format' =&gt; 'dd.MM.yyyy',
+    )
+);
+
+print_r($dateString); // outputs:
+
+Array
+(
+    [date_format] =&gt; dd.MM.yyyy
+    [locale] =&gt; de_DE
+    [day] =&gt; 13
+    [month] =&gt; 04
+    [year] =&gt; 2006
+)
+
+// creates a Zend_Date object for this date
+$dateObject = new Zend_Date('13.04.2006', 'dd.MM.yyyy');
+
+print_r($dateObject); // outputs:
+
+Zend_Date Object
+(
+    [_locale:Zend_Date:private] =&gt; de_DE
+    [_fractional:Zend_Date:private] =&gt; 0
+    [_precision:Zend_Date:private] =&gt; 3
+    [_unixTimestamp:Zend_Date_DateObject:private] =&gt; 1144879200
+    [_timezone:Zend_Date_DateObject:private] =&gt; Europe/Berlin
+    [_offset:Zend_Date_DateObject:private] =&gt; -3600
+    [_syncronised:Zend_Date_DateObject:private] =&gt; 0
+    [_dst:protected] =&gt; 1
+)
+
+// alternatively, some types of problems with input data can be
+// automatically corrected
+$date = Zend_Locale_Format::getDate(
+    '04.13.2006',
+    array(
+        'date_format' =&gt; 'dd.MM.yyyy',
+        'fix_date'    =&gt; true,
+    )
+);
+
+print_r($date); // outputs:
+
+Array
+(
+    [date_format] =&gt; dd.MM.yyyy
+    [locale] =&gt; de_DE
+    [day] =&gt; 13
+    [month] =&gt; 04
+    [year] =&gt; 2006
+    [fixed] =&gt; 4
+)
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Dado que <code class="methodname">getDate()</code> "tiene en cuenta la configuración regional", especificar
+            <code class="varname">$locale</code> es suficiente para cadenas de fecha que se ajusten al formato de esa
+            configuración regional. La opción '<span class="property">fix_date</span>' usa pruebas simples para determinar si el
+            día o el mes no son válidos, y luego aplica heurísticas para intentar corregir cualquier problema
+            detectado. Observe el uso de '<code class="constant">Zend_Locale_Format::STANDARD</code>' como el
+            valor de '<span class="property">date_format</span>' para evitar el uso de un formato de fecha predeterminado a nivel
+            de clase establecido mediante <code class="methodname">setOptions()</code>. Esto obliga a getDate a usar
+            el formato de fecha predeterminado para <code class="varname">$locale</code>.
+        </p>
+<div class="example">
+<a name="zend.locale.date.normalize.example-2"></a><p class="title"><b>Ejemplo 43.44. Normalizar una fecha según la configuración regional</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+$date = Zend_Locale_Format::getDate('13.04.2006',
+                                    array('date_format' =&gt;
+                                              Zend_Locale_Format::STANDARD,
+                                          'locale' =&gt; $locale)
+                                   );
+
+print_r ($date);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Se devuelve una fecha y hora completa cuando la entrada contiene tanto una fecha como una hora en el
+            formato esperado.
+        </p>
+<div class="example">
+<a name="zend.locale.date.normalize.example-3"></a><p class="title"><b>Ejemplo 43.45. Normalizar una fecha con hora</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+$date = Zend_Locale_Format::getDate('13.04.2005 22:14:55',
+                                    array('date_format' =&gt;
+                                                Zend_Locale_Format::STANDARD,
+                                          'locale' =&gt; $locale)
+                                    );
+
+print_r ($date);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Si se desea un formato específico, especifique el argumento <code class="varname">$format</code>,
+            sin proporcionar un <code class="varname">$locale</code>. Solo se admiten los códigos de una sola letra
+            (H, m, s, y, M, d), así como MMMM y EEEE, en <code class="varname">$format</code>.
+        </p>
+<div class="example">
+<a name="zend.locale.date.normalize.example-4"></a><p class="title"><b>Ejemplo 43.46. Normalizar una fecha definida por el usuario</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = Zend_Locale_Format::getDate('13200504T551422',
+                                    array('date_format' =&gt;
+                                              'ddyyyyMM ssmmHH')
+                                   );
+
+print_r ($date);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El formato puede incluir los siguientes signos:
+        </p>
+<div class="table">
+<a name="zend.locale.date.normalize.table-3"></a><p class="title"><b>Tabla 43.7. Definición de formato</b></p>
+<div class="table-contents"><table class="table" summary="Format definition" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Letra de formato</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>d o dd</td>
+<td>día de 1 o 2 dígitos</td>
+</tr>
+<tr>
+<td>M o MM</td>
+<td>mes de 1 o 2 dígitos</td>
+</tr>
+<tr>
+<td>y o yy</td>
+<td>año de 1 o 2 dígitos</td>
+</tr>
+<tr>
+<td>yyyy</td>
+<td>año de 4 dígitos</td>
+</tr>
+<tr>
+<td>h</td>
+<td>hora de 1 o 2 dígitos</td>
+</tr>
+<tr>
+<td>m</td>
+<td>minuto de 1 o 2 dígitos</td>
+</tr>
+<tr>
+<td>s</td>
+<td>segundo de 1 o 2 dígitos</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Ejemplos de formatos correctos son
+        </p>
+<div class="table">
+<a name="zend.locale.date.normalize.table-4"></a><p class="title"><b>Tabla 43.8. Ejemplos de formato</b></p>
+<div class="table-contents"><table class="table" summary="Example formats" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Formatos</th>
+<th>Entrada</th>
+<th>Salida</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>dd.MM.yy</td>
+<td>1.4.6</td>
+<td>['day'] =&gt; 1, ['month'] =&gt; 4, ['year'] =&gt; 6</td>
+</tr>
+<tr>
+<td>dd.MM.yy</td>
+<td>01.04.2006</td>
+<td>['day'] =&gt; 1, ['month'] =&gt; 4, ['year'] =&gt; 2006</td>
+</tr>
+<tr>
+<td>yyyyMMdd</td>
+<td>1.4.6</td>
+<td>['day'] =&gt; 6, ['month'] =&gt; 4, ['year'] =&gt; 1</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note: Database date format">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Formato de fecha de base de datos</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Para analizar un valor de fecha de base de datos (por ejemplo, MySql o MsSql), use
+                el formato ISO_8601 de <code class="classname">Zend_Date</code> en lugar de getDate().
+            </p></td></tr>
+</table></div>
+<p>
+            La opción '<span class="property">fix_date</span>' usa pruebas simples para determinar si el día o el
+            mes no son válidos, y luego aplica heurísticas para intentar corregir cualquier problema
+            detectado. <code class="methodname">getDate()</code> detecta y corrige automáticamente algunos
+            tipos de problemas con la entrada, como colocar el año en la posición incorrecta:
+        </p>
+<div class="example">
+<a name="zend.locale.date.normalize.example-5"></a><p class="title"><b>Ejemplo 43.47. Corrección automática de fechas de entrada</b></p>
+<div class="example-contents"><pre class="programlisting">
+$date = Zend_Locale_Format::getDate('41.10.20',
+                                    array('date_format' =&gt; 'ddMMyy',
+                                          'fix_date' =&gt; true)
+                                   );
+
+// instead of 41 for the day, the 41 will be returned as year value
+print_r ($date);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.locale.date.test"></a>43.4.2. Probar fechas</h3></div></div></div>
+<p>
+            Use <code class="methodname">checkDateFormat($inputString, array('date_format' =&gt; $format,
+                $locale))</code> para comprobar si una cadena dada contiene todas las partes de fecha esperadas.
+            El método <code class="methodname">checkDateFormat()</code> usa
+            <code class="methodname">getDate()</code>, pero sin la opción
+            '<span class="property">fixdate</span>' para evitar devolver <code class="constant">TRUE</code> cuando la
+            entrada no se ajusta al formato de fecha. Si se detectan errores en la entrada, como
+            valores intercambiados de meses y días, el método con la opción '<span class="property">fixdate</span>'
+            aplicará heurísticas para "corregir" las fechas antes de determinar su validez.
+        </p>
+<div class="example">
+<a name="zend.locale.date.test.example-1"></a><p class="title"><b>Ejemplo 43.48. Prueba de fecha</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+// using the default date format for 'de_AT', is this a valid date?
+if (Zend_Locale_Format::checkDateFormat('13.Apr.2006',
+                                        array('date_format' =&gt;
+                                                  Zend_Locale_Format::STANDARD,
+                                              $locale)
+                                       ) {
+    print "date";
+} else {
+    print "not a date";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.locale.time.normalizing"></a>43.4.3. Normalizar una hora</h3></div></div></div>
+<p>
+            Normalmente, se devolverá una hora junto con una fecha, si la entrada contiene ambas. Si no se conoce el
+            formato adecuado, pero sí la configuración regional relevante para la entrada del usuario, entonces debe usarse
+            <code class="methodname">getTime()</code>, porque utiliza el formato de hora predeterminado
+            para la configuración regional seleccionada.
+        </p>
+<div class="example">
+<a name="zend.locale.time.normalizing.example-1"></a><p class="title"><b>Ejemplo 43.49. Normalizar una hora desconocida</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+if (Zend_Locale_Format::getTime('13:44:42',
+                                array('date_format' =&gt;
+                                          Zend_Locale_Format::STANDARD,
+                                      'locale' =&gt; $locale)) {
+    print "time";
+} else {
+    print "not a time";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.locale.time.test"></a>43.4.4. Probar horas</h3></div></div></div>
+<p>
+            Use <code class="methodname">checkDateFormat()</code> para comprobar si una cadena dada contiene una
+            hora correcta. El uso es exactamente el mismo que al comprobar fechas, solo que
+            <span class="property">date_format</span> debe contener las partes que se espera tener.
+        </p>
+<div class="example">
+<a name="zend.locale.time.test.example-1"></a><p class="title"><b>Ejemplo 43.50. Probar una hora</b></p>
+<div class="example-contents"><pre class="programlisting">
+$locale = new Zend_Locale('de_AT');
+if (Zend_Locale_Format::checkDateFormat('13:44:42',
+                                        array('date_format' =&gt; 'HH:mm:ss',
+                                              'locale' =&gt; $locale)) {
+    print "time";
+} else {
+    print "not a time";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.locale.parsing.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.locale.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.locale.appendix.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">43.3. Normalización y localización </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 43.5. Configuraciones regionales admitidas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

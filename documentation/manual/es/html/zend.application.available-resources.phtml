@@ -1,0 +1,1122 @@
+<?php $title = '14.6. Plugins de recursos disponibles'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">14.6. Plugins de recursos disponibles</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.application.core-functionality.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 14. Zend_Application</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.auth.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.application.available-resources"></a>14.6. Plugins de recursos disponibles</h2></div></div></div>
+<p>
+        Aquí encontrará documentación de tipo <acronym class="acronym">API</acronym> sobre todos los plugins de recursos
+        disponibles por defecto en <code class="classname">Zend_Application</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.cachemanager"></a>14.6.1. Zend_Application_Resource_Cachemanager</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Cachemanager</code> puede
+        utilizarse para configurar un conjunto de paquetes de opciones de <code class="classname">Zend_Cache</code>
+        para su uso al cargar cachés de forma diferida (lazy loading) mediante
+        <code class="classname">Zend_Cache_Manager</code>
+    </p>
+<p>
+        Como el Cache Manager es un mecanismo de carga diferida, las opciones se traducen
+        a plantillas de opciones utilizadas para instanciar un objeto de caché bajo demanda.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.cachemanager.configExample"></a><p class="title"><b>Ejemplo 14.1. Ejemplo de configuración del recurso Cachemanager</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un archivo <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            puede configurarse <code class="classname">Zend_Cache_Manager</code>. El formato
+            es el prefijo del recurso Cachemanager (<span class="property">resources.cachemanager</span>)
+            seguido del nombre que se asignará a una plantilla o paquete de opciones de caché (p. ej.
+            <span class="property">resources.cachemanager.database</span>) y finalmente seguido de una
+            opción típica de <code class="classname">Zend_Cache</code>.
+        </p>
+<pre class="programlisting">
+resources.cachemanager.database.frontend.name = Core
+resources.cachemanager.database.frontend.customFrontendNaming = false
+resources.cachemanager.database.frontend.options.lifetime = 7200
+resources.cachemanager.database.frontend.options.automatic_serialization = true
+resources.cachemanager.database.backend.name = File
+resources.cachemanager.database.backend.customBackendNaming = false
+resources.cachemanager.database.backend.options.cache_dir = "/path/to/cache"
+resources.cachemanager.database.frontendBackendAutoload = false
+</pre>
+<p>
+            Obtener esta caché desde el Cache Manager es tan sencillo como
+            acceder a una instancia del Manager (<code class="classname">Zend_Cache_Manager</code>)
+            recuperada desde <code class="classname">Zend_Application_Resource_Cachemanager</code> y
+            llamando a <code class="methodname">Zend_Cache_Manager::getCache('database')</code>. El ejemplo
+            siguiente está tomado de un controlador donde se puede acceder a la clase bootstrap como
+            un parámetro del Front Controller (que se asigna automáticamente durante el arranque).
+            Como puede ver, el recurso Cache Manager implementa un
+            método <code class="methodname">getCacheManager()</code> para recuperar la instancia arrancada
+            de <code class="classname">Zend_Cache_Manager</code>.
+        </p>
+<pre class="programlisting">
+$manager = $this-&gt;getFrontController()
+            -&gt;getParam('bootstrap')
+            -&gt;getPluginResource('cachemanager')
+            -&gt;getCacheManager();
+$dbCache = $manager-&gt;getCache('database');
+</pre>
+<p>
+            Consulte el método <code class="methodname">Zend_Cache::factory()</code> para obtener una
+            descripción de los valores por defecto que puede asignar al configurar
+            una caché mediante un archivo de configuración como nuestro archivo <acronym class="acronym">INI</acronym> de ejemplo anterior.
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.db"></a>14.6.2. Zend_Application_Resource_Db</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Db</code> inicializará un
+        adaptador de <code class="classname">Zend_Db</code> según las opciones que se le pasen. Por
+        defecto, también establece el adaptador como el adaptador por defecto para su uso con
+        <code class="classname">Zend_Db_Table</code>. Si desea usar múltiples bases de datos
+        simultáneamente, puede utilizar el <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.multidb" title="14.6.10. Zend_Application_Resource_Multidb">plugin de recursos
+        Multidb</a>.
+    </p>
+<p>
+        Se reconocen las siguientes claves de configuración:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">adapter</span></em></span>: tipo de adaptador de
+                <code class="classname">Zend_Db</code>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">params</span></em></span>: array asociativo de parámetros
+                de configuración que se usarán al recuperar la instancia del adaptador.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">isDefaultTableAdapter</span></em></span>: si se debe
+                establecer o no este adaptador como el adaptador de tabla por defecto.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">defaultMetadataCache</span></em></span>: el nombre de la
+                plantilla de caché o una instancia de <code class="classname">Zend_Cache_Core</code> que se usará como
+                caché de metadatos para <code class="classname">Zend_Db_Table</code>.
+            </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.application.available-resources.db.configExample"></a><p class="title"><b>Ejemplo 14.2. Ejemplo de configuración del recurso adaptador de BD</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra una configuración <acronym class="acronym">INI</acronym> de ejemplo que puede usarse para inicializar
+            el recurso DB.
+        </p>
+<pre class="programlisting">
+[production]
+resources.db.adapter = "pdo_mysql"
+resources.db.params.host = "localhost"
+resources.db.params.username = "webuser"
+resources.db.params.password = "XXXXXXX"
+resources.db.params.dbname = "test"
+resources.db.isDefaultTableAdapter = true
+
+; Opcionalmente también puede usar la plantilla de caché para el cacheo de metadatos:
+resources.db.defaultMetadataCache = "database"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Retrieving the Adapter instance">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Recuperar la instancia del adaptador</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Si decide no convertir el adaptador instanciado con este
+            recurso en el adaptador de tabla por defecto, ¿cómo recupera la instancia
+            del adaptador?
+        </p>
+<p>
+            Como con cualquier plugin de recursos, puede obtener el plugin de recurso DB
+            desde su bootstrap:
+        </p>
+<pre class="programlisting">
+$resource = $bootstrap-&gt;getPluginResource('db');
+</pre>
+<p>
+            Una vez que tenga el objeto del recurso, puede obtener el adaptador DB
+            usando el método <code class="methodname">getDbAdapter()</code>:
+        </p>
+<pre class="programlisting">
+$db = $resource-&gt;getDbAdapter();
+</pre>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.dojo"></a>14.6.3. Zend_Application_Resource_Dojo</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Dojo</code> puede usarse
+        para configurar los ayudantes de vista (viewhelpers) de <code class="classname">Zend_Dojo</code>.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.dojo.configExample"></a><p class="title"><b>Ejemplo 14.3. Ejemplo de configuración del recurso Dojo</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un archivo <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            puede habilitarse <code class="classname">Zend_Dojo</code>.
+        </p>
+<pre class="programlisting">
+resources.dojo.enable = true ; Cargar siempre los archivos javascript de Dojo
+</pre>
+<p>
+            El plugin de recurso <code class="classname">Zend_Dojo</code> utiliza las opciones de
+            <code class="methodname">Zend_Dojo_View_Helper_Dojo_Container::setOptions()</code> para
+            configurar los ayudantes de vista. Consulte el capítulo <a class="link" href="zend.dojo.phtml" title="Chapter 29. Zend_Dojo">Zend_Dojo</a>
+            para obtener descripciones completas y las opciones disponibles.
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.frontcontroller"></a>14.6.4. Zend_Application_Resource_Frontcontroller</h3></div></div></div>
+<p>
+        Probablemente el recurso más común que cargará con
+        <code class="classname">Zend_Application</code> será el recurso Front Controller,
+        que proporciona la capacidad de configurar
+        <code class="classname">Zend_Controller_Front</code>. Este recurso proporciona la capacidad
+        de establecer parámetros arbitrarios del front controller, especificar plugins a
+        inicializar y mucho más.
+    </p>
+<p>
+        Una vez inicializado, el recurso asigna la propiedad <code class="varname">$frontController</code>
+        del bootstrap a la instancia de <code class="classname">Zend_Controller_Front</code>.
+    </p>
+<p>
+        Las claves de configuración disponibles incluyen las siguientes, y no distinguen
+        entre mayúsculas y minúsculas:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">controllerDirectory</span></em></span>: ya sea un valor de cadena
+                que especifica un único directorio de controladores, o un array de
+                pares módulo-directorio de controladores.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">moduleControllerDirectoryName</span></em></span>: un valor de
+                cadena que indica el subdirectorio bajo un módulo que contiene los controladores.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">moduleDirectory</span></em></span>: directorio bajo el cual
+                pueden encontrarse los módulos.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">defaultControllerName</span></em></span>: nombre base del
+                controlador por defecto (normalmente "index").
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">defaultAction</span></em></span>: nombre base de la acción
+                por defecto (normalmente "index").
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">defaultModule</span></em></span>: nombre base del
+                módulo por defecto (normalmente "default").
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">baseUrl</span></em></span>: <acronym class="acronym">URL</acronym> base
+                explícita de la aplicación (normalmente autodetectada).
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">plugins</span></em></span>: array de nombres de clase de plugins
+                del front controller. El recurso instanciará cada clase (sin argumentos de constructor)
+                y luego registrará la instancia con el front controller. Si desea
+                registrar un plugin con un índice de pila (stack index) concreto, debe proporcionar un array con
+                dos claves <span class="property">class</span> y <span class="property">stackIndex</span>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">params</span></em></span>: array de pares clave-valor a
+                registrar con el front controller.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">returnresponse</span></em></span>: si se debe devolver o no
+                el objeto response tras despachar el front controller. El valor debe ser un
+                booleano; por defecto, está deshabilitado.
+            </p></li>
+<li class="listitem">
+<p>
+                <span class="emphasis"><em><span class="property">dispatcher</span></em></span>: permite sobrescribir el
+                dispatcher por defecto.  Tiene dos subclaves, <span class="property">class</span> (el nombre de clase del nuevo dispatcher)
+                y <span class="property">params</span>, un array de parámetros a pasar al constructor del dispatcher.
+            </p>
+<div class="example">
+<a name="zend.application.available-resources.frontcontroller.configExample.1"></a><p class="title"><b>Ejemplo 14.4. Sobrescribir el dispatcher</b></p>
+<div class="example-contents"><pre class="programlisting">
+[production]
+resources.frontController.dispatcher.class = "My_Custom_Dispatcher"
+resources.frontController.dispatcher.params.foo = "bar"
+resources.frontController.dispatcher.params.baz = "grok"
+</pre></div>
+</div>
+<br class="example-break">
+</li>
+</ul></div>
+<p>
+        Si se proporciona una clave no reconocida, se registra como un parámetro
+        del front controller pasándola a <code class="methodname">setParam()</code>.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.frontcontroller.configExample.2"></a><p class="title"><b>Ejemplo 14.5. Ejemplo de configuración del recurso Front Controller</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo configurar el front
+            controller.
+        </p>
+<pre class="programlisting">
+[production]
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+resources.frontController.moduleControllerDirectoryName = "actions"
+resources.frontController.moduleDirectory = APPLICATION_PATH "/modules"
+resources.frontController.defaultControllerName = "site"
+resources.frontController.defaultAction = "home"
+resources.frontController.defaultModule = "static"
+resources.frontController.baseUrl = "/subdir"
+resources.frontController.plugins.foo = "My_Plugin_Foo"
+resources.frontController.plugins.bar = "My_Plugin_Bar"
+resources.frontController.plugins.baz.class = "My_Plugin_Baz"
+resources.frontController.plugins.baz.stackIndex = 123
+resources.frontController.returnresponse = 1
+resources.frontController.env = APPLICATION_ENV
+
+; Lo siguiente actúa como proxy de:
+; Zend_Controller_Action_HelperBroker::addPath('Helper_Path', $helperPrefix);
+resources.frontController.actionHelperPaths.HELPER_Prefix = "My/Helper/Path"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.application.available-resources.frontcontroller.propertyExample"></a><p class="title"><b>Ejemplo 14.6. Recuperar el Front Controller en su bootstrap</b></p>
+<div class="example-contents">
+<p>
+            Una vez que su recurso Front Controller se ha inicializado, puede
+            obtener la instancia del Front Controller mediante la
+            propiedad <code class="varname">$frontController</code> de su bootstrap.
+        </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap('frontController');
+$front = $bootstrap-&gt;frontController;
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.layout"></a>14.6.5. Zend_Application_Resource_Layout</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Layout</code> puede usarse para
+        configurar <code class="classname">Zend_Layout</code>. Las opciones de configuración se corresponden
+        con <a class="link" href="zend.layout.options.phtml" title="40.3. Zend_Layout Configuration Options">las opciones de <code class="classname">Zend_Layout
+        </code></a>.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.layout.configExample"></a><p class="title"><b>Ejemplo 14.7. Ejemplo de configuración de Layout</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            configurar el recurso layout.
+        </p>
+<pre class="programlisting">
+resources.layout.layout = "NameOfDefaultLayout"
+resources.layout.layoutPath = "/path/to/layouts"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.locale"></a>14.6.6. Zend_Application_Resource_Locale</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Locale</code> puede usarse para
+        establecer una configuración regional (locale) de ámbito de aplicación que luego se usa en todas las clases y componentes
+        que trabajan con localización o internacionalización. Por defecto la configuración regional se
+        guarda en una entrada de <code class="classname">Zend_Registry</code> con la clave
+        '<span class="property">Zend_Locale</span>'.
+    </p>
+<p>
+        Básicamente hay tres casos de uso para el plugin de recurso Locale. Cada uno de ellos
+        debe usarse según las necesidades de la aplicación.
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.locale.auto"></a>14.6.6.1. Autodetectar la configuración regional a usar</h4></div></div></div>
+<p>
+            Sin especificar ninguna opción para
+            <code class="classname">Zend_Application_Resource_Locale</code>,
+            <code class="classname">Zend_Locale</code> detectará automáticamente la configuración regional que su aplicación
+            usará.
+        </p>
+<p>
+            Esta detección funciona porque su cliente envía el idioma deseado dentro de su
+            petición <acronym class="acronym">HTTP</acronym>. Normalmente el navegador del cliente envía los idiomas que
+            desea ver, y <code class="classname">Zend_Locale</code> usa esta información para la
+            detección.
+        </p>
+<p>
+            Pero hay 2 problemas con este enfoque:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    El navegador podría estar configurado para no enviar ningún idioma
+                </p></li>
+<li class="listitem"><p>
+                    El usuario podría haber establecido manualmente una configuración regional que no existe
+                </p></li>
+</ul></div>
+<p>
+            En ambos casos <code class="classname">Zend_Locale</code> recurrirá a otro mecanismo para
+            detectar la configuración regional:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    Cuando se ha establecido una configuración regional que no existe,
+                    <code class="classname">Zend_Locale</code> intenta degradar esta cadena.
+                </p>
+<p>
+                    Cuando, por ejemplo, se establece <span class="emphasis"><em>en_ZZ</em></span>, se
+                    degradará automáticamente a <span class="emphasis"><em>en</em></span>. En este caso <span class="emphasis"><em>en</em></span>
+                    se usará como configuración regional para su aplicación.
+                </p>
+</li>
+<li class="listitem"><p>
+                    Cuando la configuración regional tampoco pudiera detectarse mediante degradación, se usará la configuración regional de su
+                    entorno (servidor web). La mayoría de los entornos disponibles de
+                    los proveedores de alojamiento web usan <span class="emphasis"><em>en</em></span> como configuración regional.
+                </p></li>
+<li class="listitem"><p>
+                    Cuando no se pudiera detectar la configuración regional del sistema, <code class="classname">Zend_Locale</code>
+                    usará su configuración regional por defecto, que se establece en <span class="emphasis"><em>en</em></span> de
+                    forma predeterminada.
+                </p></li>
+</ul></div>
+<p>
+            Para obtener más información sobre la detección de configuración regional, consulte <a class="link" href="zend.locale.phtml#zend.locale.selection.automatic" title="43.1.5. Usage of automatic Locales">este capítulo sobre la detección
+                automática de Zend_Locale</a>.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.locale.fallback"></a>14.6.6.2. Autodetectar la configuración regional y añadir un valor de reserva propio</h4></div></div></div>
+<p>
+            La autodetección anterior podría generar problemas cuando no se pudiera detectar la configuración regional y
+            desee tener otra configuración regional por defecto distinta de <span class="emphasis"><em>en</em></span>. Para evitarlo,
+            <code class="classname">Zend_Application_Resource_Locale</code> le permite establecer una configuración regional propia
+            que se usará en caso de que no se pueda detectar la configuración regional.
+        </p>
+<div class="example">
+<a name="zend.application.available-resources.locale.configExampleDetectAndFallback"></a><p class="title"><b>Ejemplo 14.8. Autodetectar la configuración regional y establecer un valor de reserva</b></p>
+<div class="example-contents">
+<p>
+                El siguiente fragmento muestra cómo establecer una configuración regional propia por defecto que se usará cuando
+                el cliente no envíe una configuración regional por sí mismo.
+            </p>
+<pre class="programlisting">
+; Intentar determinar automáticamente primero,
+; si no se consigue, usar nl_NL como valor de reserva.
+resources.locale.default = "nl_NL"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.locale.forcing"></a>14.6.6.3. Forzar el uso de una configuración regional específica</h4></div></div></div>
+<p>
+            A veces es útil definir una única configuración regional que se deba usar. Esto puede hacerse
+            utilizando la opción <span class="property">force</span>.
+        </p>
+<p>
+            En este caso se usará esta única configuración regional y la detección automática se desactiva.
+        </p>
+<div class="example">
+<a name="zend.application.available-resources.locale.configExampleFallbackOnly"></a><p class="title"><b>Ejemplo 14.9. Definir una única configuración regional a usar</b></p>
+<div class="example-contents">
+<p>
+                El siguiente fragmento muestra cómo establecer una única configuración regional para toda su aplicación.
+            </p>
+<pre class="programlisting">
+; No importa qué pase, se usará la configuración regional nl_NL.
+resources.locale.default = "nl_NL"
+resources.locale.force = true
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.locale.cache"></a>14.6.6.4. Configurar la plantilla de caché</h4></div></div></div>
+<p>
+            Cuando no ha establecido ninguna caché, <code class="classname">Zend_Locale</code> establecerá por sí mismo una caché
+            con el backend de archivo por defecto. Pero si desea elegir el backend u otras
+            opciones, puede usar el nombre de una plantilla de caché o una instancia de
+            <code class="classname">Zend_Cache_Core</code>.
+            Para obtener más información, consulte <a class="xref" href="zend.locale.phtml#zend.locale.cache" title="43.1.10. Speed up Zend_Locale and its subclasses">Sección 43.1.10, “Acelerar Zend_Locale y sus subclases”</a>.
+        </p>
+<div class="example">
+<a name="zend.application.available-resources.locale.configExampleCache"></a><p class="title"><b>Ejemplo 14.10. Definir una plantilla de caché a usar</b></p>
+<div class="example-contents"><pre class="programlisting">
+; Opcionalmente también puede usar la plantilla de caché para el cacheo:
+resources.locale.cache = "locale"
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.log"></a>14.6.7. Zend_Application_Resource_Log</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Log</code> para instanciar una
+        instancia de <code class="classname">Zend_Log</code> con un número arbitrario de escritores de log.
+        La configuración se pasará al método <code class="methodname">Zend_Log::factory()</code>,
+        lo que permite especificar combinaciones de escritores y filtros de log. La instancia de log podrá entonces
+        recuperarse del bootstrap más tarde para registrar eventos.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.log.configExample"></a><p class="title"><b>Ejemplo 14.11. Ejemplo de configuración del recurso Log</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            configurar el recurso log.
+        </p>
+<pre class="programlisting">
+resources.log.stream.writerName = "Stream"
+resources.log.stream.writerParams.stream = APPLICATION_PATH "/../data/logs/application.log"
+resources.log.stream.writerParams.mode = "a"
+resources.log.stream.filterName = "Priority"
+resources.log.stream.filterParams.priority = 4
+</pre>
+<p>
+            Para más información sobre las opciones disponibles, revise la documentación de <a class="link" href="zend.log.factory.phtml" title="44.5. Using the Factory to Create a Log">Zend_Log::factory()</a>.
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.mail"></a>14.6.8. Zend_Application_Resource_Mail</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Mail</code> puede usarse
+        para instanciar un transporte para <code class="classname">Zend_Mail</code> o establecer
+        el nombre y dirección por defecto, así como el nombre y dirección de respuesta (replyto) por defecto.
+    </p>
+<p>
+        Al instanciar un transporte, se registra automáticamente en
+        <code class="classname">Zend_Mail</code>. Sin embargo, al establecer la
+        directiva <span class="property">transport.register</span> a <code class="constant">FALSE</code>, este
+        comportamiento deja de producirse.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.mail.configExample"></a><p class="title"><b>Ejemplo 14.12. Ejemplo de configuración del recurso Mail</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            configurar el plugin de recurso mail.
+        </p>
+<pre class="programlisting">
+resources.mail.transport.type = smtp
+resources.mail.transport.host = "smtp.example.com"
+resources.mail.transport.auth = login
+resources.mail.transport.username = myUsername
+resources.mail.transport.password = myPassword
+resources.mail.transport.register = true ; Verdadero por defecto
+
+resources.mail.defaultFrom.email = john@example.com
+resources.mail.defaultFrom.name = "John Doe"
+resources.mail.defaultReplyTo.email = Jane@example.com
+resources.mail.defaultReplyTo.name = "Jane Doe"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.modules"></a>14.6.9. Zend_Application_Resource_Modules</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Modules</code> se usa para inicializar
+        los módulos de su aplicación. Si su módulo tiene un
+        archivo <code class="filename">Bootstrap.php</code> en su raíz, y contiene una clase
+        llamada <code class="classname">Module_Bootstrap</code> (donde "Module" es el nombre del módulo),
+        entonces se usará esa clase para arrancar el módulo.
+    </p>
+<p>
+        Por defecto, se creará una instancia de
+        <code class="classname">Zend_Application_Module_Autoloader</code> para el
+        módulo, utilizando el nombre y el directorio del módulo para inicializarla.
+    </p>
+<p>
+        Dado que el recurso Modules no admite ningún argumento por defecto, para habilitarlo
+        mediante configuración, debe crearlo como un array vacío. En un estilo de configuración
+        <acronym class="acronym">INI</acronym>, esto se ve así:
+    </p>
+<pre class="programlisting">
+resources.modules[] =
+</pre>
+<p>
+        En un estilo de configuración <acronym class="acronym">XML</acronym>, esto se ve así:
+    </p>
+<pre class="programlisting">
+&lt;resources&gt;
+    &lt;modules&gt;
+        &lt;!-- Placeholder to ensure an array is created --&gt;
+        &lt;placeholder /&gt;
+    &lt;/modules&gt;
+&lt;/resources&gt;
+</pre>
+<p>
+        Usando un array estándar de <acronym class="acronym">PHP</acronym>, simplemente créelo como un array vacío:
+    </p>
+<pre class="programlisting">
+$options = array(
+    'resources' =&gt; array(
+        'modules' =&gt; array(),
+    ),
+);
+</pre>
+<div class="note"><table border="0" summary="Note: Front Controller Resource Dependency">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Dependencia del recurso Front Controller</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            El recurso Modules tiene una dependencia con el recurso <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.frontcontroller" title="14.6.4. Zend_Application_Resource_Frontcontroller">Front
+            Controller</a>. Por supuesto, puede proporcionar su propio
+            reemplazo para ese recurso mediante una clase personalizada de recurso Front Controller
+            o un método inicializador de clase -- siempre que la clase del plugin
+            de recurso termine en "Frontcontroller" o el método inicializador se
+            llame "_initFrontController" (sin distinguir mayúsculas y minúsculas).
+        </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.application.available-resources.modules.configExample"></a><p class="title"><b>Ejemplo 14.13. Configurar módulos</b></p>
+<div class="example-contents">
+<p>
+            Puede especificar configuración específica de un módulo usando el nombre del módulo
+            como prefijo o subsección en su archivo de configuración.
+        </p>
+<p>
+            Por ejemplo, supongamos que su aplicación tiene un módulo "news".
+            Los siguientes son ejemplos <acronym class="acronym">INI</acronym> y <acronym class="acronym">XML</acronym> que muestran la
+            configuración de recursos en ese módulo.
+        </p>
+<pre class="programlisting">
+[production]
+news.resources.db.adapter = "pdo_mysql"
+news.resources.db.params.host = "localhost"
+news.resources.db.params.username = "webuser"
+news.resources.db.params.password = "XXXXXXX"
+news.resources.db.params.dbname = "news"
+</pre>
+<pre class="programlisting">
+&lt;?xml version="1.0"?&gt;
+&lt;config&gt;
+    &lt;production&gt;
+        &lt;news&gt;
+            &lt;resources&gt;
+                &lt;db&gt;
+                    &lt;adapter&gt;pdo_mysql&lt;/adapter&gt;
+                    &lt;params&gt;
+                        &lt;host&gt;localhost&lt;/host&gt;
+                        &lt;username&gt;webuser&lt;/username&gt;
+                        &lt;password&gt;XXXXXXX&lt;/password&gt;
+                        &lt;dbname&gt;news&lt;/dbname&gt;
+                    &lt;/params&gt;
+                    &lt;isDefaultAdapter&gt;true&lt;/isDefaultAdapter&gt;
+                &lt;/db&gt;
+            &lt;/resources&gt;
+        &lt;/news&gt;
+    &lt;/production&gt;
+&lt;/config&gt;
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.application.available-resources.modules.retrieveBootstrapExample"></a><p class="title"><b>Ejemplo 14.14. Recuperar el bootstrap de un módulo específico</b></p>
+<div class="example-contents">
+<p>
+            En ocasiones, puede que necesite recuperar el objeto bootstrap de un
+            módulo específico -- quizás para ejecutar métodos de bootstrap discretos, o para
+            obtener el autoloader con el fin de configurarlo. Esto puede hacerse
+            utilizando el método <code class="methodname">getExecutedBootstraps()</code> del recurso
+            Modules.
+        </p>
+<pre class="programlisting">
+$resource = $bootstrap-&gt;getPluginResource('modules');
+$moduleBootstraps = $resource-&gt;getExecutedBootstraps();
+$newsBootstrap = $moduleBootstraps['news'];
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.multidb"></a>14.6.10. Zend_Application_Resource_Multidb</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Multidb</code> se usa para inicializar
+        múltiples conexiones de base de datos. Puede usar las mismas opciones que con
+        el <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.db" title="14.6.2. Zend_Application_Resource_Db">plugin de recurso Db</a>.
+        Sin embargo, para especificar una conexión por defecto, también puede usar la directiva 'default'.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.multidb.configexample"></a><p class="title"><b>Ejemplo 14.15. Configurar múltiples conexiones de Db</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra una configuración <acronym class="acronym">INI</acronym> de ejemplo que puede usarse para inicializar
+            dos conexiones Db.
+        </p>
+<pre class="programlisting">
+[production]
+resources.multidb.db1.adapter = "pdo_mysql"
+resources.multidb.db1.host = "localhost"
+resources.multidb.db1.username = "webuser"
+resources.multidb.db1.password = "XXXX"
+resources.multidb.db1.dbname = "db1"
+
+resources.multidb.db2.adapter = "pdo_pgsql"
+resources.multidb.db2.host = "example.com"
+resources.multidb.db2.username = "dba"
+resources.multidb.db2.password = "notthatpublic"
+resources.multidb.db2.dbname = "db2"
+resources.multidb.db2.default = true
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.application.available-resources.multidb.retrieveSpecificDb"></a><p class="title"><b>Ejemplo 14.16. Recuperar un adaptador de base de datos específico</b></p>
+<div class="example-contents">
+<p>
+            Al usar este plugin de recurso, generalmente querrá recuperar
+            una base de datos específica. Esto puede hacerse usando el método del recurso
+            <code class="methodname">getDb()</code>. El método
+            <code class="methodname">getDb()</code> devuelve una instancia de una clase que
+            extiende <code class="classname">Zend_Db_Adapter_Abstract</code>. Si no ha
+            establecido una base de datos por defecto, se lanzará una excepción cuando se llame a este método
+            sin especificar un parámetro.
+         </p>
+<pre class="programlisting">
+$resource = $bootstrap-&gt;getPluginResource('multidb');
+$db1 = $resource-&gt;getDb('db1');
+$db2 = $resource-&gt;getDb('db2');
+$defaultDb = $resource-&gt;getDb();
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.application.available-resources.multidb.retrieveDefaultDb"></a><p class="title"><b>Ejemplo 14.17. Recuperar el adaptador de base de datos por defecto</b></p>
+<div class="example-contents">
+<p>
+            Adicionalmente, puede recuperar el adaptador de base de datos por defecto
+            usando el método <code class="methodname">getDefaultDb()</code>.
+            Si no ha establecido un adaptador por defecto, se devolverá el primer adaptador de db
+            configurado. A menos que especifique <code class="constant">FALSE</code>
+            como primer parámetro, en cuyo caso se devolverá <code class="constant">NULL</code>
+            cuando no se haya establecido un adaptador de base de datos por defecto.
+         </p>
+<p>
+            A continuación se muestra un ejemplo que asume que el plugin de recurso Multidb se ha configurado
+            con el ejemplo <acronym class="acronym">INI</acronym> anterior:
+        </p>
+<pre class="programlisting">
+$resource = $bootstrap-&gt;getPluginResource('multidb');
+$db2 = $resource-&gt;getDefaultDb();
+
+// Misma configuración, pero ahora sin una db por defecto:
+$db1 = $resource-&gt;getDefaultDb();
+$null = $resource-&gt;getDefaultDb(false); // null
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.navigation"></a>14.6.11. Zend_Application_Resource_Navigation</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Navigation</code> puede usarse para configurar
+        una instancia de <code class="classname">Zend_Navigation</code>. Las opciones de configuración se corresponden con <a class="link" href="zend.navigation.pages.phtml#zend.navigation.pages.common.options" title="Table 51.1. Common page options">las
+            opciones de <code class="classname">Zend_Navigation</code></a>.
+    </p>
+<p>
+        Una vez finalizada la configuración de la instancia de navegación, asigna la instancia a
+        <code class="classname">Zend_View_Helper_Navigation</code> por defecto
+        -- desde donde podrá recuperarla más tarde.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.navigation.configExample"></a><p class="title"><b>Ejemplo 14.18. Ejemplo de configuración del recurso Navigation</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            configurar el recurso navigation.
+        </p>
+<pre class="programlisting">
+resources.navigation.pages.page1.label = "Label of the first page"
+resources.navigation.pages.page1.route = "Route that belongs to the first page"
+
+; La página 2 es una subpágina de la página 1
+resources.navigation.pages.page1.pages.page2.type = "Zend_Navigation_Page_Uri"
+resources.navigation.pages.page1.pages.page2.label = "Label of the second page"
+resources.navigation.pages.page1.pages.page2.uri = "/url/to/page/2"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.router"></a>14.6.12. Zend_Application_Resource_Router</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Router</code> puede usarse para
+        configurar el router tal y como se registra con el Front Controller.
+        Las opciones de configuración se corresponden con <a class="link" href="zend.controller.router.phtml#zend.controller.router.routes.standard" title="24.5.7.1. Zend_Controller_Router_Route">las
+            opciones de <code class="classname">Zend_Controller_Router_Route</code></a>.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.router.configExample"></a><p class="title"><b>Ejemplo 14.19. Ejemplo de configuración del recurso Router</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo
+            configurar el recurso router.
+        </p>
+<pre class="programlisting">
+resources.router.routes.route_id.route               = "/login"
+resources.router.routes.route_id.defaults.module     = "admin"
+resources.router.routes.route_id.defaults.controller = "user"
+resources.router.routes.route_id.defaults.action     = "login"
+
+; Opcionalmente también puede establecer un separador de nombre de cadena (Chain Name Separator):
+resources.router.chainNameSeparator = "_"
+
+; Ejemplo con parámetro
+resources.router.routes.route_id.route               = "/user/:user_id"
+resources.router.routes.route_id.defaults.module     = "admin"
+resources.router.routes.route_id.defaults.controller = "user"
+resources.router.routes.route_id.defaults.action     = "edit"
+resources.router.routes.route_id.reqs.user_id        = "^\d+$"
+</pre>
+<p>Para más información sobre el separador de nombre de cadena, consulte
+            <a class="link" href="zend.controller.router.phtml#zend.controller.router.routes.chain.config" title="24.5.7.5.1. Chain Routes via Zend_Config">su sección</a>.
+        </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.session"></a>14.6.13. Zend_Application_Resource_Session</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Session</code> permite configurar
+        <code class="classname">Zend_Session</code>, así como inicializar opcionalmente un
+        SaveHandler de sesión.
+    </p>
+<p>
+        Para establecer un manejador de guardado (save handler) de sesión, simplemente pase la clave de opción <span class="property">saveHandler</span>
+        (sin distinguir mayúsculas y minúsculas) al recurso. El valor de esta opción
+        puede ser uno de los siguientes:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="type">String</span>: una cadena que indica una clase que implementa
+                <code class="classname">Zend_Session_SaveHandler_Interface</code> que debe
+                instanciarse.
+            </p></li>
+<li class="listitem"><p>
+                <span class="type">Array</span>: un array con las claves "class" y, opcionalmente,
+                "options", que indica una clase que implementa
+                <code class="classname">Zend_Session_SaveHandler_Interface</code> que debe
+                instanciarse y un array de opciones a proporcionar a su constructor.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Zend_Session_SaveHandler_Interface</code>: un objeto
+                que implementa esta interfaz.
+            </p></li>
+</ul></div>
+<p>
+        Cualquier otra clave de opción proporcionada se pasará a
+        <code class="methodname">Zend_Session::setOptions()</code> para configurar
+        <code class="classname">Zend_Session</code>.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.session.configExample"></a><p class="title"><b>Ejemplo 14.20. Ejemplo de configuración del recurso Session</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo configurar el
+            recurso session. Establece varias opciones de <code class="classname">Zend_Session</code>, así
+            como configura una instancia de <code class="classname">Zend_Session_SaveHandler_DbTable</code>.
+        </p>
+<pre class="programlisting">
+resources.session.save_path = APPLICATION_PATH "/../data/session"
+resources.session.use_only_cookies = true
+resources.session.remember_me_seconds = 864000
+resources.session.saveHandler.class = "Zend_Session_SaveHandler_DbTable"
+resources.session.saveHandler.options.name = "session"
+resources.session.saveHandler.options.primary[] = "session_id"
+resources.session.saveHandler.options.primary[] = "save_path"
+resources.session.saveHandler.options.primary[] = "name"
+resources.session.saveHandler.options.primaryAssignment[] = "sessionId"
+resources.session.saveHandler.options.primaryAssignment[] = "sessionSavePath"
+resources.session.saveHandler.options.primaryAssignment[] = "sessionName"
+resources.session.saveHandler.options.modifiedColumn = "modified"
+resources.session.saveHandler.options.dataColumn = "session_data"
+resources.session.saveHandler.options.lifetimeColumn = "lifetime"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Bootstrap your database first!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Arranque primero su base de datos!</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Si está configurando el manejador de guardado de sesión
+            <code class="classname">Zend_Session_SaveHandler_DbTable</code>, primero debe configurar su conexión de base de datos para que
+            funcione. Hágalo usando el recurso <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.db" title="14.6.2. Zend_Application_Resource_Db">Db</a>
+            -- y asegúrese de que la clave "<span class="property">resources.db</span>" aparezca antes de
+            la clave "<span class="property">resources.session</span>" -- o escribiendo su propio recurso
+            que inicialice la base de datos, y que establezca específicamente el adaptador
+            de <code class="classname">Zend_Db_Table</code> por defecto.
+        </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.translate"></a>14.6.14. Zend_Application_Resource_Translate</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Translate</code> inicializará un
+        adaptador de <code class="classname">Zend_Translate</code> según las opciones que se le pasen.
+    </p>
+<p>
+        Se reconocen las siguientes claves de configuración:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">adapter</span></em></span> : tipo de adaptador de <code class="classname">Zend_Translate
+                </code>. El adaptador por defecto es array si no se especifica.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">data</span></em></span> : ruta a la traducción.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">locale</span></em></span> : define la configuración regional a usar
+                en la traducción. Por defecto, la configuración regional puede detectarse automáticamente o forzarse
+                con una instancia de <code class="classname">Zend_Locale</code> almacenada en <code class="classname">
+                Zend_Registry</code> con una única configuración regional.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">options</span></em></span> : las opciones son diferentes para
+                cada adaptador. Consulte la sección <a class="xref" href="zend.translate.additional.phtml#zend.translate.additional.options" title="74.5.1. Options for adapters">Sección 74.5.1, “Opciones para los adaptadores”</a> para
+                más detalles.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">registry</span></em></span> : la clave personalizada para almacenar la
+                instancia de <code class="classname">Zend_Translate</code> en el registro. Por defecto, la
+                clave es <span class="property">Zend_Translate</span>.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em><span class="property">cache</span></em></span> : el nombre de la plantilla de caché
+                o una instancia de <code class="classname">Zend_Cache_Core</code> que se usará como caché para
+                <code class="classname">Zend_Translate_Adapter</code>. El objetivo es acelerar la
+                carga, especialmente para los archivos basados en <acronym class="acronym">XML</acronym>.
+            </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.application.available-resources.translate.configExample"></a><p class="title"><b>Ejemplo 14.21. Ejemplo de configuración del recurso adaptador de traducción</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra una configuración <acronym class="acronym">INI</acronym> de ejemplo que puede usarse para inicializar
+            el recurso translate.
+        </p>
+<pre class="programlisting">
+resources.translate.adapter = tmx
+resources.translate.content = APPLICATION_PATH "/../data/locales"
+resources.translate.scan = Zend_Translate::LOCALE_DIRECTORY
+
+; Opcionalmente también puede usar la plantilla de caché para el cacheo:
+resources.translate.cache = "languages"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.useragent"></a>14.6.15. Zend_Application_Resource_Useragent</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.useragent.intro"></a>14.6.15.1. Resumen</h4></div></div></div>
+<p>
+            Este recurso proporciona la capacidad de configurar e instanciar <a class="link" href="zend.http.user-agent.phtml" title="38.6. Zend_Http_UserAgent">Zend_Http_UserAgent</a> para su uso dentro de su
+            aplicación.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.useragent.quick-start"></a>14.6.15.2. Inicio rápido</h4></div></div></div>
+<p>
+            El uso de <code class="classname">Zend_Http_UserAgent</code>, incluido el uso del recurso de
+            aplicación, se cubre en el <a class="link" href="zend.http.user-agent.phtml#zend.http.user-agent.quick-start" title="38.6.2. Quick Start">inicio rápido de UserAgent</a>. A continuación se muestra un
+            breve resumen de las opciones típicas que podría proporcionar.
+        </p>
+<pre class="programlisting">
+resources.useragent.wurflapi.wurfl_api_version = "1.1"
+resources.useragent.wurflapi.wurfl_lib_dir = APPLICATION_PATH "/../library/Wurfl/1.1"
+resources.useragent.wurflapi.wurfl_config_file = APPLICATION_PATH "/../library/Wurfl/1.1/resources/wurfl-config.php"
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.useragent.options"></a>14.6.15.3. Opciones de configuración</h4></div></div></div>
+<p>
+            Consulte la <a class="link" href="zend.http.user-agent.phtml#zend.http.user-agent.options" title="38.6.3. Configuration Options">sección de opciones
+                de UserAgent</a> para más detalles sobre las opciones disponibles.
+        </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.useragent.methods"></a>14.6.15.4. Métodos disponibles</h4></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.application.available-resources.useragent.methods.init"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">init</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Llamado por el objeto bootstrap para inicializar el recurso. Llama primero al
+                        método <code class="methodname">getUserAgent()</code> (y devuelve la instancia
+                        devuelta por ese método); luego, si el recurso "view" está disponible, lo recupera
+                        e inyecta la instancia de <code class="classname">UserAgent</code> en el
+                        ayudante de vista <code class="classname">UserAgent</code>.
+                    </p></dd>
+<dt>
+<a name="zend.application.available-resources.useragent.methods.get-user-agent"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getUserAgent</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Instancia un objeto <code class="classname">Zend_Http_UserAgent</code>, usando las
+                        opciones de configuración proporcionadas en la configuración de la aplicación.
+                    </p></dd>
+</dl></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.available-resources.view"></a>14.6.16. Zend_Application_Resource_View</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_View</code> puede usarse para configurar
+        una instancia de <code class="classname">Zend_View</code>. Las opciones de configuración se corresponden con <a class="link" href="zend.view.phtml#zend.view.introduction.options" title="78.1.3. Options">las
+            opciones de <code class="classname">Zend_View</code></a>.
+    </p>
+<p>
+        Una vez finalizada la configuración de la instancia de view, crea una instancia de
+        <code class="classname">Zend_Controller_Action_Helper_ViewRenderer</code> y registra
+        el ViewRenderer con <code class="classname">Zend_Controller_Action_HelperBroker</code>
+        -- desde donde podrá recuperarlo más tarde.
+    </p>
+<div class="example">
+<a name="zend.application.available-resources.view.configExample"></a><p class="title"><b>Ejemplo 14.22. Ejemplo de configuración del recurso View</b></p>
+<div class="example-contents">
+<p>
+            A continuación se muestra un fragmento <acronym class="acronym">INI</acronym> de ejemplo que muestra cómo configurar el recurso
+            view.
+        </p>
+<pre class="programlisting">
+resources.view.encoding = "UTF-8"
+resources.view.basePath = APPLICATION_PATH "/views/"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.view.doctype"></a>14.6.16.1. Definir el doctype a usar</h4></div></div></div>
+<p>
+             Si desea obtener más información sobre los valores, consulte <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.doctype" title="78.4.1.7. Doctype Helper">el ayudante Doctype
+             </a>.
+         </p>
+<div class="example">
+<a name="zend.application.available-resources.view.doctypeExample"></a><p class="title"><b>Ejemplo 14.23. Ejemplo de configuración de doctype</b></p>
+<div class="example-contents">
+<p>
+                 El siguiente fragmento muestra cómo establecer un doctype.
+             </p>
+<pre class="programlisting">
+resources.view.doctype = "HTML5"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.available-resources.view.contentType"></a>14.6.16.2. Definir el tipo de contenido y la codificación a usar</h4></div></div></div>
+<p>
+             Si desea obtener más información sobre los valores, consulte <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.headmeta" title="78.4.1.10. HeadMeta Helper">el ayudante HeadMeta
+             </a>.
+         </p>
+<div class="example">
+<a name="zend.application.available-resources.view.contentTypeExample"></a><p class="title"><b>Ejemplo 14.24. Ejemplo de configuración de tipo de contenido y codificación</b></p>
+<div class="example-contents">
+<p>
+                 El siguiente fragmento muestra cómo establecer un meta Content-Type.
+             </p>
+<pre class="programlisting">
+resources.view.contentType = "text/html; charset=UTF-8"
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.application.available-resources.view.charsetExample"></a><p class="title"><b>Ejemplo 14.25. Ejemplo de configuración de codificación para un documento HTML5</b></p>
+<div class="example-contents">
+<p>
+                El siguiente fragmento muestra cómo establecer un meta charset al estilo HTML5.
+            </p>
+<pre class="programlisting">
+resources.view.doctype = "HTML5"
+resources.view.charset = "UTF-8"
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.application.core-functionality.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.application.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.auth.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">14.5. Funcionalidad principal </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 15. Zend_Auth</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

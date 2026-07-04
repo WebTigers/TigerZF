@@ -1,0 +1,470 @@
+<?php $title = '78.3. Scripts de vista'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">78.3. Scripts de vista</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.view.controllers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 78. Zend_View</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.view.helpers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.view.scripts"></a>78.3. Scripts de vista</h2></div></div></div>
+<p>
+        Una vez que su controlador ha asignado variables y llamado a <code class="methodname">render()</code>,
+        <code class="classname">Zend_View</code> incluye el script de vista solicitado y lo
+        ejecuta "dentro" del ámbito de la instancia de <code class="classname">Zend_View</code>. Por lo tanto,
+        en sus scripts de vista, las referencias a $this en realidad apuntan a la
+        propia instancia de <code class="classname">Zend_View</code>.
+    </p>
+<p>
+        Las variables asignadas a la vista desde el controlador se denominan
+        propiedades de instancia. Por ejemplo, si el controlador
+        asignara una variable 'something', usted se referiría a ella como
+        $this->something en el script de vista. (Esto le permite mantener
+        un seguimiento de qué valores se asignaron al script, y cuáles son
+        internos al script en sí mismo.)
+    </p>
+<p>
+        A modo de recordatorio, aquí está el script de vista de ejemplo de la
+        introducción de <code class="classname">Zend_View</code>.
+    </p>
+<pre class="programlisting">
+&lt;?php if ($this-&gt;books): ?&gt;
+
+    &lt;!-- A table of some books. --&gt;
+    &lt;table&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Author&lt;/th&gt;
+            &lt;th&gt;Title&lt;/th&gt;
+        &lt;/tr&gt;
+
+        &lt;?php foreach ($this-&gt;books as $key =&gt; $val): ?&gt;
+        &lt;tr&gt;
+            &lt;td&gt;&lt;?php echo $this-&gt;escape($val['author']) ?&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;?php echo $this-&gt;escape($val['title']) ?&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;?php endforeach; ?&gt;
+
+    &lt;/table&gt;
+
+&lt;?php else: ?&gt;
+
+    &lt;p&gt;There are no books to display.&lt;/p&gt;
+
+&lt;?php endif;?&gt;
+</pre>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.scripts.escaping"></a>78.3.1. Escapado de la salida</h3></div></div></div>
+<p>
+            Una de las tareas más importantes a realizar en un script de vista
+            es asegurarse de que la salida se escape correctamente; entre otras
+            cosas, esto ayuda a evitar ataques de cross-site scripting.
+            A menos que esté usando una función, método o helper que realice
+            el escapado por sí mismo, siempre debería escapar las variables cuando
+            las muestre.
+        </p>
+<p>
+            <code class="classname">Zend_View</code> incluye un método llamado escape() que realiza dicho
+            escapado por usted.
+        </p>
+<pre class="programlisting">
+// bad view-script practice:
+echo $this-&gt;variable;
+
+// good view-script practice:
+echo $this-&gt;escape($this-&gt;variable);
+</pre>
+<p>
+            Por defecto, el método escape() usa la función <acronym class="acronym">PHP</acronym> htmlspecialchars()
+            para el escapado. Sin embargo, dependiendo de su entorno,
+            puede que desee que el escapado se realice de una forma diferente. Use el
+            método setEscape() a nivel del controlador para indicarle a <code class="classname">Zend_View</code>
+            qué callback de escapado usar.
+        </p>
+<pre class="programlisting">
+// create a Zend_View instance
+$view = new Zend_View();
+
+// tell it to use htmlentities as the escaping callback
+$view-&gt;setEscape('htmlentities');
+
+// or tell it to use a static class method as the callback
+$view-&gt;setEscape(array('SomeClass', 'methodName'));
+
+// or even an instance method
+$obj = new SomeClass();
+$view-&gt;setEscape(array($obj, 'methodName'));
+
+// and then render your view
+echo $view-&gt;render(...);
+</pre>
+<p>
+            La función o método de callback debería recibir el valor a
+            escapar como su primer parámetro, y todos los demás parámetros deberían
+            ser opcionales.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.scripts.templates"></a>78.3.2. Uso de sistemas de plantillas alternativos</h3></div></div></div>
+<p>
+            Aunque <acronym class="acronym">PHP</acronym> es en sí mismo un potente sistema de plantillas, muchos desarrolladores
+            sienten que es demasiado potente o complejo para sus diseñadores de plantillas y
+            querrán usar un motor de plantillas alternativo. <code class="classname">Zend_View</code> proporciona
+            dos mecanismos para hacerlo, el primero a través de scripts de vista, el
+            segundo implementando <code class="classname">Zend_View_Interface</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.view.scripts.templates.scripts"></a>78.3.2.1. Sistemas de plantillas usando scripts de vista</h4></div></div></div>
+<p>
+                Un script de vista puede usarse para instanciar y manipular un
+                objeto de plantilla independiente, como una plantilla al estilo PHPLIB. El
+                script de vista para ese tipo de actividad podría parecerse a
+                esto:
+            </p>
+<pre class="programlisting">
+include_once 'template.inc';
+$tpl = new Template();
+
+if ($this-&gt;books) {
+    $tpl-&gt;setFile(array(
+        "booklist" =&gt; "booklist.tpl",
+        "eachbook" =&gt; "eachbook.tpl",
+    ));
+
+    foreach ($this-&gt;books as $key =&gt; $val) {
+        $tpl-&gt;set_var('author', $this-&gt;escape($val['author']);
+        $tpl-&gt;set_var('title', $this-&gt;escape($val['title']);
+        $tpl-&gt;parse("books", "eachbook", true);
+    }
+
+    $tpl-&gt;pparse("output", "booklist");
+} else {
+    $tpl-&gt;setFile("nobooks", "nobooks.tpl")
+    $tpl-&gt;pparse("output", "nobooks");
+}
+</pre>
+<p>
+                Estos serían los archivos de plantilla relacionados:
+            </p>
+<pre class="programlisting">
+&lt;!-- booklist.tpl --&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Author&lt;/th&gt;
+        &lt;th&gt;Title&lt;/th&gt;
+    &lt;/tr&gt;
+    {books}
+&lt;/table&gt;
+
+&lt;!-- eachbook.tpl --&gt;
+    &lt;tr&gt;
+        &lt;td&gt;{author}&lt;/td&gt;
+        &lt;td&gt;{title}&lt;/td&gt;
+    &lt;/tr&gt;
+
+&lt;!-- nobooks.tpl --&gt;
+&lt;p&gt;There are no books to display.&lt;/p&gt;
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.view.scripts.templates.interface"></a>78.3.2.2. Sistemas de plantillas usando Zend_View_Interface</h4></div></div></div>
+<p>
+                Algunos pueden encontrar más fácil simplemente proporcionar un
+                motor de plantillas compatible con <code class="classname">Zend_View</code>.
+                <code class="classname">Zend_View_Interface</code> define la interfaz mínima necesaria para
+                la compatibilidad:
+            </p>
+<pre class="programlisting">
+/**
+ * Return the actual template engine object
+ */
+public function getEngine();
+
+/**
+ * Set the path to view scripts/templates
+ */
+public function setScriptPath($path);
+
+/**
+ * Set a base path to all view resources
+ */
+public function setBasePath($path, $prefix = 'Zend_View');
+
+/**
+ * Add an additional base path to view resources
+ */
+public function addBasePath($path, $prefix = 'Zend_View');
+
+/**
+ * Retrieve the current script paths
+ */
+public function getScriptPaths();
+
+/**
+ * Overloading methods for assigning template variables as object
+ * properties
+ */
+public function __set($key, $value);
+public function __isset($key);
+public function __unset($key);
+
+/**
+ * Manual assignment of template variables, or ability to assign
+ * multiple variables en masse.
+ */
+public function assign($spec, $value = null);
+
+/**
+ * Unset all assigned template variables
+ */
+public function clearVars();
+
+/**
+ * Render the template named $name
+ */
+public function render($name);
+</pre>
+<p>
+                Usando esta interfaz, resulta relativamente fácil envolver un
+                motor de plantillas de terceros como una clase compatible con <code class="classname">Zend_View</code>.
+                Como ejemplo, el siguiente es un posible wrapper para Smarty:
+            </p>
+<pre class="programlisting">
+class Zend_View_Smarty implements Zend_View_Interface
+{
+    /**
+     * Smarty object
+     * @var Smarty
+     */
+    protected $_smarty;
+
+    /**
+     * Constructor
+     *
+     * @param string $tmplPath
+     * @param array $extraParams
+     * @return void
+     */
+    public function __construct($tmplPath = null, $extraParams = array())
+    {
+        $this-&gt;_smarty = new Smarty;
+
+        if (null !== $tmplPath) {
+            $this-&gt;setScriptPath($tmplPath);
+        }
+
+        foreach ($extraParams as $key =&gt; $value) {
+            $this-&gt;_smarty-&gt;$key = $value;
+        }
+    }
+
+    /**
+     * Return the template engine object
+     *
+     * @return Smarty
+     */
+    public function getEngine()
+    {
+        return $this-&gt;_smarty;
+    }
+
+    /**
+     * Set the path to the templates
+     *
+     * @param string $path The directory to set as the path.
+     * @return void
+     */
+    public function setScriptPath($path)
+    {
+        if (is_readable($path)) {
+            $this-&gt;_smarty-&gt;template_dir = $path;
+            return;
+        }
+
+        throw new Exception('Invalid path provided');
+    }
+
+    /**
+     * Retrieve the current template directory
+     *
+     * @return string
+     */
+    public function getScriptPaths()
+    {
+        return array($this-&gt;_smarty-&gt;template_dir);
+    }
+
+    /**
+     * Alias for setScriptPath
+     *
+     * @param string $path
+     * @param string $prefix Unused
+     * @return void
+     */
+    public function setBasePath($path, $prefix = 'Zend_View')
+    {
+        return $this-&gt;setScriptPath($path);
+    }
+
+    /**
+     * Alias for setScriptPath
+     *
+     * @param string $path
+     * @param string $prefix Unused
+     * @return void
+     */
+    public function addBasePath($path, $prefix = 'Zend_View')
+    {
+        return $this-&gt;setScriptPath($path);
+    }
+
+    /**
+     * Assign a variable to the template
+     *
+     * @param string $key The variable name.
+     * @param mixed $val The variable value.
+     * @return void
+     */
+    public function __set($key, $val)
+    {
+        $this-&gt;_smarty-&gt;assign($key, $val);
+    }
+
+    /**
+     * Allows testing with empty() and isset() to work
+     *
+     * @param string $key
+     * @return boolean
+     */
+    public function __isset($key)
+    {
+        return (null !== $this-&gt;_smarty-&gt;get_template_vars($key));
+    }
+
+    /**
+     * Allows unset() on object properties to work
+     *
+     * @param string $key
+     * @return void
+     */
+    public function __unset($key)
+    {
+        $this-&gt;_smarty-&gt;clear_assign($key);
+    }
+
+    /**
+     * Assign variables to the template
+     *
+     * Allows setting a specific key to the specified value, OR passing
+     * an array of key =&gt; value pairs to set en masse.
+     *
+     * @see __set()
+     * @param string|array $spec The assignment strategy to use (key or
+     * array of key =&gt; value pairs)
+     * @param mixed $value (Optional) If assigning a named variable,
+     * use this as the value.
+     * @return void
+     */
+    public function assign($spec, $value = null)
+    {
+        if (is_array($spec)) {
+            $this-&gt;_smarty-&gt;assign($spec);
+            return;
+        }
+
+        $this-&gt;_smarty-&gt;assign($spec, $value);
+    }
+
+    /**
+     * Clear all assigned variables
+     *
+     * Clears all variables assigned to Zend_View either via
+     * {@link assign()} or property overloading
+     * ({@link __get()}/{@link __set()}).
+     *
+     * @return void
+     */
+    public function clearVars()
+    {
+        $this-&gt;_smarty-&gt;clear_all_assign();
+    }
+
+    /**
+     * Processes a template and returns the output.
+     *
+     * @param string $name The template to process.
+     * @return string The output.
+     */
+    public function render($name)
+    {
+        return $this-&gt;_smarty-&gt;fetch($name);
+    }
+}
+</pre>
+<p>
+                En este ejemplo, usted instanciaría la clase
+                <code class="classname">Zend_View_Smarty</code> en lugar de
+                <code class="classname">Zend_View</code>, y luego la usaría de forma aproximadamente igual
+                que <code class="classname">Zend_View</code>:
+            </p>
+<pre class="programlisting">
+//Example 1. In initView() of initializer.
+$view = new Zend_View_Smarty('/path/to/templates');
+$viewRenderer =
+    Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
+$viewRenderer-&gt;setView($view)
+             -&gt;setViewBasePathSpec($view-&gt;_smarty-&gt;template_dir)
+             -&gt;setViewScriptPathSpec(':controller/:action.:suffix')
+             -&gt;setViewScriptPathNoControllerSpec(':action.:suffix')
+             -&gt;setViewSuffix('tpl');
+
+//Example 2. Usage in action controller remains the same...
+class FooController extends Zend_Controller_Action
+{
+    public function barAction()
+    {
+        $this-&gt;view-&gt;book   = 'Zend PHP 5 Certification Study Guide';
+        $this-&gt;view-&gt;author = 'Davey Shafik and Ben Ramsey'
+    }
+}
+
+//Example 3. Initializing view in action controller
+class FooController extends Zend_Controller_Action
+{
+    public function init()
+    {
+        $this-&gt;view   = new Zend_View_Smarty('/path/to/templates');
+        $viewRenderer = $this-&gt;_helper-&gt;getHelper('viewRenderer');
+        $viewRenderer-&gt;setView($this-&gt;view)
+                     -&gt;setViewBasePathSpec($view-&gt;_smarty-&gt;template_dir)
+                     -&gt;setViewScriptPathSpec(':controller/:action.:suffix')
+                     -&gt;setViewScriptPathNoControllerSpec(':action.:suffix')
+                     -&gt;setViewSuffix('tpl');
+    }
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.view.controllers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.view.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.view.helpers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">78.2. Scripts de controlador </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 78.4. Helpers de vista</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

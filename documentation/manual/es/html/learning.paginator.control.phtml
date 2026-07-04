@@ -1,0 +1,126 @@
+<?php $title = '11.3. Control de paginación y ScrollingStyles'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">11.3. Control de paginación y ScrollingStyles</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.paginator.simple.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 11. Primeros pasos con Zend_Paginator</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.paginator.together.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.paginator.control"></a>11.3. Control de paginación y ScrollingStyles</h2></div></div></div>
+<p>
+        Renderizar los elementos de una página en pantalla ha sido un buen comienzo. En los fragmentos
+        de código de la sección anterior también hemos visto el
+        método <code class="methodname">setCurrentPageNumber()</code> para establecer el número de página activa. El
+        siguiente paso es navegar por sus páginas. Para hacer esto, Paginator le proporciona dos
+        herramientas importantes: la capacidad de renderizar el Paginator con ayuda de un View Partial, y
+        soporte para los llamados ScrollingStyles.
+    </p>
+<p>
+        El View Partial es un pequeño script de vista que renderiza los controles de paginación, como
+        botones para ir a la página siguiente o anterior. Qué controles de paginación se renderizan depende
+        del contenido del view partial. Trabajar con el view partial requiere que tenga
+        configurado <code class="classname">Zend_View</code>. Para comenzar con el control de paginación, cree
+        un nuevo script de vista en algún lugar de su ruta de scripts de vista. Puede nombrarlo como quiera,
+        pero en este texto lo llamaremos "controls.phtml". El manual de referencia contiene varios
+        ejemplos de lo que podría ir en el script de vista. Aquí hay un ejemplo.
+    </p>
+<pre class="programlisting">
+&lt;?php if ($this-&gt;pageCount): ?&gt;
+&lt;!-- First page link --&gt;
+&lt;?php if (isset($this-&gt;previous)): ?&gt;
+  &lt;a href="&lt;?php echo $this-&gt;url(array('page' =&gt; $this-&gt;first)); ?&gt;"&gt;
+    First
+  &lt;/a&gt; |
+&lt;?php else: ?&gt;
+  &lt;span class="disabled"&gt;First&lt;/span&gt; |
+&lt;?php endif; ?&gt;
+
+&lt;!-- Previous page link --&gt;
+&lt;?php if (isset($this-&gt;previous)): ?&gt;
+  &lt;a href="&lt;?php echo $this-&gt;url(array('page' =&gt; $this-&gt;previous)); ?&gt;"&gt;
+    &amp;lt; Previous
+  &lt;/a&gt; |
+&lt;?php else: ?&gt;
+  &lt;span class="disabled"&gt;&amp;lt; Previous&lt;/span&gt; |
+&lt;?php endif; ?&gt;
+
+&lt;!-- Next page link --&gt;
+&lt;?php if (isset($this-&gt;next)): ?&gt;
+  &lt;a href="&lt;?php echo $this-&gt;url(array('page' =&gt; $this-&gt;next)); ?&gt;"&gt;
+    Next &amp;gt;
+  &lt;/a&gt; |
+&lt;?php else: ?&gt;
+  &lt;span class="disabled"&gt;Next &amp;gt;&lt;/span&gt; |
+&lt;?php endif; ?&gt;
+
+&lt;!-- Last page link --&gt;
+&lt;?php if (isset($this-&gt;next)): ?&gt;
+  &lt;a href="&lt;?php echo $this-&gt;url(array('page' =&gt; $this-&gt;last)); ?&gt;"&gt;
+    Last
+  &lt;/a&gt;
+&lt;?php else: ?&gt;
+  &lt;span class="disabled"&gt;Last&lt;/span&gt;
+&lt;?php endif; ?&gt;
+
+&lt;/div&gt;
+&lt;?php endif; ?&gt;
+</pre>
+<p>
+        El siguiente paso es indicar a <code class="classname">Zend_Paginator</code> qué view partial puede
+        usarse para renderizar los controles de navegación. Ponga la siguiente línea en el archivo bootstrap
+        de su aplicación.
+    </p>
+<pre class="programlisting">
+Zend_View_Helper_PaginationControl::setDefaultViewPartial('controls.phtml');
+</pre>
+<p>
+        El último paso es probablemente el más fácil. Asegúrese de haber asignado su objeto Paginator
+        a un script (NO el script 'controls.phtml'). Lo único que queda por hacer es mostrar el
+        Paginator en el script de vista. Esto renderizará automáticamente el Paginator usando el
+        helper de vista PaginationControl. En el siguiente ejemplo, el objeto Paginator se ha asignado
+        a la variable de vista 'paginator'. No se preocupe si aún no entiende completamente cómo funciona todo.
+        La siguiente sección presentará un ejemplo completo.
+    </p>
+<pre class="programlisting">
+&lt;?php echo $this-&gt;paginator; ?&gt;
+</pre>
+<p>
+        <code class="classname">Zend_Paginator</code>, junto con el script de vista 'controls.phtml' que
+        escribió, se asegura de que su navegación de Paginator se renderice correctamente. Para decidir
+        qué números de página deben mostrarse en pantalla, Paginator utiliza los llamados ScrollingStyles.
+        El estilo predeterminado se llama "Sliding", que es similar a la forma en que funciona la navegación
+        de resultados de búsqueda de Yahoo. Para imitar el ScrollingStyle de Google, use el estilo Elastic.
+        Puede establecer un ScrollingStyle predeterminado con el método estático
+        <code class="methodname">setDefaultScrollingStyle()</code>, o puede especificar un
+        ScrollingStyle dinámicamente al renderizar el Paginator en su script de vista. Esto requiere
+        la invocación manual del helper de vista en su script de vista.
+    </p>
+<pre class="programlisting">
+// $this-&gt;paginator is a Paginator object
+&lt;?php echo $this-&gt;paginationControl($this-&gt;paginator, 'Elastic', 'controls.phtml'); ?&gt;
+</pre>
+<p>
+        Para una lista de todos los ScrollingStyles disponibles, consulte el manual de referencia.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.paginator.simple.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.paginator.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.paginator.together.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">11.2. Ejemplos sencillos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 11.4. Poniéndolo todo junto</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

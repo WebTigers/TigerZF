@@ -1,0 +1,79 @@
+<?php $title = '35.3. Cadenas de filtros'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">35.3. Cadenas de filtros</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.filter.set.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 35. Zend_Filter</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.filter.writing_filters.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.filter.filter_chains"></a>35.3. Cadenas de filtros</h2></div></div></div>
+<p>
+        A menudo deben aplicarse varios filtros a un valor en un orden particular. Por ejemplo, un
+        formulario de acceso acepta un nombre de usuario que debe contener solo caracteres
+        alfabéticos en minúscula. <code class="classname">Zend_Filter</code> proporciona un método
+        sencillo mediante el cual los filtros pueden encadenarse. El siguiente código ilustra cómo
+        encadenar dos filtros para el nombre de usuario enviado:
+    </p>
+<pre class="programlisting">
+// Create a filter chain and add filters to the chain
+$filterChain = new Zend_Filter();
+$filterChain-&gt;addFilter(new Zend_Filter_Alpha())
+            -&gt;addFilter(new Zend_Filter_StringToLower());
+
+// Filter the username
+$username = $filterChain-&gt;filter($_POST['username']);
+</pre>
+<p>
+        Los filtros se ejecutan en el orden en que se añadieron a <code class="classname">Zend_Filter</code>. En
+        el ejemplo anterior, primero se eliminan del nombre de usuario los caracteres no alfabéticos,
+        y luego se convierten a minúscula los caracteres en mayúscula.
+    </p>
+<p>
+        Cualquier objeto que implemente <code class="classname">Zend_Filter_Interface</code> puede usarse en una
+        cadena de filtros.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.filter.filter_chains.order"></a>35.3.1. Cambiar el orden de la cadena de filtros</h3></div></div></div>
+<p>
+            Desde la versión 1.10, la cadena de <code class="classname">Zend_Filter</code> también
+            admite alterar la cadena anteponiendo o añadiendo filtros. Por
+            ejemplo, el siguiente fragmento de código hace exactamente lo mismo que el otro
+            ejemplo de cadena de filtros del nombre de usuario:
+        </p>
+<pre class="programlisting">
+// Create a filter chain and add filters to the chain
+$filterChain = new Zend_Filter();
+
+// this filter will be appended to the filter chain
+$filterChain-&gt;appendFilter(new Zend_Filter_StringToLower());
+
+// this filter will be prepended at the beginning of the filter chain.
+$filterChain-&gt;prependFilter(new Zend_Filter_Alpha());
+
+// Filter the username
+$username = $filterChain-&gt;filter($_POST['username']);
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.filter.set.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.filter.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.filter.writing_filters.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">35.2. Clases de filtros estándar </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 35.4. Escribir filtros</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

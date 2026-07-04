@@ -1,0 +1,273 @@
+<?php $title = '8.4. Renderizar decoradores individuales'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">8.4. Renderizar decoradores individuales</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.form.decorators.layering.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 8. Entendiendo y usando los decoradores de Zend Form</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.form.decorators.composite.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.form.decorators.individual"></a>8.4. Renderizar decoradores individuales</h2></div></div></div>
+<p>
+        En la <a class="link" href="learning.form.decorators.layering.phtml" title="8.3. Layering Decorators">sección anterior</a>,
+        vimos cómo se pueden combinar decoradores para crear una salida compleja. Observamos que, si bien
+        este enfoque ofrece mucha flexibilidad, también añade algo de complejidad y sobrecarga. En
+        esta sección, examinaremos cómo renderizar decoradores individualmente con el fin de crear
+        marcado personalizado para formularios y/o elementos individuales.
+    </p>
+<p>
+        Una vez que ha registrado sus decoradores, puede recuperarlos posteriormente por nombre desde el
+        elemento. Repasemos el ejemplo anterior:
+    </p>
+<pre class="programlisting">
+$element = new Zend_Form_Element('foo', array(
+    'label'      =&gt; 'Foo',
+    'belongsTo'  =&gt; 'bar',
+    'value'      =&gt; 'test',
+    'prefixPath' =&gt; array('decorator' =&gt; array(
+        'My_Decorator' =&gt; 'path/to/decorators/',
+    )),
+    'decorators' =&gt; array(
+        'SimpleInput'
+        array('SimpleLabel', array('placement' =&gt; 'append')),
+    ),
+));
+</pre>
+<p>
+        Si quisiéramos obtener y renderizar solo el decorador <code class="classname">SimpleInput</code>, podemos
+        hacerlo utilizando el método <code class="methodname">getDecorator()</code>:
+    </p>
+<pre class="programlisting">
+$decorator = $element-&gt;getDecorator('SimpleInput');
+echo $decorator-&gt;render('');
+</pre>
+<p>
+        Esto es bastante sencillo, pero se puede simplificar aún más; hagámoslo en una sola línea:
+    </p>
+<pre class="programlisting">
+echo $element-&gt;getDecorator('SimpleInput')-&gt;render('');
+</pre>
+<p>
+        No está mal, pero sigue siendo algo complejo. Para facilitar esto, en la versión 1.7 de
+        <code class="classname">Zend_Form</code> se introdujo una notación abreviada: puede renderizar cualquier
+        decorador registrado llamando a un método con el formato <code class="methodname">renderDecoratorName()</code>.
+        Esto realiza efectivamente lo que se ve arriba, pero hace que el argumento
+        <code class="varname">$content</code> sea opcional y simplifica el uso:
+    </p>
+<pre class="programlisting">
+echo $element-&gt;renderSimpleInput();
+</pre>
+<p>
+        Este es un truco interesante, pero ¿cómo y por qué lo usaría?
+    </p>
+<p>
+        Muchos desarrolladores y diseñadores tienen necesidades de marcado muy precisas para sus formularios.
+        Prefieren tener control total sobre la salida en lugar de depender de una solución más automatizada que
+        puede o no ajustarse a su diseño. En otros casos, la disposición del formulario puede requerir mucho
+        marcado especializado -- agrupar elementos arbitrarios, ocultar algunos a menos que se seleccione un
+        enlace en particular, etc.
+    </p>
+<p>
+        Utilicemos la posibilidad de renderizar decoradores individuales para crear algo de marcado especializado.
+    </p>
+<p>
+        Primero, definamos un formulario. Nuestro formulario capturará los datos demográficos de un usuario. El
+        marcado estará altamente personalizado y, en algunos casos, utilizará ayudantes de vista directamente en
+        lugar de elementos de formulario para lograr sus objetivos. Aquí está la definición básica del formulario:
+    </p>
+<pre class="programlisting">
+class My_Form_UserDemographics extends Zend_Form
+{
+    public function init()
+    {
+        // Add a path for my own decorators
+        $this-&gt;addElementPrefixPaths(array(
+            'decorator' =&gt; array('My_Decorator' =&gt; 'My/Decorator'),
+        ));
+
+        $this-&gt;addElement('text', 'firstName', array(
+            'label' =&gt; 'First name: ',
+        ));
+        $this-&gt;addElement('text', 'lastName', array(
+            'label' =&gt; 'Last name: ',
+        ));
+        $this-&gt;addElement('text', 'title', array(
+            'label' =&gt; 'Title: ',
+        ));
+        $this-&gt;addElement('text', 'dateOfBirth', array(
+            'label' =&gt; 'Date of Birth (DD/MM/YYYY): ',
+        ));
+        $this-&gt;addElement('text', 'email', array(
+            'label' =&gt; 'Your email address: ',
+        ));
+        $this-&gt;addElement('password', 'password', array(
+            'label' =&gt; 'Password: ',
+        ));
+        $this-&gt;addElement('password', 'passwordConfirmation', array(
+            'label' =&gt; 'Confirm Password: ',
+        ));
+    }
+}
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            No estamos definiendo ningún validador ni filtro en este momento, ya que no son relevantes para
+            la discusión sobre la decoración. En un escenario real, debería definirlos.
+        </p></td></tr>
+</table></div>
+<p>
+        Con eso resuelto, consideremos cómo podríamos querer mostrar este formulario. Un patrón común
+        con los nombres y apellidos es mostrarlos en una sola línea; cuando se proporciona un título,
+        este suele estar también en la misma línea. Las fechas, cuando no se utiliza un selector de fecha
+        de JavaScript, a menudo se separan en tres campos mostrados uno al lado del otro.
+    </p>
+<p>
+        Usemos la capacidad de renderizar los decoradores de un elemento uno por uno para lograrlo.
+        Primero, notemos que no se definieron decoradores explícitos para los elementos dados. Como
+        recordatorio, los decoradores por defecto para (la mayoría de) los elementos son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="classname">ViewHelper</code>: utiliza un ayudante de vista para renderizar una entrada de formulario
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Errors</code>: utiliza el ayudante de vista <code class="classname">FormErrors</code>
+                para renderizar los errores de validación
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Description</code>: utiliza el ayudante de vista <code class="classname">FormNote</code>
+                para renderizar la descripción del elemento (si existe)
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">HtmlTag</code>: envuelve los tres elementos anteriores en una
+                etiqueta <span class="emphasis"><em>&lt;dd&gt;</em></span>
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Label</code>: renderiza la etiqueta del elemento utilizando el
+                ayudante de vista <code class="classname">FormLabel</code> (y la envuelve en una
+                etiqueta <span class="emphasis"><em>&lt;dt&gt;</em></span>)
+            </p></li>
+</ul></div>
+<p>
+        Además, como recordatorio, puede acceder a cualquier elemento de un formulario como si fuera una propiedad
+        de clase; simplemente haga referencia al elemento por el nombre que le asignó.
+    </p>
+<p>
+        Nuestro script de vista podría entonces verse así:
+    </p>
+<pre class="programlisting">
+&lt;?php
+$form = $this-&gt;form;
+// Remove &lt;dt&gt; from label generation
+foreach ($form-&gt;getElements() as $element) {
+    $element-&gt;getDecorator('label')-&gt;setOption('tag', null);
+}
+?&gt;
+&lt;?php echo $form-&gt;renderForm(false); ?&gt;
+    &lt;div class="element"&gt;
+        &lt;?php echo $form-&gt;title-&gt;renderLabel()
+              . $form-&gt;title-&gt;renderViewHelper() ?&gt;
+        &lt;?php echo $form-&gt;firstName-&gt;renderLabel()
+              . $form-&gt;firstName-&gt;renderViewHelper() ?&gt;
+        &lt;?php echo $form-&gt;lastName-&gt;renderLabel()
+              . $form-&gt;lastName-&gt;renderViewHelper() ?&gt;
+    &lt;/div&gt;
+    &lt;div class="element"&gt;
+        &lt;?php echo $form-&gt;dateOfBirth-&gt;renderLabel() ?&gt;
+        &lt;?php echo $this-&gt;formText('dateOfBirth[day]', '', array(
+            'size' =&gt; 2, 'maxlength' =&gt; 2)) ?&gt;
+        /
+        &lt;?php echo $this-&gt;formText('dateOfBirth[month]', '', array(
+            'size' =&gt; 2, 'maxlength' =&gt; 2)) ?&gt;
+        /
+        &lt;?php echo $this-&gt;formText('dateOfBirth[year]', '', array(
+            'size' =&gt; 4, 'maxlength' =&gt; 4)) ?&gt;
+    &lt;/div&gt;
+    &lt;div class="element"&gt;
+        &lt;?php echo $form-&gt;password-&gt;renderLabel()
+              . $form-&gt;password-&gt;renderViewHelper() ?&gt;
+    &lt;/div&gt;
+    &lt;div class="element"&gt;
+        &lt;?php echo $form-&gt;passwordConfirmation-&gt;renderLabel()
+              . $form-&gt;passwordConfirmation-&gt;renderViewHelper() ?&gt;
+    &lt;/div&gt;
+    &lt;?php echo $this-&gt;formSubmit('submit', 'Save') ?&gt;
+&lt;/form&gt;
+</pre>
+<p>
+        Si utiliza el script de vista anterior, obtendrá aproximadamente el siguiente
+        <acronym class="acronym">HTML</acronym> (aproximado, ya que el <acronym class="acronym">HTML</acronym> siguiente está formateado):
+    </p>
+<pre class="programlisting">
+&lt;form method="post" action=""&gt;
+    &lt;div class="element"&gt;
+        &lt;label for="title" tag="" class="optional"&gt;Title:&lt;/label&gt;
+        &lt;input type="text" name="title" id="title" value=""/&gt;
+
+        &lt;label for="firstName" tag="" class="optional"&gt;First name:&lt;/label&gt;
+        &lt;input type="text" name="firstName" id="firstName" value=""/&gt;
+
+        &lt;label for="lastName" tag="" class="optional"&gt;Last name:&lt;/label&gt;
+        &lt;input type="text" name="lastName" id="lastName" value=""/&gt;
+    &lt;/div&gt;
+
+    &lt;div class="element"&gt;
+        &lt;label for="dateOfBirth" tag="" class="optional"&gt;Date of Birth
+            (DD/MM/YYYY):&lt;/label&gt;
+        &lt;input type="text" name="dateOfBirth[day]" id="dateOfBirth-day"
+            value="" size="2" maxlength="2"/&gt;
+        /
+        &lt;input type="text" name="dateOfBirth[month]" id="dateOfBirth-month"
+            value="" size="2" maxlength="2"/&gt;
+        /
+        &lt;input type="text" name="dateOfBirth[year]" id="dateOfBirth-year"
+            value="" size="4" maxlength="4"/&gt;
+    &lt;/div&gt;
+
+    &lt;div class="element"&gt;
+        &lt;label for="password" tag="" class="optional"&gt;Password:&lt;/label&gt;
+        &lt;input type="password" name="password" id="password" value=""/&gt;
+    &lt;/div&gt;
+
+    &lt;div class="element"&gt;
+        &lt;label for="passwordConfirmation" tag="" class="" id="submit"
+            value="Save"/&gt;
+&lt;/form&gt;
+</pre>
+<p>
+        Puede que no quede realmente bonito, pero con algo de CSS, podría hacerse que luciera exactamente como
+        usted desee. El punto principal, sin embargo, es que este formulario se generó utilizando casi
+        por completo marcado personalizado, mientras que se sigue aprovechando los decoradores para el marcado
+        más común (y para garantizar que ocurran cosas como el escapado con htmlentities y la inyección de valores).
+    </p>
+<p>
+        A estas alturas del tutorial, debería sentirse bastante cómodo con las
+        posibilidades de marcado que ofrecen los decoradores de <code class="classname">Zend_Form</code>. En la
+        siguiente sección, retomaremos el elemento de fecha visto anteriormente y demostraremos cómo crear un
+        elemento y un decorador personalizados para elementos compuestos.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.form.decorators.layering.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.form.decorators.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.form.decorators.composite.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">8.3. Combinar decoradores </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 8.5. Crear y renderizar elementos compuestos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

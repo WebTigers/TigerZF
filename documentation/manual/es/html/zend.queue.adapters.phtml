@@ -1,0 +1,530 @@
+<?php $title = '57.4. Adaptadores'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">57.4. Adaptadores</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.queue.framework.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 57. Zend_Queue</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.queue.custom.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.queue.adapters"></a>57.4. Adaptadores</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Queue</code> soporta todas las colas que implementen la
+        interfaz <code class="classname">Zend_Queue_Adapter_AdapterInterface</code>.
+        Se soportan los siguientes servicios de colas de mensajes:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <a class="ulink" href="http://activemq.apache.org/" target="_top">Apache ActiveMQ</a>.
+            </p></li>
+<li class="listitem"><p>
+                Una cola basada en base de datos mediante <code class="classname">Zend_Db</code>.
+            </p></li>
+<li class="listitem"><p>
+                Una cola <a class="ulink" href="http://memcachedb.org/memcacheq/" target="_top">MemcacheQ</a>
+                gestionada mediante <code class="classname">Memcache</code>.
+            </p></li>
+<li class="listitem"><p>
+                La cola de trabajos de <a class="ulink" href="http://www.zend.com/en/products/platform/" target="_top">Zend Platform</a>.
+            </p></li>
+<li class="listitem"><p>
+                Un array local. Útil para pruebas unitarias.
+            </p></li>
+</ul></div>
+<div class="note"><table border="0" summary="Note: Limitations">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">
+<a name="zend.queue.adapters.limitations"></a>Limitaciones</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            No se soporta el manejo de transacciones de mensajes.
+        </p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.adapters.configuration"></a>57.4.1. Adaptadores específicos - Ajustes de configuración</h3></div></div></div>
+<p>
+            Si se indica un ajuste predeterminado, entonces el parámetro es opcional.
+            Si no se especifica un ajuste predeterminado, entonces el parámetro es
+            obligatorio.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.configuration.activemq"></a>57.4.1.1. Apache ActiveMQ - Zend_Queue_Adapter_Activemq</h4></div></div></div>
+<p>
+                Las opciones listadas aquí son requisitos conocidos. No todos
+                los servidores de mensajería requieren nombre de usuario o contraseña.
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['name'] = '/temp/queue1';</em></span>
+                    </p>
+<p>
+                        Este es el nombre de la cola que se desea empezar a
+                        usar. (Obligatorio)
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['host'] = 'host.domain.tld';</em></span>
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['host'] = '127.0.0.1';</em></span>
+                    </p>
+<p>
+                        Puede establecer host con una dirección IP o un nombre de host.
+                    </p>
+<p>
+                        El ajuste predeterminado para host es '127.0.0.1'.
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['port'] = 61613;</em></span>
+                    </p>
+<p>El ajuste predeterminado para port es 61613.</p>
+</li>
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['driverOptions']['username'] = 'username';</em></span>
+                    </p>
+<p>
+                        Opcional para algunos servidores de mensajería. Lea el manual
+                        de su servidor de mensajería.
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['password'] = 'password';</em></span>
+                    </p>
+<p>
+                        Opcional para algunos servidores de mensajería. Lea el manual
+                        de su servidor de mensajería.
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['timeout_sec'] = 2;</em></span>
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['timeout_usec'] = 0;</em></span>
+                    </p>
+<p>
+                        Esta es la cantidad de tiempo que
+                        <code class="classname">Zend_Queue_Adapter_Activemq</code> esperará por
+                        actividad de lectura en un socket antes de devolver ningún mensaje.
+                    </p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.configuration.Db"></a>57.4.1.2. Db - Zend_Queue_Adapter_Db</h4></div></div></div>
+<p>
+                Las opciones del controlador se comprueban para verificar algunas opciones
+                obligatorias como <span class="emphasis"><em>type</em></span>, <span class="emphasis"><em>host</em></span>,
+                <span class="emphasis"><em>username</em></span>, <span class="emphasis"><em>password</em></span>,
+                y <span class="emphasis"><em>dbname</em></span>. Puede pasar
+                parámetros adicionales para <code class="methodname">Zend_DB::factory()</code> como parámetros
+                en <code class="varname">$options['driverOptions']</code>. Un ejemplo de una opción
+                adicional no listada aquí, pero que podría pasarse, sería <span class="emphasis"><em>port</em></span>.
+            </p>
+<pre class="programlisting">
+$options = array(
+    'driverOptions' =&gt; array(
+        'host'      =&gt; 'db1.domain.tld',
+        'username'  =&gt; 'my_username',
+        'password'  =&gt; 'my_password',
+        'dbname'    =&gt; 'messaging',
+        'type'      =&gt; 'pdo_mysql',
+        'port'      =&gt; 3306, // optional parameter.
+    ),
+    'options' =&gt; array(
+        // use Zend_Db_Select for update, not all databases can support this
+        // feature.
+        Zend_Db_Select::FOR_UPDATE =&gt; true
+    )
+);
+
+// Create a database queue.
+$queue = new Zend_Queue('Db', $options);
+</pre>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['name'] = 'queue1';</em></span>
+                    </p>
+<p>
+                        Este es el nombre de la cola que se desea empezar a usar. (Obligatorio)
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['type'] = 'Pdo';</em></span>
+                    </p>
+<p>
+                        <span class="emphasis"><em>type</em></span> es el adaptador que desea que
+                        <code class="methodname">Zend_Db::factory()</code> use. Este es
+                        el primer parámetro de la llamada al método de clase
+                        <code class="methodname">Zend_Db::factory()</code>.
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['host'] = 'host.domain.tld';</em></span>
+                    </p>
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['host'] = '127.0.0.1';</em></span>
+                    </p>
+<p>Puede establecer host con una dirección IP o un nombre de host.</p>
+<p>El ajuste predeterminado para host es '127.0.0.1'.</p>
+</li>
+<li class="listitem"><p>
+                         <span class="emphasis"><em>$options['driverOptions']['username'] = 'username';</em></span>
+                    </p></li>
+<li class="listitem"><p>
+                        <span class="emphasis"><em>$options['driverOptions']['password'] = 'password';</em></span>
+                    </p></li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['dbname'] = 'dbname';</em></span>
+                    </p>
+<p>
+                        El nombre de la base de datos para la cual ha creado las tablas requeridas.
+                        Vea la sección de notas a continuación.
+                    </p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.configuration.memcacheq"></a>57.4.1.3. MemcacheQ - Zend_Queue_Adapter_Memcacheq</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['name'] = 'queue1';</em></span>
+                    </p>
+<p>
+                        Este es el nombre de la cola que se desea empezar a usar. (Obligatorio)
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['driverOptions']['host'] = 'host.domain.tld';</em></span>
+                    </p>
+<p>
+                         <span class="emphasis"><em>$options['driverOptions']['host'] = '127.0.0.1;'</em></span>
+                    </p>
+<p>Puede establecer host con una dirección IP o un nombre de host.</p>
+<p>El ajuste predeterminado para host es '127.0.0.1'.</p>
+</li>
+<li class="listitem">
+<p>
+                        <span class="emphasis"><em>$options['driverOptions']['port'] = 22201;</em></span>
+                    </p>
+<p>El ajuste predeterminado para port es 22201.</p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.configuration.platformjq"></a>57.4.1.4. Zend Platform Job Queue - Zend_Queue_Adapter_PlatformJobQueue</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['daemonOptions']['host'] = '127.0.0.1:10003';</em></span>
+                    </p>
+<p>
+                        El nombre de host y el puerto correspondientes al daemon de Zend Platform Job Queue
+                        que va a usar. (Obligatorio)
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['daemonOptions']['password'] = '1234';</em></span>
+                    </p>
+<p>
+                        La contraseña requerida para acceder al daemon de Zend Platform Job Queue.
+                        (Obligatorio)
+                    </p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.configuration.array"></a>57.4.1.5. Array - Zend_Queue_Adapter_Array</h4></div></div></div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<p>
+                         <span class="emphasis"><em>$options['name'] = 'queue1';</em></span>
+                    </p>
+<p>
+                        Este es el nombre de la cola que se desea empezar a usar. (Obligatorio)
+                    </p>
+</li></ul></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.adapters.notes"></a>57.4.2. Notas para adaptadores específicos</h3></div></div></div>
+<p>Los siguientes adaptadores tienen notas:</p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.notes.activemq"></a>57.4.2.1. Apache ActiveMQ</h4></div></div></div>
+<p>
+                La duración de visibilidad para
+                <code class="classname">Zend_Queue_Adapter_Activemq</code> no está
+                disponible.
+            </p>
+<p>
+                Aunque el ActiveMQ de Apache soporta múltiples suscripciones,
+                <code class="classname">Zend_Queue</code> no lo hace. Debe crear un
+                nuevo objeto <code class="classname">Zend_Queue</code> para cada suscripción
+                individual.
+            </p>
+<p>
+                Los nombres de cola/tema de ActiveMQ deben comenzar con uno de los siguientes:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="filename">/queue/</code>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="filename">/topic/</code>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="filename">/temp-queue/</code>
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="filename">/temp-topic/</code>
+                    </p></li>
+</ul></div>
+<p>
+                Por ejemplo: <code class="filename">/queue/testing</code>
+            </p>
+<p>
+                No se soportan las siguientes funciones:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                         <code class="methodname">create()</code> - crear cola.
+                         Llamar a esta función lanzará una excepción.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">delete()</code> - eliminar cola.
+                        Llamar a esta función lanzará una excepción.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getQueues()</code> - listar colas.
+                        Llamar a esta función lanzará una excepción.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.notes.zend_db"></a>57.4.2.2. Zend_Db</h4></div></div></div>
+<p>
+                La sentencia <acronym class="acronym">SQL</acronym> de base de datos <span class="emphasis"><em>CREATE TABLE ( ... )</em></span> se
+                puede encontrar en <code class="filename">Zend/Queue/Adapter/Db/mysql.sql</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.notes.memcacheQ"></a>57.4.2.3. MemcacheQ</h4></div></div></div>
+<p>
+                Memcache se puede descargar desde <a class="ulink" href="http://www.danga.com/memcached/" target="_top">http://www.danga.com/memcached/</a>.
+            </p>
+<p>
+                MemcacheQ se puede descargar desde <a class="ulink" href="http://memcachedb.org/memcacheq/" target="_top">http://memcachedb.org/memcacheq/</a>.
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="methodname">deleteMessage()</code> - Los mensajes se eliminan al
+                        recibirse de la cola. Llamar a esta función no tendría
+                        efecto. Llamar a esta función lanzará un
+                        error.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">count()</code> o <code class="methodname">count($adapter)</code>
+                        - MemcacheQ no soporta un método para contar el número de elementos en
+                        una cola. Llamar a esta función lanzará un error.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.notes.platformjq"></a>57.4.2.4. Zend Platform Job Queue</h4></div></div></div>
+<p>
+                Job Queue es una característica de la oferta de soluciones empresariales de Zend Platform. No es una
+                cola de mensajes tradicional, sino que permite poner en cola un script para su ejecución,
+                junto con los parámetros que desea pasarle. Puede obtener más información sobre Job
+                Queue <a class="ulink" href="http://www.zend.com/en/products/platform/" target="_top">en el sitio web
+                    de zend.com</a>.
+            </p>
+<p>
+                A continuación se muestra una lista de métodos en los que el comportamiento de este adaptador diverge de las
+                ofertas estándar:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="methodname">create()</code> - Zend Platform no tiene el concepto
+                        de colas discretas; en su lugar, permite a los administradores proporcionar scripts para
+                        procesar trabajos. Dado que agregar nuevos scripts está restringido a la
+                        interfaz de administración, este método simplemente lanza una excepción indicando
+                        que la acción está prohibida.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">isExists()</code> - Al igual que
+                        <code class="methodname">create()</code>, dado que Job Queue no tiene una noción de
+                        colas con nombre, este método lanza una excepción al invocarse.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">delete()</code> - similar a
+                        <code class="methodname">create()</code>, la eliminación de scripts de JQ no es posible
+                        excepto a través de la interfaz de administración; este método lanza una excepción.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getQueues()</code> - Zend Platform no permite
+                        la introspección de los scripts de manejo de trabajos adjuntos a través de la
+                        <acronym class="acronym">API</acronym>. Este método lanza una excepción.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">count()</code> - devuelve el número total de trabajos
+                        actualmente activos en la Job Queue.
+                    </p></li>
+<li class="listitem">
+<p>
+                        <code class="methodname">send()</code> - este método es quizás el que más
+                        diverge de otros adaptadores. El argumento <code class="varname">$message</code>
+                        puede ser uno de tres tipos posibles, y operará de forma diferente según
+                        el valor pasado:
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                <acronym class="acronym">string</acronym> - el nombre de un script registrado con Job
+                                Queue para invocar. Si se pasa de esta forma, no se proporcionan argumentos al
+                                script.
+                            </p></li>
+<li class="listitem">
+<p>
+                                <acronym class="acronym">array</acronym> - un array de valores con los que
+                                configurar un objeto <code class="classname">ZendApi_Job</code>. Estos pueden
+                                incluir lo siguiente:
+                            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; ">
+<li class="listitem"><p>
+                                        <code class="varname">script</code> - el nombre del script de Job Queue
+                                        a invocar. (Obligatorio)
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">priority</code> - la prioridad del trabajo a usar al
+                                        registrarse con la cola.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">name</code> - una cadena corta que describe el trabajo.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">predecessor</code> - el ID de un trabajo del que
+                                        este depende, y que debe ejecutarse antes de que este
+                                        pueda comenzar.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">preserved</code> - si se debe conservar o no el
+                                        trabajo dentro del historial de Job Queue. Por defecto, desactivado; pase un
+                                        valor <code class="constant">TRUE</code> para conservarlo.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">user_variables</code> - un array asociativo de
+                                        todas las variables que desea tener en el ámbito durante la ejecución del trabajo
+                                        (similar a los argumentos con nombre).
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">interval</code> - con qué frecuencia, en segundos, debe
+                                        ejecutarse el trabajo. Por defecto, se establece en 0, lo que indica que
+                                        debe ejecutarse una sola vez.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">end_time</code> - una hora de expiración, después de la cual el
+                                        trabajo no debe ejecutarse. Si el trabajo se configuró para ejecutarse solo una vez,
+                                        y <code class="varname">end_time</code> ya pasó, entonces el trabajo
+                                        no se ejecutará. Si el trabajo se configuró para ejecutarse en un
+                                        intervalo, no se ejecutará de nuevo una vez que
+                                        <code class="varname">end_time</code> haya pasado.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">schedule_time</code> - una marca de tiempo <acronym class="acronym">UNIX</acronym>
+                                        que indica cuándo ejecutar el trabajo; por defecto, 0,
+                                        lo que indica que el trabajo debe ejecutarse lo antes posible.
+                                    </p></li>
+<li class="listitem"><p>
+                                        <code class="varname">application_id</code> - el identificador de la
+                                        aplicación del trabajo. Por defecto, este es
+                                        <code class="constant">NULL</code>, lo que indica que se
+                                        asignará uno automáticamente por la cola, si a la cola se le
+                                        asignó un ID de aplicación.
+                                    </p></li>
+</ul></div>
+<p>
+                                Como se indicó, solo el argumento <code class="varname">script</code> es obligatorio;
+                                todos los demás simplemente están disponibles para permitir pasar detalles más
+                                precisos sobre cómo y cuándo ejecutar el trabajo.
+                            </p>
+</li>
+<li class="listitem"><p>
+                                <code class="classname">ZendApi_Job</code> - finalmente, puede simplemente pasar una
+                                instancia de <code class="classname">ZendApi_Job</code>, y se pasará
+                                directamente a la Job Queue de Platform.
+                            </p></li>
+</ul></div>
+<p>
+                        En todos los casos, <code class="methodname">send()</code> devuelve un
+                        objeto <code class="classname">Zend_Queue_Message_PlatformJob</code>, que proporciona
+                        acceso al objeto <code class="classname">ZendApi_Job</code> usado para comunicarse
+                        con Job Queue.
+                    </p>
+</li>
+<li class="listitem"><p>
+                        <code class="methodname">receive()</code> - recupera una lista de trabajos activos de
+                        Job Queue. Cada trabajo en el conjunto devuelto será una instancia de
+                        <code class="classname">Zend_Queue_Message_PlatformJob</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">deleteMessage()</code> - dado que este adaptador solo funciona
+                        con Job Queue, este método espera que el <code class="varname">$message</code> proporcionado
+                        sea una instancia de <code class="classname">Zend_Queue_Message_PlatformJob</code>, y
+                        lanzará una excepción en caso contrario.
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.queue.adapters.notes.array"></a>57.4.2.5. Array (local)</h4></div></div></div>
+<p>
+                La cola Array es un <code class="methodname">array()</code> de <acronym class="acronym">PHP</acronym>
+                en memoria local. <code class="classname">Zend_Queue_Adapter_Array</code> es buena para
+                pruebas unitarias.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.queue.framework.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.queue.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.queue.custom.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">57.3. Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 57.5. Personalización de Zend_Queue</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

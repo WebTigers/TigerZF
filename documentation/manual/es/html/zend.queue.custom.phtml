@@ -1,0 +1,148 @@
+<?php $title = '57.5. Personalizar Zend_Queue'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">57.5. Personalizar Zend_Queue</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.queue.adapters.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 57. Zend_Queue</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.queue.stomp.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.queue.custom"></a>57.5. Personalizar Zend_Queue</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.custom.adapter"></a>57.5.1. Crear su propio adaptador</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Queue</code> aceptará cualquier adaptador que
+            implemente
+            <code class="classname">Zend_Queue_Adapter_AdapterAbstract</code>. Puede
+            crear su propio adaptador extendiendo uno de los adaptadores
+            existentes, o la clase abstracta
+            <code class="classname">Zend_Queue_Adapter_AdapterAbstract</code>. Se
+            sugiere revisar <code class="classname">Zend_Queue_Adapter_Array</code>, ya que
+            este adaptador es el más fácil de conceptualizar.
+        </p>
+<pre class="programlisting">
+class Custom_DbForUpdate extends Zend_Queue_Adapter_Db
+{
+    /**
+     * @see code in tests/Zend/Queue/Custom/DbForUpdate.php
+     *
+     * Custom_DbForUpdate uses the SELECT ... FOR UPDATE to find it's rows.
+     * this is more likely to produce the wanted rows than the existing code.
+     *
+     * However, not all databases have SELECT ... FOR UPDATE as a feature.
+     *
+     * Note: this was later converted to be an option for Zend_Queue_Adapter_Db
+     *
+     * This code still serves as a good example.
+     */
+}
+
+$options = array(
+    'name'          =&gt; 'queue1',
+    'driverOptions' =&gt; array(
+        'host'      =&gt; '127.0.0.1',
+        'port'      =&gt; '3306',
+        'username'  =&gt; 'queue',
+        'password'  =&gt; 'queue',
+        'dbname'    =&gt; 'queue',
+        'type'      =&gt; 'pdo_mysql'
+    )
+);
+
+$adapter = new Custom_DbForUpdate($options);
+$queue = new Zend_Queue($adapter, $options);
+</pre>
+<p>
+            También puede cambiar el adaptador sobre la marcha.
+        </p>
+<pre class="programlisting">
+$adapter = new MyCustom_Adapter($options);
+$queue   = new Zend_Queue($options);
+$queue-&gt;setAdapter($adapter);
+echo "Adapter: ", get_class($queue-&gt;getAdapter()), "\n";
+</pre>
+<p>o</p>
+<pre class="programlisting">
+$options = array(
+    'name'           =&gt; 'queue1',
+    'namespace'      =&gt; 'Custom',
+    'driverOptions'  =&gt; array(
+        'host'       =&gt; '127.0.0.1',
+        'port'       =&gt; '3306',
+        'username'   =&gt; 'queue',
+        'password'   =&gt; 'queue',
+        'dbname'     =&gt; 'queue',
+        'type'       =&gt; 'pdo_mysql'
+    )
+);
+$queue = new Zend_Queue('DbForUpdate', $config); // loads Custom_DbForUpdate
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.custom.message"></a>57.5.2. Crear su propia clase de mensaje</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Queue</code> también aceptará su propia clase de mensaje.
+            Nuestras variables empiezan con un guion bajo. Por ejemplo:
+        </p>
+<pre class="programlisting">
+class Zend_Queue_Message
+{
+    protected $_data = array();
+}
+</pre>
+<p>
+            Puede extender la clase de mensajería existente. Vea el código de ejemplo en
+            <code class="filename">tests/Zend/Queue/Custom/Message.php</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.custom-iterator"></a>57.5.3. Crear su propia clase de iterador de mensajes</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Queue</code> también aceptará su propia clase de iterador
+            de mensajes. La clase de iterador de mensajes se usa para devolver
+            mensajes desde
+            <code class="methodname">Zend_Queue_Adapter_Abstract::recieve()</code>.
+            <code class="methodname">Zend_Queue_Abstract::receive()</code> siempre debería
+            devolver una clase contenedora como
+            <code class="classname">Zend_Queue_Message_Iterator</code>, incluso si solo hay
+            un mensaje.
+        </p>
+<p>
+            Vea el nombre de archivo de ejemplo en
+            <code class="filename">tests/Zend/Queue/Custom/Messages.php</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.custom.queue"></a>57.5.4. Crear su propia clase de cola </h3></div></div></div>
+<p>
+            <code class="classname">Zend_Queue</code> también puede sobrecargarse fácilmente.
+        </p>
+<p>
+            Vea el nombre de archivo de ejemplo en <code class="filename">tests/Zend/Queue/Custom/Queue.php</code>.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.queue.adapters.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.queue.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.queue.stomp.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">57.4. Adaptadores </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 57.6. Stomp</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,397 @@
+<?php $title = '27.7. Zend_Db_Table_Rowset'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">27.7. Zend_Db_Table_Rowset</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.db.table.row.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 27. Zend_Db</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.table.relationships.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.db.table.rowset"></a>27.7. Zend_Db_Table_Rowset</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.introduction"></a>27.7.1. Introducción</h3></div></div></div>
+<p>
+            Cuando ejecuta una consulta contra una clase Table usando los métodos <code class="methodname">find()</code> o
+            <code class="methodname">fetchAll()</code>, el resultado se devuelve en un objeto de tipo
+            <code class="classname">Zend_Db_Table_Rowset_Abstract</code>. Un Rowset contiene una colección de
+            objetos que descienden de <code class="classname">Zend_Db_Table_Row_Abstract</code>. Puede
+            iterar a través del Rowset y acceder a objetos Row individuales, leyendo o modificando datos
+            en las Rows.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.fetch"></a>27.7.2. Obtener un Rowset</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Db_Table_Abstract</code> proporciona los métodos
+            <code class="methodname">find()</code> y <code class="methodname">fetchAll()</code>, cada uno de los cuales
+            devuelve un objeto de tipo <code class="classname">Zend_Db_Table_Rowset_Abstract</code>.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.fetch.example"></a><p class="title"><b>Ejemplo 27.134. Ejemplo de obtención de un rowset</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs   = new Bugs();
+$rowset = $bugs-&gt;fetchAll("bug_status = 'NEW'");
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.rows"></a>27.7.3. Recuperar Rows de un Rowset</h3></div></div></div>
+<p>
+            El Rowset en sí es normalmente menos interesante que las Rows que contiene. Esta
+            sección ilustra cómo obtener las Rows que componen el Rowset.
+        </p>
+<p>
+            Una consulta legítima devuelve cero filas cuando ninguna fila de la base de datos coincide con las
+            condiciones de la consulta. Por lo tanto, un objeto Rowset podría contener cero objetos Row. Dado que
+            <code class="classname">Zend_Db_Table_Rowset_Abstract</code> implementa la interfaz
+            <code class="classname">Countable</code>, puede usar <code class="methodname">count()</code>
+            para determinar el número de Rows en el Rowset.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.rows.counting.example"></a><p class="title"><b>Ejemplo 27.135. Contar las Rows en un Rowset</b></p>
+<div class="example-contents"><pre class="programlisting">
+$rowset   = $bugs-&gt;fetchAll("bug_status = 'FIXED'");
+
+$rowCount = count($rowset);
+
+if ($rowCount &gt; 0) {
+    echo "found $rowCount rows";
+} else {
+    echo 'no rows matched the query';
+}
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.table.rowset.rows.current.example"></a><p class="title"><b>Ejemplo 27.136. Leer una única Row de un Rowset</b></p>
+<div class="example-contents">
+<p>
+                La forma más simple de acceder a una Row de un Rowset es usar el
+                método <code class="methodname">current()</code>. Esto es particularmente apropiado cuando el
+                Rowset contiene exactamente una Row.
+            </p>
+<pre class="programlisting">
+$bugs   = new Bugs();
+$rowset = $bugs-&gt;fetchAll("bug_id = 1");
+$row    = $rowset-&gt;current();
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Si el Rowset contiene cero filas, <code class="methodname">current()</code> devuelve
+            el valor <code class="constant">NULL</code> de <acronym class="acronym">PHP</acronym>.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.rows.iterate.example"></a><p class="title"><b>Ejemplo 27.137. Iterar a través de un Rowset</b></p>
+<div class="example-contents">
+<p>
+                Los objetos que descienden de <code class="classname">Zend_Db_Table_Rowset_Abstract</code>
+                implementan la interfaz <code class="classname">SeekableIterator</code>, lo que significa que puede
+                recorrerlos usando la construcción <code class="methodname">foreach()</code>. Cada valor
+                que recupera de esta manera es un objeto <code class="classname">Zend_Db_Table_Row_Abstract</code>
+                que corresponde a un registro de la tabla.
+            </p>
+<pre class="programlisting">
+$bugs = new Bugs();
+
+// fetch all records from the table
+$rowset = $bugs-&gt;fetchAll();
+
+foreach ($rowset as $row) {
+
+    // output 'Zend_Db_Table_Row' or similar
+    echo get_class($row) . "\n";
+
+    // read a column in the row
+    $status = $row-&gt;bug_status;
+
+    // modify a column in the current row
+    $row-&gt;assigned_to = 'mmouse';
+
+    // write the change to the database
+    $row-&gt;save();
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.table.rowset.rows.seek.example"></a><p class="title"><b>Ejemplo 27.138. Desplazarse a una posición conocida dentro de un Rowset</b></p>
+<div class="example-contents">
+<p>
+                <code class="classname">SeekableIterator</code> le permite desplazarse a una posición a la
+                que le gustaría que el iterador salte. Simplemente use el método <code class="methodname">seek()</code>
+                para eso. Páselo un entero que represente el número de la Row a la que
+                le gustaría que su Rowset apunte a continuación; no olvide que empieza con el índice 0. Si el
+                índice es incorrecto, es decir, no existe, se lanzará una excepción. Debe usar
+                <code class="methodname">count()</code> para comprobar el número de resultados antes de desplazarse a una
+                posición.
+            </p>
+<pre class="programlisting">
+$bugs = new Bugs();
+
+// fetch all records from the table
+$rowset = $bugs-&gt;fetchAll();
+
+// takes the iterator to the 9th element (zero is one element) :
+$rowset-&gt;seek(8);
+
+// retrieve it
+$row9 = $rowset-&gt;current();
+
+// and use it
+$row9-&gt;assigned_to = 'mmouse';
+$row9-&gt;save();
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            <code class="methodname">getRow()</code> le permite obtener una Row específica en el Rowset,
+            conociendo su posición; no olvide, sin embargo, que las posiciones empiezan con el índice cero. El
+            primer parámetro de <code class="methodname">getRow()</code> es un entero para la posición
+            solicitada. El segundo parámetro opcional es un booleano; indica al iterador del Rowset si
+            debe desplazarse a esa posición al mismo tiempo o no (el valor predeterminado es
+            <code class="constant">FALSE</code>). Este método devuelve un objeto
+            <code class="classname">Zend_Db_Table_Row</code> por defecto. Si la
+            posición solicitada no existe, se lanzará una excepción. He aquí un ejemplo:
+        </p>
+<pre class="programlisting">
+$bugs = new Bugs();
+
+// fetch all records from the table
+$rowset = $bugs-&gt;fetchAll();
+
+// retrieve the 9th element immediately:
+$row9 = $rowset-&gt;getRow(8);
+
+// and use it:
+$row9-&gt;assigned_to = 'mmouse';
+$row9-&gt;save();
+</pre>
+<p>
+            Después de tener acceso a un objeto Row individual, puede manipular la Row usando los
+            métodos descritos en <a class="link" href="zend.db.table.row.phtml" title="27.6. Zend_Db_Table_Row">Zend_Db_Table_Row</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.to-array"></a>27.7.4. Recuperar un Rowset como Array</h3></div></div></div>
+<p>
+            Puede acceder a todos los datos del Rowset como un array usando el
+            método <code class="methodname">toArray()</code> del objeto Rowset. Esto devuelve un array
+            que contiene una entrada por Row. Cada entrada es un array asociativo con claves que
+            corresponden a nombres de columna y elementos que corresponden a los respectivos valores de columna.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.to-array.example"></a><p class="title"><b>Ejemplo 27.139. Uso de toArray()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$bugs   = new Bugs();
+$rowset = $bugs-&gt;fetchAll();
+
+$rowsetArray = $rowset-&gt;toArray();
+
+$rowCount = 1;
+foreach ($rowsetArray as $rowArray) {
+    echo "row #$rowCount:\n";
+    foreach ($rowArray as $column =&gt; $value) {
+        echo "\t$column =&gt; $value\n";
+    }
+    ++$rowCount;
+    echo "\n";
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            El array devuelto por <code class="methodname">toArray()</code> no es actualizable. Es decir,
+            puede modificar valores en el array como con cualquier array, pero los cambios en los datos
+            del array no se propagan a la base de datos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.serialize"></a>27.7.5. Serializar y deserializar un Rowset</h3></div></div></div>
+<p>
+            Los objetos de tipo <code class="classname">Zend_Db_Table_Rowset_Abstract</code> son serializables.
+            De manera similar a serializar un objeto Row individual, puede serializar un Rowset
+            y deserializarlo más tarde.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.serialize.example.serialize"></a><p class="title"><b>Ejemplo 27.140. Serializar un Rowset</b></p>
+<div class="example-contents">
+<p>
+                Simplemente use la función <code class="methodname">serialize()</code> de <acronym class="acronym">PHP</acronym> para
+                crear una cadena que contenga una representación en flujo de bytes del argumento
+                objeto Rowset.
+            </p>
+<pre class="programlisting">
+$bugs   = new Bugs();
+$rowset = $bugs-&gt;fetchAll();
+
+// Convert object to serialized form
+$serializedRowset = serialize($rowset);
+
+// Now you can write $serializedRowset to a file, etc.
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.db.table.rowset.serialize.example.unserialize"></a><p class="title"><b>Ejemplo 27.141. Deserializar un Rowset serializado</b></p>
+<div class="example-contents">
+<p>
+                Use la función <code class="methodname">unserialize()</code> de <acronym class="acronym">PHP</acronym> para
+                restaurar una cadena que contenga una representación en flujo de bytes de un objeto. La función
+                devuelve el objeto original.
+            </p>
+<p>
+                Tenga en cuenta que el objeto Rowset devuelto está en un estado
+                <span class="emphasis"><em>desconectado</em></span>. Puede iterar a través del Rowset y leer los objetos Row y sus
+                propiedades, pero no puede cambiar valores en las Rows ni ejecutar otros métodos que
+                requieran una conexión a la base de datos (por ejemplo, consultas contra tablas relacionadas).
+            </p>
+<pre class="programlisting">
+$rowsetDisconnected = unserialize($serializedRowset);
+
+// Now you can use object methods and properties, but read-only
+$row = $rowsetDisconnected-&gt;current();
+echo $row-&gt;bug_description;
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Why do Rowsets unserialize in a disconnected state?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Por qué los Rowsets se deserializan en un estado desconectado?</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Un objeto serializado es una cadena que puede leer cualquiera que la posea. Podría
+                ser un riesgo de seguridad almacenar parámetros como la cuenta y la contraseña de la base de datos
+                en texto plano sin cifrar dentro de la cadena serializada. No querría almacenar
+                dichos datos en un archivo de texto que no esté protegido, ni enviarlos por correo electrónico u otro
+                medio que sea fácilmente legible por posibles atacantes. Quien lea el objeto
+                serializado no debería poder usarlo para obtener acceso a su base de datos sin conocer
+                credenciales válidas.
+            </p></td></tr>
+</table></div>
+<p>
+            Puede reactivar un Rowset desconectado usando el método <code class="methodname">setTable()</code>.
+            El argumento de este método es un objeto válido de tipo
+            <code class="classname">Zend_Db_Table_Abstract</code>, que usted crea. Crear un objeto Table
+            requiere una conexión activa a la base de datos, por lo que, al reasociar la Table con el
+            Rowset, el Rowset obtiene acceso a la base de datos. Posteriormente, puede cambiar valores en
+            los objetos Row contenidos en el Rowset y guardar los cambios en la base de datos.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.serialize.example.set-table"></a><p class="title"><b>Ejemplo 27.142. Reactivar un Rowset como datos activos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$rowset = unserialize($serializedRowset);
+
+$bugs = new Bugs();
+
+// Reconnect the rowset to a table, and
+// thus to a live database connection
+$rowset-&gt;setTable($bugs);
+
+$row = $rowset-&gt;current();
+
+// Now you can make changes to the row and save them
+$row-&gt;bug_status = 'FIXED';
+$row-&gt;save();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Reactivar un Rowset con <code class="methodname">setTable()</code> también reactiva todos los
+            objetos Row contenidos en ese Rowset.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.rowset.extending"></a>27.7.6. Extender la clase Rowset</h3></div></div></div>
+<p>
+            Puede usar una clase concreta alternativa para instancias de Rowsets
+            extendiendo <code class="classname">Zend_Db_Table_Rowset_Abstract</code>. Especifique la clase
+            Rowset personalizada por nombre, ya sea en el miembro protegido
+            <code class="varname">$_rowsetClass</code> de una clase Table, o en el argumento de array del
+            constructor de un objeto Table.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.extending.example"></a><p class="title"><b>Ejemplo 27.143. Especificar una clase Rowset personalizada</b></p>
+<div class="example-contents"><pre class="programlisting">
+class MyRowset extends Zend_Db_Table_Rowset_Abstract
+{
+    // ...customizations
+}
+
+// Specify a custom Rowset to be used by default
+// in all instances of a Table class.
+class Products extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'products';
+    protected $_rowsetClass = 'MyRowset';
+}
+
+// Or specify a custom Rowset to be used in one
+// instance of a Table class.
+$bugs = new Bugs(array('rowsetClass' =&gt; 'MyRowset'));
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Normalmente, la clase concreta estándar <code class="classname">Zend_Db_Rowset</code> es
+            suficiente para la mayoría de los usos. Sin embargo, podría resultarle útil
+            añadir nueva lógica a un Rowset, específica para una Table dada.
+            Por ejemplo, un nuevo método podría calcular un agregado
+            sobre todas las Rows en el Rowset.
+        </p>
+<div class="example">
+<a name="zend.db.table.rowset.extending.example-aggregate"></a><p class="title"><b>Ejemplo 27.144. Ejemplo de clase Rowset con un nuevo método</b></p>
+<div class="example-contents"><pre class="programlisting">
+class MyBugsRowset extends Zend_Db_Table_Rowset_Abstract
+{
+    /**
+     * Find the Row in the current Rowset with the
+     * greatest value in its 'updated_at' column.
+     */
+    public function getLatestUpdatedRow()
+    {
+        $max_updated_at = 0;
+        $latestRow = null;
+        foreach ($this as $row) {
+            if ($row-&gt;updated_at &gt; $max_updated_at) {
+                $latestRow = $row;
+            }
+        }
+        return $latestRow;
+    }
+}
+
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs';
+    protected $_rowsetClass = 'MyBugsRowset';
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.db.table.row.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.db.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.table.relationships.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">27.6. Zend_Db_Table_Row </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 27.8. Zend_Db_Table Relationships</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

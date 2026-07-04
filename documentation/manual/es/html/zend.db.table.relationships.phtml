@@ -1,0 +1,825 @@
+<?php $title = '27.8. Relaciones de Zend_Db_Table'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">27.8. Relaciones de Zend_Db_Table</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.db.table.rowset.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 27. Zend_Db</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.table.definition.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.db.table.relationships"></a>27.8. Relaciones de Zend_Db_Table</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.introduction"></a>27.8.1. Introducción</h3></div></div></div>
+<p>
+            Las tablas tienen relaciones entre sí en una base de datos relacional. Una entidad en
+            una tabla puede estar vinculada a una o más entidades en otra tabla mediante el uso de
+            restricciones de integridad referencial definidas en el esquema de la base de datos.
+        </p>
+<p>
+            La clase <code class="classname">Zend_Db_Table_Row</code> tiene métodos para consultar filas
+            relacionadas en otras tablas.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.defining"></a>27.8.2. Definición de relaciones</h3></div></div></div>
+<p>
+            Defina clases para cada una de sus tablas, extendiendo la clase abstracta
+            <code class="classname">Zend_Db_Table_Abstract</code>, tal como se describe en
+            <a class="link" href="zend.db.table.phtml#zend.db.table.defining" title="27.5.3. Defining a Table Class">este capítulo</a>. Vea también
+            <a class="link" href="zend.db.phtml#zend.db.adapter.example-database" title="27.1.2. Example Database">este capítulo</a> para una descripción
+            de la base de datos de ejemplo para la cual está diseñado el siguiente código de ejemplo.
+        </p>
+<p>
+            A continuación se muestran las definiciones de clase de <acronym class="acronym">PHP</acronym> para estas tablas:
+        </p>
+<pre class="programlisting">
+class Accounts extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'accounts';
+    protected $_dependentTables = array('Bugs');
+}
+
+class Products extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'products';
+    protected $_dependentTables = array('BugsProducts');
+}
+
+class Bugs extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'bugs';
+
+    protected $_dependentTables = array('BugsProducts');
+
+    protected $_referenceMap    = array(
+        'Reporter' =&gt; array(
+            'columns'           =&gt; 'reported_by',
+            'refTableClass'     =&gt; 'Accounts',
+            'refColumns'        =&gt; 'account_name'
+        ),
+        'Engineer' =&gt; array(
+            'columns'           =&gt; 'assigned_to',
+            'refTableClass'     =&gt; 'Accounts',
+            'refColumns'        =&gt; 'account_name'
+        ),
+        'Verifier' =&gt; array(
+            'columns'           =&gt; array('verified_by'),
+            'refTableClass'     =&gt; 'Accounts',
+            'refColumns'        =&gt; array('account_name')
+        )
+    );
+}
+
+class BugsProducts extends Zend_Db_Table_Abstract
+{
+    protected $_name = 'bugs_products';
+
+    protected $_referenceMap    = array(
+        'Bug' =&gt; array(
+            'columns'           =&gt; array('bug_id'),
+            'refTableClass'     =&gt; 'Bugs',
+            'refColumns'        =&gt; array('bug_id')
+        ),
+        'Product' =&gt; array(
+            'columns'           =&gt; array('product_id'),
+            'refTableClass'     =&gt; 'Products',
+            'refColumns'        =&gt; array('product_id')
+        )
+    );
+
+}
+</pre>
+<p>
+            Si utiliza <code class="classname">Zend_Db_Table</code> para emular operaciones
+            en cascada de <code class="constant">UPDATE</code> y <code class="constant">DELETE</code>,
+            declare el array <code class="varname">$_dependentTables</code> en la clase de la
+            tabla padre. Enumere el nombre de clase de cada tabla dependiente. Use el nombre de clase, no el
+            nombre físico de la tabla <acronym class="acronym">SQL</acronym>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Omita la declaración de <code class="varname">$_dependentTables</code> si utiliza restricciones de
+                integridad referencial en el servidor <acronym class="acronym">RDBMS</acronym> para implementar operaciones
+                en cascada. Consulte <a class="link" href="zend.db.table.relationships.phtml#zend.db.table.relationships.cascading" title="27.8.6. Cascading Write Operations">este
+                    capítulo</a> para más información.
+            </p></td></tr>
+</table></div>
+<p>
+            Declare el array <code class="varname">$_referenceMap</code> en la clase de cada tabla
+            dependiente. Este es un array asociativo de "reglas" de referencia. Una regla de referencia identifica
+            cuál es la tabla padre en la relación, y también enumera qué columnas de la
+            tabla dependiente hacen referencia a qué columnas de la tabla padre.
+        </p>
+<p>
+            La clave de la regla es una cadena que se usa como índice del array
+            <code class="varname">$_referenceMap</code>. Esta clave de regla se utiliza para identificar cada relación de
+            referencia. Elija un nombre descriptivo para esta clave de regla. Es recomendable usar una cadena que
+            pueda formar parte de un nombre de método <acronym class="acronym">PHP</acronym>, como verá más adelante.
+        </p>
+<p>
+            En el código <acronym class="acronym">PHP</acronym> del ejemplo anterior, las claves de regla en la clase de la tabla Bugs
+            son: <span class="command"><strong>'Reporter'</strong></span>, <span class="command"><strong>'Engineer'</strong></span>,
+            <span class="command"><strong>'Verifier'</strong></span> y <span class="command"><strong>'Product'</strong></span>.
+        </p>
+<p>
+            El valor de cada entrada de regla en el array <code class="varname">$_referenceMap</code> es también un
+            array asociativo. Los elementos de esta entrada de regla se describen a continuación:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>columns</em></span> =&gt; Una cadena o un array de cadenas
+                    que nombran las columnas de clave foránea en la tabla dependiente.
+                </p>
+<p>
+                    Es común que sea una sola columna, pero algunas tablas tienen claves de
+                    múltiples columnas.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>refTableClass</em></span> =&gt; El nombre de clase de la tabla padre. Use
+                    el nombre de clase, no el nombre físico de la tabla <acronym class="acronym">SQL</acronym>.
+                </p>
+<p>
+                    Es común que una tabla dependiente tenga solo una referencia a su tabla
+                    padre, pero algunas tablas tienen múltiples referencias a la misma tabla padre. En
+                    la base de datos de ejemplo, hay una referencia de la tabla <span class="command"><strong>bugs</strong></span>
+                    a la tabla <span class="command"><strong>products</strong></span>, pero tres referencias de la tabla
+                    <span class="command"><strong>bugs</strong></span> a la tabla <span class="command"><strong>accounts</strong></span>. Coloque cada
+                    referencia en una entrada separada del array <code class="varname">$_referenceMap</code>.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>refColumns</em></span> =&gt; Una cadena o un array de
+                    cadenas que nombran las columnas de clave primaria en la tabla padre.
+                </p>
+<p>
+                    Es común que sea una sola columna, pero algunas tablas tienen claves de
+                    múltiples columnas. Si la referencia usa una clave de múltiples columnas, el orden de las columnas en la
+                    entrada <span class="command"><strong>'columns'</strong></span> debe coincidir con el orden de las columnas en la
+                    entrada <span class="command"><strong>'refColumns'</strong></span>.
+                </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                        Se recomienda que el elemento <span class="property">refColumns</span> se declare siempre, ya que las
+                        operaciones en cascada no funcionarán a menos que lo haga.
+                    </p></td></tr>
+</table></div>
+</li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>onDelete</em></span> =&gt; La regla para una acción a
+                    ejecutar si se elimina una fila en la tabla padre. Consulte
+                    <a class="link" href="zend.db.table.relationships.phtml#zend.db.table.relationships.cascading" title="27.8.6. Cascading Write Operations">este capítulo</a> para
+                    más información.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>onUpdate</em></span> =&gt; La regla para una acción a
+                    ejecutar si se actualizan los valores de las columnas de clave primaria en la tabla padre. Consulte
+                    <a class="link" href="zend.db.table.relationships.phtml#zend.db.table.relationships.cascading" title="27.8.6. Cascading Write Operations">este capítulo</a> para
+                    más información.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.fetching.dependent"></a>27.8.3. Obtención de un rowset dependiente</h3></div></div></div>
+<p>
+            Si tiene un objeto Row como resultado de una consulta sobre una tabla padre, puede obtener filas
+            de tablas dependientes que hacen referencia a la fila actual. Use el método:
+        </p>
+<pre class="programlisting">
+$row-&gt;findDependentRowset($table, [$rule]);
+</pre>
+<p>
+            Este método devuelve un objeto <code class="classname">Zend_Db_Table_Rowset_Abstract</code>,
+            que contiene un conjunto de filas de la tabla dependiente <code class="varname">$table</code> que hacen referencia
+            a la fila identificada por el objeto <code class="varname">$row</code>.
+        </p>
+<p>
+            El primer argumento <code class="varname">$table</code> puede ser una cadena que especifica la
+            tabla dependiente por su nombre de clase. También puede especificar la tabla dependiente usando un
+            objeto de esa clase de tabla.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.dependent.example"></a><p class="title"><b>Ejemplo 27.145. Obtención de un rowset dependiente</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla <span class="command"><strong>Accounts</strong></span>,
+                y encontrar los <span class="command"><strong>Bugs</strong></span> reportados por esa cuenta.
+            </p>
+<pre class="programlisting">
+$accountsTable = new Accounts();
+$accountsRowset = $accountsTable-&gt;find(1234);
+$user1234 = $accountsRowset-&gt;current();
+
+$bugsReportedByUser = $user1234-&gt;findDependentRowset('Bugs');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            El segundo argumento <code class="varname">$rule</code> es opcional. Es una cadena que nombra la
+            clave de regla en el array <code class="varname">$_referenceMap</code> de la clase de la tabla dependiente. Si
+            no especifica una regla, se utiliza la primera regla del array que hace referencia a la tabla padre. Si
+            necesita usar una regla distinta de la primera, debe especificar la clave.
+        </p>
+<p>
+            En el código de ejemplo anterior, no se especifica la clave de regla, por lo que la regla utilizada por defecto
+            es la primera que coincide con la tabla padre. Esta es la regla
+            <span class="command"><strong>'Reporter'</strong></span>.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.dependent.example-by"></a><p class="title"><b>Ejemplo 27.146. Obtención de un rowset dependiente mediante una regla específica</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla <span class="command"><strong>Accounts</strong></span>,
+                y encontrar los <span class="command"><strong>Bugs</strong></span> asignados para ser corregidos por el usuario de esa
+                cuenta. La cadena de la clave de regla que corresponde a esta relación de referencia en este
+                ejemplo es <span class="command"><strong>'Engineer'</strong></span>.
+            </p>
+<pre class="programlisting">
+$accountsTable = new Accounts();
+$accountsRowset = $accountsTable-&gt;find(1234);
+$user1234 = $accountsRowset-&gt;current();
+
+$bugsAssignedToUser = $user1234-&gt;findDependentRowset('Bugs', 'Engineer');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            También puede agregar criterios, ordenamiento y límites a sus relaciones usando el objeto select de la
+            fila padre.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.dependent.example-by-select"></a><p class="title"><b>Ejemplo 27.147. Obtención de un rowset dependiente usando un Zend_Db_Table_Select</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla
+                <span class="command"><strong>Accounts</strong></span>, y encontrar los <span class="command"><strong>Bugs</strong></span> asignados para
+                ser corregidos por el usuario de esa cuenta, limitados solo a 3 filas y ordenados por
+                nombre.
+            </p>
+<pre class="programlisting">
+$accountsTable = new Accounts();
+$accountsRowset = $accountsTable-&gt;find(1234);
+$user1234 = $accountsRowset-&gt;current();
+$select = $accountsTable-&gt;select()-&gt;order('name ASC')
+                                  -&gt;limit(3);
+
+$bugsAssignedToUser = $user1234-&gt;findDependentRowset('Bugs',
+                                                     'Engineer',
+                                                     $select);
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Alternativamente, puede consultar filas de una tabla dependiente usando un mecanismo especial
+            llamado "método mágico". <code class="classname">Zend_Db_Table_Row_Abstract</code> invoca el
+            método: <code class="methodname">findDependentRowset('&lt;TableClass&gt;',
+                '&lt;Rule&gt;')</code> si invoca un método en el objeto Row que coincida
+            con alguno de los siguientes patrones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;find&lt;TableClass&gt;()</strong></span>
+                </p></li>
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;find&lt;TableClass&gt;By&lt;Rule&gt;()</strong></span>
+                </p></li>
+</ul></div>
+<p>
+            En los patrones anteriores, <span class="command"><strong>&lt;TableClass&gt;</strong></span> y
+            <span class="command"><strong>&lt;Rule&gt;</strong></span> son cadenas que corresponden al nombre de clase de la
+            tabla dependiente, y a la clave de regla de la tabla dependiente que hace referencia a la tabla padre.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Algunos frameworks de aplicaciones, como Ruby on Rails, utilizan un mecanismo llamado
+                "inflexión" para permitir que la ortografía de los identificadores cambie según el uso. Por
+                simplicidad, <code class="classname">Zend_Db_Table_Row</code> no proporciona ningún mecanismo de
+                inflexión. La identidad de la tabla y la clave de regla nombradas en la llamada al método deben coincidir
+                exactamente con la ortografía de la clase y la clave de regla.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.dependent.example-magic"></a><p class="title"><b>Ejemplo 27.148. Obtención de rowsets dependientes usando el método mágico</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo encontrar rowsets dependientes equivalentes a los de los ejemplos
+                anteriores. En este caso, la aplicación usa la invocación del método mágico en lugar de
+                especificar la tabla y la regla como cadenas.
+            </p>
+<pre class="programlisting">
+$accountsTable = new Accounts();
+$accountsRowset = $accountsTable-&gt;find(1234);
+$user1234 = $accountsRowset-&gt;current();
+
+// Use the default reference rule
+$bugsReportedBy = $user1234-&gt;findBugs();
+
+// Specify the reference rule
+$bugsAssignedTo = $user1234-&gt;findBugsByEngineer();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.fetching.parent"></a>27.8.4. Obtención de una fila padre</h3></div></div></div>
+<p>
+            Si tiene un objeto Row como resultado de una consulta sobre una tabla dependiente, puede obtener
+            la fila en el padre a la que hace referencia la fila dependiente. Use el método:
+        </p>
+<pre class="programlisting">
+$row-&gt;findParentRow($table, [$rule]);
+</pre>
+<p>
+            Siempre debe existir exactamente una fila en la tabla padre referenciada por una fila
+            dependiente, por lo tanto este método devuelve un objeto Row, no un objeto Rowset.
+        </p>
+<p>
+            El primer argumento <code class="varname">$table</code> puede ser una cadena que especifica la tabla
+            padre por su nombre de clase. También puede especificar la tabla padre usando un objeto de
+            esa clase de tabla.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.parent.example"></a><p class="title"><b>Ejemplo 27.149. Obtención de la fila padre</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla <span class="command"><strong>Bugs</strong></span> (por
+                ejemplo, uno de esos bugs con estado 'NEW'), y encontrar la fila en la
+                tabla <span class="command"><strong>Accounts</strong></span> del usuario que reportó el bug.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;fetchAll(array('bug_status = ?' =&gt; 'NEW'));
+$bug1 = $bugsRowset-&gt;current();
+
+$reporter = $bug1-&gt;findParentRow('Accounts');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            El segundo argumento <code class="varname">$rule</code> es opcional. Es una cadena que nombra la
+            clave de regla en el array <code class="varname">$_referenceMap</code> de la clase de la tabla dependiente. Si
+            no especifica una regla, se utiliza la primera regla del array que hace referencia a la tabla padre. Si
+            necesita usar una regla distinta de la primera, debe especificar la clave.
+        </p>
+<p>
+            En el ejemplo anterior, no se especifica la clave de regla, por lo que la regla utilizada por defecto es la
+            primera que coincide con la tabla padre. Esta es la regla <span class="command"><strong>'Reporter'</strong></span>.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.parent.example-by"></a><p class="title"><b>Ejemplo 27.150. Obtención de una fila padre mediante una regla específica</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla <span class="command"><strong>Bugs</strong></span>, y
+                encontrar la cuenta del ingeniero asignado para corregir ese bug. La cadena de la clave de regla
+                que corresponde a esta relación de referencia en este ejemplo es
+                <span class="command"><strong>'Engineer'</strong></span>.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;fetchAll(array('bug_status = ?', 'NEW'));
+$bug1 = $bugsRowset-&gt;current();
+
+$engineer = $bug1-&gt;findParentRow('Accounts', 'Engineer');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Alternativamente, puede consultar filas de una tabla padre usando un "método mágico".
+            <code class="classname">Zend_Db_Table_Row_Abstract</code> invoca el método:
+            <code class="methodname">findParentRow('&lt;TableClass&gt;', '&lt;Rule&gt;')</code> si
+            invoca un método en el objeto Row que coincida con alguno de los siguientes patrones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;findParent&lt;TableClass&gt;([Zend_Db_Table_Select
+                        $select])</strong></span>
+                </p></li>
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;findParent&lt;TableClass&gt;By&lt;Rule&gt;([Zend_Db_Table_Select
+                       $select])</strong></span>
+                </p></li>
+</ul></div>
+<p>
+            En los patrones anteriores, <span class="command"><strong>&lt;TableClass&gt;</strong></span> y
+            <span class="command"><strong>&lt;Rule&gt;</strong></span> son cadenas que corresponden al nombre de clase de la
+            tabla padre, y a la clave de regla de la tabla dependiente que hace referencia a la tabla padre.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                La identidad de la tabla y la clave de regla nombradas en la llamada al método deben coincidir con la
+                ortografía de la clase y la clave de regla exactamente.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.parent.example-magic"></a><p class="title"><b>Ejemplo 27.151. Obtención de la fila padre usando el método mágico</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo encontrar filas padre equivalentes a las de los ejemplos
+                anteriores. En este caso, la aplicación usa la invocación del método mágico en lugar de
+                especificar la tabla y la regla como cadenas.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;fetchAll(array('bug_status = ?', 'NEW'));
+$bug1 = $bugsRowset-&gt;current();
+
+// Use the default reference rule
+$reporter = $bug1-&gt;findParentAccounts();
+
+// Specify the reference rule
+$engineer = $bug1-&gt;findParentAccountsByEngineer();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.fetching.many-to-many"></a>27.8.5. Obtención de un rowset a través de una relación de muchos a muchos</h3></div></div></div>
+<p>
+            Si tiene un objeto Row como resultado de una consulta sobre una tabla en una relación de
+            muchos a muchos (a efectos del ejemplo, llame a esta la tabla "origen"), puede
+            obtener las filas correspondientes en la otra tabla (llame a esta la tabla "destino") a través de una
+            tabla de intersección. Use el método:
+        </p>
+<pre class="programlisting">
+$row-&gt;findManyToManyRowset($table,
+                           $intersectionTable,
+                           [$rule1,
+                               [$rule2,
+                                   [Zend_Db_Table_Select $select]
+                               ]
+                           ]);
+</pre>
+<p>
+            Este método devuelve un <code class="classname">Zend_Db_Table_Rowset_Abstract</code> que contiene
+            filas de la tabla <code class="varname">$table</code>, que satisfacen la relación de muchos a muchos.
+            El objeto Row actual <code class="varname">$row</code> de la tabla origen se usa para encontrar
+            filas en la tabla de intersección, que se une a la tabla destino.
+        </p>
+<p>
+            El primer argumento <code class="varname">$table</code> puede ser una cadena que especifica la
+            tabla destino en la relación de muchos a muchos por su nombre de clase. También puede
+            especificar la tabla destino usando un objeto de esa clase de tabla.
+        </p>
+<p>
+            El segundo argumento <code class="varname">$intersectionTable</code> puede ser una cadena que especifica
+            la tabla de intersección entre las dos tablas en la relación de muchos a muchos por
+            su nombre de clase. También puede especificar la tabla de intersección usando un objeto de esa
+            clase de tabla.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.many-to-many.example"></a><p class="title"><b>Ejemplo 27.152. Obtención de un rowset con el método de muchos a muchos</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla origen
+                <span class="command"><strong>Bugs</strong></span>, y encontrar filas de la tabla destino
+                <span class="command"><strong>Products</strong></span>, que representan los productos relacionados con ese bug.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;find(1234);
+$bug1234 = $bugsRowset-&gt;current();
+
+$productsRowset = $bug1234-&gt;findManyToManyRowset('Products',
+                                                 'BugsProducts');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            El tercer y cuarto argumento <code class="varname">$rule1</code> y <code class="varname">$rule2</code>
+            son opcionales. Son cadenas que nombran las claves de regla en el array
+            <code class="varname">$_referenceMap</code> de la tabla de intersección.
+        </p>
+<p>
+            La clave <code class="varname">$rule1</code> nombra la regla para la relación desde la
+            tabla de intersección hacia la tabla origen. En este ejemplo, esta es la relación de
+            <span class="command"><strong>BugsProducts</strong></span> a <span class="command"><strong>Bugs</strong></span>.
+        </p>
+<p>
+            La clave <code class="varname">$rule2</code> nombra la regla para la relación desde la
+            tabla de intersección hacia la tabla destino. En este ejemplo, esta es la relación
+            de <span class="command"><strong>Bugs</strong></span> a <span class="command"><strong>Products</strong></span>.
+        </p>
+<p>
+            De forma similar a los métodos para encontrar filas padre y dependientes, si no especifica una
+            regla, el método utiliza la primera regla en el array <code class="varname">$_referenceMap</code> que
+            coincide con las tablas en la relación. Si necesita usar una regla distinta de la primera,
+            debe especificar la clave.
+        </p>
+<p>
+            En el código de ejemplo anterior, no se especifica la clave de regla, por lo que las reglas utilizadas por defecto
+            son las primeras que coinciden. En este caso, <code class="varname">$rule1</code> es
+            <span class="command"><strong>'Reporter'</strong></span> y <code class="varname">$rule2</code> es
+            <span class="command"><strong>'Product'</strong></span>.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.many-to-many.example-by"></a><p class="title"><b>Ejemplo 27.153. Obtención de un rowset con el método de muchos a muchos mediante una regla específica</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo obtener un objeto Row de la tabla origen
+                <span class="command"><strong>Bugs</strong></span>, y encontrar filas de la tabla destino
+                <span class="command"><strong>Products</strong></span>, que representan los productos relacionados con ese bug.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;find(1234);
+$bug1234 = $bugsRowset-&gt;current();
+
+$productsRowset = $bug1234-&gt;findManyToManyRowset('Products',
+                                                 'BugsProducts',
+                                                 'Bug');
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            Alternativamente, puede consultar filas de la tabla destino en una relación de muchos a muchos
+            usando un "método mágico". <code class="classname">Zend_Db_Table_Row_Abstract</code>
+            invoca el método: <span class="command"><strong>findManyToManyRowset('&lt;TableClass&gt;',
+                '&lt;IntersectionTableClass&gt;', '&lt;Rule1&gt;', '&lt;Rule2&gt;')</strong></span> si
+            invoca un método que coincida con cualquiera de los siguientes patrones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;find&lt;TableClass&gt;Via&lt;IntersectionTableClass&gt;
+                        ([Zend_Db_Table_Select $select])</strong></span>
+                </p></li>
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;find&lt;TableClass&gt;Via&lt;IntersectionTableClass&gt;By&lt;Rule1&gt;
+                        ([Zend_Db_Table_Select $select])</strong></span>
+                </p></li>
+<li class="listitem"><p>
+                    <span class="command"><strong>$row-&gt;find&lt;TableClass&gt;Via&lt;IntersectionTableClass&gt;By&lt;Rule1&gt;And&lt;Rule2&gt;
+                        ([Zend_Db_Table_Select $select])</strong></span>
+                </p></li>
+</ul></div>
+<p>
+            En los patrones anteriores, <span class="command"><strong>&lt;TableClass&gt;</strong></span> y
+            <span class="command"><strong>&lt;IntersectionTableClass&gt;</strong></span> son cadenas que corresponden a los
+            nombres de clase de la tabla destino y de la tabla de intersección, respectivamente.
+            <span class="command"><strong>&lt;Rule1&gt;</strong></span> y <span class="command"><strong>&lt;Rule2&gt;</strong></span> son cadenas que
+            corresponden a las claves de regla en la tabla de intersección que hacen referencia a la tabla origen
+            y a la tabla destino, respectivamente.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Las identidades de tabla y las claves de regla nombradas en la llamada al método deben coincidir con la
+                ortografía de la clase y la clave de regla exactamente.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.db.table.relationships.fetching.many-to-many.example-magic"></a><p class="title"><b>Ejemplo 27.154. Obtención de rowsets usando el método mágico de muchos a muchos</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo encontrar filas en la tabla destino de una relación de muchos a muchos
+                que representan los productos relacionados con un bug determinado.
+            </p>
+<pre class="programlisting">
+$bugsTable = new Bugs();
+$bugsRowset = $bugsTable-&gt;find(1234);
+$bug1234 = $bugsRowset-&gt;current();
+
+// Use the default reference rule
+$products = $bug1234-&gt;findProductsViaBugsProducts();
+
+// Specify the reference rule
+$products = $bug1234-&gt;findProductsViaBugsProductsByBug();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.db.table.relationships.cascading"></a>27.8.6. Operaciones de escritura en cascada</h3></div></div></div>
+<div class="note"><table border="0" summary="Note: Declare DRI in the database:">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Declare la DRI en la base de datos:</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                La declaración de operaciones en cascada en <code class="classname">Zend_Db_Table</code> está pensada
+                <span class="emphasis"><em>únicamente</em></span> para las marcas de <acronym class="acronym">RDBMS</acronym> que no admiten
+                integridad referencial declarativa (<acronym class="acronym">DRI</acronym>).
+            </p>
+<p>
+                Por ejemplo, si utiliza el motor de almacenamiento MyISAM de MySQL o MariaDB, o SQLite, estas soluciones
+                no admiten <acronym class="acronym">DRI</acronym>. Puede resultarle útil declarar las
+                operaciones en cascada con <code class="classname">Zend_Db_Table</code>.
+            </p>
+<p>
+                Si su <acronym class="acronym">RDBMS</acronym> implementa <acronym class="acronym">DRI</acronym> y las cláusulas
+                ON <code class="constant">DELETE</code> y ON <code class="constant">UPDATE</code>, debería
+                declarar estas cláusulas en el esquema de su base de datos, en lugar de usar la función de cascada
+                de <code class="classname">Zend_Db_Table</code>. Declarar las reglas de
+                <acronym class="acronym">DRI</acronym> en cascada en el <acronym class="acronym">RDBMS</acronym> es mejor para el rendimiento,
+                la consistencia y la integridad de la base de datos.
+            </p>
+<p>
+                Lo más importante: no declare operaciones en cascada tanto en el
+                <acronym class="acronym">RDBMS</acronym> como en su clase <code class="classname">Zend_Db_Table</code>.
+            </p>
+</td></tr>
+</table></div>
+<p>
+            Puede declarar operaciones en cascada para ejecutar sobre una tabla dependiente cuando
+            aplica un <code class="constant">UPDATE</code> o un <code class="constant">DELETE</code> a una fila en una
+            tabla padre.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.cascading.example-delete"></a><p class="title"><b>Ejemplo 27.155. Ejemplo de una eliminación en cascada</b></p>
+<div class="example-contents">
+<p>
+                Este ejemplo muestra cómo eliminar una fila en la tabla <span class="command"><strong>Products</strong></span>, que está
+                configurada para eliminar automáticamente las filas dependientes en la tabla
+                <span class="command"><strong>Bugs</strong></span>.
+            </p>
+<pre class="programlisting">
+$productsTable = new Products();
+$productsRowset = $productsTable-&gt;find(1234);
+$product1234 = $productsRowset-&gt;current();
+
+$product1234-&gt;delete();
+// Automatically cascades to Bugs table
+// and deletes dependent rows.
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            De forma similar, si usa <code class="constant">UPDATE</code> para cambiar el valor de una clave primaria
+            en una tabla padre, es posible que desee que el valor de las claves foráneas de las tablas dependientes se
+            actualice automáticamente para que coincida con el nuevo valor, de modo que dichas referencias se mantengan
+            actualizadas.
+        </p>
+<p>
+            Por lo general, no es necesario actualizar el valor de una clave primaria que fue generada por una
+            secuencia u otro mecanismo. Pero si utiliza una <span class="emphasis"><em>clave natural</em></span> que puede
+            cambiar de valor ocasionalmente, es más probable que necesite aplicar actualizaciones en cascada
+            a las tablas dependientes.
+        </p>
+<p>
+            Para declarar una relación en cascada en <code class="classname">Zend_Db_Table</code>, edite
+            las reglas en <code class="varname">$_referenceMap</code>. Establezca las claves del array asociativo
+            <span class="command"><strong>'onDelete'</strong></span> y <span class="command"><strong>'onUpdate'</strong></span> con una de estas opciones:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Cascade: Esta opción configura una cascada de un solo nivel (la tabla padre más todas
+                    las tablas directamente dependientes). Para habilitar esta opción, establezca la clave correspondiente en
+                    <code class="varname">$_referenceMap</code> con la cadena 'cascade' o use la constante
+                    <code class="constant">self::CASCADE</code>.
+                </p></li>
+<li class="listitem"><p>
+                    Recursive Cascade: Esta opción configura una cascada recursiva completa comenzando
+                    por la tabla padre. Para habilitar esta opción, establezca la clave correspondiente en
+                    <code class="varname">$_referenceMap</code> con la cadena 'cascadeRecurse' o use la constante
+                    <code class="constant">self::CASCADE_RECURSE</code>.
+                </p></li>
+</ul></div>
+<p>
+            Antes de que se elimine una fila de la tabla padre, o se actualicen sus valores de clave primaria,
+            se eliminan o actualizan primero las filas en la tabla dependiente que hacen referencia a la fila del padre.
+        </p>
+<div class="example">
+<a name="zend.db.table.relationships.cascading.example-declaration"></a><p class="title"><b>Ejemplo 27.156. Ejemplo de declaración de operaciones en cascada</b></p>
+<div class="example-contents">
+<p>
+                En el ejemplo siguiente, las filas de la tabla <span class="command"><strong>Bugs</strong></span> se eliminan
+                automáticamente si se elimina la fila de la tabla <span class="command"><strong>Products</strong></span> a la que
+                hacen referencia. El elemento <span class="command"><strong>'onDelete'</strong></span> de la entrada del mapa de referencias
+                se establece en <code class="constant">self::CASCADE</code>.
+            </p>
+<p>
+                No se realiza ninguna actualización en cascada en el ejemplo siguiente si se cambia el valor de la
+                clave primaria en la clase padre. El elemento <span class="command"><strong>'onUpdate'</strong></span> de la entrada del
+                mapa de referencias es <code class="constant">self::RESTRICT</code>. Puede obtener el mismo resultado
+                omitiendo la entrada <span class="command"><strong>'onUpdate'</strong></span>.
+            </p>
+<pre class="programlisting">
+class BugsProducts extends Zend_Db_Table_Abstract
+{
+    ...
+    protected $_referenceMap = array(
+        'Product' =&gt; array(
+            'columns'           =&gt; array('product_id'),
+            'refTableClass'     =&gt; 'Products',
+            'refColumns'        =&gt; array('product_id'),
+            'onDelete'          =&gt; self::CASCADE,
+            'onUpdate'          =&gt; self::RESTRICT
+        ),
+        ...
+    );
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.db.table.relationships.cascading.notes"></a>27.8.6.1. Notas sobre las operaciones en cascada</h4></div></div></div>
+<p>
+                <span class="emphasis"><em>Las operaciones en cascada invocadas por <code class="classname">Zend_Db_Table</code> no
+                son atómicas.</em></span>
+            </p>
+<p>
+                Esto significa que si su base de datos implementa y aplica restricciones de integridad
+                referencial, un <code class="constant">UPDATE</code> en cascada ejecutado por una clase
+                <code class="classname">Zend_Db_Table</code> entra en conflicto con la restricción, y
+                da lugar a una violación de integridad referencial. Puede usar <code class="constant">UPDATE</code>
+                en cascada en <code class="classname">Zend_Db_Table</code>
+                <span class="emphasis"><em>únicamente</em></span> si su base de datos no aplica esa restricción de
+                integridad referencial.
+            </p>
+<p>
+                El <code class="constant">DELETE</code> en cascada sufre menos el problema de violaciones de integridad
+                referencial. Puede eliminar las filas dependientes como una acción no atómica antes de
+                eliminar la fila padre a la que hacen referencia.
+            </p>
+<p>
+                Sin embargo, tanto para <code class="constant">UPDATE</code> como para <code class="constant">DELETE</code>,
+                cambiar la base de datos de forma no atómica también crea el riesgo de que otro
+                usuario de la base de datos vea los datos en un estado inconsistente. Por ejemplo, si elimina
+                una fila y todas sus filas dependientes, existe una pequeña posibilidad de que otro
+                programa cliente de la base de datos consulte la base de datos después de que usted haya eliminado las filas
+                dependientes, pero antes de eliminar la fila padre. Ese programa cliente puede ver la fila padre sin
+                filas dependientes, y suponer que este es el estado deseado de los datos. No hay forma
+                de que ese cliente sepa que su consulta leyó la base de datos en medio de un cambio.
+            </p>
+<p>
+                El problema del cambio no atómico se puede mitigar usando transacciones para aislar
+                su cambio. Pero algunas marcas de <acronym class="acronym">RDBMS</acronym> no admiten transacciones, o
+                permiten a los clientes leer cambios "sucios" que aún no se han confirmado.
+            </p>
+<p>
+                <span class="emphasis"><em>Las operaciones en cascada de <code class="classname">Zend_Db_Table</code> solo se
+                invocan mediante <code class="classname">Zend_Db_Table</code>.</em></span>
+            </p>
+<p>
+                Las eliminaciones y actualizaciones en cascada definidas en sus clases
+                <code class="classname">Zend_Db_Table</code> se aplican si ejecuta los métodos
+                <code class="methodname">save()</code> o <code class="methodname">delete()</code> en la clase Row. Sin embargo, si
+                actualiza o elimina datos usando otra interfaz, como una herramienta de consulta u otra
+                aplicación, las operaciones en cascada no se aplican. Incluso cuando se usan los métodos
+                <code class="methodname">update()</code> y <code class="methodname">delete()</code>
+                de la clase <code class="classname">Zend_Db_Adapter</code>, las operaciones en cascada definidas en
+                sus clases <code class="classname">Zend_Db_Table</code> no se ejecutan.
+            </p>
+<p>
+                <span class="emphasis"><em>Sin <code class="constant">INSERT</code> en cascada.</em></span>
+            </p>
+<p>
+                No hay soporte para un <code class="constant">INSERT</code> en cascada. Debe insertar una
+                fila en una tabla padre en una operación, e insertar filas en una tabla dependiente en una
+                operación separada.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.db.table.rowset.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.db.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.table.definition.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">27.7. Zend_Db_Table_Rowset </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 27.9. Zend_Db_Table_Definition</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

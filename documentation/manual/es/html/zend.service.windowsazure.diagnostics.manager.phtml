@@ -1,0 +1,196 @@
+<?php $title = '64.35. Zend_Service_WindowsAzure_Diagnostics_Manager'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.35. Zend_Service_WindowsAzure_Diagnostics_Manager</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.storage.blob.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.windowsazure.storage.queue.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.windowsazure.diagnostics.manager"></a>64.35. Zend_Service_WindowsAzure_Diagnostics_Manager</h2></div></div></div>
+<p>
+        Blob Storage almacena conjuntos de datos binarios. Blob Storage ofrece las siguientes tres
+        Windows Azure Diagnostics le permite recopilar datos de diagnóstico de un servicio
+        en ejecución en Windows Azure. Puede utilizarse para tareas como la depuración y
+        resolución de problemas, la medición del rendimiento, la supervisión del uso de recursos, el
+        análisis de tráfico, la planificación de la capacidad y la auditoría. Una vez recopilados, los datos de diagnóstico pueden
+        transferirse a una cuenta de almacenamiento de Windows Azure para su persistencia. Las transferencias pueden
+        programarse o realizarse bajo demanda.
+    </p>
+<p>
+        Puede configurar Windows Azure Diagnostics desde código en ejecución dentro de un rol. También
+        puede configurarlo de forma remota desde una aplicación en ejecución fuera de Windows
+        Azure; por ejemplo, puede administrar Windows Azure Diagnostics desde un panel de control
+        personalizado que se ejecute localmente. Al administrar Windows Azure Diagnostics
+        de forma remota, puede iniciar su servicio con una configuración de diagnóstico inicial,
+        y luego ajustar esa configuración desde código en ejecución fuera de su servicio,
+        sin tener que actualizar su servicio.
+    </p>
+<p>
+        Se puede encontrar más información sobre qué registros, contadores de rendimiento, volcados de fallos, ...
+        se pueden supervisar en la <a class="ulink" href="http://msdn.microsoft.com/en-us/library/ee758705(v=MSDN.10).aspx" target="_top">
+        página web correspondiente de MSDN</a>.
+    </p>
+<p>
+        Nota: Los diagnósticos se configuran por rol. Esto significa que cada
+        rol debe configurarse por separado. Especificar instrucciones de diagnóstico
+        para una instancia de rol no implica que esta configuración se cargue en otras
+        instancias de rol.
+    </p>
+<p>
+        Nota: Los diagnósticos se configuran por rol. Esto significa que cada
+        La API de Diagnostics en el SDK de Windows Azure para PHP solo puede utilizarse cuando
+        el DiagnosticsMonitor se ha iniciado durante el arranque del rol. Actualmente,
+        esto solo se admite cuando una aplicación se empaqueta con las herramientas de línea de comandos
+        de Windows Azure para desarrolladores de PHP.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api"></a>64.35.1. Ejemplos de la API</h3></div></div></div>
+<p>
+            Este apartado enumera algunos ejemplos de uso de la clase
+            <code class="classname">Zend_Service_WindowsAzure_Diagnostics_Manager</code>. Otras funciones están
+            disponibles en el paquete de descarga, así como documentación detallada de la API de esas
+            funciones.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-exists"></a>64.35.1.1. Comprobar si existe una configuración de diagnóstico para la instancia de rol actual</h4></div></div></div>
+<p>
+                Con el siguiente código, puede comprobar si existe una configuración de diagnóstico para la
+                instancia de rol actual.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-exists.example"></a><p class="title"><b>Ejemplo 64.162. Comprobar si existe una configuración de diagnóstico para la instancia de rol actual</b></p>
+<div class="example-contents"><pre class="programlisting">
+/** Zend_Service_WindowsAzure_Storage_Blob */
+require_once 'Zend/Service/WindowsAzure/Storage/Blob.php';
+
+/** Zend_Service_WindowsAzure_Diagnostics_Manager */
+require_once 'Zend/Service/WindowsAzure/Diagnostics/Manager.php';
+
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$manager = new Zend_Service_WindowsAzure_Diagnostics_Manager($storageClient);
+
+$configurationExists = $manager-&gt;configurationForCurrentRoleInstanceExists();
+
+echo 'The configuration ' . ($configurationExists ? 'exists' : 'does not exist';
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-load"></a>64.35.1.2. Cargar la configuración de diagnóstico de la instancia de rol actual</h4></div></div></div>
+<p>
+                Con el siguiente código, puede cargar la configuración de diagnóstico de la instancia
+                de rol actual.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-load.example"></a><p class="title"><b>Ejemplo 64.163. Cargar la configuración de diagnóstico de la instancia de rol actual</b></p>
+<div class="example-contents"><pre class="programlisting">
+/** Zend_Service_WindowsAzure_Storage_Blob */
+require_once 'Zend/Service/WindowsAzure/Storage/Blob.php';
+
+/** Zend_Service_WindowsAzure_Diagnostics_Manager */
+require_once 'Zend/Service/WindowsAzure/Diagnostics/Manager.php';
+
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$manager = new Zend_Service_WindowsAzure_Diagnostics_Manager($storageClient);
+
+$configuration = $manager-&gt;getConfigurationForCurrentRoleInstance();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-store"></a>64.35.1.3. Almacenar la configuración de diagnóstico de la instancia de rol actual</h4></div></div></div>
+<p>
+                Con el siguiente código, puede almacenar la configuración de diagnóstico de la instancia
+                de rol actual.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-store.example"></a><p class="title"><b>Ejemplo 64.164. Almacenar la configuración de diagnóstico de la instancia de rol actual</b></p>
+<div class="example-contents"><pre class="programlisting">
+/** Zend_Service_WindowsAzure_Storage_Blob */
+require_once 'Zend/Service/WindowsAzure/Storage/Blob.php';
+
+/** Zend_Service_WindowsAzure_Diagnostics_Manager */
+require_once 'Zend/Service/WindowsAzure/Diagnostics/Manager.php';
+
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$manager = new Zend_Service_WindowsAzure_Diagnostics_Manager($storageClient);
+
+$configuration = // ...;
+$manager-&gt;setConfigurationForCurrentRoleInstance($configuration);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-perf"></a>64.35.1.4. Suscribirse a un contador de rendimiento</h4></div></div></div>
+<p>
+                Con el siguiente código, puede suscribirse a un contador de rendimiento.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-perf.example"></a><p class="title"><b>Ejemplo 64.165. Suscribirse a un contador de rendimiento</b></p>
+<div class="example-contents"><pre class="programlisting">
+/** Zend_Service_WindowsAzure_Storage_Blob */
+require_once 'Zend/Service/WindowsAzure/Storage/Blob.php';
+
+/** Zend_Service_WindowsAzure_Diagnostics_Manager */
+require_once 'Zend/Service/WindowsAzure/Diagnostics/Manager.php';
+
+$storageClient = new Zend_Service_WindowsAzure_Storage_Blob();
+$manager = new Zend_Service_WindowsAzure_Diagnostics_Manager($storageClient);
+
+$configuration = $manager-&gt;getConfigurationForCurrentRoleInstance();
+
+// Subscribe to \Processor(*)\% Processor Time
+$configuration-&gt;DataSources-&gt;PerformanceCounters-&gt;addSubscription('\Processor(*)\% Processor Time', 1);
+
+$manager-&gt;setConfigurationForCurrentRoleInstance($configuration);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-roleid"></a>64.35.1.5. Obtener el id de la instancia de rol actual</h4></div></div></div>
+<p>
+                El id de la instancia de rol actual se define en la variable de servidor
+                RdRoleId. Solo estará disponible cuando la aplicación se ejecute en
+                Development Fabric o en Windows Azure Fabric.
+            </p>
+<div class="example">
+<a name="zend.service.windowsazure.diagnostics.manager.api.config-roleid.example"></a><p class="title"><b>Ejemplo 64.166. Obtener el id de la instancia de rol actual</b></p>
+<div class="example-contents"><pre class="programlisting">
+echo 'The role instance id is ' . $_SERVER['RdRoleId'];
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.windowsazure.storage.blob.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.windowsazure.storage.queue.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.34. Zend_Service_WindowsAzure_Storage_Blob </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.36. Zend_Service_WindowsAzure_Storage_Queue</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

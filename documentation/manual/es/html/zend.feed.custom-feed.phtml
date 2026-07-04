@@ -1,0 +1,116 @@
+<?php $title = '33.8. Clases personalizadas de Feed y Entry'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.8. Clases personalizadas de Feed y Entry</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.modifying-feed.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.feed.reader.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.custom-feed"></a>33.8. Clases personalizadas de Feed y Entry</h2></div></div></div>
+<p>
+        Por último, puede extender las clases de <code class="classname">Zend_Feed</code> si desea
+        proporcionar su propio formato o comodidades como el manejo automático de elementos que deben ir en
+        un espacio de nombres personalizado.
+    </p>
+<p>
+        Aquí tiene un ejemplo de una clase de entrada Atom personalizada que gestiona sus propias
+        entradas del espacio de nombres <span class="emphasis"><em>myns:</em></span>. Observe que también realiza
+        la llamada a <code class="methodname">registerNamespace()</code> por usted, de modo que el usuario final no necesita
+        preocuparse en absoluto por los espacios de nombres.
+    </p>
+<div class="example">
+<a name="zend.feed.custom-feed.example.extending"></a><p class="title"><b>Ejemplo 33.7. Extendiendo la clase Atom Entry con espacios de nombres personalizados</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+/**
+ * The custom entry class automatically knows the feed URI (optional) and
+ * can automatically add extra namespaces.
+ */
+class MyEntry extends Zend_Feed_Entry_Atom
+{
+
+    public function __construct($uri = 'http://www.example.com/myfeed/',
+                                $xml = null)
+    {
+        parent::__construct($uri, $xml);
+
+        Zend_Feed::registerNamespace('myns',
+                                     'http://www.example.com/myns/1.0');
+    }
+
+    public function __get($var)
+    {
+        switch ($var) {
+            case 'myUpdated':
+                // Translate myUpdated to myns:updated.
+                return parent::__get('myns:updated');
+
+            default:
+                return parent::__get($var);
+            }
+    }
+
+    public function __set($var, $value)
+    {
+        switch ($var) {
+            case 'myUpdated':
+                // Translate myUpdated to myns:updated.
+                parent::__set('myns:updated', $value);
+                break;
+
+            default:
+                parent::__set($var, $value);
+        }
+    }
+
+    public function __call($var, $unused)
+    {
+        switch ($var) {
+            case 'myUpdated':
+                // Translate myUpdated to myns:updated.
+                return parent::__call('myns:updated', $unused);
+
+            default:
+                return parent::__call($var, $unused);
+        }
+    }
+}
+</pre>
+<p>
+            Luego, para usar esta clase, simplemente la instanciaría directamente y establecería la
+            propiedad <span class="property">myUpdated</span>:
+        </p>
+<pre class="programlisting">
+$entry = new MyEntry();
+$entry-&gt;myUpdated = '2005-04-19T15:30';
+
+// method-style call is handled by __call function
+$entry-&gt;myUpdated();
+// property-style call is handled by __get function
+$entry-&gt;myUpdated;
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.modifying-feed.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.feed.reader.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">33.7. Modificando las estructuras de Feed y Entry </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 33.9. Zend_Feed_Reader</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

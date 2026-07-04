@@ -1,0 +1,811 @@
+<?php $title = '64.25. Zend_Service_Rackspace_Servers'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.25. Zend_Service_Rackspace_Servers</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.rackspace.files.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.recaptcha.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.rackspace.servers"></a>64.25. Zend_Service_Rackspace_Servers</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.servers.intro"></a>64.25.1. Resumen</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Rackspace_Servers</code> es una clase que proporciona una
+            <acronym class="acronym">API</acronym> simple para administrar los <a class="ulink" href="http://www.rackspace.com/cloud/cloud_hosting_products/servers/" target="_top">Rackspace
+                Cloud Servers</a>. Usando esta clase puede:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Crear nuevos servidores
+                </p></li>
+<li class="listitem"><p>
+                    Listar y obtener información de cada servidor
+                </p></li>
+<li class="listitem"><p>
+                    Eliminar un servidor
+                </p></li>
+<li class="listitem"><p>
+                    Administrar las direcciones IP públicas/privadas de un servidor
+                </p></li>
+<li class="listitem"><p>
+                    Redimensionar la capacidad del servidor
+                </p></li>
+<li class="listitem"><p>
+                    Reiniciar un servidor
+                </p></li>
+<li class="listitem"><p>
+                    Crear nuevas imágenes para un servidor
+                </p></li>
+<li class="listitem"><p>
+                    Administrar la copia de seguridad de un servidor
+                </p></li>
+<li class="listitem"><p>
+                    Crear un grupo de servidores para compartir las direcciones IP para una arquitectura de alta disponibilidad
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.servers.terminology"></a>64.25.2. Terminología</h3></div></div></div>
+<p>
+            Un <span class="emphasis"><em>servidor</em></span> es una instancia de máquina virtual en el sistema Cloud Servers. Flavor e imagen son
+            elementos obligatorios al crear un servidor.
+        </p>
+<p>
+            Un <span class="emphasis"><em>servidor</em></span> se administra usando la clase <code class="classname">Zend_Service_Rackspace_Servers_Server</code>.
+        </p>
+<p>
+            Un <span class="emphasis"><em>flavor</em></span> es una configuración de hardware disponible para un servidor. Cada flavor tiene una
+            combinación única de espacio en disco, capacidad de memoria y prioridad de tiempo de CPU.
+        </p>
+<p>
+            Una <span class="emphasis"><em>imagen</em></span> es una colección de archivos usados para crear o reconstruir un servidor. Rackspace proporciona
+            de forma predeterminada varias imágenes de sistema operativo prediseñadas. También puede crear imágenes personalizadas a partir de servidores
+            cloud que haya lanzado. Estas imágenes personalizadas son útiles para propósitos de copia de seguridad o para
+            producir imágenes de servidor “de oro” si planea desplegar una configuración de servidor particular
+            con frecuencia.
+        </p>
+<p>
+            Una <span class="emphasis"><em>imagen</em></span> se administra usando la clase <code class="classname">Zend_Service_Rackspace_Servers_Image</code>.
+        </p>
+<p>
+            Se puede definir una <span class="emphasis"><em>programación de copia de seguridad</em></span> para crear imágenes del servidor a intervalos regulares (diarios y
+            semanales). Las programaciones de copia de seguridad son configurables por servidor.
+        </p>
+<p>
+            Las <span class="emphasis"><em>direcciones IP públicas</em></span> pueden compartirse entre varios servidores para su uso en distintos escenarios
+            de alta disponibilidad. Cuando una dirección IP se comparte con otro servidor, las restricciones de red de la nube
+            se modifican para permitir que cada servidor escuche y responda en esa dirección IP (opcionalmente puede
+            especificar que se modifique también la configuración de red del servidor de destino). Las direcciones IP
+            compartidas pueden usarse con muchas utilidades estándar de heartbeat (por ejemplo, keepalived) que
+            monitorean fallos y gestionan el failover de IP.
+        </p>
+<p>
+            Un <span class="emphasis"><em>grupo de IP compartida</em></span> es una colección de servidores que pueden compartir IPs con otros miembros del
+            grupo. Cualquier servidor de un grupo puede compartir una o más IPs públicas con cualquier otro servidor del
+            grupo. Con la excepción del primer servidor de un grupo de IP compartida, los servidores deben lanzarse
+            dentro de grupos de IP compartida. Un servidor solo puede ser miembro de un grupo de IP compartida.
+        </p>
+<p>
+            Un <span class="emphasis"><em>grupo de IP compartida</em></span> se administra usando la clase <code class="classname">Zend_Service_Rackspace_Servers_SharedIpGroup</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.servers.quick-start"></a>64.25.3. Inicio rápido</h3></div></div></div>
+<p>
+            Para usar esta clase debe pasar el nombre de usuario y la clave de la
+            API de Rackspace en la construcción de la clase.
+        </p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Servers($user,$key);
+</pre>
+<p>
+            Para crear un nuevo servidor puede usar el método <span class="emphasis"><em>createServer</em></span>.
+        </p>
+<pre class="programlisting">
+$data = array (
+    'name'     =&gt; 'test',
+    'imageId'  =&gt; '49',
+    'flavorId' =&gt; '1',
+);
+
+$server= $rackspace-&gt;createServer($data);
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+printf("Server name    : %s\n",$server-&gt;getName());
+printf("Server Id      : %s\n",$server-&gt;getId());
+printf("Admin password : %s\n",$server-&gt;getAdminPass());
+</pre>
+<p>
+            Este ejemplo crea un servidor con nombre <span class="emphasis"><em>test</em></span>, imageId 49, y
+            flavorId 1. Los atributos <span class="emphasis"><em>name</em></span>, <span class="emphasis"><em>imageId</em></span> y
+            <span class="emphasis"><em>flavorId</em></span> son obligatorios para crear un nuevo servidor. El resultado de
+            <span class="emphasis"><em>createServer</em></span> es una instancia de
+            <code class="classname">Zend_Service_Rackspace_Servers_Server</code>.
+        </p>
+<p>
+            Para obtener las direcciones IP pública y privada de un servidor puede usar el método
+            <span class="emphasis"><em>getServerIp</em></span>.
+        </p>
+<pre class="programlisting">
+$id  = '20054631';
+$ips = $rackspace-&gt;getServerIp($id);
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+echo "Private IPs:\n";
+print_r($ips['private']);
+echo "Public IPs:\n";
+print_r($ips['public']);
+</pre>
+<p>
+            Este ejemplo obtiene las direcciones IP del servidor con Id <span class="emphasis"><em>20054631</em></span>.
+            El resultado de <span class="emphasis"><em>getServerIp</em></span> es un arreglo asociativo con las claves
+            'private' y 'public' que contienen todas las direcciones IP privadas y las direcciones IP públicas
+            del servidor.
+        </p>
+<p>
+            Para obtener la lista de todos los servidores disponibles puede usar el método
+            <span class="emphasis"><em>listServers</em></span>.
+        </p>
+<pre class="programlisting">
+$servers= $rackspace-&gt;listServer(true);
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+foreach ($servers as $srv) {
+    printf("Name      : %s\n",$srv-&gt;getName());
+    printf("Server Id : %s\n",$srv-&gt;getId());
+    printf("Image  Id : %s\n",$srv-&gt;getImageId());
+    printf("Flavor Id : %s\n",$srv-&gt;getFlavorId());
+    printf("Status    : %s (%d\%)\n",$srv-&gt;getStatus(),$srv-&gt;getProgress());
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.servers.methods"></a>64.25.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.service.rackspace.servers.methods.change-backup-schedule"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">changeBackupSchedule</span>(<span class="methodparam">string $id, string $weekly, string $daily</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Esta operación crea una nueva programación de copia de seguridad o actualiza una existente para
+                        el servidor especificado.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID del servidor
+                    </p>
+<p>
+                        <span class="emphasis"><em>$weekly</em></span>, el día de la semana para la copia de seguridad (por ejemplo "THURSDAY")
+                    </p>
+<p>
+                        <span class="emphasis"><em>$daily</em></span>, especifica las horas para la copia de seguridad (por ejemplo "H_0400_0600")
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.change-server-name"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">changeServerName</span>(<span class="methodparam">string $id, string $name</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Cambia el nombre de un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID del servidor
+                    </p>
+<p>
+                        <span class="emphasis"><em>$name</em></span> es un parámetro opcional que especifica el nuevo nombre del servidor
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.change-server-password"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">changeServerPassword</span>(<span class="methodparam">string $id, string $password</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Cambia la contraseña de administrador de un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID del servidor
+                    </p>
+<p>
+                        <span class="emphasis"><em>$password</em></span> es un parámetro opcional que especifica la nueva contraseña de administrador del servidor
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.confirm-resize-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">confirmResizeServer</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Confirma el redimensionamiento de un servidor. Durante una operación de redimensionamiento, el servidor original se guarda durante un período de tiempo para permitir la
+                        reversión si hay algún problema. Una vez que el servidor redimensionado ha sido probado y se ha confirmado
+                        que funciona correctamente, use esta operación para confirmar el redimensionamiento. Tras la confirmación,
+                        el servidor original se elimina y no se puede revertir. Todos los redimensionamientos se confirman automáticamente
+                        después de 24 horas si no se confirman o revierten explícitamente.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.create-image"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">createImage</span>(<span class="methodparam">string $serverId,string $name</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Crea una imagen a partir de un servidor.
+                        Devuelve una nueva instancia de <code class="classname">Zend_Service_Rackspace_Servers_Image</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$serverId</em></span> es el Id del servidor a usar para crear la imagen.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$name</em></span>, es el nombre de la imagen a crear
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.create-shared-ip-group"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">createSharedIpGroup</span>(<span class="methodparam">string $name, string $serverId</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Esta operación crea un nuevo grupo de IP compartida. Tenga en cuenta que, en una solicitud de creación, el grupo de IP
+                        compartida puede crearse vacío o puede poblarse inicialmente con un único servidor.
+                        Devuelve el grupo de IP compartida como instancia de <code class="classname">Zend_Service_Rackspace_Servers_SharedIpGroup</code>
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$name</em></span> es el nombre del grupo de IP compartida a crear.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$serverId</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.create-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">createServer</span>(<span class="methodparam">array $data, $metadata=array(),$files=array()</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Crea un servidor con los atributos especificados en <span class="emphasis"><em>$data</em></span>. También puede especificar
+                        parámetros opcionales: <span class="emphasis"><em>metadata</em></span> y <span class="emphasis"><em>files</em></span>.
+                        Metadata es un arreglo que contiene clave/valor de metadatos relacionados con el servidor y files es un arreglo
+                        que contiene las rutas de algunos archivos a subir al servidor. La sintaxis usada para la subida
+                        de los archivos es 'serverPath' =&gt; 'localPath'.
+                        Devuelve una nueva instancia de <code class="classname">Zend_Service_Rackspace_Servers_Server</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$data</em></span> contiene los parámetros para el servidor.
+                        Los atributos obligatorios para crear un nuevo servidor son:
+                        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>name</em></span>, contiene el nombre del servidor
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>flavorId</em></span>, contiene el Id del flavor a usar
+                                </p></li>
+<li class="listitem"><p>
+                                    <span class="emphasis"><em>imageId</em></span>, contiene el Id de la imagen a usar
+                                </p></li>
+</ul></div>
+<p>
+                    </p>
+<p>
+                        <span class="emphasis"><em>$metadata</em></span>, contiene el arreglo de información de metadatos
+                    </p>
+<p>
+                        <span class="emphasis"><em>$files</em></span>, contiene la ruta de los archivos a subir en el servidor
+                        usando la sintaxis 'serverPath' =&gt; 'localPath'.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.disable-backup-schedule"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">disableBackupSchedule</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Deshabilita la copia de seguridad de un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.delete-image"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deleteImage</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Elimina una imagen.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id de la imagen.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.delete-shared-ip-group"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deleteSharedIpGroup</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Elimina un grupo de IP compartida.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del grupo de IP compartida.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.delete-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">deleteServer</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Elimina un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-backup-schedule"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getBackupSchedule</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve la programación de copia de seguridad de un servidor. El retorno es un arreglo asociativo con los siguientes valores: enabled, weekly, daily.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-flavor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getFlavor</span>(<span class="methodparam">string $flavorId</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve la información sobre un flavor. El retorno es un arreglo asociativo con los siguientes valores: id, ram, disk, name.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$flavorId</em></span> es el Id del flavor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-image"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getImage</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve una imagen como instancia de <code class="classname">Zend_Service_Rackspace_Servers_Image</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id de la imagen.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-shared-ip-group"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getSharedIpGroup</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve el grupo de IP compartida como instancia de <code class="classname">Zend_Service_Rackspace_Servers_SharedIpGroup</code>
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del grupo de IP compartida.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServer</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve el servidor especificado por el Id como instancia de <code class="classname">Zend_Service_Rackspace_Servers_Server</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-server-ip"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServerIp</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve las direcciones IP pública y privada de un servidor.
+                        Devuelve un arreglo asociativo que contiene las claves <span class="emphasis"><em>'public'</em></span> y <span class="emphasis"><em>'private'</em></span> para las direcciones IP.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-server-private-ip"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServerPrivateIp</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve las direcciones IP privadas del servidor.
+                        Devuelve un arreglo asociativo que contiene las direcciones IP.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.get-server-public-ip"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getServerPublicIp</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve las direcciones IP públicas del servidor.
+                        Devuelve un arreglo asociativo que contiene las direcciones IP.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.list-flavors"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">listFlavors</span>(<span class="methodparam">boolean $details=false</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los flavors disponibles como arreglo asociativo.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        Si <span class="emphasis"><em>$details</em></span> es <span class="emphasis"><em>true</em></span> devuelve una lista detallada, si es <span class="emphasis"><em>false</em></span> devuelve solo el <span class="emphasis"><em>name</em></span> y el <span class="emphasis"><em>Id</em></span> del flavor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.list-images"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">listImages</span>(<span class="methodparam">boolean $details=false</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todas las imágenes disponibles como instancia de <code class="classname">Zend_Service_Rackspace_Servers_ImageList</code>
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        Si <span class="emphasis"><em>$details</em></span> es <span class="emphasis"><em>true</em></span> devuelve una lista detallada, si es <span class="emphasis"><em>false</em></span> devuelve solo el <span class="emphasis"><em>name</em></span> y el <span class="emphasis"><em>Id</em></span> de la imagen.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.list-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">listServer</span>(<span class="methodparam">boolean $details=false</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los servidores disponibles con una nueva instancia de <code class="classname">Zend_Service_Rackspace_Servers_ServerList</code>.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        Si <span class="emphasis"><em>$details</em></span> es <span class="emphasis"><em>true</em></span> devuelve una lista detallada, si es <span class="emphasis"><em>false</em></span> devuelve solo el <span class="emphasis"><em>name</em></span> y el <span class="emphasis"><em>Id</em></span> del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.list-shared-ip-groups"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">listSharedIpGroups</span>(<span class="methodparam">boolean $details=false</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Devuelve todos los grupos de IP compartida como instancia de <code class="classname">Zend_Service_Rackspace_Servers_SharedIpGroupList</code>
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        Si <span class="emphasis"><em>$details</em></span> es <span class="emphasis"><em>true</em></span> devuelve una lista detallada, si es <span class="emphasis"><em>false</em></span> devuelve solo el <span class="emphasis"><em>name</em></span> y el <span class="emphasis"><em>Id</em></span> del grupo de IP compartida.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.reboot-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">rebootServer</span>(<span class="methodparam">string $id, boolean $hard=false</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Reinicia un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+<p>
+                        Si <span class="emphasis"><em>$hard</em></span> es <span class="emphasis"><em>false</em></span> (predeterminado) el servidor se reinicia en modo suave.
+                        Esto significa que se señaliza al sistema operativo para reiniciarse, lo que permite un apagado ordenado de
+                        todos los procesos. Si <span class="emphasis"><em>$hard</em></span> es <span class="emphasis"><em>true</em></span> el servidor se reinicia en modo forzado.
+                        Un reinicio forzado equivale a un ciclo de apagado y encendido del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.rebuild-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">rebuildServer</span>(<span class="methodparam">string $id, string $imageId</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Reconstruye un servidor. La función de reconstrucción elimina todos los datos del servidor y los reemplaza con la imagen especificada,
+                        el Id del servidor y las direcciones IP se mantendrán iguales.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$imageId</em></span> es el nuevo Id de imagen del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.resize-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">resizeServer</span>(<span class="methodparam">string $id, string $flavorId</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Redimensiona un servidor. La función de redimensionamiento convierte un servidor existente a un flavor diferente, en esencia, escalando el
+                        servidor hacia arriba o hacia abajo. El servidor original se guarda durante un período de tiempo para permitir la reversión si hay
+                        algún problema. Todos los redimensionamientos deben probarse y confirmarse explícitamente, momento en el cual el servidor
+                        original se elimina. Todos los redimensionamientos se confirman automáticamente después de 24 horas si no se
+                        confirman o revierten explícitamente.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$flavorId</em></span> es el nuevo Id de flavor del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.revert-resize-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">revertResizeServer</span>(<span class="methodparam">string $id</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Revierte el redimensionamiento de un servidor. Durante una operación de redimensionamiento, el servidor original se guarda durante un período de tiempo para permitir la
+                        reversión si hay algún problema. Si determina que hay un problema con un servidor recién redimensionado,
+                        use esta operación para revertir el redimensionamiento y volver al servidor original. Todos los redimensionamientos se
+                        confirman automáticamente después de 24 horas si no se han confirmado explícitamente ni
+                        revertido.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.share-ip-address"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">shareIpAddress</span>(<span class="methodparam">string $id, string $ip, string $groupId, boolean $configure=true</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Comparte una dirección IP para un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$ip</em></span> es la dirección IP a compartir.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$groupId</em></span> es el Id del grupo a usar.
+                    </p>
+<p>
+                        Si el atributo <span class="emphasis"><em>$configure</em></span> se establece como true, el servidor se configura
+                        con la nueva dirección, aunque la dirección no queda habilitada. Tenga en cuenta que configurar el servidor
+                        sí requiere un reinicio.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.unshare-ip-address"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">unshareIpAddress</span>(<span class="methodparam">string $id, string $ip</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Deja de compartir una dirección IP de un servidor.
+                        Devuelve <span class="emphasis"><em>true</em></span> en caso de éxito, <span class="emphasis"><em>false</em></span> en caso de error.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el Id del servidor.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$ip</em></span> es la dirección IP a compartir.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.rackspace.servers.methods.update-server"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">updateServer</span>(<span class="methodparam">string $id,string $name=null,string $password=null</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Cambia el nombre y/o la contraseña de administrador de un servidor.
+                        En caso de error el retorno es <span class="emphasis"><em>false</em></span>.
+                    </p>
+<p>
+                        <span class="emphasis"><em>$id</em></span> es el ID del servidor
+                    </p>
+<p>
+                        <span class="emphasis"><em>$name</em></span> es un parámetro opcional que especifica el nuevo nombre del servidor
+                    </p>
+<p>
+                        <span class="emphasis"><em>$password</em></span> es un parámetro opcional que especifica la nueva contraseña de administrador del servidor
+                    </p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.rackspace.servers.examples"></a>64.25.5. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.service.rackspace.servers.examples.authenticate"></a><p class="title"><b>Ejemplo 64.115. Autenticar</b></p>
+<div class="example-contents">
+<p>Comprueba si el nombre de usuario y la clave son válidos para la autenticación de Rackspace.</p>
+<pre class="programlisting">
+$user = 'username';
+$key  = 'secret key';
+
+$rackspace = new Zend_Service_Rackspace_Servers($user,$key);
+
+if ($rackspace-&gt;authenticate()) {
+    printf("Authenticated with token: %s",$rackspace-&gt;getToken());
+} else {
+    printf("ERROR: %s",$rackspace-&gt;getErrorMsg());
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.servers.examples.create-server"></a><p class="title"><b>Ejemplo 64.116. Crear un servidor con información de metadatos y subida de un archivo</b></p>
+<div class="example-contents">
+<p>
+                Crea un servidor con información de metadatos y sube el archivo <span class="emphasis"><em>build.sh</em></span>
+                desde la ruta local <span class="emphasis"><em>/home/user</em></span> a la ruta remota <span class="emphasis"><em>/root</em></span>.
+             </p>
+<pre class="programlisting">
+$data = array (
+    'name'     =&gt; 'test',
+    'imageId'  =&gt; '49',
+    'flavorId' =&gt; '1',
+);
+$metadata = array (
+    'foo' =&gt; 'bar',
+);
+$files = array (
+    '/root/build.sh' =&gt; '/home/user/build.sh',
+);
+$server= $rackspace-&gt;createServer($data,$metadata,$files);
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+$publicIp= $server-&gt;getPublicIp();
+
+printf("Server name    : %s\n",$server-&gt;getName());
+printf("Server Id      : %s\n",$server-&gt;getId());
+printf("Public IP      : %s\n",$publicIp[0]);
+printf("Admin password : %s\n",$server-&gt;getAdminPass());
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.servers.examples.reboot-server"></a><p class="title"><b>Ejemplo 64.117. Reiniciar un servidor</b></p>
+<div class="example-contents">
+<p>
+                Reinicia un servidor en modo forzado (equivale a un ciclo de apagado y encendido del servidor).
+             </p>
+<pre class="programlisting">
+$flavors= $rackspace-&gt;rebootServer('server id',true)
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+echo "The server has been rebooted successfully";
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.service.rackspace.servers.examples.list-flavors"></a><p class="title"><b>Ejemplo 64.118. Listar todos los flavors disponibles</b></p>
+<div class="example-contents">
+<p>
+                Lista todos los flavors disponibles con toda la información detallada.
+             </p>
+<pre class="programlisting">
+$flavors= $rackspace-&gt;listFlavors(true);
+
+if (!$rackspace-&gt;isSuccessful()) {
+    die('ERROR: '.$rackspace-&gt;getErrorMsg());
+}
+
+print_r($flavors);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.rackspace.files.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.recaptcha.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.24. Zend_Service_Rackspace_Files </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.26. Zend_Service_ReCaptcha</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,368 @@
+<?php $title = '37.8. Uso de Google Spreadsheets'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">37.8. Uso de Google Spreadsheets</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.gdata.docs.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 37. Zend_Gdata</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.gdata.gapps.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.gdata.spreadsheets"></a>37.8. Uso de Google Spreadsheets</h2></div></div></div>
+<p>
+        La <acronym class="acronym">API</acronym> de datos de Google Spreadsheets permite a las aplicaciones cliente ver
+        y actualizar el contenido de Spreadsheets en forma de feeds de la <acronym class="acronym">API</acronym> de datos de Google.
+        Tu aplicación cliente puede solicitar una lista de las hojas de cálculo de un usuario,
+        editar o eliminar contenido en una hoja de trabajo de Spreadsheets existente, y
+        consultar el contenido de una hoja de trabajo de Spreadsheets existente.
+    </p>
+<p>
+        Consulta <a class="ulink" href="http://code.google.com/apis/spreadsheets/overview.html" target="_top">http://code.google.com/apis/spreadsheets/overview.html</a>
+        para más información sobre la <acronym class="acronym">API</acronym> de Google Spreadsheets.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.spreadsheets.creating"></a>37.8.1. Crear una hoja de cálculo</h3></div></div></div>
+<p>
+            La <acronym class="acronym">API</acronym> de datos de Spreadsheets actualmente no proporciona una forma de
+            crear o eliminar una hoja de cálculo mediante programación.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.spreadsheets.listspreadsheets"></a>37.8.2. Obtener una lista de hojas de cálculo</h3></div></div></div>
+<p>
+            Puedes obtener una lista de hojas de cálculo de un usuario en particular utilizando
+            el método <code class="methodname">getSpreadsheetFeed()</code> del servicio de Spreadsheets.
+            El servicio devolverá un objeto
+            <code class="classname">Zend_Gdata_Spreadsheets_SpreadsheetFeed</code>
+            que contiene una lista de hojas de cálculo asociadas al usuario
+            autenticado.
+        </p>
+<pre class="programlisting">
+$service = Zend_Gdata_Spreadsheets::AUTH_SERVICE_NAME;
+$client = Zend_Gdata_ClientLogin::getHttpClient($user, $pass, $service);
+$spreadsheetService = new Zend_Gdata_Spreadsheets($client);
+$feed = $spreadsheetService-&gt;getSpreadsheetFeed();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.spreadsheets.listworksheets"></a>37.8.3. Obtener una lista de hojas de trabajo</h3></div></div></div>
+<p>
+            Una hoja de cálculo dada puede contener varias hojas de trabajo. Para cada
+            hoja de cálculo, existe un metafeed de hojas de trabajo que enumera todas las
+            hojas de trabajo de esa hoja de cálculo.
+        </p>
+<p>
+            Dada la clave de la hoja de cálculo obtenida del &lt;id&gt; de un
+            objeto <code class="classname">Zend_Gdata_Spreadsheets_SpreadsheetEntry</code>
+            que ya hayas recuperado, puedes obtener un feed
+            que contiene una lista de hojas de trabajo asociadas a esa hoja de cálculo.
+        </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_DocumentQuery();
+$query-&gt;setSpreadsheetKey($spreadsheetKey);
+$feed = $spreadsheetService-&gt;getWorksheetFeed($query);
+</pre>
+<p>
+            El objeto feed <code class="classname">Zend_Gdata_Spreadsheets_WorksheetFeed</code>
+            resultante representa la respuesta del servidor. Entre otras
+            cosas, este feed contiene una lista de objetos
+            <code class="classname">Zend_Gdata_Spreadsheets_WorksheetEntry </code>
+            (<span class="command"><strong>$feed-&gt;entries</strong></span>), cada uno de los cuales representa
+            una única hoja de trabajo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds"></a>37.8.4. Interactuar con feeds basados en listas</h3></div></div></div>
+<p>
+            Una hoja de trabajo dada generalmente contiene varias filas, cada una
+            con varias celdas. Puedes solicitar datos de la
+            hoja de trabajo ya sea como un feed basado en listas, en el cual cada entrada
+            representa una fila, o como un feed basado en celdas, en el cual cada
+            entrada representa una única celda. Para información sobre feeds basados en celdas, consulta <a class="link" href="zend.gdata.spreadsheets.phtml#zend.gdata.spreadsheets.cellfeeds" title="37.8.5. Interactuar con feeds basados en celdas">Interactuar con feeds
+                basados en celdas</a>.
+        </p>
+<p>
+            Las siguientes secciones describen cómo obtener un feed basado en listas,
+            añadir una fila a una hoja de trabajo y enviar consultas con varios parámetros
+            de consulta.
+        </p>
+<p>
+            El feed de listas hace algunas suposiciones sobre cómo están organizados
+            los datos en la hoja de cálculo.
+        </p>
+<p>
+            En particular, el feed de listas trata la primera fila de la
+            hoja de trabajo como una fila de encabezado; Spreadsheets crea dinámicamente
+            elementos <acronym class="acronym">XML</acronym> con nombres derivados del contenido de las celdas de la fila de encabezado.
+            Los usuarios que deseen proporcionar feeds Gdata no deben colocar ningún dato
+            que no sean los encabezados de columna en la primera fila de una hoja de trabajo.
+        </p>
+<p>
+            El feed de listas contiene todas las filas después de la primera fila hasta la
+            primera fila en blanco. La primera fila en blanco termina el conjunto de datos.
+            Si los datos esperados no aparecen en un feed, revisa la hoja de trabajo
+            manualmente para comprobar si hay una fila en blanco inesperada en medio
+            de los datos. En particular, si la segunda fila de la hoja de cálculo está
+            en blanco, el feed de listas no contendrá datos.
+        </p>
+<p>
+            Una fila en un feed de listas es tan ancha en columnas como la propia hoja de trabajo.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.get"></a>37.8.4.1. Obtener un feed basado en listas</h4></div></div></div>
+<p>
+                Para obtener el feed de listas de una hoja de trabajo, usa el
+                método <code class="methodname">getListFeed()</code> del servicio de Spreadsheets.
+            </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_ListQuery();
+$query-&gt;setSpreadsheetKey($spreadsheetKey);
+$query-&gt;setWorksheetId($worksheetId);
+$listFeed = $spreadsheetService-&gt;getListFeed($query);
+</pre>
+<p>
+                El objeto <code class="classname">Zend_Gdata_Spreadsheets_ListFeed</code>
+                resultante <code class="varname">$listfeed</code> representa una respuesta del
+                servidor. Entre otras cosas, este feed contiene un array de objetos
+                <code class="classname">Zend_Gdata_Spreadsheets_ListEntry</code>
+                (<span class="command"><strong>$listFeed-&gt;entries</strong></span>), cada uno de los cuales representa
+                una única fila en una hoja de trabajo.
+            </p>
+<p>
+                Cada <code class="classname">Zend_Gdata_Spreadsheets_ListEntry</code> contiene un
+                array, <span class="property">custom</span>, que contiene los datos de esa
+                fila. Puedes extraer y mostrar este array:
+            </p>
+<pre class="programlisting">
+$rowData = $listFeed-&gt;entries[1]-&gt;getCustom();
+foreach($rowData as $customEntry) {
+  echo $customEntry-&gt;getColumnName() . " = " . $customEntry-&gt;getText();
+}
+</pre>
+<p>
+                Una versión alternativa de este array, <span class="property">customByName</span>,
+                permite el acceso directo a las celdas de una entrada por nombre. Esto es
+                conveniente cuando se intenta acceder a un encabezado específico:
+            </p>
+<pre class="programlisting">
+$customEntry = $listFeed-&gt;entries[1]-&gt;getCustomByName('my_heading');
+echo $customEntry-&gt;getColumnName() . " = " . $customEntry-&gt;getText();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.reverse"></a>37.8.4.2. Ordenar filas de forma inversa</h4></div></div></div>
+<p>
+                Por defecto, las filas en el feed aparecen en el mismo orden que las
+                filas correspondientes en la interfaz gráfica; es decir, están en orden por
+                número de fila. Para obtener las filas en orden inverso, establece la propiedad
+                reverse del objeto <code class="classname">Zend_Gdata_Spreadsheets_ListQuery</code>
+                en <code class="constant">TRUE</code>:
+            </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_ListQuery();
+$query-&gt;setSpreadsheetKey($spreadsheetKey);
+$query-&gt;setWorksheetId($worksheetId);
+$query-&gt;setReverse('true');
+$listFeed = $spreadsheetService-&gt;getListFeed($query);
+</pre>
+<p>
+                Ten en cuenta que si deseas ordenar (u ordenar de forma inversa) por una
+                columna en particular, en lugar de por posición en la hoja de trabajo,
+                puedes establecer el valor <span class="property">orderby</span> del
+                objeto <code class="classname">Zend_Gdata_Spreadsheets_ListQuery</code> como
+                <span class="emphasis"><em>column:&lt;el encabezado de esa columna&gt;</em></span>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.sq"></a>37.8.4.3. Enviar una consulta estructurada</h4></div></div></div>
+<p>
+                Puedes establecer el valor <span class="property">sq</span> de un
+                <code class="classname">Zend_Gdata_Spreadsheets_ListQuery</code> para producir un feed
+                con entradas que cumplan los criterios especificados. Por ejemplo, supón que tienes
+                una hoja de trabajo que contiene datos de personal, en la que cada fila representa
+                información sobre una única persona. Deseas obtener todas las filas
+                en las que el nombre de la persona sea "John" y la edad de la persona sea mayor
+                de 25. Para hacerlo, establecerías <span class="property">sq</span> de la siguiente forma:
+            </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_ListQuery();
+$query-&gt;setSpreadsheetKey($spreadsheetKey);
+$query-&gt;setWorksheetId($worksheetId);
+$query-&gt;setSpreadsheetQuery('name=John and age&gt;25');
+$listFeed = $spreadsheetService-&gt;getListFeed($query);
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.addrow"></a>37.8.4.4. Añadir una fila</h4></div></div></div>
+<p>
+                Se pueden añadir filas a una hoja de cálculo utilizando el
+                método <code class="methodname">insertRow()</code> del servicio de Spreadsheet.
+            </p>
+<pre class="programlisting">
+$insertedListEntry = $spreadsheetService-&gt;insertRow($rowData,
+                                                    $spreadsheetKey,
+                                                    $worksheetId);
+</pre>
+<p>
+                El parámetro <code class="varname">$rowData</code> contiene un array de claves de columna
+                asociadas a valores de datos. El método devuelve un objeto
+                <code class="classname">Zend_Gdata_Spreadsheets_SpreadsheetsEntry</code>
+                que representa la fila insertada.
+            </p>
+<p>
+                Spreadsheets inserta la nueva fila inmediatamente después de la última fila
+                que aparece en el feed basado en listas, es decir,
+                inmediatamente antes de la primera fila completamente en blanco.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.editrow"></a>37.8.4.5. Editar una fila</h4></div></div></div>
+<p>
+                Una vez obtenido un objeto <code class="classname">Zend_Gdata_Spreadsheets_ListEntry</code>,
+                sus filas pueden actualizarse utilizando el
+                método <code class="methodname">updateRow()</code> del servicio de Spreadsheet.
+            </p>
+<pre class="programlisting">
+$updatedListEntry = $spreadsheetService-&gt;updateRow($oldListEntry,
+                                                   $newRowData);
+</pre>
+<p>
+                El parámetro <code class="varname">$oldListEntry</code> contiene la entrada de lista
+                a actualizar. <code class="varname">$newRowData</code> contiene un array de
+                claves de columna asociadas a valores de datos, que se usarán como los nuevos datos de la fila.
+                El método devuelve un objeto
+                <code class="classname">Zend_Gdata_Spreadsheets_SpreadsheetsEntry</code>
+                que representa la fila actualizada.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.listfeeds.deleterow"></a>37.8.4.6. Eliminar una fila</h4></div></div></div>
+<p>
+                Para eliminar una fila, simplemente invoca <code class="methodname">deleteRow()</code> en el
+                objeto <code class="classname">Zend_Gdata_Spreadsheets</code> con la entrada existente
+                que se desea eliminar:
+            </p>
+<pre class="programlisting">
+$spreadsheetService-&gt;deleteRow($listEntry);
+</pre>
+<p>
+                Alternativamente, puedes llamar al método <code class="methodname">delete()</code> de
+                la propia entrada:
+            </p>
+<pre class="programlisting">
+$listEntry-&gt;delete();
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.gdata.spreadsheets.cellfeeds"></a>37.8.5. Interactuar con feeds basados en celdas</h3></div></div></div>
+<p>
+            En un feed basado en celdas, cada entrada representa una única celda.
+        </p>
+<p>
+            Ten en cuenta que no recomendamos interactuar con un feed basado en celdas
+            y un feed basado en listas para la misma hoja de trabajo al mismo tiempo.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.cellfeeds.get"></a>37.8.5.1. Obtener un feed basado en celdas</h4></div></div></div>
+<p>
+                Para obtener el feed de celdas de una hoja de trabajo, usa el
+                método <code class="methodname">getCellFeed()</code> del servicio de Spreadsheets.
+            </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_CellQuery();
+$query-&gt;setSpreadsheetKey($spreadsheetKey);
+$query-&gt;setWorksheetId($worksheetId);
+$cellFeed = $spreadsheetService-&gt;getCellFeed($query);
+</pre>
+<p>
+                El objeto <code class="classname">Zend_Gdata_Spreadsheets_CellFeed</code>
+                resultante <code class="varname">$cellFeed</code> representa una respuesta del
+                servidor. Entre otras cosas, este feed contiene un array de objetos
+                <code class="classname">Zend_Gdata_Spreadsheets_CellEntry</code>
+                (<span class="command"><strong>$cellFeed&gt;entries</strong></span>), cada uno de los cuales representa
+                una única celda en una hoja de trabajo. Puedes mostrar esta información:
+            </p>
+<pre class="programlisting">
+foreach($cellFeed as $cellEntry) {
+  $row = $cellEntry-&gt;cell-&gt;getRow();
+  $col = $cellEntry-&gt;cell-&gt;getColumn();
+  $val = $cellEntry-&gt;cell-&gt;getText();
+  echo "$row, $col = $val\n";
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.cellfeeds.cellrangequery"></a>37.8.5.2. Enviar una consulta de rango de celdas</h4></div></div></div>
+<p>
+                Supón que deseas obtener las celdas de la primera columna
+                de una hoja de trabajo. Puedes solicitar un feed de celdas que contenga solo
+                esa columna de la siguiente manera:
+            </p>
+<pre class="programlisting">
+$query = new Zend_Gdata_Spreadsheets_CellQuery();
+$query-&gt;setMinCol(1);
+$query-&gt;setMaxCol(1);
+$query-&gt;setMinRow(2);
+$feed = $spreadsheetService-&gt;getCellsFeed($query);
+</pre>
+<p>
+                Esto solicita todos los datos en la columna 1, comenzando por la fila 2.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.gdata.spreadsheets.cellfeeds.updatecell"></a>37.8.5.3. Cambiar el contenido de una celda</h4></div></div></div>
+<p>
+                Para modificar el contenido de una celda, llama a
+                <code class="methodname">updateCell()</code> con la fila, la columna
+                y el nuevo valor de la celda.
+            </p>
+<pre class="programlisting">
+$updatedCell = $spreadsheetService-&gt;updateCell($row,
+                                               $col,
+                                               $inputValue,
+                                               $spreadsheetKey,
+                                               $worksheetId);
+</pre>
+<p>
+                Los nuevos datos se colocan en la celda especificada de la hoja de trabajo.
+                Si la celda especificada ya contiene datos, serán
+                sobrescritos. Nota: Usa <code class="methodname">updateCell()</code> para cambiar
+                los datos de una celda, incluso si la celda está vacía.
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.gdata.docs.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.gdata.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.gdata.gapps.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">37.7. Uso de la API de datos de listas de Google Documents </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 37.9. Uso de Google Apps Provisioning</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

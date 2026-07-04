@@ -1,0 +1,123 @@
+<?php $title = 'F.3. Rendimiento de Zend_Db'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">F.3. Rendimiento de Zend_Db</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="performance.classloading.phtml">Anterior</a> </td>
+<th width="60%" align="center">Apéndice F. Guía de rendimiento de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="performance.localization.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="performance.database"></a>F.3. Rendimiento de Zend_Db</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Db</code> es una capa de abstracción de base de datos, y está
+        pensada para proporcionar una <acronym class="acronym">API</acronym> común para las operaciones
+        <acronym class="acronym">SQL</acronym>. <code class="classname">Zend_Db_Table</code> es un
+        Table Data Gateway, pensado para abstraer las operaciones comunes de base de datos a nivel de
+        tabla. Debido a su naturaleza abstracta y a la "magia" que realizan internamente para llevar a
+        cabo sus operaciones, en ocasiones pueden introducir sobrecarga en el rendimiento.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.database.tableMetadata"></a>F.3.1. ¿Cómo puedo reducir la sobrecarga introducida por Zend_Db_Table al
+            obtener los metadatos de la tabla?</h3></div></div></div>
+<p>
+            Con el fin de mantener el uso lo más sencillo posible, y también para soportar
+            esquemas en constante cambio durante el desarrollo,
+            <code class="classname">Zend_Db_Table</code> realiza cierta magia internamente: en el
+            primer uso, obtiene el esquema de la tabla y lo almacena en miembros del
+            objeto. Esta operación suele ser costosa, independientemente de la
+            base de datos, lo que puede contribuir a cuellos de botella en producción.
+        </p>
+<p>
+            Afortunadamente, existen técnicas para mejorar la situación.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.database.tableMetadata.cache"></a>F.3.1.1. Usar la caché de metadatos</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Db_Table</code> puede utilizar opcionalmente
+                <code class="classname">Zend_Cache</code> para almacenar en caché los metadatos de la
+                tabla. Esto suele ser más rápido de acceder y menos costoso que obtener los
+                metadatos directamente desde la base de datos.
+            </p>
+<p>
+                La <a class="link" href="zend.db.table.phtml#zend.db.table.metadata.caching" title="27.5.12. Caching Table Metadata">documentación de <code class="classname">Zend_Db_Table
+                </code> incluye información sobre el almacenamiento en caché de metadatos</a>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.database.tableMetadata.hardcoding"></a>F.3.1.2. Codificar directamente los metadatos en la definición de la tabla</h4></div></div></div>
+<p>
+                A partir de la versión 1.7.0, <code class="classname">Zend_Db_Table</code> también ofrece <a class="link" href="zend.db.table.phtml#zend.db.table.metadata.caching.hardcoding" title="27.5.12.1. Hardcoding Table Metadata">soporte
+                para codificar directamente los metadatos en la definición de la tabla</a>. Este
+                es un caso de uso avanzado, y solo debería usarse cuando sepa que el
+                esquema de la tabla es poco probable que cambie, o que es capaz de mantener
+                las definiciones actualizadas.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="performance.database.select"></a>F.3.2.
+            El SQL generado con Zend_Db_Select no está aprovechando mis índices; ¿cómo puedo mejorarlo?
+        </h3></div></div></div>
+<p>
+            <code class="classname">Zend_Db_Select</code> es relativamente bueno en su tarea. Sin
+            embargo, si está realizando consultas complejas que requieren joins o
+            subconsultas, a menudo puede resultar bastante ingenuo.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="performance.database.select.writeyourown"></a>F.3.2.1. Escriba su propio SQL optimizado</h4></div></div></div>
+<p>
+                La única respuesta real es escribir su propio <acronym class="acronym">SQL</acronym>;
+                <code class="classname">Zend_Db</code> no requiere el uso de
+                <code class="classname">Zend_Db_Select</code>, por lo que proporcionar sus propias
+                sentencias <acronym class="acronym">SQL</acronym> select optimizadas es un enfoque
+                perfectamente legítimo,
+            </p>
+<p>
+                Ejecute <code class="constant">EXPLAIN</code> en sus consultas, y pruebe una variedad de
+                enfoques hasta que pueda aprovechar de forma fiable sus índices de la manera más
+                eficiente posible, y luego codifique directamente el <acronym class="acronym">SQL</acronym>
+                como una propiedad o constante de clase.
+            </p>
+<p>
+                Si el <acronym class="acronym">SQL</acronym> requiere argumentos variables, proporcione
+                marcadores de posición en el <acronym class="acronym">SQL</acronym>, y utilice una
+                combinación de <code class="methodname">vsprintf()</code> y
+                <code class="methodname">array_map()</code> para inyectar los valores en el
+                <acronym class="acronym">SQL</acronym>:
+            </p>
+<pre class="programlisting">
+// $adapter is the DB adapter. In Zend_Db_Table, retrieve
+// it using $this-&gt;getAdapter().
+$sql = vsprintf(
+    self::SELECT_FOO,
+    array_map(array($adapter, 'quoteInto'), $values)
+);
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="performance.classloading.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="performance.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="performance.localization.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">F.2. Carga de clases </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> F.4. Internacionalización (i18n) y localización (l10n)</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

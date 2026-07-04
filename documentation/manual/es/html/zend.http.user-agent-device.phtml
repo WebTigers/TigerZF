@@ -1,0 +1,395 @@
+<?php $title = '38.7. La interfaz UserAgent Device'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">38.7. La interfaz UserAgent Device</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.http.user-agent.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 38. Zend_Http</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.http.user-agent-features.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.http.user-agent-device"></a>38.7. La interfaz UserAgent Device</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-device.intro"></a>38.7.1. Resumen</h3></div></div></div>
+<p>
+            Una vez que el User-Agent ha sido analizado y se han obtenido las capacidades desde el <a class="link" href="zend.http.user-agent-features.phtml" title="38.8. The UserAgent Features Adapter">adaptador Features</a>, se le
+            devolverá un objeto que representa el dispositivo de navegador descubierto. Esta interfaz
+            describe las diversas capacidades que ahora puede introspeccionar.
+        </p>
+<p>
+            Además, las diversas clases de dispositivo definen algoritmos para determinar la
+            coincidencia de los dispositivos que describen. Al implementar esta interfaz, puede proporcionar lógica
+            adicional en torno a estas capacidades.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-device.quick-start"></a>38.7.2. Inicio rápido</h3></div></div></div>
+<p>
+            La interfaz <code class="interfacename">Zend_Http_UserAgent_Device</code> define los
+            siguientes métodos.
+        </p>
+<pre class="programlisting">
+interface Zend_Http_UserAgent_Device extends Serializable
+{
+    public function __construct($userAgent = null, array $server = array(), array $config = array());
+    public static function match($userAgent, $server);
+    public function getAllFeatures();
+    public function getAllGroups();
+    public function getBrowser();
+    public function getBrowserVersion();
+    public function getGroup($group);
+    public function getImageFormatSupport();
+    public function getImages();
+    public function getMaxImageHeight();
+    public function getMaxImageWidth();
+    public function getPhysicalScreenHeight();
+    public function getPhysicalScreenWidth();
+    public function getPreferredMarkup();
+    public function getUserAgent();
+    public function getXhtmlSupportLevel();
+    public function hasFlashSupport();
+    public function hasPdfSupport();
+    public function hasPhoneNumber();
+    public function httpsSupport();
+}
+</pre>
+<p>
+            La función estática <code class="methodname">match()</code> debe utilizarse para determinar si
+            el User-Agent proporcionado y el entorno (representado por la variable
+            <code class="varname">$server</code>) coinciden con este dispositivo. Si es así, la clase
+            <code class="classname">Zend_Http_UserAgent</code>
+            creará entonces una instancia de la clase, pasándole el User-Agent,
+            el array <code class="varname">$server</code>, y cualquier configuración disponible; en ese momento, se
+            espera que la clase Device consulte con un adaptador de características, si está presente, y
+            se rellene con las capacidades descubiertas.
+        </p>
+<p>
+            En la práctica, es probable que extienda
+            <code class="classname">Zend_Http_UserAgent_AbstractDevice</code>, que proporciona funcionalidad
+            para descubrir capacidades a partir de la propia cadena User-Agent, así como
+            para descubrir y consultar un <a class="link" href="zend.http.user-agent-features.phtml" title="38.8. The UserAgent Features Adapter">adaptador Features</a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-device.options"></a>38.7.3. Opciones de configuración</h3></div></div></div>
+<p>
+            Las opciones de configuración se definen por cada dispositivo. Las siguientes opciones están
+            definidas en <code class="classname">Zend_Http_UserAgent_AbstractDevice</code>. Como en todas las opciones,
+            el carácter "." representa un nivel adicional de profundidad en el array de configuración.
+        </p>
+<div class="variablelist">
+<p class="title"><b>Opciones del dispositivo</b></p>
+<dl class="variablelist">
+<dt><span class="term">features.classname</span></dt>
+<dd><p>
+                        El nombre de una clase de <a class="link" href="zend.http.user-agent-features.phtml" title="38.8. The UserAgent Features Adapter">adaptador
+                            Features</a> que haya sido cargada previamente o que se pueda
+                        descubrir mediante autocarga, o que se use junto con la opción
+                        <code class="varname">features.path</code>. Esta clase debe implementar la
+                        interfaz <code class="interfacename">Zend_Http_UserAgent_Features_Adapter</code>.
+                    </p></dd>
+<dt><span class="term">features.path</span></dt>
+<dd><p>
+                        Si se proporciona, la ruta del sistema de archivos a la clase de adaptador de
+                        características que se está usando. La ruta debe ser una ruta absoluta o
+                        descubrible a través de <code class="varname">include_path</code>.
+                    </p></dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-device.methods"></a>38.7.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.http.user-agent-device.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$userAgent = null, array $server = array(), array $config =
+                                array()</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Espera una cadena User-Agent, un array que representa el entorno HTTP, y un
+                        array de valores de configuración. Todos los valores son opcionales, ya que pueden
+                        rellenarse durante la deserialización.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.match"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">match</span>(<span class="methodparam">$userAgent, $server</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Este método es estático.
+                    </p>
+<p>
+                        Dada la cadena <code class="varname">$userAgent</code> y un array que representa las
+                        cabeceras HTTP proporcionadas en la solicitud, determine si coinciden con las capacidades
+                        de este dispositivo. Este método debe devolver un valor booleano.
+                    </p>
+</dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-all-features"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getAllFeatures</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve un array de pares clave/valor que representan las características soportadas por
+                        esta instancia de dispositivo.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-all-groups"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getAllGroups</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Similar a <code class="methodname">getAllFeatures()</code>, este método obtiene todas las
+                        características, pero agrupadas por tipo.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.has-feature"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">hasFeature</span>(<span class="methodparam">$feature</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Consulta al dispositivo para determinar si contiene información sobre una
+                        característica específica.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-feature"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getFeature</span>(<span class="methodparam">$feature</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el valor de una característica específica del dispositivo, si está presente. Habitualmente,
+                        esto devolverá un booleano <code class="constant">false</code> o un
+                        valor <code class="constant">null</code> si la característica no está definida.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-browser"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getBrowser</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Devuelve la cadena del navegador tal como se descubrió a partir de la cadena User-Agent.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-browser-version"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getBrowserVersion</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la versión del navegador tal como se descubrió a partir de la cadena User-Agent.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-group"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getGroup</span>(<span class="methodparam">$group</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Obtiene todas las características de un grupo de características determinado.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-image-format-support"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getImageFormatSupport</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera una lista de los tipos de imagen soportados.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-images"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getImages</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Alias de <code class="methodname">getImageFormatSupport()</code>.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-max-image-height"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getMaxImageHeight</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la altura máxima de imagen soportada para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-max-image-width"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getMaxImageWidth</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el ancho máximo de imagen soportado para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-physical-screen-height"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getPhysicalScreenHeight</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la altura física de pantalla para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-physical-screen-width"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getPhysicalScreenWidth</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el ancho físico de pantalla para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-preferred-markup"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getPreferredMarkup</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera el formato de marcado preferido para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-user-agent"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getUserAgent</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la cadena User-Agent para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.get-xhtml-support-level"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getXhtmlSupportLevel</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera la versión de X/HTML soportada para la instancia de dispositivo actual.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.has-flash-support"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">hasFlashSupport</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Determina si la instancia de dispositivo actual soporta Flash.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.has-pdf-support"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">hasPdfSupport</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Determina si la instancia de dispositivo actual soporta PDF.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.has-phone-number"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">hasPhoneNumber</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Determina si el dispositivo tiene un número de teléfono asociado. Nota: no
+                        recupera el número de teléfono. Esto puede ser útil para determinar si el dispositivo
+                        es un teléfono móvil frente a otro dispositivo con capacidad inalámbrica.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-device.methods.https-support"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">httpsSupport</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Determina si la instancia de dispositivo actual soporta HTTPS.
+                    </p></dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-device.examples"></a>38.7.5. Ejemplos</h3></div></div></div>
+<div class="example">
+<a name="zend.http.user-agent-device.examples.support"></a><p class="title"><b>Ejemplo 38.34. Determinar las características soportadas</b></p>
+<div class="example-contents">
+<p>
+                Puede que desee dirigir al usuario a áreas específicas de su sitio en función de las características
+                soportadas por el dispositivo que está utilizando. Por ejemplo, si una aplicación en particular funciona solo
+                en Flash, podría dirigir a un dispositivo sin capacidad Flash a una página que indique que la
+                aplicación no funcionará en su dispositivo; o para un dispositivo que no admite HTTPS,
+                podría indicar que ciertas acciones, como las compras, no están disponibles.
+            </p>
+<pre class="programlisting">
+$userAgent = new Zend_Http_UserAgent();
+$device    = $userAgent-&gt;getDevice();
+
+// Redirect to a Flash version of the app:
+if ($device-&gt;hasFlashSupport()) {
+    header('Location: /flash/app');
+    exit;
+}
+
+// Determine whether to show a "purchase" link:
+if ($device-&gt;httpsSupport()) {
+    echo '&lt;a href="https://store-site.com/purchase"&gt;Purchase!&lt;/a&gt;';
+} else {
+    echo 'Purchasing is unavailable on this device.';
+}
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.http.user-agent-device.examples.images"></a><p class="title"><b>Ejemplo 38.35. Escalado dinámico de imágenes</b></p>
+<div class="example-contents">
+<p>
+                Puede que desee alterar los tamaños de imagen presentes para lograr un diseño específico
+                en dispositivos móviles. Puede utilizar una variedad de métodos en el objeto de dispositivo para lograr
+                esto.
+            </p>
+<pre class="programlisting">
+$userAgent = new Zend_Http_UserAgent();
+$device    = $userAgent-&gt;getDevice();
+
+// Get the maximum image width and height
+$maxWidth  = $device-&gt;getMaxImageWidth();
+$maxHeight = $device-&gt;getMaxImageHeight();
+
+// Create an &lt;img&gt; tag with appropriate sizes
+echo '&lt;img src="/images/foo.png"';
+if ((null !== $maxWidth) &amp;&amp; ($maxWidth &lt; 328)) {
+    echo ' width="' . $maxWidth . '"';
+}
+if ((null !== $maxHeight) &amp;&amp; ($maxHeight &lt; 400)) {
+    echo ' height="' . $maxHeight . '"';
+}
+echo '/&gt;';
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Markup- based scaling is not ideal">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">El escalado basado en marcado no es lo ideal</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El escalado basado en marcado, como en el ejemplo anterior, no es el mejor enfoque, ya que
+                implica que la imagen a tamaño completo sigue entregándose al dispositivo. Un mejor
+                enfoque es preescalar sus imágenes a una variedad de tamaños que representen los
+                dispositivos que desea soportar, y luego usar las capacidades del dispositivo para determinar
+                qué imagen usar.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.http.user-agent.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.http.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.http.user-agent-features.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">38.6. Zend_Http_UserAgent </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 38.8. El adaptador UserAgent Features</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

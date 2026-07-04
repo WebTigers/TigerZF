@@ -1,0 +1,109 @@
+<?php $title = '10.4. Indexación'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">10.4. Indexación</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.lucene.index-opening.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 10. Primeros pasos con Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.lucene.searching.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.lucene.indexing"></a>10.4. Indexación</h2></div></div></div>
+<p>
+        La indexación se realiza añadiendo un nuevo documento a un índice existente o nuevo:
+    </p>
+<pre class="programlisting">
+$index-&gt;addDocument($doc);
+</pre>
+<p>
+        Hay dos formas de crear un objeto documento. La primera es hacerlo manualmente.
+    </p>
+<div class="example">
+<a name="learning.lucene.indexing.doc-creation"></a><p class="title"><b>Ejemplo 10.3. Construcción manual de un documento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$doc = new Zend_Search_Lucene_Document();
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('url', $docUrl));
+$doc-&gt;addField(Zend_Search_Lucene_Field::Text('title', $docTitle));
+$doc-&gt;addField(Zend_Search_Lucene_Field::unStored('contents', $docBody));
+$doc-&gt;addField(Zend_Search_Lucene_Field::binary('avatar', $avatarData));
+</pre></div>
+</div>
+<br class="example-break"><p>
+        El segundo método es cargarlo desde archivos <acronym class="acronym">HTML</acronym> o de Microsoft Office 2007:
+    </p>
+<div class="example">
+<a name="learning.lucene.indexing.doc-loading"></a><p class="title"><b>Ejemplo 10.4. Carga de un documento</b></p>
+<div class="example-contents"><pre class="programlisting">
+$doc = Zend_Search_Lucene_Document_Html::loadHTML($htmlString);
+$doc = Zend_Search_Lucene_Document_Docx::loadDocxFile($path);
+$doc = Zend_Search_Lucene_Document_Pptx::loadPptFile($path);
+$doc = Zend_Search_Lucene_Document_Xlsx::loadXlsxFile($path);
+</pre></div>
+</div>
+<br class="example-break"><p>
+        Si un documento se carga desde uno de los formatos soportados, aún puede extenderse manualmente
+        con nuevos campos definidos por el usuario.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.lucene.indexing.policy"></a>10.4.1. Política de indexación</h3></div></div></div>
+<p>
+            Debería definir la política de indexación dentro del diseño arquitectónico de su aplicación.
+        </p>
+<p>
+            Puede que necesite una configuración de indexación bajo demanda (algo similar a un sistema
+            <acronym class="acronym">OLTP</acronym>). En tales sistemas, habitualmente se añade un documento por cada
+            petición del usuario. En ese caso, la opción <span class="emphasis"><em>MaxBufferedDocs</em></span> no afectará al
+            sistema. Por otro lado, <span class="emphasis"><em>MaxMergeDocs</em></span> resulta realmente útil, ya que
+            permite limitar el tiempo máximo de ejecución del script. <span class="emphasis"><em>MergeFactor</em></span> debería
+            establecerse en un valor que mantenga el equilibrio entre el tiempo medio de indexación (que
+            también se ve afectado por el tiempo medio de auto-optimización) y el rendimiento de búsqueda
+            (el nivel de optimización del índice depende del número de segmentos).
+        </p>
+<p>
+            Si va a realizar principalmente actualizaciones de índice por lotes, su configuración debería
+            usar una opción <span class="emphasis"><em>MaxBufferedDocs</em></span> establecida en el valor máximo soportado por
+            la cantidad de memoria disponible. <span class="emphasis"><em>MaxMergeDocs</em></span> y
+            <span class="emphasis"><em>MergeFactor</em></span> deben establecerse en valores que reduzcan al máximo
+            posible la intervención de la auto-optimización <a href="#ftn.id3391" class="footnote" name="id3391"><sup class="footnote">[5]</sup></a>. Debería aplicarse una
+            optimización completa del índice tras la indexación.
+        </p>
+<div class="example">
+<a name="learning.lucene.indexing.optimization"></a><p class="title"><b>Ejemplo 10.5. Optimización del índice</b></p>
+<div class="example-contents"><pre class="programlisting">
+$index-&gt;optimize();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            En algunas configuraciones, resulta más eficaz serializar las actualizaciones del índice
+            organizando las peticiones de actualización en una cola y procesando varias peticiones de
+            actualización en una sola ejecución del script. Esto reduce la sobrecarga de apertura del
+            índice y permite aprovechar el almacenamiento en búfer de documentos del índice.
+        </p>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id3391" class="footnote"><p><a href="#id3391" class="para"><sup class="para">[5] </sup></a>Un límite adicional es el número máximo de
+                    manejadores de archivos que soporta el sistema operativo para operaciones
+                    concurrentes abiertas</p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.lucene.index-opening.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.lucene.searching.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">10.3. Apertura y creación del índice </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 10.5. Búsqueda</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

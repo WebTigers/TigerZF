@@ -1,0 +1,94 @@
+<?php $title = '18.2. Funcionamiento de Captcha'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">18.2. Funcionamiento de Captcha</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.captcha.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 18. Zend_Captcha</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.captcha.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.captcha.operation"></a>18.2. Funcionamiento de Captcha</h2></div></div></div>
+<p>
+        Todos los adaptadores <acronym class="acronym">CAPTCHA</acronym> implementan
+        <code class="classname">Zend_Captcha_Adapter</code>, que tiene el siguiente aspecto:
+    </p>
+<pre class="programlisting">
+interface Zend_Captcha_Adapter extends Zend_Validate_Interface
+{
+    public function generate();
+
+    public function render(Zend_View $view, $element = null);
+
+    public function setName($name);
+
+    public function getName();
+
+    public function getDecorator();
+
+    // Additionally, to satisfy Zend_Validate_Interface:
+    public function isValid($value);
+
+    public function getMessages();
+
+    public function getErrors();
+}
+</pre>
+<p>
+        Los métodos setter y getter del nombre se usan para especificar y recuperar el
+        identificador del <acronym class="acronym">CAPTCHA</acronym>. <code class="methodname">getDecorator()</code> puede usarse
+        para especificar un decorador de <code class="classname">Zend_Form</code> ya sea por nombre o devolviendo un
+        objeto decorador real. Los métodos más interesantes son
+        <code class="methodname">generate()</code> y <code class="methodname">render()</code>.
+        <code class="methodname">generate()</code> se usa para crear el token
+        <acronym class="acronym">CAPTCHA</acronym>. Este proceso normalmente almacenará el token en la sesión para que pueda
+        compararlo en solicitudes posteriores. <code class="methodname">render()</code> se usa para renderizar la
+        información que representa el <acronym class="acronym">CAPTCHA</acronym>, ya sea una imagen, un figlet, un
+        problema lógico, u otro tipo de <acronym class="acronym">CAPTCHA</acronym>.
+    </p>
+<p>
+        Un caso de uso típico podría verse como el siguiente:
+    </p>
+<pre class="programlisting">
+// Creating a Zend_View instance
+$view = new Zend_View();
+
+// Originating request:
+$captcha = new Zend_Captcha_Figlet(array(
+    'name' =&gt; 'foo',
+    'wordLen' =&gt; 6,
+    'timeout' =&gt; 300,
+));
+
+$id = $captcha-&gt;generate();
+echo "&lt;form method=\"post\" action=\"\"&gt;";
+echo $captcha-&gt;render($view);
+echo "&lt;/form&gt;";
+
+// On subsequent request:
+// Assume captcha setup as before, the value of $_POST['foo']
+// would be key/value array: id =&gt; captcha ID, input =&gt; captcha value
+if ($captcha-&gt;isValid($_POST['foo'], $_POST)) {
+    // Validated!
+}
+</pre>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.captcha.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.captcha.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.captcha.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 18. Zend_Captcha </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 18.3. Adaptadores CAPTCHA</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

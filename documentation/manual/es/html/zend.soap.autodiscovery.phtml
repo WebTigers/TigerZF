@@ -1,0 +1,382 @@
+<?php $title = '66.4. AutoDiscovery'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">66.4. AutoDiscovery</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.soap.wsdl.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 66. Zend_Soap</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.tag.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.soap.autodiscovery"></a>66.4. AutoDiscovery</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.autodiscovery.introduction"></a>66.4.1. Introducción a AutoDiscovery</h3></div></div></div>
+<p>
+            La funcionalidad de <acronym class="acronym">SOAP</acronym> implementada dentro de Zend Framework tiene como objetivo
+            simplificar todos los pasos necesarios para las comunicaciones <acronym class="acronym">SOAP</acronym>.
+        </p>
+<p>
+            <acronym class="acronym">SOAP</acronym> es un protocolo independiente del lenguaje. Por lo tanto, puede utilizarse no solo para
+            comunicaciones <acronym class="acronym">PHP</acronym>-a-PHP.
+        </p>
+<p>
+            Existen tres configuraciones para aplicaciones <acronym class="acronym">SOAP</acronym> en las que Zend
+            Framework puede utilizarse:
+
+            </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                        Aplicación servidor SOAP en <acronym class="acronym">PHP</acronym> &lt;---&gt;
+                        aplicación cliente <acronym class="acronym">SOAP</acronym> en <acronym class="acronym">PHP</acronym>
+                    </li>
+<li class="listitem">
+                        Aplicación servidor SOAP en un lenguaje distinto de PHP &lt;---&gt; aplicación
+                        cliente <acronym class="acronym">SOAP</acronym> en <acronym class="acronym">PHP</acronym>
+                    </li>
+<li class="listitem">
+                        Aplicación servidor SOAP en <acronym class="acronym">PHP</acronym> &lt;---&gt;
+                        aplicación cliente <acronym class="acronym">SOAP</acronym> en un lenguaje distinto de PHP
+                    </li>
+</ol></div>
+<p>
+        </p>
+<p>
+            Siempre necesitamos saber qué funcionalidad proporciona el servidor <acronym class="acronym">SOAP</acronym>
+            para poder operar con él. <a class="ulink" href="http://www.w3.org/TR/wsdl" target="_top">WSDL</a> se utiliza
+            para describir en detalle la <acronym class="acronym">API</acronym> del servicio de red.
+        </p>
+<p>
+            El lenguaje WSDL es lo suficientemente complejo (consulte <a class="ulink" href="http://www.w3.org/TR/wsdl" target="_top">http://www.w3.org/TR/wsdl</a>
+            para más detalles). Por eso resulta difícil preparar una descripción WSDL correcta.
+        </p>
+<p>
+            Otro problema es sincronizar los cambios en la <acronym class="acronym">API</acronym> del servicio de red con
+            un WSDL ya existente.
+        </p>
+<p>
+            Ambos problemas pueden resolverse mediante la autogeneración de WSDL. Un requisito previo para esto es un
+            servidor de autodetección <acronym class="acronym">SOAP</acronym>. Este construye un objeto similar al objeto
+            utilizado en la aplicación servidor <acronym class="acronym">SOAP</acronym>, extrae la información necesaria y
+            genera el WSDL correcto utilizando esa información.
+        </p>
+<p>
+            Hay dos formas de utilizar Zend Framework para una aplicación servidor
+            <acronym class="acronym">SOAP</acronym>:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Usar una clase separada.</p></li>
+<li class="listitem"><p>Usar un conjunto de funciones</p></li>
+</ul></div>
+<p>
+        </p>
+<p>
+            Ambos métodos son compatibles con la funcionalidad de Autodiscovery de Zend Framework.
+        </p>
+<p>
+            La clase <code class="classname">Zend_Soap_AutoDiscover</code> también admite el mapeo de tipos de datos
+            de <acronym class="acronym">PHP</acronym> a <a class="ulink" href="http://www.w3.org/TR/xmlschema-2/" target="_top">tipos XSD</a>.
+        </p>
+<p>
+            A continuación se muestra un ejemplo de uso común de la funcionalidad de autodetección. La
+            función <code class="methodname">handle()</code> genera el archivo WSDL y lo envía al
+            navegador.
+        </p>
+<pre class="programlisting">
+class My_SoapServer_Class {
+...
+}
+
+$autodiscover = new Zend_Soap_AutoDiscover();
+$autodiscover-&gt;setClass('My_SoapServer_Class');
+$autodiscover-&gt;handle();
+</pre>
+<p>
+            Si necesita acceder al archivo WSDL generado, ya sea para guardarlo en un archivo o como una
+            cadena <acronym class="acronym">XML</acronym>, puede utilizar las funciones <code class="methodname">dump($filename)</code>
+            o <code class="methodname">toXml()</code> que proporciona la clase AutoDiscover.
+        </p>
+<div class="note"><table border="0" summary="Note: Zend_Soap_Autodiscover is not a Soap Server">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">
+<a name="zend.soap.autodiscovery.introduction.noserver"></a>Zend_Soap_Autodiscover no es un servidor SOAP</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Es muy importante señalar que la clase
+                <code class="classname">Zend_Soap_AutoDiscover</code> no actúa como un
+                servidor <acronym class="acronym">SOAP</acronym> por sí misma. Solo genera el WSDL y lo sirve
+                a quien acceda a la url en la que está escuchando.
+            </p>
+<p>
+                Como <acronym class="acronym">URI</acronym> del punto de conexión SOAP se utiliza por defecto
+                <code class="code">'http://' .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']</code>, pero esto
+                puede cambiarse con la función <code class="methodname">setUri()</code> o con el
+                parámetro del constructor de la clase <code class="classname">Zend_Soap_AutoDiscover</code>. El
+                punto de conexión debe proporcionar un <code class="classname">Zend_Soap_Server</code> que escuche las
+                solicitudes.
+            </p>
+<pre class="programlisting">
+if(isset($_GET['wsdl'])) {
+    $autodiscover = new Zend_Soap_AutoDiscover();
+    $autodiscover-&gt;setClass('HelloWorldService');
+    $autodiscover-&gt;handle();
+} else {
+    // pointing to the current file here
+    $soap = new Zend_Soap_Server("http://example.com/soap.php?wsdl");
+    $soap-&gt;setClass('HelloWorldService');
+    $soap-&gt;handle();
+}
+</pre>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.autodiscovery.class"></a>66.4.2. Autodetección de clases</h3></div></div></div>
+<p>
+            Si se utiliza una clase para proporcionar la funcionalidad del servidor SOAP, entonces la misma clase debe
+            proporcionarse a <code class="classname">Zend_Soap_AutoDiscover</code> para la generación del WSDL:
+        </p>
+<pre class="programlisting">
+$autodiscover = new Zend_Soap_AutoDiscover();
+$autodiscover-&gt;setClass('My_SoapServer_Class');
+$autodiscover-&gt;handle();
+</pre>
+<p>
+            Se utilizan las siguientes reglas durante la generación del WSDL:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>El WSDL generado describe un servicio web de estilo RPC.</p></li>
+<li class="listitem"><p>El nombre de la clase se utiliza como nombre del servicio web descrito.</p></li>
+<li class="listitem">
+<p>
+                        <code class="code">'http://' .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']</code> se
+                        utiliza por defecto como <acronym class="acronym">URI</acronym> donde está disponible el WSDL, pero
+                        puede sobrescribirse mediante el método <code class="methodname">setUri()</code>.
+                    </p>
+<p>
+                         También se utiliza como espacio de nombres de destino para todos los nombres relacionados
+                         con el servicio (incluyendo los tipos complejos descritos).
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        Los métodos de la clase se agrupan en un único <a class="ulink" href="http://www.w3.org/TR/wsdl#_porttypes" target="_top">Port Type</a>.
+                    </p>
+<p>
+                        <code class="code">$className . 'Port'</code> se utiliza como nombre del Port Type.
+                    </p>
+</li>
+<li class="listitem"><p>Cada método de la clase se registra como la operación de puerto correspondiente.</p></li>
+<li class="listitem">
+<p>
+                        Cada prototipo de método genera los mensajes de solicitud/respuesta correspondientes.
+                    </p>
+<p>
+                        Un método puede tener varios prototipos si algunos de sus parámetros son opcionales.
+                    </p>
+</li>
+</ul></div>
+<p>
+        </p>
+<div class="note"><table border="0" summary="Note: Important!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Importante!</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                La autodetección de WSDL utiliza los bloques de documentación (docblocks) de <acronym class="acronym">PHP</acronym> proporcionados por el
+                desarrollador para determinar los tipos de parámetros y de retorno. De hecho, para los tipos escalares,
+                esta es la única forma de determinar los tipos de parámetros, y para los tipos de retorno, esta es
+                la única forma de determinarlos.
+            </p>
+<p>
+                Esto significa que proporcionar docblocks correctos y completamente detallados no solo es una buena
+                práctica, sino que es obligatorio para que la clase pueda ser autodetectada.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.autodiscovery.functions"></a>66.4.3. Autodetección de funciones</h3></div></div></div>
+<p>
+            Si se utiliza un conjunto de funciones para proporcionar la funcionalidad del servidor SOAP, entonces el mismo conjunto
+            debe proporcionarse a <code class="classname">Zend_Soap_AutoDiscovery</code> para la
+            generación del WSDL:
+        </p>
+<pre class="programlisting">
+$autodiscover = new Zend_Soap_AutoDiscover();
+$autodiscover-&gt;addFunction('function1');
+$autodiscover-&gt;addFunction('function2');
+$autodiscover-&gt;addFunction('function3');
+...
+$autodiscover-&gt;handle();
+</pre>
+<p>
+            Se utilizan las siguientes reglas durante la generación del WSDL:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>El WSDL generado describe un servicio web de estilo RPC.</p></li>
+<li class="listitem"><p>
+                        El nombre del script actual se utiliza como nombre del servicio web descrito.
+                    </p></li>
+<li class="listitem">
+<p>
+                        <code class="code">'http://' .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']</code> se
+                        utiliza como <acronym class="acronym">URI</acronym> donde está disponible el WSDL.
+                    </p>
+<p>
+                         También se utiliza como espacio de nombres de destino para todos los nombres relacionados
+                         con el servicio (incluyendo los tipos complejos descritos).
+                    </p>
+</li>
+<li class="listitem">
+<p>
+                        Las funciones se agrupan en un único <a class="ulink" href="http://www.w3.org/TR/wsdl#_porttypes" target="_top">Port Type</a>.
+                    </p>
+<p>
+                        <code class="code">$functionName . 'Port'</code> se utiliza como nombre del Port Type.
+                    </p>
+</li>
+<li class="listitem"><p>Cada función se registra como la operación de puerto correspondiente.</p></li>
+<li class="listitem">
+<p>
+                        Cada prototipo de función genera los mensajes de solicitud/respuesta correspondientes.
+                    </p>
+<p>
+                        Una función puede tener varios prototipos si algunos de sus parámetros de método son opcionales.
+                    </p>
+</li>
+</ul></div>
+<p>
+        </p>
+<div class="note"><table border="0" summary="Note: Important!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Importante!</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                La autodetección de WSDL utiliza los bloques de documentación (docblocks) de <acronym class="acronym">PHP</acronym> proporcionados por el
+                desarrollador para determinar los tipos de parámetros y de retorno. De hecho, para los tipos escalares,
+                esta es la única forma de determinar los tipos de parámetros, y para los tipos de retorno, esta es
+                la única forma de determinarlos.
+            </p>
+<p>
+                Esto significa que proporcionar docblocks correctos y completamente detallados no solo es una buena
+                práctica, sino que es obligatorio para que la clase pueda ser autodetectada.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.autodiscovery.datatypes"></a>66.4.4. Autodetección de tipos de datos</h3></div></div></div>
+<p>
+            Los tipos de datos de entrada/salida se convierten en tipos del servicio de red utilizando el siguiente
+            mapeo:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Cadenas de PHP &lt;-&gt; <code class="code">xsd:string</code>.</p></li>
+<li class="listitem"><p>Enteros de PHP &lt;-&gt; <code class="code">xsd:int</code>.</p></li>
+<li class="listitem"><p>Flotantes y dobles de PHP &lt;-&gt; <code class="code">xsd:float</code>.</p></li>
+<li class="listitem"><p>Booleanos de PHP &lt;-&gt; <code class="code">xsd:boolean</code>.</p></li>
+<li class="listitem"><p>Arrays de PHP &lt;-&gt; <code class="code">soap-enc:Array</code>.</p></li>
+<li class="listitem"><p>Objetos de PHP &lt;-&gt; <code class="code">xsd:struct</code>.</p></li>
+<li class="listitem"><p>
+                        Clases de <acronym class="acronym">PHP</acronym> &lt;-&gt; basado en la estrategia de tipo complejo (consulte:
+                        <a class="link" href="zend.soap.wsdl.phtml#zend.soap.wsdl.types.add_complex" title="66.3.10.2. Adding complex type information">esta sección</a>)
+
+                        <a href="#ftn.id55232" class="footnote" name="id55232"><sup class="footnote">[29]</sup></a>.
+                    </p></li>
+<li class="listitem"><p>
+                        tipo[] u objeto[] (por ejemplo, int[]) &lt;-&gt; basado en la estrategia de tipo complejo
+                    </p></li>
+<li class="listitem"><p>Void de PHP &lt;-&gt; tipo vacío.</p></li>
+<li class="listitem"><p>
+                        Si un tipo no coincide con ninguno de estos tipos por algún motivo, entonces se utiliza
+                        <code class="code">xsd:anyType</code>.
+                    </p></li>
+</ul></div>
+<p>
+
+            Donde <code class="code">xsd:</code> es el espacio de nombres "http://www.w3.org/2001/XMLSchema",
+            <code class="code">soap-enc:</code> es el espacio de nombres "http://schemas.xmlsoap.org/soap/encoding/",
+            <code class="code">tns:</code> es el "espacio de nombres de destino" de un servicio.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.soap.autodiscovery.wsdlstyles"></a>66.4.5. Estilos de enlace WSDL</h3></div></div></div>
+<p>
+            WSDL ofrece diferentes mecanismos de transporte y estilos. Esto afecta a las etiquetas
+            <code class="code">soap:binding</code> y <code class="code">soap:body</code> dentro de la sección Binding
+            del WSDL. Diferentes clientes tienen diferentes requisitos en cuanto a qué opciones
+            realmente funcionan. Por lo tanto, puede establecer los estilos antes de llamar a cualquier método <code class="code">setClass</code>
+            o <code class="code">addFunction</code> de la clase AutoDiscover.
+        </p>
+<pre class="programlisting">
+$autodiscover = new Zend_Soap_AutoDiscover();
+// Default is 'use' =&gt; 'encoded' and
+// 'encodingStyle' =&gt; 'http://schemas.xmlsoap.org/soap/encoding/'
+$autodiscover-&gt;setOperationBodyStyle(
+                    array('use' =&gt; 'literal',
+                          'namespace' =&gt; 'http://framework.zend.com')
+                );
+
+// Default is 'style' =&gt; 'rpc' and
+// 'transport' =&gt; 'http://schemas.xmlsoap.org/soap/http'
+$autodiscover-&gt;setBindingStyle(
+                    array('style' =&gt; 'document',
+                          'transport' =&gt; 'http://framework.zend.com')
+                );
+...
+$autodiscover-&gt;addFunction('myfunc1');
+$autodiscover-&gt;handle();
+</pre>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id55232" class="footnote"><p><a href="#id55232" class="para"><sup class="para">[29] </sup></a>
+                                <code class="classname">Zend_Soap_AutoDiscover</code> se creará con
+                                la clase
+                                <code class="classname">Zend_Soap_Wsdl_Strategy_DefaultComplexType</code>
+                                como algoritmo de detección para los tipos complejos. El primer parámetro
+                                del constructor de AutoDiscover acepta cualquier estrategia de tipo complejo
+                                que implemente
+                                <code class="classname">Zend_Soap_Wsdl_Strategy_Interface</code> o una cadena
+                                con el nombre de la clase. Por compatibilidad con versiones anteriores, las variables booleanas
+                                <code class="varname">$extractComplexType</code> se procesan
+                                exactamente igual que en <code class="classname">Zend_Soap_Wsdl</code>. Consulte el
+                                <a class="link" href="zend.soap.wsdl.phtml#zend.soap.wsdl.types.add_complex" title="66.3.10.2. Adding complex type information">manual de <code class="classname">Zend_Soap_Wsdl</code>
+                                    sobre cómo agregar tipos complejos</a> para más información.
+                            </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.soap.wsdl.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.soap.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.tag.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">66.3. WSDL Accessor </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 67. Zend_Tag</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

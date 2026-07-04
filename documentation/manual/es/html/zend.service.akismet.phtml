@@ -1,0 +1,301 @@
+<?php $title = '64.2. Zend_Service_Akismet'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.2. Zend_Service_Akismet</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.amazon.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.akismet"></a>64.2. Zend_Service_Akismet</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.introduction"></a>64.2.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Akismet</code> proporciona un cliente para la <a class="ulink" href="http://akismet.com/development/api/" target="_top">API de Akismet</a>.
+            El servicio Akismet se usa para determinar si los datos entrantes son
+            potencialmente spam. También expone métodos para enviar datos como
+            spam conocido o como falsos positivos (ham). Originalmente se pensó para ayudar a
+            categorizar e identificar spam para Wordpress, pero puede usarse para cualquier
+            tipo de dato.
+        </p>
+<p>
+            Akismet requiere una clave de <acronym class="acronym">API</acronym> para su uso. Puede obtener una registrándose
+            para una cuenta de <a class="ulink" href="http://wordpress.com/" target="_top">WordPress.com</a>.
+            No necesita activar un blog. Simplemente al obtener la
+            cuenta se le proporcionará la clave de <acronym class="acronym">API</acronym>.
+        </p>
+<p>
+            Akismet requiere que todas las solicitudes contengan una <acronym class="acronym">URL</acronym> al
+            recurso para el que se están filtrando los datos. Debido a los
+            orígenes de Akismet en WordPress, este recurso se denomina la <acronym class="acronym">URL</acronym>
+            del blog. Este valor debe pasarse como segundo argumento al
+            constructor, pero puede restablecerse en cualquier momento usando el método
+            <code class="methodname">setBlogUrl()</code>, o sobrescribirse especificando una
+            clave 'blog' en las distintas llamadas a métodos.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.verifykey"></a>64.2.2. Verificar una clave de API</h3></div></div></div>
+<p>
+            <code class="methodname">Zend_Service_Akismet::verifyKey($key)</code> se usa para
+            verificar que una clave de <acronym class="acronym">API</acronym> de Akismet es válida. En la mayoría de los casos, no
+            necesitará comprobarlo, pero si necesita una verificación de cordura, o
+            determinar si una clave recién adquirida está activa, puede hacerlo
+            con este método.
+        </p>
+<pre class="programlisting">
+// Instantiate with the API key and a URL to the application or
+// resource being used
+$akismet = new Zend_Service_Akismet($apiKey,
+                                    'http://framework.zend.com/wiki/');
+if ($akismet-&gt;verifyKey($apiKey) {
+    echo "Key is valid.\n";
+} else {
+    echo "Key is not valid\n";
+}
+</pre>
+<p>
+            Si se llama sin argumentos, <code class="methodname">verifyKey()</code> usa
+            la clave de <acronym class="acronym">API</acronym> proporcionada al constructor.
+        </p>
+<p>
+            <code class="methodname">verifyKey()</code> implementa el método REST
+            <code class="code">verify-key</code> de Akismet.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.isspam"></a>64.2.3. Comprobar si es spam</h3></div></div></div>
+<p>
+            <code class="methodname">Zend_Service_Akismet::isSpam($data)</code> se usa para
+            determinar si los datos proporcionados son considerados spam por
+            Akismet. Acepta un array asociativo como único
+            argumento. Ese array requiere que se establezcan las siguientes claves:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">user_ip</code>, la dirección IP del usuario
+                    que envía los datos (no su dirección IP, sino la
+                    de un usuario en su sitio).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">user_agent</code>, la cadena de UserAgent
+                    reportada (navegador y versión) del usuario que envía
+                    los datos.
+                </p></li>
+</ul></div>
+<p>
+            Las siguientes claves también son reconocidas específicamente por la
+            <acronym class="acronym">API</acronym>:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="code">blog</code>, la <acronym class="acronym">URL</acronym> completa al
+                    recurso o aplicación. Si no se especifica, se usará la <acronym class="acronym">URL</acronym>
+                    proporcionada al constructor.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">referrer</code>, el contenido de la
+                    cabecera HTTP_REFERER en el momento del envío. (Tenga en cuenta
+                    la ortografía; no sigue el nombre de la cabecera).
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">permalink</code>, la ubicación del enlace permanente, si
+                    la hay, de la entrada a la que se enviaron los datos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">comment_type</code>, el tipo de dato
+                    proporcionado. Los valores especificados en la <acronym class="acronym">API</acronym>
+                    incluyen 'comment', 'trackback', 'pingback', y una
+                    cadena vacía (''), pero puede ser cualquier valor.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">comment_author</code>, el nombre de la persona
+                    que envía los datos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">comment_author_email</code>, el correo electrónico de la
+                    persona que envía los datos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">comment_author_url</code>, la <acronym class="acronym">URL</acronym> o página de inicio de la
+                    persona que envía los datos.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="code">comment_content</code>, el contenido de datos real
+                    enviado.
+                </p></li>
+</ul></div>
+<p>
+            También puede enviar cualquier otra variable de entorno que
+            considere que podría ser un factor para determinar si los datos son spam.
+            Akismet sugiere el contenido de todo el array $_SERVER.
+        </p>
+<p>
+            El método <code class="methodname">isSpam()</code> devolverá
+            <code class="constant">TRUE</code> o <code class="constant">FALSE</code>, o lanzará una excepción si la
+            clave de <acronym class="acronym">API</acronym> no es válida.
+        </p>
+<div class="example">
+<a name="zend.service.akismet.isspam.example-1"></a><p class="title"><b>Ejemplo 64.1. Uso de isSpam()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'user_ip'              =&gt; '111.222.111.222',
+    'user_agent'           =&gt; 'Mozilla/5.0 ' . (Windows; U; Windows NT ' .
+                              '5.2; en-GB; rv:1.8.1) Gecko/20061010 ' .
+                              'Firefox/2.0',
+    'comment_type'         =&gt; 'contact',
+    'comment_author'       =&gt; 'John Doe',
+    'comment_author_email' =&gt; 'nospam@myhaus.net',
+    'comment_content'      =&gt; "I'm not a spammer, honest!"
+);
+if ($akismet-&gt;isSpam($data)) {
+    echo "Sorry, but we think you're a spammer.";
+} else {
+    echo "Welcome to our site!";
+}
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <code class="methodname">isSpam()</code> implementa el método <code class="code">comment-check</code>
+            de la <acronym class="acronym">API</acronym> de Akismet.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.submitspam"></a>64.2.4. Enviar spam conocido</h3></div></div></div>
+<p>
+            Ocasionalmente, datos de spam pasarán por el filtro. Si descubre spam que considera que
+            debería haberse detectado, puede enviarlo a Akismet para ayudar a mejorar su filtro.
+        </p>
+<p>
+            <code class="methodname">Zend_Service_Akismet::submitSpam()</code> recibe el mismo array
+            de datos que se pasa a <code class="methodname">isSpam()</code>, pero no devuelve un
+            valor. Se lanzará una excepción si la clave de <acronym class="acronym">API</acronym> usada no es válida.
+        </p>
+<div class="example">
+<a name="zend.service.akismet.submitspam.example-1"></a><p class="title"><b>Ejemplo 64.2. Uso de submitSpam()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'user_ip'              =&gt; '111.222.111.222',
+    'user_agent'           =&gt; 'Mozilla/5.0 (Windows; U; Windows NT 5.2;' .
+                              'en-GB; rv:1.8.1) Gecko/20061010 Firefox/2.0',
+    'comment_type'         =&gt; 'contact',
+    'comment_author'       =&gt; 'John Doe',
+    'comment_author_email' =&gt; 'nospam@myhaus.net',
+    'comment_content'      =&gt; "I'm not a spammer, honest!"
+);
+$akismet-&gt;submitSpam($data));
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <code class="methodname">submitSpam()</code> implementa el método <code class="code">submit-spam</code>
+            de la <acronym class="acronym">API</acronym> de Akismet.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.submitham"></a>64.2.5. Enviar falsos positivos (ham)</h3></div></div></div>
+<p>
+            Ocasionalmente, Akismet detectará datos erróneamente como spam. Por esta razón,
+            probablemente debería mantener un registro de todos los datos detectados como spam por Akismet y revisarlo
+            periódicamente. Si encuentra tales casos, puede enviar los datos a Akismet como
+            "ham", o falso positivo (ham es bueno, spam no lo es).
+        </p>
+<p>
+            <code class="methodname">Zend_Service_Akismet::submitHam()</code> recibe el mismo array
+            de datos que se pasa a <code class="methodname">isSpam()</code> o
+            <code class="methodname">submitSpam()</code>, y, al igual que <code class="methodname">submitSpam()</code>,
+            no devuelve un valor. Se lanzará una excepción si la clave de <acronym class="acronym">API</acronym>
+            usada no es válida.
+        </p>
+<div class="example">
+<a name="zend.service.akismet.submitham.example-1"></a><p class="title"><b>Ejemplo 64.3. Uso de submitHam()</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = array(
+    'user_ip'              =&gt; '111.222.111.222',
+    'user_agent'           =&gt; 'Mozilla/5.0 (Windows; U; Windows NT 5.2;' .
+                              'en-GB; rv:1.8.1) Gecko/20061010 Firefox/2.0',
+    'comment_type'         =&gt; 'contact',
+    'comment_author'       =&gt; 'John Doe',
+    'comment_author_email' =&gt; 'nospam@myhaus.net',
+    'comment_content'      =&gt; "I'm not a spammer, honest!"
+);
+$akismet-&gt;submitHam($data));
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <code class="methodname">submitHam()</code> implementa el método <code class="code">submit-ham</code>
+            de la <acronym class="acronym">API</acronym> de Akismet.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.akismet.accessors"></a>64.2.6. Métodos específicos de Zend</h3></div></div></div>
+<p>
+            Si bien la <acronym class="acronym">API</acronym> de Akismet solo especifica cuatro métodos,
+            <code class="classname">Zend_Service_Akismet</code> tiene varios métodos adicionales
+            que pueden usarse para obtener y modificar propiedades internas.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">getBlogUrl()</code> y <code class="methodname">setBlogUrl()</code>
+                    le permiten obtener y modificar la <acronym class="acronym">URL</acronym> del blog usada en
+                    las solicitudes.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getApiKey()</code> y <code class="methodname">setApiKey()</code>
+                    le permiten obtener y modificar la clave de <acronym class="acronym">API</acronym> usada en
+                    las solicitudes.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getCharset()</code> y <code class="methodname">setCharset()</code>
+                    le permiten obtener y modificar el conjunto de caracteres usado para realizar la solicitud.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getPort()</code> y <code class="methodname">setPort()</code>
+                    le permiten obtener y modificar el puerto <acronym class="acronym">TCP</acronym> usado para realizar
+                    la solicitud.
+                </p></li>
+<li class="listitem">
+<p>
+                    <code class="methodname">getUserAgent()</code> y
+                    <code class="methodname">setUserAgent()</code> le permiten obtener y modificar el
+                    user agent <acronym class="acronym">HTTP</acronym> usado para realizar la solicitud. Nota: este no es
+                    el user_agent usado en los datos enviados al servicio, sino más bien el valor
+                    proporcionado en la cabecera <acronym class="acronym">HTTP</acronym> User-Agent al realizar una solicitud
+                    al servicio.
+                </p>
+<p>
+                    El valor usado para establecer el user agent debe tener la forma
+                    <code class="code">some user agent/version | Akismet/version</code>. El valor predeterminado es
+                    <code class="code">Zend Framework/ZF-VERSION | Akismet/1.11</code>, donde
+                    <code class="code">ZF-VERSION</code> es la versión actual de Zend Framework tal como se almacena en la
+                    constante <code class="constant">Zend_Framework::VERSION</code>.
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.amazon.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 64. Zend_Service </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.3. Zend_Service_Amazon</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

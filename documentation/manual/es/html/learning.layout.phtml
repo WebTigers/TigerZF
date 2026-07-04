@@ -1,0 +1,93 @@
+<?php $title = 'Capítulo 6. Primeros pasos con Zend_Layout'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 6. Primeros pasos con Zend_Layout</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.plugins.conclusion.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte II. Aprendiendo Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.layout.usage.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="learning.layout"></a>Capítulo 6. Primeros pasos con Zend_Layout</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="learning.layout.phtml#learning.layout.intro">6.1. Introducción</a></span></dt>
+<dt><span class="sect1"><a href="learning.layout.usage.phtml">6.2. Uso de Zend_Layout</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="learning.layout.usage.phtml#learning.layout.usage.configuration">6.2.1. Configuración del layout</a></span></dt>
+<dt><span class="sect2"><a href="learning.layout.usage.phtml#learning.layout.usage.layout-script">6.2.2. Crear un script de layout</a></span></dt>
+<dt><span class="sect2"><a href="learning.layout.usage.phtml#learning.layout.usage.access">6.2.3. Acceder al objeto layout</a></span></dt>
+<dt><span class="sect2"><a href="learning.layout.usage.phtml#learning.layout.usage.other-operations">6.2.4. Otras operaciones</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="learning.layout.conclusions.phtml">6.3. Zend_Layout: conclusiones</a></span></dt>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.layout.intro"></a>6.1. Introducción</h2></div></div></div>
+<p>
+        Al construir un sitio web usando las capas <acronym class="acronym">MVC</acronym> de Zend Framework, sus
+        scripts de vista normalmente serán solo fragmentos de <acronym class="acronym">HTML</acronym> relativos a la
+        acción solicitada. Por ejemplo, si tuviera la acción "<code class="filename">/user/list</code>",
+        podría crear un script de vista que recorra los usuarios y presente una
+        lista sin ordenar:
+    </p>
+<pre class="programlisting">
+&lt;h2&gt;Users&lt;/h2&gt;
+&lt;ul&gt;
+    &lt;?php if (!count($this-&gt;users)): ?&gt;
+    &lt;li&gt;No users found&lt;/li&gt;
+    &lt;?php else: ?&gt;
+    &lt;?php foreach ($this-&gt;users as $user): ?&gt;
+    &lt;li&gt;
+        &lt;?php echo $this-&gt;escape($user-&gt;fullname) ?&gt;
+        (&lt;?php echo $this-&gt;escape($user-&gt;email) ?&gt;)
+    &lt;/li&gt;
+    &lt;?php endforeach ?&gt;
+    &lt;?php endif ?&gt;
+&lt;/ul&gt;
+</pre>
+<p>
+        Dado que esto es solo un fragmento de <acronym class="acronym">HTML</acronym>, no es una página válida; le faltan
+        una declaración <acronym class="acronym">DOCTYPE</acronym>, y las etiquetas de apertura <acronym class="acronym">HTML</acronym> y
+        <acronym class="acronym">BODY</acronym>. Entonces, la pregunta es, ¿dónde se crearán estas?
+    </p>
+<p>
+        En las primeras versiones de Zend Framework, los desarrolladores a menudo creaban scripts de vista de
+        "cabecera" y "pie de página" que contenían estos elementos, y luego los renderizaban en cada script de vista. Aunque
+        esta metodología funcionaba, también dificultaba la refactorización posterior, o la construcción de
+        contenido compuesto llamando a múltiples acciones.
+    </p>
+<p>
+        El patrón de diseño <a class="ulink" href="http://martinfowler.com/eaaCatalog/twoStepView.html" target="_top">Two Step View</a>
+        resuelve muchos de los problemas presentados. En este patrón, la vista de "aplicación"
+        se crea primero, y luego se inyecta en la vista de "página", que se presenta entonces al
+        cliente. La vista de página puede considerarse como la plantilla o layout de todo el sitio, y contendría
+        elementos comunes usados a través de varias páginas.
+    </p>
+<p>
+        Dentro de Zend Framework, <code class="classname">Zend_Layout</code> implementa el patrón
+        Two Step View.
+    </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.plugins.conclusion.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.layout.usage.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">5.3. Conclusión </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 6.2. Uso de Zend_Layout</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

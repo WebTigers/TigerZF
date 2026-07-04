@@ -1,0 +1,172 @@
+<?php $title = '76.5. Mensajes de validación'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">76.5. Mensajes de validación</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.validate.writing_validators.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 76. Zend_Validate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.version.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.validate.messages"></a>76.5. Mensajes de validación</h2></div></div></div>
+<p>
+        Cada validador basado en <code class="classname">Zend_Validate</code> proporciona
+        uno o varios mensajes en caso de fallo de validación. Puede usar
+        esta información para establecer sus propios mensajes, o para traducir los mensajes existentes que un
+        validador podría devolver a algo diferente.
+    </p>
+<p>
+        Estos mensajes de validación son constantes que se pueden encontrar en la parte superior de cada clase de validador.
+        Veamos <code class="classname">Zend_Validate_GreaterThan</code> como ejemplo descriptivo:
+    </p>
+<pre class="programlisting">
+protected $_messageTemplates = array(
+    self::NOT_GREATER =&gt; "'%value%' is not greater than '%min%'",
+);
+</pre>
+<p>
+        Como puede ver, la constante <code class="constant">self::NOT_GREATER</code> hace referencia al fallo y
+        se usa como clave, y el mensaje en sí se usa como valor del array de mensajes.
+    </p>
+<p>
+        Puede recuperar todas las plantillas de mensajes de un validador usando el
+        método <code class="methodname">getMessageTemplates()</code>. Este devuelve el array anterior que
+        contiene todos los mensajes que un validador podría devolver en caso de fallo de validación.
+    </p>
+<pre class="programlisting">
+$validator = new Zend_Validate_GreaterThan();
+$messages  = $validator-&gt;getMessageTemplates();
+</pre>
+<p>
+        Usando el método <code class="methodname">setMessage()</code> puede establecer otro mensaje que se
+        devolverá en caso del fallo especificado.
+    </p>
+<pre class="programlisting">
+$validator = new Zend_Validate_GreaterThan();
+$validator-&gt;setMessage(
+    'Please enter a lower value',
+    Zend_Validate_GreaterThan::NOT_GREATER
+);
+</pre>
+<p>
+        El segundo parámetro define el fallo que se sobrescribirá. Cuando se omite este
+        parámetro, el mensaje indicado se establecerá para todos los fallos posibles de este validador.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.validate.messages.pretranslated"></a>76.5.1. Uso de mensajes de validación pretraducidos</h3></div></div></div>
+<p>
+            Zend Framework se distribuye con más de 45 validadores diferentes con más de 200
+            mensajes de fallo. Traducir todos estos mensajes puede ser una tarea tediosa. Pero para
+            su comodidad, Zend Framework incluye mensajes de validación ya pretraducidos.
+            Puede encontrarlos en la ruta <code class="filename">/resources/languages</code> de su
+            instalación de Zend Framework.
+        </p>
+<div class="note"><table border="0" summary="Note: Used path">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Ruta utilizada</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Los archivos de recursos están fuera de la ruta de la biblioteca porque todas sus traducciones
+                también deberían estar fuera de esta ruta.
+            </p></td></tr>
+</table></div>
+<p>
+            Así que, para traducir todos los mensajes de validación al alemán, por ejemplo, todo lo que tiene que hacer es
+            adjuntar un traductor a <code class="classname">Zend_Validate</code> usando estos archivos de recursos.
+        </p>
+<pre class="programlisting">
+$translator = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'array',
+        'content' =&gt; '/resources/languages',
+        'locale'  =&gt; $language,
+        'scan' =&gt; Zend_Translate::LOCALE_DIRECTORY
+    )
+);
+Zend_Validate_Abstract::setDefaultTranslator($translator);
+</pre>
+<div class="note"><table border="0" summary="Note: Used translation adapter">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Adaptador de traducción utilizado</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Como adaptador de traducción, Zend Framework eligió el adaptador de array. Es sencillo
+                de editar y se crea muy rápido.
+            </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Supported languages">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Idiomas soportados</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Esta característica es muy reciente, por lo que la cantidad de idiomas soportados puede no estar
+                completa. Se añadirán nuevos idiomas con cada versión. Además, siéntase libre de
+                usar los archivos de recursos existentes para crear sus propias traducciones.
+            </p>
+<p>
+                También podría usar estos archivos de recursos para reescribir traducciones existentes. Así
+                no necesita crear estos archivos manualmente usted mismo.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.validate.messages.limitation"></a>76.5.2. Limitar el tamaño de un mensaje de validación</h3></div></div></div>
+<p>
+            A veces es necesario limitar el tamaño máximo que puede tener un mensaje de validación.
+            Por ejemplo, cuando su vista permite un tamaño máximo de 100 caracteres para mostrar en una
+            línea. Para simplificar el uso, <code class="classname">Zend_Validate</code> es capaz de
+            limitar automáticamente el tamaño máximo devuelto de un mensaje de validación.
+        </p>
+<p>
+            Para obtener el tamaño real establecido use
+            <code class="methodname">Zend_Validate::getMessageLength()</code>. Si es -1, entonces el
+            mensaje devuelto no se truncará. Este es el comportamiento por defecto.
+        </p>
+<p>
+            Para limitar el tamaño del mensaje devuelto use
+            <code class="methodname">Zend_Validate::setMessageLength()</code>. Establézcalo con cualquier tamaño entero
+            que necesite. Cuando el mensaje devuelto exceda el tamaño establecido, entonces el mensaje
+            se truncará y se añadirá la cadena '<span class="emphasis"><em>...</em></span>' en lugar de
+            el resto del mensaje.
+        </p>
+<pre class="programlisting">
+Zend_Validate::setMessageLength(100);
+</pre>
+<div class="note"><table border="0" summary="Note: Where is this parameter used?">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¿Dónde se usa este parámetro?</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El tamaño de mensaje establecido se usa para todos los validadores, incluso para los definidos
+                por el propio usuario, siempre que extiendan <code class="classname">Zend_Validate_Abstract</code>.
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.validate.writing_validators.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.validate.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.version.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">76.4. Escritura de validadores </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 77. Zend_Version</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

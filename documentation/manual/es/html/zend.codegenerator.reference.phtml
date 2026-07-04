@@ -1,0 +1,518 @@
+<?php $title = '20.3. Referencia de Zend_CodeGenerator'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">20.3. Referencia de Zend_CodeGenerator</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.codegenerator.examples.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 20. Zend_CodeGenerator</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.config.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.codegenerator.reference"></a>20.3. Referencia de Zend_CodeGenerator</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.codegenerator.reference.abstracts"></a>20.3.1. Clases abstractas e interfaces</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.abstracts.abstract"></a>20.3.1.1. Zend_CodeGenerator_Abstract</h4></div></div></div>
+<p>
+                La clase base de la que heredan todas las clases de CodeGenerator
+                proporciona la funcionalidad mínima necesaria. Su <acronym class="acronym">API</acronym> es la
+                siguiente:
+            </p>
+<pre class="programlisting">
+abstract class Zend_CodeGenerator_Abstract
+{
+    final public function __construct(Array $options = array())
+    public function setOptions(Array $options)
+    public function setSourceContent($sourceContent)
+    public function getSourceContent()
+    protected function _init()
+    protected function _prepare()
+    abstract public function generate();
+    final public function __toString()
+}
+</pre>
+<p>
+                El constructor primero llama a <code class="methodname">_init()</code> (que se
+                deja vacío para que la clase concreta que extienda la implemente),
+                luego pasa el parámetro <code class="varname">$options</code> a
+                <code class="methodname">setOptions()</code>, y finalmente llama a
+                <code class="methodname">_prepare()</code> (de nuevo, para ser implementado por una
+                clase que extienda).
+            </p>
+<p>
+                Como la mayoría de las clases en Zend Framework, <code class="methodname">setOptions()</code>
+                compara una clave de opción con los setters existentes en la clase, y
+                pasa el valor a ese método si se encuentra.
+            </p>
+<p>
+                <code class="methodname">__toString()</code> está marcado como final, y delega en
+                <code class="methodname">generate()</code>.
+            </p>
+<p>
+                <code class="methodname">setSourceContent()</code> y
+                <code class="methodname">getSourceContent()</code> están pensados para establecer el
+                contenido por defecto del código que se está generando, o para reemplazar dicho
+                contenido una vez que todas las tareas de generación se hayan completado.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.abstracts.php-abstract"></a>20.3.1.2. Zend_CodeGenerator_Php_Abstract</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Abstract</code> extiende
+                <code class="classname">Zend_CodeGenerator_Abstract</code>, y añade algunas
+                propiedades para rastrear si el contenido ha cambiado, así como
+                la cantidad de sangría que debe aparecer antes del contenido
+                generado. Su <acronym class="acronym">API</acronym> es la siguiente:
+            </p>
+<pre class="programlisting">
+abstract class Zend_CodeGenerator_Php_Abstract
+    extends Zend_CodeGenerator_Abstract
+{
+    public function setSourceDirty($isSourceDirty = true)
+    public function isSourceDirty()
+    public function setIndentation($indentation)
+    public function getIndentation()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.abstracts.php-member-abstract"></a>20.3.1.3. Zend_CodeGenerator_Php_Member_Abstract</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Member_Abstract</code> es una clase
+                base para generar miembros de clase -- propiedades y métodos --
+                y proporciona accesores y mutadores para establecer la visibilidad;
+                si el miembro es abstracto, estático o final; y el
+                nombre del miembro. Su <acronym class="acronym">API</acronym> es la siguiente:
+            </p>
+<pre class="programlisting">
+abstract class Zend_CodeGenerator_Php_Member_Abstract
+    extends Zend_CodeGenerator_Php_Abstract
+{
+    public function setAbstract($isAbstract)
+    public function isAbstract()
+    public function setStatic($isStatic)
+    public function isStatic()
+    public function setVisibility($visibility)
+    public function getVisibility()
+    public function setName($name)
+    public function getName()
+}
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.codegenerator.reference.concrete"></a>20.3.2. Clases concretas de CodeGenerator</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-body"></a>20.3.2.1. Zend_CodeGenerator_Php_Body</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Body</code> está pensado para
+                generar código procedural arbitrario para incluir en un archivo.
+                Como tal, simplemente se establece el contenido para el objeto, y este
+                devolverá dicho contenido al invocar <code class="methodname">generate()</code>.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Body extends Zend_CodeGenerator_Php_Abstract
+{
+    public function setContent($content)
+    public function getContent()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-class"></a>20.3.2.2. Zend_CodeGenerator_Php_Class</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Class</code> está pensado para
+                generar clases <acronym class="acronym">PHP</acronym>. La funcionalidad básica solo genera
+                la clase <acronym class="acronym">PHP</acronym> en sí, así como opcionalmente el
+                <acronym class="acronym">DocBlock</acronym> <acronym class="acronym">PHP</acronym> relacionado. Las clases pueden implementar o heredar de otras
+                clases, y pueden marcarse como abstractas. Utilizando otras clases
+                generadoras de código, también se pueden asociar constantes de clase, propiedades y
+                métodos.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Class extends Zend_CodeGenerator_Php_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Class $reflectionClass
+    )
+    public function setDocblock(Zend_CodeGenerator_Php_Docblock $docblock)
+    public function getDocblock()
+    public function setName($name)
+    public function getName()
+    public function setAbstract($isAbstract)
+    public function isAbstract()
+    public function setExtendedClass($extendedClass)
+    public function getExtendedClass()
+    public function setImplementedInterfaces(Array $implementedInterfaces)
+    public function getImplementedInterfaces()
+    public function setProperties(Array $properties)
+    public function setProperty($property)
+    public function getProperties()
+    public function getProperty($propertyName)
+    public function setMethods(Array $methods)
+    public function setMethod($method)
+    public function getMethods()
+    public function getMethod($methodName)
+    public function hasMethod($methodName)
+    public function isSourceDirty()
+    public function generate()
+}
+</pre>
+<p>
+                El método <code class="methodname">setProperty()</code> acepta un array de
+                información que puede utilizarse para generar una instancia de
+                <code class="classname">Zend_CodeGenerator_Php_Property</code> -- o
+                simplemente una instancia de
+                <code class="classname">Zend_CodeGenerator_Php_Property</code>.
+                De igual forma, <code class="methodname">setMethod()</code> acepta o bien un array de
+                información para generar una instancia de
+                <code class="classname">Zend_CodeGenerator_Php_Method</code> o una
+                instancia concreta de esa clase.
+            </p>
+<p>
+                Tenga en cuenta que <code class="methodname">setDocBlock()</code> espera una instancia de
+                <code class="classname">Zend_CodeGenerator_Php_DocBlock</code>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-docblock"></a>20.3.2.3. Zend_CodeGenerator_Php_Docblock</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Docblock</code> puede utilizarse para
+                generar docblocks <acronym class="acronym">PHP</acronym> arbitrarios, incluyendo todas las características
+                estándar de los docblocks: descripciones cortas y largas, y etiquetas
+                de anotación.
+            </p>
+<p>
+                Las etiquetas de anotación pueden establecerse mediante los métodos <code class="methodname">setTag()</code> y
+                <code class="methodname">setTags()</code>; cada uno de ellos acepta ya sea un array
+                que describe la etiqueta y que puede pasarse al constructor de
+                <code class="classname">Zend_CodeGenerator_Php_Docblock_Tag</code>, o
+                una instancia de esa clase.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Docblock extends Zend_CodeGenerator_Php_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Docblock $reflectionDocblock
+    )
+    public function setShortDescription($shortDescription)
+    public function getShortDescription()
+    public function setLongDescription($longDescription)
+    public function getLongDescription()
+    public function setTags(Array $tags)
+    public function setTag($tag)
+    public function getTags()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-docblock-tag"></a>20.3.2.4. Zend_CodeGenerator_Php_Docblock_Tag</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Docblock_Tag</code> está pensado para
+                crear etiquetas de anotación arbitrarias para incluir en docblocks
+                <acronym class="acronym">PHP</acronym>. Se espera que las etiquetas contengan un nombre (la parte
+                inmediatamente después del símbolo '@') y una descripción
+                (todo lo que sigue al nombre de la etiqueta).
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Docblock_Tag
+    extends Zend_CodeGenerator_Php_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Docblock_Tag $reflectionTag
+    )
+    public function setName($name)
+    public function getName()
+    public function setDescription($description)
+    public function getDescription()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-docblock-tag-param"></a>20.3.2.5. Zend_CodeGenerator_Php_DocBlock_Tag_Param</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_DocBlock_Tag_Param</code> es una
+                versión especializada de
+                <code class="classname">Zend_CodeGenerator_Php_DocBlock_Tag</code>, y representa
+                un parámetro de método. Por tanto, el nombre de la etiqueta ya se conoce ("param"),
+                pero debido al formato de esta etiqueta de anotación, se requiere
+                información adicional para generarla: el nombre del parámetro
+                y el tipo de dato que representa.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Docblock_Tag_Param
+    extends Zend_CodeGenerator_Php_Docblock_Tag
+{
+    public static function fromReflection(
+        Zend_Reflection_Docblock_Tag $reflectionTagParam
+    )
+    public function setDatatype($datatype)
+    public function getDatatype()
+    public function setParamName($paramName)
+    public function getParamName()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-docblock-tag-return"></a>20.3.2.6. Zend_CodeGenerator_Php_DocBlock_Tag_Return</h4></div></div></div>
+<p>
+                Al igual que la variante de etiqueta docblock param,
+                <code class="classname">Zend_CodeGenerator_Php_Docblock_Tab_Return</code> es una
+                variante de etiqueta de anotación para representar un valor de retorno de método.
+                En este caso, el nombre de la etiqueta de anotación ya se conoce ("return"), pero
+                requiere un tipo de retorno.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Docblock_Tag_Param
+    extends Zend_CodeGenerator_Php_Docblock_Tag
+{
+    public static function fromReflection(
+        Zend_Reflection_Docblock_Tag $reflectionTagReturn
+    )
+    public function setDatatype($datatype)
+    public function getDatatype()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-file"></a>20.3.2.7. Zend_CodeGenerator_Php_File</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_File</code> se utiliza para generar
+                el contenido completo de un archivo que contendrá código <acronym class="acronym">PHP</acronym>. El archivo
+                puede contener clases o código <acronym class="acronym">PHP</acronym> arbitrario, así como un
+                docblock a nivel de archivo si se desea.
+            </p>
+<p>
+                Al añadir clases al archivo, será necesario pasar ya sea un
+                array de información al constructor de
+                <code class="classname">Zend_CodeGenerator_Php_Class</code>, o una
+                instancia de esa clase. De forma similar, con los docblocks, será necesario
+                pasar información para que la consuma el constructor de
+                <code class="classname">Zend_CodeGenerator_Php_Docblock</code> o
+                una instancia de la clase.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_File extends Zend_CodeGenerator_Php_Abstract
+{
+    public static function fromReflectedFilePath(
+        $filePath,
+        $usePreviousCodeGeneratorIfItExists = true,
+        $includeIfNotAlreadyIncluded = true)
+    public static function fromReflection(Zend_Reflection_File $reflectionFile)
+    public function setDocblock(Zend_CodeGenerator_Php_Docblock $docblock)
+    public function getDocblock()
+    public function setRequiredFiles($requiredFiles)
+    public function getRequiredFiles()
+    public function setClasses(Array $classes)
+    public function getClass($name = null)
+    public function setClass($class)
+    public function setFilename($filename)
+    public function getFilename()
+    public function getClasses()
+    public function setBody($body)
+    public function getBody()
+    public function isSourceDirty()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-member-container"></a>20.3.2.8. Zend_CodeGenerator_Php_Member_Container</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Member_Container</code> se utiliza
+                internamente por <code class="classname">Zend_CodeGenerator_Php_Class</code> para llevar
+                registro de los miembros de la clase -- tanto propiedades como métodos. Estos
+                se indexan por nombre, utilizando las instancias concretas de los miembros
+                como valores.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Member_Container extends ArrayObject
+{
+    public function __construct($type = self::TYPE_PROPERTY)
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-method"></a>20.3.2.9. Zend_CodeGenerator_Php_Method</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Method</code> describe un método
+                de clase, y puede generar tanto el código como el docblock del
+                método. La visibilidad y el estado de estático,
+                abstracto o final pueden indicarse, según su clase padre,
+                <code class="classname">Zend_CodeGenerator_Php_Member_Abstract</code>. Finalmente,
+                los parámetros y el valor de retorno del método pueden especificarse.
+            </p>
+<p>
+                Los parámetros pueden establecerse mediante <code class="methodname">setParameter()</code> o
+                <code class="methodname">setParameters()</code>. En cada caso, un parámetro debe
+                ser ya sea un array de información para pasar al constructor de
+                <code class="classname">Zend_CodeGenerator_Php_Parameter</code> o una
+                instancia de esa clase.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Method
+    extends Zend_CodeGenerator_Php_Member_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Method $reflectionMethod
+    )
+    public function setDocblock(Zend_CodeGenerator_Php_Docblock $docblock)
+    public function getDocblock()
+    public function setFinal($isFinal)
+    public function setParameters(Array $parameters)
+    public function setParameter($parameter)
+    public function getParameters()
+    public function setBody($body)
+    public function getBody()
+    public function generate()
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-parameter"></a>20.3.2.10. Zend_CodeGenerator_Php_Parameter</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Parameter</code> puede utilizarse para
+                especificar parámetros de método. Cada parámetro puede tener una posición
+                (si no se especifica, se utilizará el orden en que se registran con el
+                método), un valor por defecto y un tipo de dato; un
+                nombre de parámetro es obligatorio.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Parameter extends Zend_CodeGenerator_Php_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Parameter $reflectionParameter
+    )
+    public function setType($type)
+    public function getType()
+    public function setName($name)
+    public function getName()
+    public function setDefaultValue($defaultValue)
+    public function getDefaultValue()
+    public function setPosition($position)
+    public function getPosition()
+    public function getPassedByReference()
+    public function setPassedByReference($passedByReference)
+    public function generate()
+}
+</pre>
+<p>
+                Pueden ocurrir varios problemas al intentar establecer
+                <code class="constant">NULL</code>, booleanos o arrays como valores por defecto. Para esto, puede utilizarse
+                el objeto contenedor de valores <code class="classname">Zend_CodeGenerator_Php_ParameterDefaultValue</code>,
+                por ejemplo:
+            </p>
+<pre class="programlisting">
+$parameter = new Zend_CodeGenerator_Php_Parameter();
+$parameter-&gt;setDefaultValue(
+    new Zend_CodeGenerator_Php_Parameter_DefaultValue("null")
+);
+$parameter-&gt;setDefaultValue(
+    new Zend_CodeGenerator_Php_Parameter_DefaultValue("array('foo', 'bar')")
+);
+</pre>
+<p>
+                Internamente, <code class="methodname">setDefaultValue()</code> también convierte los valores
+                que no pueden expresarse en <acronym class="acronym">PHP</acronym> en el objeto contenedor de valores.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.codegenerator.reference.concrete.php-property"></a>20.3.2.11. Zend_CodeGenerator_Php_Property</h4></div></div></div>
+<p>
+                <code class="classname">Zend_CodeGenerator_Php_Property</code> describe una propiedad
+                de clase, que puede ser una constante o una variable. En cada
+                caso, la propiedad puede tener un valor por defecto opcional asociado
+                a ella. Además, la visibilidad de las propiedades de tipo variable puede
+                establecerse, según la clase padre,
+                <code class="classname">Zend_CodeGenerator_Php_Member_Abstract</code>.
+            </p>
+<p>
+                El <acronym class="acronym">API</acronym> de la clase es el siguiente:
+            </p>
+<pre class="programlisting">
+class Zend_CodeGenerator_Php_Property
+    extends Zend_CodeGenerator_Php_Member_Abstract
+{
+    public static function fromReflection(
+        Zend_Reflection_Property $reflectionProperty
+    )
+    public function setConst($const)
+    public function isConst()
+    public function setDefaultValue($defaultValue)
+    public function getDefaultValue()
+    public function generate()
+}
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.codegenerator.examples.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.codegenerator.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.config.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">20.2. Ejemplos de Zend_CodeGenerator </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 21. Zend_Config</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

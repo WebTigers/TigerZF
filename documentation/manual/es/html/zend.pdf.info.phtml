@@ -1,0 +1,203 @@
+<?php $title = '55.7. Información del documento y metadatos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">55.7. Información del documento y metadatos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.pdf.interactive-features.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 55. Zend_Pdf</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.pdf.usage.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.pdf.info"></a>55.7. Información del documento y metadatos</h2></div></div></div>
+<p>
+        Un documento <acronym class="acronym">PDF</acronym> puede incluir información general como el título,
+        el autor y las fechas de creación y modificación del documento.
+    </p>
+<p>
+        Históricamente esta información se almacena mediante una estructura Info especial. Esta
+        estructura está disponible para lectura y escritura como un array asociativo a través de la
+        propiedad pública <span class="property">properties</span> de los objetos <code class="classname">Zend_Pdf</code>:
+    </p>
+<pre class="programlisting">
+$pdf = Zend_Pdf::load($pdfPath);
+
+echo $pdf-&gt;properties['Title'] . "\n";
+echo $pdf-&gt;properties['Author'] . "\n";
+
+$pdf-&gt;properties['Title'] = 'New Title.';
+$pdf-&gt;save($pdfPath);
+</pre>
+<p>
+        El estándar <acronym class="acronym">PDF</acronym> v1.4 (Acrobat 5) define las siguientes claves:
+
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Title</em></span> - cadena, opcional, el título del documento.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Author</em></span> - cadena, opcional, el nombre de la persona que
+                    creó el documento.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Subject</em></span> - cadena, opcional, el asunto del documento.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Keywords</em></span> - cadena, opcional, palabras clave asociadas al
+                    documento.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Creator</em></span> - cadena, opcional, si el documento se convirtió
+                    a <acronym class="acronym">PDF</acronym> desde otro formato, el nombre de la aplicación (por
+                    ejemplo, Adobe FrameMaker®) que creó el documento original a partir del cual se
+                    convirtió.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Producer</em></span> - cadena, opcional, si el documento se convirtió
+                    a <acronym class="acronym">PDF</acronym> desde otro formato, el nombre de la aplicación (por
+                    ejemplo, Acrobat Distiller) que lo convirtió a <acronym class="acronym">PDF</acronym>..
+                </p></li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>CreationDate</em></span> - cadena, opcional, la fecha y hora en que
+                    se creó el documento, en la siguiente forma: "D:YYYYMMDDHHmmSSOHH'mm'", donde:
+
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                <span class="emphasis"><em>YYYY</em></span> es el año.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>MM</em></span> es el mes.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>DD</em></span> es el día (01–31).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>HH</em></span> es la hora (00–23).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>mm</em></span>es el minuto (00–59).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>SS</em></span> es el segundo (00–59).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>O</em></span> es la relación de la hora local con el
+                                Tiempo Universal (UT), denotada por uno de los caracteres +, −, o Z
+                                (ver más abajo).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>HH</em></span> seguido de ' es el valor absoluto del
+                                desfase respecto a UT en horas (00–23).
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em>mm</em></span> seguido de ' es el valor absoluto del
+                                desfase respecto a UT en minutos (00–59).
+                            </p></li>
+</ul></div>
+<p>
+
+                    El carácter apóstrofo (') después de HH y mm forma parte de la sintaxis. Todos
+                    los campos posteriores al año son opcionales. (El prefijo D:, aunque también
+                    opcional, se recomienda encarecidamente.) Los valores por defecto de MM y DD son
+                    ambos 01; todos los demás campos numéricos toman por defecto el valor cero. Un
+                    signo más (+) como valor del campo O indica que la hora local es posterior a UT,
+                    un signo menos (−) que la hora local es anterior a UT, y la letra Z que la hora
+                    local es igual a UT. Si no se especifica información de UT, la relación de la
+                    hora especificada con UT se considera desconocida. Se conozca o no la zona
+                    horaria, el resto de la fecha debe especificarse en hora local.
+                </p>
+<p>
+                    Por ejemplo, el 23 de diciembre de 1998, a las 19:52, hora estándar del Pacífico
+                    de EE. UU., se representa mediante la cadena "D:199812231952−08'00'".
+                </p>
+</li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>ModDate</em></span> - cadena, opcional, la fecha y hora en que el
+                    documento se modificó por última vez, en la misma forma que
+                    <span class="emphasis"><em>CreationDate</em></span>.
+                </p></li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>Trapped</em></span> - booleano, opcional, indica si el documento
+                    se ha modificado para incluir información de trapping.
+
+                    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                                <span class="emphasis"><em><code class="constant">TRUE</code></em></span> - El documento ha
+                                sido completamente sometido a trapping; no se necesita más trapping.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em><code class="constant">FALSE</code></em></span> - El documento
+                                aún no ha sido sometido a trapping; cualquier trapping deseado
+                                todavía debe realizarse.
+                            </p></li>
+<li class="listitem"><p>
+                                <span class="emphasis"><em><code class="constant">NULL</code></em></span> - Se desconoce si
+                                el documento ha sido sometido a trapping, o ha sido sometido
+                                parcialmente pero no por completo; puede que aún se necesite
+                                trapping adicional.
+                            </p></li>
+</ul></div>
+<p>
+                </p>
+</li>
+</ul></div>
+<p>
+    </p>
+<p>
+        Desde <acronym class="acronym">PDF</acronym> v 1.6, los metadatos pueden almacenarse en el documento
+        <acronym class="acronym">XML</acronym> especial adjunto al <acronym class="acronym">PDF</acronym> (XMP - <a class="ulink" href="http://www.adobe.com/products/xmp/" target="_top">Extensible Metadata Platform</a>).
+    </p>
+<p>
+        Este documento <acronym class="acronym">XML</acronym> puede obtenerse y adjuntarse al PDF con los
+        métodos <code class="methodname">Zend_Pdf::getMetadata()</code> y
+        <code class="methodname">Zend_Pdf::setMetadata($metadata)</code>:
+    </p>
+<pre class="programlisting">
+$pdf = Zend_Pdf::load($pdfPath);
+$metadata = $pdf-&gt;getMetadata();
+$metadataDOM = new DOMDocument();
+$metadataDOM-&gt;loadXML($metadata);
+
+$xpath = new DOMXPath($metadataDOM);
+$pdfPreffixNamespaceURI = $xpath-&gt;query('/rdf:RDF/rdf:Description')
+                                -&gt;item(0)
+                                -&gt;lookupNamespaceURI('pdf');
+$xpath-&gt;registerNamespace('pdf', $pdfPreffixNamespaceURI);
+
+$titleNode = $xpath-&gt;query('/rdf:RDF/rdf:Description/pdf:Title')-&gt;item(0);
+$title = $titleNode-&gt;nodeValue;
+...
+
+$titleNode-&gt;nodeValue = 'New title';
+$pdf-&gt;setMetadata($metadataDOM-&gt;saveXML());
+$pdf-&gt;save($pdfPath);
+</pre>
+<p>
+        Las propiedades comunes del documento están duplicadas en la estructura Info y en el
+        documento de Metadata (si está presente). Ahora es responsabilidad de la aplicación del
+        usuario mantenerlas sincronizadas.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.pdf.interactive-features.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.pdf.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.pdf.usage.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">55.6. Características interactivas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 55.8. Ejemplo de uso del módulo Zend_Pdf</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

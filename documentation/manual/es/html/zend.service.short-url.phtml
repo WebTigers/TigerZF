@@ -1,0 +1,179 @@
+<?php $title = '64.27. Zend_Service_ShortUrl'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.27. Zend_Service_ShortUrl</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.recaptcha.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.slideshare.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.short-url"></a>64.27. Zend_Service_ShortUrl</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.short-url.intro"></a>64.27.1. Resumen</h3></div></div></div>
+<p>
+            Los acortadores de URL han explotado en popularidad en los últimos años, en gran parte debido
+            a la naturaleza social de la web y al deseo de compartir enlaces.
+            <code class="classname">Zend_Service_ShortUrl</code> proporciona una API para acceder a varios
+            servicios distintos de acortamiento de URL, con la capacidad tanto de crear URLs cortas como de
+            recuperar la URL original.
+        </p>
+<p>
+            Los adaptadores proporcionados incluyen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="classname">Zend_Service_ShortUrl_JdemCz</code>, que accede al servicio <a class="ulink" href="http://jdem.cz/" target="_top">jdem.cz</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Service_ShortUrl_TinyUrlCom</code>, que accede al servicio <a class="ulink" href="http://tinyurl.com" target="_top">tinyurl.com</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Service_ShortUrl_MetamarkNet</code>, que accede al servicio <a class="ulink" href="http://metamark.net/" target="_top">metamark.net</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Service_ShortUrl_IsGd</code>, que accede al servicio <a class="ulink" href="http://is.gd" target="_top">is.gd</a>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="classname">Zend_Service_ShortUrl_BitLy</code>, que accede al servicio <a class="ulink" href="http://bitly.com" target="_top">bit.ly</a>.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.short-url.quick-start"></a>64.27.2. Inicio rápido</h3></div></div></div>
+<p>
+            Utilizar uno de los servicios de acortamiento de URL es sencillo. Cada acortador de URL sigue una
+            interfaz simple que define dos métodos: <code class="methodname">shorten()</code> y
+            <code class="methodname">unshorten()</code>. Instancie la clase y llame al método
+            correspondiente.
+        </p>
+<pre class="programlisting">
+$tinyurl = new Zend_Service_ShortUrl_TinyUrlCom();
+
+// Shorten a URL:
+$short = $tinyurl-&gt;shorten('http://framework.zend.com/'); // http://tinyurl.com/rxtuq
+
+// Inflate or unshorten a short URL:
+$long  = $tinyurl-&gt;unshorten('http://tinyurl.com/rxtuq'); // http://framework.zend.com/
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.short-url.methods"></a>64.27.3. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.service.short-url.methods.shorten"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">shorten</span>(<span class="methodparam">$url</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Toma la <code class="varname">$url</code> proporcionada y la pasa al servicio con el
+                        fin de obtener una URL acortada.
+                    </p>
+<p>
+                        Si la <code class="varname">$url</code> proporcionada no es válida, se lanzará una
+                        excepción.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.short-url.methods.unshorten"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">unshorten</span>(<span class="methodparam">$shortenedUrl</span>);</code>
+                </span>
+</dt>
+<dd>
+<p>
+                        Toma la <code class="varname">$shortenedUrl</code> proporcionada y la pasa al
+                        servicio con el fin de obtener la URL original.
+                    </p>
+<p>
+                        Si la <code class="varname">$shortenedUrl</code> proporcionada no es válida, se
+                        lanzará una excepción.
+                    </p>
+</dd>
+<dt>
+<a name="zend.service.short-url.methods.set-http-client"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setHttpClient</span>(<span class="methodparam">Zend_Http_Client $httpClient</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Use este método para establecer el cliente HTTP utilizado para comunicarse con el
+                        servicio.
+                    </p></dd>
+<dt>
+<a name="zend.service.short-url.methods.get-http-client"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">getHttpClient</span>(<span class="methodparam"></span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Use este método para acceder al cliente HTTP asociado al servicio. Por
+                        defecto, esto cargará de forma diferida (lazy-load) una instancia de
+                        <code class="classname">Zend_Http_Client</code> si aún no hay ningún cliente asociado.
+                    </p></dd>
+</dl></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.short-url.bitly"></a>64.27.4. Métodos adicionales de Bit.ly</h3></div></div></div>
+<p>
+            La API de bitly requiere que las credenciales de autenticación se proporcionen como argumentos
+            de consulta. Para comenzar, necesitará una cuenta de usuario bitly gratuita y una apiKey.
+            Regístrese en:
+            <a class="ulink" href="http://http://bitly.com/a/sign_up" target="_top">http://bitly.com/a/sign_up</a>
+        </p>
+<p>
+            bitly actualmente también admite el borrador de especificación OAuth 2. Puede proporcionar un
+            token de acceso OAuth generado a <code class="classname">Zend_Service_ShortUrl_BitLy</code>
+            usando <code class="methodname">setOAuthAccessToken</code> o como argumento del constructor.
+        </p>
+<pre class="programlisting">
+$bitly = new Zend_Service_ShortUrl_BitLy('username','apiKey');
+
+// Shorten a URL:
+$short = $bitly-&gt;shorten('http://framework.zend.com/'); // http://bit.ly/15Oe0
+
+// Inflate or unshorten a short URL:
+$long  = $bitly-&gt;unshorten('http://bit.ly/15Oe0'); // http://framework.zend.com/
+</pre>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.service.short-url.bitly.setApiLogin"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setApiLogin</span>(<span class="methodparam">$login, $apiKey</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Toma el nombre de usuario <code class="varname">$login</code> y la <code class="varname">$apiKey</code>
+                        requeridos y los pasa al servicio.
+                    </p></dd>
+<dt>
+<a name="zend.service.short-url.bitly.setOAuthAccessToken"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">setOAuthAccessToken</span>(<span class="methodparam">$accessToken</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Utiliza el <code class="varname">$accessToken</code> de OAuth para la autenticación
+                    </p></dd>
+</dl></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.recaptcha.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.slideshare.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.26. Zend_Service_ReCaptcha </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.28. Zend_Service_SlideShare</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

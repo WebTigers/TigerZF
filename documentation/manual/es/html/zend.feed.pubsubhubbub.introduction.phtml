@@ -1,0 +1,686 @@
+<?php $title = '33.11. Zend_Feed_Pubsubhubbub'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.11. Zend_Feed_Pubsubhubbub</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.writer.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.file.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.pubsubhubbub.introduction"></a>33.11. Zend_Feed_Pubsubhubbub</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Feed_Pubsubhubbub</code> es una implementación de la Especificación
+        Core 0.2 de PubSubHubbub (Working Draft). Ofrece implementaciones de un Publicador y un
+        Suscriptor Pubsubhubbub adecuadas para Zend Framework y otras aplicaciones
+        <acronym class="acronym">PHP</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.pubsubhubbub.what.is.pubsubhubbub"></a>33.11.1. ¿Qué es Pubsubhubbub?</h3></div></div></div>
+<p>
+            Pubsubhubbub es un protocolo pubsub abierto, simple y de escala web. Un caso de uso
+            habitual es permitir que los blogs (Publicadores) "empujen" actualizaciones desde sus
+            fuentes <acronym class="acronym">RSS</acronym> o Atom (Temas) hacia los Suscriptores finales. Estos
+            Suscriptores se habrán suscrito a la fuente <acronym class="acronym">RSS</acronym> o Atom del blog a
+            través de un Hub, un servidor central al que el Publicador notifica cualquier
+            actualización y que luego distribuye estas actualizaciones a todos los Suscriptores.
+            Cualquier fuente puede anunciar que soporta uno o más Hubs mediante un elemento link con
+            espacio de nombres Atom y un atributo rel de "hub".
+        </p>
+<p>
+            Pubsubhubbub ha atraído atención porque es un protocolo pubsub fácil de implementar y
+            que opera sobre <acronym class="acronym">HTTP</acronym>. Su filosofía consiste en reemplazar el modelo
+            tradicional en el que las fuentes de los blogs se sondeaban (polling) a intervalos
+            regulares para detectar y recuperar actualizaciones. Dependiendo de la frecuencia del
+            sondeo, esto puede tardar mucho tiempo en propagar las actualizaciones a las partes
+            interesadas, desde agregadores planetarios hasta lectores de escritorio. Con un sistema
+            pubsub implementado, las actualizaciones no son simplemente sondeadas por los
+            Suscriptores, sino que se les empujan (push), eliminando cualquier retraso. Por esta
+            razón, Pubsubhubbub forma parte de lo que se ha denominado la web en tiempo real.
+        </p>
+<p>
+            El protocolo no existe de forma aislada. Los sistemas pubsub llevan ya un tiempo
+            existiendo, como el conocido protocolo Jabber Publish-Subscribe,
+            <acronym class="acronym">XEP-0060</acronym>, o el menos conocido rssCloud (descrito en 2001). Sin
+            embargo, estos no han logrado una adopción generalizada, típicamente debido a su
+            complejidad, a un momento de aparición inoportuno o a su falta de idoneidad para
+            aplicaciones web. rssCloud, que fue recientemente revivido como respuesta a la aparición
+            de Pubsubhubbub, también ha visto aumentar su uso de forma significativa, aunque carece
+            de una especificación formal y actualmente no soporta fuentes Atom 1.0.
+        </p>
+<p>
+            Quizás sorprendentemente dada su corta edad relativa, Pubsubhubbub ya está en uso,
+            incluyendo Google Reader, Feedburner, y existen plugins disponibles para blogs de
+            Wordpress.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.pubsubhubbub.architecture"></a>33.11.2. Arquitectura</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Feed_Pubsubhubbub</code> implementa dos lados de la Especificación
+            0.2 de Pubsubhubbub: un Publicador y un Suscriptor. Actualmente no implementa un
+            Servidor Hub, aunque esto está en desarrollo para una futura versión de Zend Framework.
+        </p>
+<p>
+            Un Publicador es responsable de notificar a todos los Hubs soportados (se pueden
+            soportar varios para añadir redundancia al sistema) sobre cualquier actualización de sus
+            fuentes, ya sean basadas en Atom o <acronym class="acronym">RSS</acronym>. Esto se logra haciendo ping
+            a los Servidores Hub soportados con la <acronym class="acronym">URL</acronym> de la fuente actualizada.
+            En la terminología de Pubsubhubbub, cualquier recurso actualizable que pueda ser
+            suscrito se denomina Tema (Topic). Una vez recibido un ping, el Hub solicitará la fuente
+            actualizada, la procesará en busca de elementos actualizados y reenviará todas las
+            actualizaciones a todos los Suscriptores suscritos a esa fuente.
+        </p>
+<p>
+            Un Suscriptor es cualquier parte o aplicación que se suscribe a uno o más Hubs para
+            recibir actualizaciones de un Tema alojado por un Publicador. El Suscriptor nunca se
+            comunica directamente con el Publicador, ya que el Hub actúa como intermediario, aceptando
+            suscripciones y enviando actualizaciones a los Suscriptores suscritos. Por lo tanto, el
+            Suscriptor se comunica únicamente con el Hub, ya sea para suscribirse o cancelar la
+            suscripción a Temas, o cuando recibe actualizaciones del Hub. Este diseño de comunicación
+            ("Fat Pings") elimina eficazmente la posibilidad de un problema de "Estampida" (Thundering
+            Herd). Esto ocurre en un sistema pubsub en el que el Hub simplemente informa a los
+            Suscriptores de que hay una actualización disponible, lo que hace que todos los
+            Suscriptores recuperen inmediatamente la fuente del Publicador, dando lugar a un pico de
+            tráfico. En Pubsubhubbub, el Hub distribuye la actualización real en un "Fat Ping", de
+            modo que el Publicador no queda sometido a ningún pico de tráfico.
+        </p>
+<p>
+            <code class="classname">Zend_Feed_Pubsubhubbub</code> implementa Publicadores y Suscriptores de
+            Pubsubhubbub con las
+            clases <code class="classname">Zend_Feed_Pubsubhubbub_Publisher</code> y
+            <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber</code>. Además, la implementación del
+            Suscriptor puede gestionar cualquier actualización de fuente reenviada desde un Hub
+            usando <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code>. Estas clases,
+            sus casos de uso y sus <acronym class="acronym">API</acronym>s se tratan en las siguientes secciones.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.publisher"></a>33.11.3. Zend_Feed_Pubsubhubbub_Publisher</h3></div></div></div>
+<p>
+            En Pubsubhubbub, el Publicador es la parte que publica una fuente en vivo y la actualiza
+            con frecuencia con contenido nuevo. Esto puede ser un blog, un agregador, o incluso un
+            servicio web con una <acronym class="acronym">API</acronym> pública basada en fuentes. Para que estas
+            actualizaciones se empujen a los Suscriptores, el Publicador debe notificar a todos sus
+            Hubs soportados de que se ha producido una actualización mediante una simple solicitud
+            <acronym class="acronym">HTTP</acronym> <acronym class="acronym">POST</acronym> que contenga la
+            <acronym class="acronym">URI</acronym> del Tema actualizado (es decir, la fuente
+            <acronym class="acronym">RSS</acronym> o Atom actualizada). El Hub confirmará la recepción de la
+            notificación, obtendrá la fuente actualizada y reenviará cualquier actualización a los
+            Suscriptores que se hayan suscrito a ese Hub para recibir actualizaciones de la fuente
+            correspondiente.
+        </p>
+<p>
+            Por diseño, esto significa que el Publicador tiene muy poco que hacer, salvo enviar
+            estos pings al Hub cada vez que sus fuentes cambian. Como resultado, la implementación
+            del Publicador es extremadamente sencilla de usar y requiere muy poco trabajo de
+            configuración y uso cuando se actualizan las fuentes.
+        </p>
+<p>
+            <code class="classname">Zend_Feed_Pubsubhubbub_Publisher</code> implementa un Publicador
+            Pubsubhubbub completo. Su configuración para su uso también es sencilla, requiriendo
+            principalmente que se configure con el punto final <acronym class="acronym">URI</acronym> de todos
+            los Hubs a los que se debe notificar sobre actualizaciones, y las
+            <acronym class="acronym">URI</acronym>s de todos los Temas a incluir en las notificaciones.
+        </p>
+<p>
+            El siguiente ejemplo muestra un Publicador notificando a un conjunto de Hubs sobre
+            actualizaciones de un par de fuentes <acronym class="acronym">RSS</acronym> y Atom locales. La clase
+            mantiene una colección de errores que incluyen las <acronym class="acronym">URL</acronym>s de los
+            Hubs, de modo que la notificación pueda reintentarse más tarde y/o registrarse si alguna
+            notificación llegara a fallar. Cada array de error resultante también incluye una clave
+            "response" que contiene el objeto de respuesta <acronym class="acronym">HTTP</acronym> correspondiente.
+            En caso de errores, se recomienda encarecidamente intentar la operación de nuevo al menos
+            una vez más en el futuro para los Puntos Finales de Hub que hayan fallado. Esto puede
+            requerir el uso de una tarea programada para este propósito o de una cola de trabajos,
+            aunque estos pasos adicionales son opcionales.
+        </p>
+<pre class="programlisting">
+$publisher = new Zend_Feed_Pubsubhubbub_Publisher;
+$publisher-&gt;addHubUrls(array(
+    'http://pubsubhubbub.appspot.com/',
+    'http://hubbub.example.com',
+));
+$publisher-&gt;addUpdatedTopicUrls(array(
+    'http://www.example.net/rss',
+    'http://www.example.net/atom',
+));
+$publisher-&gt;notifyAll();
+
+if (!$publisher-&gt;isSuccess()) {
+    // check for errors
+    $errors     = $publisher-&gt;getErrors();
+    $failedHubs = array()
+    foreach ($errors as $error) {
+        $failedHubs[] = $error['hubUrl'];
+    }
+}
+
+// reschedule notifications for the failed Hubs in $failedHubs
+</pre>
+<p>
+            Si prefiere tener un control más concreto sobre el Publicador, los métodos
+            <code class="methodname">addHubUrls()</code> y <code class="methodname">addUpdatedTopicUrls()</code>
+            pasan cada valor del array a los métodos públicos singulares <code class="methodname">addHubUrl()</code> y
+            <code class="methodname">addUpdatedTopicUrl()</code>. También existen los métodos
+            correspondientes <code class="methodname">removeUpdatedTopicUrl()</code> y
+            <code class="methodname">removeHubUrl()</code>.
+        </p>
+<p>
+            También puede omitir la configuración de <acronym class="acronym">URI</acronym>s de Hub y notificar
+            a cada uno por turno usando el método <code class="methodname">notifyHub()</code>, que acepta
+            la <acronym class="acronym">URI</acronym> de un punto final de Hub como único argumento.
+        </p>
+<p>
+            No hay otras tareas que cubrir. La implementación del Publicador es muy sencilla, ya
+            que la mayor parte del procesamiento y distribución de la fuente lo gestionan los Hubs
+            seleccionados. Sin embargo, es importante detectar errores y reprogramar las
+            notificaciones lo antes posible (con un número máximo razonable de reintentos) para
+            garantizar que las notificaciones lleguen a todos los Suscriptores. En muchos casos,
+            como alternativa final, los Hubs pueden sondear con frecuencia sus fuentes para ofrecer
+            cierta tolerancia adicional a fallos, tanto en términos de su propia caída temporal como
+            de errores o caídas del Publicador.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.subscriber"></a>33.11.4. Zend_Feed_Pubsubhubbub_Subscriber</h3></div></div></div>
+<p>
+            En Pubsubhubbub, el Suscriptor es la parte que desea recibir actualizaciones de
+            cualquier Tema (fuente <acronym class="acronym">RSS</acronym> o Atom). Lo consigue suscribiéndose a
+            uno o más de los Hubs anunciados por ese Tema, generalmente como un conjunto de uno o más
+            enlaces Atom 1.0 con un atributo rel de "hub". A partir de ese momento, el Hub enviará
+            una fuente Atom o <acronym class="acronym">RSS</acronym> que contenga todas las actualizaciones a la
+            <acronym class="acronym">URL</acronym> de Callback del Suscriptor cuando reciba una notificación de
+            actualización del Publicador. De este modo, el Suscriptor nunca necesita visitar
+            realmente la fuente original (aunque sigue recomendándose hacerlo en cierta medida para
+            garantizar que las actualizaciones se recuperen si alguna vez un Hub queda fuera de
+            línea). Todas las solicitudes de suscripción deben contener la <acronym class="acronym">URI</acronym>
+            del Tema al que se suscriben y una <acronym class="acronym">URL</acronym> de Callback que el Hub usará
+            para confirmar la suscripción y reenviar las actualizaciones.
+        </p>
+<p>
+            El Suscriptor tiene, por lo tanto, dos funciones. Crear y gestionar suscripciones,
+            incluyendo la suscripción a nuevos Temas con un Hub, la cancelación de suscripciones (si
+            es necesario) y la renovación periódica de las suscripciones, ya que pueden tener una
+            validez limitada establecida por el Hub. Esto lo gestiona
+            <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber</code>.
+        </p>
+<p>
+            La segunda función es aceptar las actualizaciones enviadas por un Hub a la
+            <acronym class="acronym">URL</acronym> de Callback del Suscriptor, es decir, la <acronym class="acronym">URI</acronym>
+            que el Suscriptor ha asignado para gestionar las actualizaciones. La
+            <acronym class="acronym">URL</acronym> de Callback también gestiona los eventos en los que el Hub
+            contacta con el Suscriptor para confirmar todas las suscripciones y cancelaciones de
+            suscripción. Esto lo gestiona el uso de una instancia de
+            <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code> cuando se accede a la
+            <acronym class="acronym">URL</acronym> de Callback.
+        </p>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td>
+<th align="left">Importante</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber</code> implementa la
+                Especificación 0.2 de Pubsubhubbub. Al tratarse de una versión de especificación
+                nueva, no todos los Hubs la implementan actualmente. La nueva especificación permite
+                que la <acronym class="acronym">URL</acronym> de Callback incluya una cadena de consulta usada
+                por esta clase, pero no soportada por todos los Hubs. En aras de maximizar la
+                compatibilidad, se recomienda por tanto que el componente de cadena de consulta de la
+                <acronym class="acronym">URI</acronym> de Callback del Suscriptor se presente como un elemento de
+                ruta, es decir, reconocido como un parámetro en la ruta asociada con la
+                <acronym class="acronym">URI</acronym> de Callback y utilizado por el Router de la aplicación.
+            </p></td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.subscriber.subscribing.and.unsubscribing"></a>33.11.4.1. Suscribirse y cancelar la suscripción</h4></div></div></div>
+<p>
+                <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber</code> implementa un Suscriptor
+                Pubsubhubbub completo, capaz de suscribirse a, o cancelar la suscripción de,
+                cualquier Tema a través de cualquier Hub anunciado por ese Tema. Funciona en
+                conjunto con <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code>, que
+                acepta solicitudes de un Hub para confirmar todos los intentos de suscripción o
+                cancelación de suscripción (para evitar el uso indebido por terceros).
+            </p>
+<p>
+                Cualquier suscripción (o cancelación de suscripción) requiere la información
+                pertinente antes de continuar, es decir, la <acronym class="acronym">URI</acronym> del Tema
+                (fuente Atom o <acronym class="acronym">RSS</acronym>) al que se va a suscribir para recibir
+                actualizaciones, y la <acronym class="acronym">URI</acronym> del punto final del Hub que
+                gestionará la suscripción y el reenvío de las actualizaciones. El tiempo de vida de
+                una suscripción puede ser determinado por el Hub, pero la mayoría de los Hubs
+                deberían soportar renovaciones automáticas de suscripción comprobando con el
+                Suscriptor. Esto lo soporta
+                <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code> y no requiere
+                ningún trabajo adicional por su parte. Aun así, se recomienda encarecidamente usar el
+                tiempo de vida (ttl) de la suscripción proporcionado por el Hub para programar la
+                creación de nuevas suscripciones (el proceso es idéntico al de cualquier nueva
+                suscripción) para renovarla con el Hub. Aunque no debería ser estrictamente
+                necesario, cubre los casos en los que un Hub pueda no soportar la renovación
+                automática de suscripciones y descarta errores del Hub para obtener redundancia
+                adicional.
+            </p>
+<p>
+                Con la información pertinente a mano, se puede intentar una suscripción como se
+                muestra a continuación:
+            </p>
+<pre class="programlisting">
+$storage = new Zend_Feed_Pubsubhubbub_Model_Subscription;
+
+$subscriber = new Zend_Feed_Pubsubhubbub_Subscriber;
+$subscriber-&gt;setStorage($storage);
+$subscriber-&gt;addHubUrl('http://hubbub.example.com');
+$subscriber-&gt;setTopicUrl('http://www.example.net/rss.xml');
+$subscriber-&gt;setCallbackUrl('http://www.mydomain.com/hubbub/callback');
+$subscriber-&gt;subscribeAll();
+</pre>
+<p>
+                Para almacenar las suscripciones y ofrecer acceso a estos datos para uso general,
+                el componente requiere una base de datos (más adelante en esta sección se ofrece un
+                esquema). Por defecto, se asume que el nombre de la tabla es "subscription" y utiliza
+                <code class="classname">Zend_Db_Table_Abstract</code> internamente, lo que significa que
+                usará el adaptador predeterminado que haya configurado para su aplicación. También
+                puede pasar una instancia personalizada específica de
+                <code class="classname">Zend_Db_Table_Abstract</code> al modelo asociado
+                <code class="classname">Zend_Feed_Pubsubhubbub_Model_Subscription</code>. Este adaptador
+                personalizado puede ser tan simple en su intención como cambiar el nombre de la
+                tabla a usar, o tan complejo como usted considere necesario.
+            </p>
+<p>
+                Aunque este Modelo se ofrece como una solución lista para usar por defecto, puede
+                crear su propio Modelo usando cualquier otra capa de backend o de base de datos
+                (por ejemplo, Doctrine), siempre que la clase resultante implemente la interfaz
+                <code class="classname">Zend_Feed_Pubsubhubbub_Model_SubscriptionInterface</code>.
+            </p>
+<p>
+                Un ejemplo de esquema (MySQL) para una tabla de suscripción accesible por el modelo
+                proporcionado puede ser similar a:
+            </p>
+<pre class="programlisting">
+CREATE TABLE IF NOT EXISTS `subscription` (
+  `id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `topic_url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `hub_url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created_time` datetime DEFAULT NULL,
+  `lease_seconds` bigint(20) DEFAULT NULL,
+  `verify_token` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `secret` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `subscription_state` varchar(12) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+</pre>
+<p>
+                Entre bastidores, el Suscriptor anterior enviará una solicitud al punto final del
+                Hub que contendrá los siguientes parámetros (basado en el ejemplo anterior):
+            </p>
+<div class="table">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.subscriber.subscribing.and.unsubscribing.table"></a><p class="title"><b>Tabla 33.9. Parámetros de la solicitud de suscripción</b></p>
+<div class="table-contents"><table class="table" summary="Subscription request parameters" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Explicación</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="property">hub.callback</span></td>
+<td>http://www.mydomain.com/hubbub/callback?xhub.subscription=5536df06b5dcb966edab3a4c4d56213c16a8184</td>
+<td>
+                                <p>
+                                    La <acronym class="acronym">URI</acronym> que un Hub usa para contactar con el
+                                    Suscriptor y solicitar confirmación de una solicitud de
+                                    (des)suscripción, o enviar actualizaciones de las fuentes
+                                    suscritas. La cadena de consulta añadida contiene un parámetro
+                                    personalizado (de ahí la denominación xhub). Es un parámetro de
+                                    cadena de consulta preservado por el Hub y reenviado con todas
+                                    las solicitudes del Suscriptor. Su propósito es permitir al
+                                    Suscriptor identificar y buscar la suscripción asociada a
+                                    cualquier solicitud del Hub en un medio de almacenamiento de
+                                    backend. Este es un parámetro no estándar usado por este
+                                    componente en lugar de codificar una clave de suscripción en la
+                                    ruta de la <acronym class="acronym">URI</acronym>, lo cual es más difícil de
+                                    implementar en una aplicación de Zend Framework.
+                                </p>
+
+                                <p>
+                                    Sin embargo, dado que no todos los Hubs soportan parámetros de
+                                    cadena de consulta, seguimos recomendando encarecidamente añadir
+                                    la clave de suscripción como un componente de ruta con la forma
+                                    http://www.mydomain.com/hubbub/callback/5536df06b5dcb966edab3a4c4d56213c16a8184.
+                                    Para lograr esto, se requiere definir una ruta capaz de extraer
+                                    el valor final de la clave y luego recuperar el valor y pasarlo
+                                    al objeto Callback del Suscriptor. El valor se pasaría al método
+                                    <code class="methodname">Zend_Pubsubhubbub_Subscriber_Callback::setSubscriptionKey()</code>.
+                                    Más adelante se ofrece un ejemplo detallado.
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.lease_seconds</span></td>
+<td>2592000</td>
+<td>
+                                <p>
+                                    El número de segundos durante los cuales el Suscriptor desea que
+                                    una nueva suscripción permanezca válida (es decir, un
+                                    <acronym class="acronym">TTL</acronym>). Los Hubs pueden imponer su propio
+                                    período máximo de suscripción. Todas las suscripciones deberían
+                                    renovarse simplemente volviéndose a suscribir antes de que
+                                    finalice el período de suscripción, para garantizar la
+                                    continuidad de las actualizaciones. Además, los Hubs deberían
+                                    intentar renovar automáticamente las suscripciones antes de que
+                                    caduquen, contactando con los Suscriptores (gestionado
+                                    automáticamente por la clase Callback).
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.mode</span></td>
+<td>subscribe</td>
+<td>
+                                <p>
+                                    Valor simple que indica que se trata de una solicitud de
+                                    suscripción. Las solicitudes de cancelación de suscripción
+                                    usarían el valor "unsubscribe".
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.topic</span></td>
+<td>http://www.example.net/rss.xml</td>
+<td>
+                                <p>
+                                    La <acronym class="acronym">URI</acronym> del tema (es decir, la fuente Atom o
+                                    <acronym class="acronym">RSS</acronym>) al que el Suscriptor desea suscribirse
+                                    para recibir actualizaciones.
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.verify</span></td>
+<td>sync</td>
+<td>
+                                <p>
+                                    Indica al Hub el modo preferido de verificación de suscripciones
+                                    o cancelaciones de suscripción. Se repite dos veces en orden de
+                                    preferencia. Técnicamente, este componente no distingue entre
+                                    ambos modos y los trata por igual.
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.verify</span></td>
+<td>async</td>
+<td>
+                                <p>
+                                    Indica al Hub el modo preferido de verificación de suscripciones
+                                    o cancelaciones de suscripción. Se repite dos veces en orden de
+                                    preferencia. Técnicamente, este componente no distingue entre
+                                    ambos modos y los trata por igual.
+                                </p>
+                            </td>
+</tr>
+<tr>
+<td><span class="property">hub.verify_token</span></td>
+<td>3065919804abcaa7212ae89.879827871253878386</td>
+<td>
+                                <p>
+                                    Un token de verificación devuelto al Suscriptor por el Hub
+                                    cuando confirma una suscripción o cancelación de suscripción.
+                                    Ofrece una medida de confianza de que la solicitud de
+                                    confirmación se origina en el Hub correcto, para evitar el uso
+                                    indebido.
+                                </p>
+                            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+                Puede modificar varios de estos parámetros para indicar una preferencia distinta.
+                Por ejemplo, puede establecer un valor de lease seconds diferente usando
+                <code class="methodname">Zend_Pubsubhubbub_Subscriber::setLeaseSeconds()</code> o mostrar
+                una preferencia por el modo de verificación async usando
+                <code class="methodname">setPreferredVerificationMode(Zend_Feed_Pubsubhubbub::VERIFICATION_MODE_ASYNC)</code>.
+                Sin embargo, los Hubs conservan la capacidad de imponer sus propias preferencias, y
+                por esta razón el componente está deliberadamente diseñado para funcionar con casi
+                cualquier conjunto de opciones con una configuración mínima requerida por parte del
+                usuario final. ¡Las convenciones son geniales cuando funcionan!
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Aunque los Hubs pueden requerir el uso de un modo de verificación específico
+                    (ambos están soportados por <code class="classname">Zend_Pubsubhubbub</code>), puede
+                    indicar una preferencia específica usando el método
+                    <code class="methodname">setPreferredVerificationMode()</code>. En modo "sync"
+                    (síncrono), el Hub intenta confirmar una suscripción tan pronto como la recibe,
+                    y antes de responder a la solicitud de suscripción. En modo "async"
+                    (asíncrono), el Hub devolverá una respuesta a la solicitud de suscripción de
+                    inmediato, y su solicitud de verificación puede producirse más tarde. Dado que
+                    <code class="classname">Zend_Pubsubhubbub</code> implementa la función de
+                    verificación del Suscriptor como una clase callback independiente y requiere el
+                    uso de un medio de almacenamiento de backend, en realidad soporta ambos modos de
+                    forma transparente, aunque en términos de rendimiento para el usuario final, la
+                    verificación asíncrona es muy preferible para eliminar el impacto de un Hub con
+                    un rendimiento deficiente que ocupe los recursos y conexiones del servidor del
+                    usuario final durante demasiado tiempo.
+                </p></td></tr>
+</table></div>
+<p>
+                Cancelar la suscripción de un Tema sigue exactamente el mismo patrón que el ejemplo
+                anterior, con la excepción de que deberíamos llamar a
+                <code class="methodname">unsubscribeAll()</code> en su lugar. Los parámetros incluidos son
+                idénticos a los de una solicitud de suscripción, con la excepción de que
+                "<span class="property">hub.mode</span>" se establece en "unsubscribe".
+            </p>
+<p>
+                Por defecto, una nueva instancia de <code class="classname">Zend_Pubsubhubbub_Subscriber</code>
+                intentará usar un medio de almacenamiento respaldado por base de datos, que por
+                defecto usa el adaptador predeterminado de <code class="classname">Zend_Db</code> con un
+                nombre de tabla "subscription". Se recomienda establecer una solución de
+                almacenamiento personalizada cuando estos valores predeterminados no sean adecuados,
+                ya sea pasando un nuevo Modelo que soporte la interfaz requerida o pasando una nueva
+                instancia de <code class="classname">Zend_Db_Table_Abstract</code> al constructor del
+                Modelo predeterminado para cambiar el nombre de la tabla utilizada.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.subscriber.handling.hub.callbacks"></a>33.11.4.2. Gestión de los Callbacks del Suscriptor</h4></div></div></div>
+<p>
+                Cada vez que se realiza una solicitud de suscripción o cancelación de suscripción,
+                el Hub debe verificar la solicitud reenviando una nueva solicitud de verificación a
+                la <acronym class="acronym">URL</acronym> de Callback establecida en los parámetros de
+                suscripción o cancelación de suscripción. Para gestionar estas solicitudes del Hub,
+                que incluirán todas las comunicaciones futuras que contengan actualizaciones de
+                Tema (fuente), la <acronym class="acronym">URL</acronym> de Callback debería desencadenar la
+                ejecución de una instancia de
+                <code class="classname">Zend_Pubsubhubbub_Subscriber_Callback</code> para gestionar la
+                solicitud.
+            </p>
+<p>
+                La clase Callback debería configurarse para usar el mismo medio de almacenamiento
+                que la clase Subscriber. Su uso es bastante simple, ya que la mayor parte de su
+                trabajo se realiza internamente.
+            </p>
+<pre class="programlisting">
+$storage = new Zend_Feed_Pubsubhubbub_Model_Subscription;
+$callback = new Zend_Feed_Pubsubhubbub_Subscriber_Callback;
+$callback-&gt;setStorage($storage);
+$callback-&gt;handle();
+$callback-&gt;sendResponse();
+
+/**
+ * Check if the callback resulting in the receipt of a feed update.
+ * Otherwise it was either a (un)sub verification request or invalid request.
+ * Typically we need do nothing other than add feed update handling - the rest
+ * is handled internally by the class.
+ */
+if ($callback-&gt;hasFeedUpdate()) {
+    $feedString = $callback-&gt;getFeedUpdate();
+    /**
+     *  Process the feed update asynchronously to avoid a Hub timeout.
+     */
+}
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Cabe señalar que
+                    <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code> puede
+                    analizar de forma independiente cualquier cadena de consulta y otros parámetros
+                    entrantes. Esto es necesario porque <acronym class="acronym">PHP</acronym> altera la
+                    estructura y las claves de una cadena de consulta cuando se analiza en las
+                    superglobales <code class="varname">$_GET</code> o
+                    <code class="varname">$_POST</code>. Por ejemplo, se ignoran todas las claves
+                    duplicadas y los puntos se convierten en guiones bajos. Pubsubhubbub presenta
+                    ambas características en las cadenas de consulta que genera.
+                </p></td></tr>
+</table></div>
+<div class="important"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td>
+<th align="left">Importante</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Es esencial que los desarrolladores reconozcan que a los Hubs solo les interesa
+                    enviar solicitudes y recibir una respuesta que verifique su recepción. Si se
+                    recibe una actualización de fuente, nunca debería procesarse en el acto, ya que
+                    esto dejaría al Hub esperando una respuesta. Más bien, cualquier procesamiento
+                    debería delegarse a otro proceso o posponerse hasta después de que se haya
+                    devuelto una respuesta al Hub. Un síntoma de no completar con prontitud las
+                    solicitudes del Hub es que este puede continuar intentando la entrega de la
+                    actualización o de la solicitud de verificación, lo que provoca que el
+                    Suscriptor procese intentos de actualización duplicados. Esto parece
+                    problemático, pero en realidad un Hub puede aplicar un tiempo de espera de solo
+                    unos segundos, y si no recibe respuesta dentro de ese tiempo, puede desconectarse
+                    (asumiendo un fallo en la entrega) y reintentarlo más tarde. Tenga en cuenta que
+                    se espera que los Hubs distribuyan grandes volúmenes de actualizaciones, por lo
+                    que sus recursos están al límite; procese las fuentes de forma asíncrona (por
+                    ejemplo, en un proceso separado, una cola de trabajos o incluso una tarea
+                    programada por cron) tanto como sea posible.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.pubsubhubbub.zend.feed.pubsubhubbub.subscriber.setting.up.and.using.a.callback.url.route"></a>33.11.4.3. Configuración y uso de una ruta de URL de Callback</h4></div></div></div>
+<p>
+                Como se señaló anteriormente, la clase
+                <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code> recibe la clave
+                combinada asociada a cualquier suscripción desde el Hub mediante uno de dos
+                métodos. El método técnicamente preferido es añadir esta clave a la
+                <acronym class="acronym">URL</acronym> de Callback empleada por el Hub en todas las solicitudes
+                futuras usando un parámetro de cadena de consulta con la clave "xhub.subscription".
+                Sin embargo, por razones históricas, principalmente porque esto no estaba soportado
+                en Pubsubhubbub 0.1 (se añadió recientemente solo en la 0.2), se recomienda
+                encarecidamente usar el medio más compatible de añadir esta clave a la
+                <acronym class="acronym">URL</acronym> de Callback, añadiéndola a la ruta de la
+                <acronym class="acronym">URL</acronym>.
+            </p>
+<p>
+                Así, la <acronym class="acronym">URL</acronym>
+                http://www.example.com/callback?xhub.subscription=key se convertiría en
+                http://www.example.com/callback/key.
+            </p>
+<p>
+                Dado que el método de cadena de consulta es el predeterminado, en previsión de un
+                mayor nivel de soporte futuro para la especificación 0.2 completa, esto requiere
+                algo de trabajo adicional para implementarlo.
+            </p>
+<p>
+                El primer paso es hacer que la clase
+                <code class="classname">Zend_Feed_Pubsubhubbub_Subscriber_Callback</code> sea consciente de
+                la clave de suscripción contenida en la ruta. Por lo tanto, se inyecta manualmente,
+                ya que también requiere definir manualmente una ruta para este propósito. Esto se
+                logra simplemente llamando al método
+                <code class="methodname">Zend_Feed_Pubsubhubbub_Subscriber_Callback::setSubscriptionKey()</code>
+                con el parámetro siendo el valor de la clave disponible desde el Router. El ejemplo
+                siguiente muestra esto usando un controlador de Zend Framework.
+            </p>
+<pre class="programlisting">
+class CallbackController extends Zend_Controller_Action
+{
+
+    public function indexAction()
+    {
+        $storage = new Zend_Feed_Pubsubhubbub_Model_Subscription;
+        $callback = new Zend_Feed_Pubsubhubbub_Subscriber_Callback;
+        $callback-&gt;setStorage($storage);
+        /**
+         * Inject subscription key parsing from URL path using
+         * a parameter from Router.
+         */
+        $subscriptionKey = $this-&gt;_getParam('subkey');
+        $callback-&gt;setSubscriptionKey($subscriptionKey);
+        $callback-&gt;handle();
+        $callback-&gt;sendResponse();
+
+        /**
+         * Check if the callback resulting in the receipt of a feed update.
+         * Otherwise it was either a (un)sub verification request or invalid
+         * request. Typically we need do nothing other than add feed update
+         * handling - the rest is handled internally by the class.
+         */
+        if ($callback-&gt;hasFeedUpdate()) {
+            $feedString = $callback-&gt;getFeedUpdate();
+            /**
+             *  Process the feed update asynchronously to avoid a Hub timeout.
+             */
+        }
+    }
+
+}
+</pre>
+<p>
+            La forma de añadir realmente la ruta que asignaría la clave añadida al final de la ruta
+            a un parámetro para su recuperación desde un controlador se puede lograr usando una
+            configuración de Route como el siguiente ejemplo con formato <acronym class="acronym">INI</acronym>,
+            para su uso con el arranque de <code class="classname">Zend_Application</code>.
+        </p>
+<pre class="programlisting">
+; Callback Route to enable appending a PuSH Subscription's lookup key
+resources.router.routes.callback.route = "callback/:subkey"
+resources.router.routes.callback.defaults.module = "default"
+resources.router.routes.callback.defaults.controller = "callback"
+resources.router.routes.callback.defaults.action = "index"
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.writer.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.file.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">33.10. Zend_Feed_Writer </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 34. Zend_File</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

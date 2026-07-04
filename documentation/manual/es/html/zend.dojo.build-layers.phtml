@@ -1,0 +1,422 @@
+<?php $title = '29.5. Soporte de capas de compilación (build layer) de Zend_Dojo'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">29.5. Soporte de capas de compilación (build layer) de Zend_Dojo</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.dojo.form.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 29. Zend_Dojo</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.dom.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.dojo.build-layers"></a>29.5. Soporte de capas de compilación (build layer) de Zend_Dojo</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.build-layers.introduction"></a>29.5.1. Introducción</h3></div></div></div>
+<p>
+            Las capas de compilación (build layers) de Dojo proporcionan un camino
+            limpio desde el desarrollo hasta la producción cuando se utiliza Dojo
+            para la capa de interfaz de usuario. En desarrollo, puede tener carga
+            bajo demanda, prototipado rápido de aplicaciones; una capa de
+            compilación toma todas las dependencias de Dojo y las compila en un
+            único archivo, opcionalmente eliminando espacios en blanco y
+            comentarios, y realizando heurísticas de código para permitir una
+            mayor minificación de los nombres de variables. Además, puede realizar
+            minificación de <acronym class="acronym">CSS</acronym>.
+        </p>
+<p>
+            Para crear una capa de compilación, tradicionalmente crearía un
+            archivo JavaScript que tuviera sentencias <span class="command"><strong>dojo.require</strong></span>
+            para cada dependencia, y opcionalmente algo de código adicional que
+            podría ejecutarse cuando se carga el script. Como ejemplo:
+        </p>
+<pre class="programlisting">
+dojo.provide("custom.main");
+
+dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.layout.ContentPane");
+dojo.require("dijit.form.Form");
+dojo.require("dijit.form.Button");
+dojo.require("dijit.form.TextBox");
+</pre>
+<p>
+            Este script generalmente se conoce como un script de "capa" (layer).
+        </p>
+<p>
+            Después, en el layout de su aplicación, indicaría a Dojo que cargue
+            este módulo:
+        </p>
+<pre class="programlisting">
+&lt;html&gt;
+&lt;head&gt;
+    &lt;script type="text/javascript" src="/js/dojo/dojo.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript"&gt;
+        dojo.registerModulePath("custom", "../custom/");
+        dojo.require("custom.main");
+    &lt;/script&gt;
+</pre>
+<p>
+            Si utiliza <code class="classname">Zend_Dojo</code> para hacer esto, haría lo
+            siguiente:
+        </p>
+<pre class="programlisting">
+$view-&gt;dojo()-&gt;registerModulePath('custom', '../custom/')
+             -&gt;requireModule('custom.main');
+</pre>
+<p>
+            Pero dado que <code class="classname">Zend_Dojo</code> agrega sus diversas
+            sentencias <span class="command"><strong>dojo.require</strong></span>, ¿cómo crea su script de
+            capa? Podría abrir cada página y ver las sentencias
+            <span class="command"><strong>dojo.require</strong></span> generadas, y cortarlas y pegarlas
+            manualmente en un archivo de script de capa.
+        </p>
+<p>
+            Sin embargo, existe una solución mejor: dado que
+            <code class="classname">Zend_Dojo</code> ya agrega esta información, puede
+            simplemente extraer esa información y construir su archivo de capa.
+            Este es el propósito de
+            <code class="classname">Zend_Dojo_BuildLayer</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.build-layers.usage"></a>29.5.2. Generación de capas de módulos personalizadas con Zend_Dojo_BuildLayer</h3></div></div></div>
+<p>
+            En su forma más simple, simplemente instancia
+            <code class="classname">Zend_Dojo_BuildLayer</code>, le pasa el objeto de vista
+            y el nombre de su capa de módulo personalizada, y le hace generar el
+            contenido del archivo de capa; luego depende de usted escribirlo en
+            disco.
+        </p>
+<p>
+            Como ejemplo, supongamos que desea crear la capa de módulo
+            "<code class="filename">custom.main</code>". Suponiendo que sigue la
+            estructura de directorios de proyecto recomendada, y que está
+            almacenando sus archivos JavaScript bajo
+            <code class="filename">public/js/</code>, podría hacer lo siguiente:
+        </p>
+<pre class="programlisting">
+$build = new Zend_Dojo_BuildLayer(array(
+    'view'      =&gt; $view,
+    'layerName' =&gt; 'custom.main',
+));
+
+$layerContents = $build-&gt;generateLayerScript();
+$filename      = APPLICATION_PATH . '/../public/js/custom/main.js';
+if (!file_exists(dirname($filename))) {
+    mkdir(dirname($filename));
+}
+file_put_contents($filename, $layerContents);
+</pre>
+<p>
+            ¿Cuándo debería hacer lo anterior? Para que funcione correctamente,
+            necesita hacerlo después de que se hayan renderizado todos los
+            scripts de vista y el layout, para asegurar que el ayudante
+            <code class="methodname">dojo()</code> esté completamente poblado. Una forma
+            sencilla de hacerlo es utilizando un plugin del controlador frontal,
+            con un gancho <code class="methodname">dispatchLoopShutdown()</code>:
+        </p>
+<pre class="programlisting">
+class App_Plugin_DojoLayer extends Zend_Controller_Plugin_Abstract
+{
+    public $layerScript = APPLICATION_PATH . '/../public/js/custom/main.js';
+    protected $_build;
+
+    public function dispatchLoopShutdown()
+    {
+        if (!file_exists($this-&gt;layerScript)) {
+            $this-&gt;generateDojoLayer();
+        }
+    }
+
+    public function getBuild()
+    {
+        $viewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper(
+            'ViewRenderer'
+        );
+        $viewRenderer-&gt;initView();
+        if (null === $this-&gt;_build) {
+            $this-&gt;_build = new Zend_Dojo_BuildLayer(array(
+                'view'      =&gt; $viewRenderer-&gt;view,
+                'layerName' =&gt; 'custom.main',
+            ));
+        }
+        return $this-&gt;_build;
+    }
+
+    public function generateDojoLayer()
+    {
+        $build = $this-&gt;getBuild();
+        $layerContents = $build-&gt;generateLayerScript();
+        if (!file_exists(dirname($this-&gt;layerScript))) {
+            mkdir(dirname($this-&gt;layerScript));
+        }
+        file_put_contents($this-&gt;layerScript, $layerContents);
+    }
+}
+</pre>
+<div class="note"><table border="0" summary="Note: Do not generate the layer on every page">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">No genere la capa en cada página</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Es tentador generar el script de capa en cada página. Sin
+                embargo, esto consume muchos recursos, ya que debe escribir en
+                el disco en cada página. Además, dado que el mtime del archivo
+                seguirá cambiando, no obtendrá ningún beneficio del caché del
+                lado del cliente. Escriba el archivo una sola vez.
+            </p></td></tr>
+</table></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.build-layers.usage.options"></a>29.5.2.1. Opciones de BuildLayer</h4></div></div></div>
+<p>
+                La funcionalidad anterior será suficiente para la mayoría de las
+                situaciones. Para aquellos que necesiten más personalización,
+                se puede invocar una variedad de opciones.
+            </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.dojo.build-layers.usage.options.view"></a>29.5.2.1.1. Establecer el objeto de vista</h5></div></div></div>
+<p>
+                    Aunque el objeto de vista puede pasarse durante la
+                    instanciación, también puede pasarlo a una instancia a
+                    través del método <code class="methodname">setView()</code>:
+                </p>
+<pre class="programlisting">
+$build-&gt;setView($view);
+</pre>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.dojo.build-layers.usage.options.layername"></a>29.5.2.1.2. Establecer el nombre de la capa</h5></div></div></div>
+<p>
+                    Aunque el nombre de la capa puede pasarse durante la
+                    instanciación, también puede pasarlo a una instancia a
+                    través del método <code class="methodname">setLayerName()</code>:
+                </p>
+<pre class="programlisting">
+$build-&gt;setLayerName("custom.main");
+</pre>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.dojo.build-layers.usage.options.onload"></a>29.5.2.1.3. Incluir eventos onLoad en la capa generada</h5></div></div></div>
+<p>
+                    <span class="command"><strong>dojo.addOnLoad</strong></span> es una utilidad útil para
+                    especificar acciones que deben dispararse cuando el
+                    <acronym class="acronym">DOM</acronym> ha terminado de cargarse. El ayudante
+                    de vista <code class="methodname">dojo()</code> puede crear estas
+                    sentencias a través de sus métodos
+                    <code class="methodname">addOnLoad()</code> y
+                    <code class="methodname">onLoadCapture()</code>. En algunos casos, tiene
+                    sentido incluirlos en su archivo de capa en lugar de
+                    renderizarlos a través de sus scripts de vista.
+                </p>
+<p>
+                    Por defecto, estos no se renderizan; para habilitarlos, pase
+                    la clave de configuración <span class="property">consumeOnLoad</span>
+                    durante la instanciación:
+                </p>
+<pre class="programlisting">
+$build = new Zend_Dojo_BuildLayer(array(
+    'view'          =&gt; $view,
+    'layerName'     =&gt; 'custom.main',
+    'consumeOnLoad' =&gt; true,
+));
+</pre>
+<p>
+                    Alternativamente, puede usar el método
+                    <code class="methodname">setConsumeOnLoad()</code> después de la
+                    instanciación:
+                </p>
+<pre class="programlisting">
+$build-&gt;setConsumeOnLoad(true);
+</pre>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.dojo.build-layers.usage.options.javascript"></a>29.5.2.1.4. Incluir JavaScript capturado en la capa generada</h5></div></div></div>
+<p>
+                    El ayudante de vista <code class="methodname">dojo()</code> incluye
+                    métodos para capturar JavaScript arbitrario para incluir en
+                    la etiqueta &lt;script&gt; que contiene las diversas
+                    sentencias <span class="command"><strong>dojo.require</strong></span> y
+                    <span class="command"><strong>dojo.addOnLoad</strong></span>. Esto puede resultar útil
+                    al crear almacenes de datos predeterminados u objetos con
+                    ámbito global utilizados en toda su aplicación.
+                </p>
+<p>
+                    Por defecto, estos no se renderizan; para habilitarlos, pase
+                    la clave de configuración <span class="property">consumeJavascript</span>
+                    durante la instanciación:
+                </p>
+<pre class="programlisting">
+$build = new Zend_Dojo_BuildLayer(array(
+    'view'              =&gt; $view,
+    'layerName'         =&gt; 'custom.main',
+    'consumeJavascript' =&gt; true,
+));
+</pre>
+<p>
+                    Alternativamente, puede usar el método
+                    <code class="methodname">setConsumeJavascript()</code> después de la
+                    instanciación:
+                </p>
+<pre class="programlisting">
+$build-&gt;setConsumeJavascript(true);
+</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.build-layers.profiles"></a>29.5.3. Generación de perfiles de compilación con Zend_Dojo_BuildLayer</h3></div></div></div>
+<p>
+            Uno de los principales beneficios de una capa de módulo de Dojo es
+            que facilita la creación de una compilación personalizada.
+            <code class="classname">Zend_Dojo_BuildLayer</code> tiene funcionalidad para
+            generar perfiles de compilación.
+        </p>
+<p>
+            El caso de uso más simple es utilizar el método
+            <code class="methodname">generateBuildProfile()</code> y enviar la salida a
+            un archivo:
+        </p>
+<pre class="programlisting">
+$build = new Zend_Dojo_BuildLayer(array(
+    'view'      =&gt; $view,
+    'layerName' =&gt; 'custom.main',
+));
+
+$profile   = $build-&gt;generateBuildProfile();
+$filename  = APPLICATION_PATH . '/../misc/scripts/custom.profile.js';
+file_put_contents($filename, $profile);
+</pre>
+<p>
+            Al igual que la generación de capas, puede que desee automatizar
+            esto mediante un gancho de plugin
+            <code class="methodname">dispatchLoopShutdown()</code>; incluso podría
+            simplemente modificar el mostrado para la generación de capas para
+            que quede así:
+        </p>
+<pre class="programlisting">
+class App_Plugin_DojoLayer extends Zend_Controller_Plugin_Abstract
+{
+    public $layerScript  = APPLICATION_PATH
+                         . '/../public/js/custom/main.js';
+    public $buildProfile = APPLICATION_PATH
+                         . '/../misc/scripts/custom.profile.js';
+    protected $_build;
+
+    public function dispatchLoopShutdown()
+    {
+        if (!file_exists($this-&gt;layerScript)) {
+            $this-&gt;generateDojoLayer();
+        }
+        if (!file_exists($this-&gt;buildProfile)) {
+            $this-&gt;generateBuildProfile();
+        }
+    }
+
+    public function generateDojoLayer() { /* ... */ }
+
+    public function generateBuildProfile()
+    {
+        $profile = $this-&gt;getBuild()-&gt;generateBuildProfile();
+        file_put_contents($this-&gt;buildProfile, $profile);
+    }
+
+}
+</pre>
+<p>
+            Como se ha señalado, con las capas de módulo, solo debe crear el
+            archivo una vez.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.build-layers.profiles.options"></a>29.5.3.1. Opciones del perfil de compilación</h4></div></div></div>
+<p>
+                La funcionalidad anterior será suficiente para la mayoría de
+                las situaciones. La única manera de personalizar la generación
+                del perfil de compilación es proporcionar opciones
+                adicionales de perfil de compilación a utilizar.
+            </p>
+<p>
+                Como ejemplo, puede que desee especificar qué tipo de
+                optimizaciones deben realizarse, si se deben optimizar o no
+                los archivos <acronym class="acronym">CSS</acronym> en la capa, si se deben
+                copiar o no las pruebas en la compilación, etc. Para obtener
+                una lista de las opciones disponibles, debería leer la
+                <a class="ulink" href="http://docs.dojocampus.org/build/index" target="_top">documentación
+                    de compilación de Dojo</a> y la <a class="ulink" href="http://dojotoolkit.org/reference-guide/dojo/index.html#package-system" target="_top">documentación
+                que la acompaña</a>.
+            </p>
+<p>
+                Establecer estas opciones es trivial: utilice los métodos
+                <code class="methodname">addProfileOption()</code>,
+                <code class="methodname">addProfileOptions()</code>, o
+                <code class="methodname">setProfileOptions()</code>. El primer método
+                añade un único par de clave y valor de opción, el segundo
+                añadirá varios, y el tercero sobrescribirá cualquier opción
+                con la lista de pares de clave y valor proporcionados.
+            </p>
+<p>
+                Por defecto, se establecen las siguientes opciones:
+            </p>
+<pre class="programlisting">
+{
+    action:        "release",
+    optimize:      "shrinksafe",
+    layerOptimize: "shrinksafe",
+    copyTests:     false,
+    loader:        "default",
+    cssOptimize:   "comments"
+}
+</pre>
+<p>
+                Puede pasar los pares de clave y valor que desee; el script de
+                compilación de Dojo ignorará aquellos que no comprenda.
+            </p>
+<p>
+                Como ejemplo de establecimiento de opciones:
+            </p>
+<pre class="programlisting">
+// A single option:
+$build-&gt;addProfileOption('version', 'zend-1.3.1');
+
+// Several options:
+$build-&gt;addProfileOptions(array(
+    'loader'   =&gt; 'xdomain',
+    'optimize' =&gt; 'packer',
+));
+
+// Or overwrite options:
+$build-&gt;setProfileOptions(array(
+    'version'  =&gt; 'custom-1.3.1',
+    'loader'   =&gt; 'shrinksafe',
+    'optimize' =&gt; 'shrinksafe',
+));
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.dojo.form.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.dojo.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.dom.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">29.4. Elementos de formulario y decoradores de Dojo </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 30. Zend_Dom</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

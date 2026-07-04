@@ -1,0 +1,422 @@
+<?php $title = '72.3. Arquitectura'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">72.3. Arquitectura</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.tool.framework.clitool.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 72. Zend_Tool_Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.tool.framework.writing-providers.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.tool.framework.architecture"></a>72.3. Arquitectura</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.architecture.registry"></a>72.3.1. Registro</h3></div></div></div>
+<p>
+            Debido a que los proveedores y manifiestos pueden provenir de
+            cualquier lugar del <span class="property">include_path</span>, se
+            proporciona un registro para simplificar el acceso a las diversas
+            piezas de la cadena de herramientas. Este registro se inyecta en
+            los componentes que tienen conocimiento del registro, los cuales
+            pueden luego extraer dependencias de ellos según sea necesario. La
+            mayoría de las dependencias registradas con el registro serán
+            repositorios específicos de subcomponentes.
+        </p>
+<p>
+            La interfaz del registro consiste en la siguiente definición:
+        </p>
+<pre class="programlisting">
+interface Zend_Tool_Framework_Registry_Interface
+{
+    public function setClient(Zend_Tool_Framework_Client_Abstract $client);
+    public function getClient();
+    public function setLoader(Zend_Tool_Framework_Loader_Abstract $loader);
+    public function getLoader();
+    public function setActionRepository(
+        Zend_Tool_Framework_Action_Repository $actionRepository
+    );
+    public function getActionRepository();
+    public function setProviderRepository(
+        Zend_Tool_Framework_Provider_Repository $providerRepository
+    );
+    public function getProviderRepository();
+    public function setManifestRepository(
+        Zend_Tool_Framework_Manifest_Repository $manifestRepository
+    );
+    public function getManifestRepository();
+    public function setRequest(Zend_Tool_Framework_Client_Request $request);
+    public function getRequest();
+    public function setResponse(Zend_Tool_Framework_Client_Response $response);
+    public function getResponse();
+}
+</pre>
+<p>
+            Los diversos objetos que gestiona el registro se tratarán en sus
+            secciones correspondientes.
+        </p>
+<p>
+            Las clases que deban tener conocimiento del registro deben
+            implementar
+            <code class="classname">Zend_Tool_Framework_Registry_EnabledInterface</code>.
+            Esta interfaz simplemente permite la inicialización del registro
+            en la clase de destino.
+        </p>
+<pre class="programlisting">
+interface Zend_Tool_Framework_Registry_EnabledInterface
+{
+    public function setRegistry(
+        Zend_Tool_Framework_Registry_Interface $registry
+    );
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.architecture.providers"></a>72.3.2. Proveedores</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Tool_Framework_Provider</code> representa el
+            aspecto funcional o de "capacidad" del framework.
+            Fundamentalmente, <code class="classname">Zend_Tool_Framework_Provider</code>
+            proporcionará las interfaces necesarias para producir
+            "proveedores", o piezas de funcionalidad de herramientas que se
+            pueden invocar y usar dentro de la cadena de herramientas
+            <code class="classname">Zend_Tool_Framework</code>. La naturaleza
+            simplista de implementar esta interfaz de proveedor permite al
+            desarrollador un "punto único" para añadir funcionalidad o
+            capacidades a <code class="classname">Zend_Tool_Framework</code>.
+        </p>
+<p>
+            La interfaz de proveedor es una interfaz vacía y no impone
+            ningún método (este es el patrón de interfaz marcadora):
+        </p>
+<pre class="programlisting">
+interface Zend_Tool_Framework_Provider_Interface
+{}
+</pre>
+<p>
+            O, si lo desea, puede implementar el Provider base (o
+            abstracto) que le dará acceso al
+            <code class="classname">Zend_Tool_Framework_Registry</code>:
+        </p>
+<pre class="programlisting">
+abstract class Zend_Tool_Framework_Provider_Abstract
+    implements Zend_Tool_Framework_Provider_Interface,
+               Zend_Tool_Registry_EnabledInterface
+{
+    protected $_registry;
+    public function setRegistry(
+        Zend_Tool_Framework_Registry_Interface $registry
+    );
+}
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.architecture.loaders"></a>72.3.3. Cargadores (Loaders)</h3></div></div></div>
+<p>
+            El propósito de un Loader es encontrar Providers y archivos de
+            Manifest que contengan clases que implementen
+            <code class="classname">Zend_Tool_Framework_Provider_Interface</code> o
+            <code class="classname">Zend_Tool_Framework_Manifest_Interface</code>. Una
+            vez que un cargador encuentra estos archivos, los proveedores se
+            cargan en el Repositorio de Proveedores y los metadatos de
+            manifiesto se cargan en el Repositorio de Manifiestos.
+        </p>
+<p>
+            Para implementar un cargador, se debe extender la siguiente
+            clase abstracta:
+        </p>
+<pre class="programlisting">
+abstract class Zend_Tool_Framework_Loader_Abstract
+{
+
+    abstract protected function _getFiles();
+
+    public function load()
+    {
+        /** ... */
+    }
+}
+</pre>
+<p>
+            El método <code class="methodname">_getFiles()</code> debe devolver un
+            array de archivos (rutas absolutas). El cargador integrado
+            suministrado con Zend Framework se llama cargador IncludePath.
+            Por defecto, el framework de herramientas utilizará un cargador
+            basado en include_path para encontrar archivos que podrían
+            incluir objetos Provider o Manifest Metadata.
+            <code class="classname">Zend_Tool_Framework_Loader_IncludePathLoader</code>,
+            sin ninguna otra opción, buscará archivos dentro del include
+            path que terminen en <code class="filename">Mainfest.php</code>,
+            <code class="filename">Tool.php</code> o
+            <code class="filename">Provider.php</code>. Una vez encontrados, se
+            comprobará (mediante el método
+            <code class="methodname">load()</code> de
+            <code class="classname">Zend_Tool_Framework_Loader_Abstract</code>) si
+            implementan alguna de las interfaces soportadas. Si es así, se
+            instancia una instancia de la clase encontrada, y se añade al
+            repositorio correspondiente.
+        </p>
+<pre class="programlisting">
+class Zend_Tool_Framework_Loader_IncludePathLoader
+    extends Zend_Tool_Framework_Loader_Abstract
+{
+
+    protected $_filterDenyDirectoryPattern = '.*(/|\\\\).svn';
+    protected $_filterAcceptFilePattern = '.*(?:Manifest|Provider)\.php$';
+
+    protected function _getFiles()
+    {
+        /** ... */
+    }
+}
+</pre>
+<p>
+            Como puede ver, el cargador IncludePath buscará en todos los
+            include_paths los archivos que coincidan con
+            <code class="varname">$_filterAcceptFilePattern</code> y
+            <span class="emphasis"><em>no</em></span> coincidan con
+            <code class="varname">$_filterDenyDirectoryPattern</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.architecture.manifests"></a>72.3.4. Manifiestos</h3></div></div></div>
+<p>
+            En resumen, el Manifest contendrá metadatos específicos o
+            arbitrarios que resulten útiles para cualquier proveedor o
+            cliente, además de ser responsable de cargar cualquier proveedor
+            adicional en el repositorio de proveedores.
+        </p>
+<p>
+            Para introducir metadatos en el repositorio de manifiestos, todo
+            lo que se debe hacer es implementar la interfaz vacía
+            <code class="classname">Zend_Tool_Framework_Manifest_Interface</code>, y
+            proporcionar un método <code class="methodname">getMetadata()</code> que
+            devuelva un array de objetos que implementen
+            <code class="classname">Zend_Tool_Framework_Manifest_Metadata</code>.
+        </p>
+<pre class="programlisting">
+interface Zend_Tool_Framework_Manifest_Interface
+{
+    public function getMetadata();
+}
+</pre>
+<p>
+            Los objetos de metadatos se cargan (mediante un cargador
+            definido más abajo) en el Repositorio de Manifiestos
+            (<code class="classname">Zend_Tool_Framework_Manifest_Repository</code>).
+            Los Manifests se procesarán después de que se hayan encontrado
+            y cargado todos los Providers en el repositorio de proveedores.
+            Esto permitirá que los Manifests creen objetos de Metadata
+            basados en lo que actualmente hay dentro del repositorio de
+            proveedores.
+        </p>
+<p>
+            Existen algunas clases de metadatos diferentes que se pueden
+            usar para describir metadatos. La clase
+            <code class="classname">Zend_Tool_Framework_Manifest_Metadata</code> es el
+            objeto de metadatos base. Como se puede ver en el siguiente
+            fragmento de código, la clase de metadatos base es bastante
+            ligera y de naturaleza abstracta:
+        </p>
+<pre class="programlisting">
+class Zend_Tool_Framework_Metadata_Basic
+{
+
+    protected $_type        = 'Global';
+    protected $_name        = null;
+    protected $_value       = null;
+    protected $_reference   = null;
+
+    public function getType();
+    public function getName();
+    public function getValue();
+    public function getReference();
+    /** ... */
+}
+</pre>
+<p>
+            También hay otras clases de metadatos integradas para describir
+            metadatos más especializados: <code class="classname">ActionMetadata</code>
+            y <code class="classname">ProviderMetadata</code>. Estas clases le
+            ayudarán a describir con más detalle los metadatos específicos
+            de acciones o proveedores, y se espera que la referencia sea una
+            referencia a una acción o a un proveedor, respectivamente. Estas
+            clases se describen en el siguiente fragmento de código.
+        </p>
+<pre class="programlisting">
+class Zend_Tool_Framework_Manifest_ActionMetadata
+    extends Zend_Tool_Framework_Manifest_Metadata
+{
+
+    protected $_type = 'Action';
+    protected $_actionName = null;
+
+    public function getActionName();
+    /** ... */
+}
+
+class Zend_Tool_Framework_Manifest_ProviderMetadata
+    extends Zend_Tool_Framework_Manifest_Metadata
+{
+
+    protected $_type = 'Provider';
+    protected $_providerName  = null;
+    protected $_actionName    = null;
+    protected $_specialtyName = null;
+
+    public function getProviderName();
+    public function getActionName();
+    public function getSpecialtyName();
+    /** ... */
+}
+</pre>
+<p>
+            El 'Type' en estas clases se utiliza para describir el tipo de
+            metadatos del que es responsable el objeto. En el caso de
+            <code class="classname">ActionMetadata</code>, el tipo sería 'Action', y,
+            a la inversa, en el caso de <code class="classname">ProviderMetadata</code>
+            el tipo es 'Provider'. Estos tipos de metadatos también
+            incluirán información estructurada adicional tanto sobre la
+            "cosa" que están describiendo como sobre el objeto (el
+            <code class="methodname">getReference()</code>) al que hacen referencia con
+            estos nuevos metadatos.
+        </p>
+<p>
+            Para crear su propio tipo de metadatos, todo lo que se debe
+            hacer es extender la clase base
+            <code class="classname">Zend_Tool_Framework_Manifest_Metadata</code> y
+            devolver estos nuevos objetos de metadatos a través de una clase
+            u objeto Manifest local. Estas clases basadas en el usuario
+            vivirán en el Repositorio de Manifiestos
+        </p>
+<p>
+            Una vez que estos objetos de metadatos están en el repositorio,
+            hay entonces dos métodos diferentes que se pueden usar para
+            buscarlos en el repositorio.
+        </p>
+<pre class="programlisting">
+class Zend_Tool_Framework_Manifest_Repository
+{
+    /**
+     * To use this method to search, $searchProperties should contain the names
+     * and values of the key/value pairs you would like to match within the
+     * manifest.
+     *
+     * For Example:
+     *     $manifestRepository-&gt;findMetadatas(array(
+     *         'action' =&gt; 'Foo',
+     *         'name'   =&gt; 'cliActionName'
+     *         ));
+     *
+     * Will find any metadata objects that have a key with name 'action' value
+     * of 'Foo', AND a key named 'name' value of 'cliActionName'
+     *
+     * Note: to either exclude or include name/value pairs that exist in the
+     * search criteria but do not appear in the object, pass a bool value to
+     * $includeNonExistentProperties
+     */
+    public function findMetadatas(Array $searchProperties = array(),
+                                  $includeNonExistentProperties = true);
+
+    /**
+     * The following will return exactly one of the matching search criteria,
+     * regardless of how many have been returned. First one in the manifest is
+     * what will be returned.
+     */
+    public function findMetadata(Array $searchProperties = array(),
+                                 $includeNonExistentProperties = true)
+    {
+        $metadatas = $this-&gt;getMetadatas($searchProperties,
+                                         $includeNonExistentProperties);
+        return array_shift($metadatas);
+    }
+}
+</pre>
+<p>
+            Observando los métodos de búsqueda anteriores, las firmas
+            permiten una búsqueda extremadamente flexible. Para encontrar un
+            objeto de metadatos, simplemente pase un array de restricciones
+            de coincidencia mediante un array. Si se puede acceder a los
+            datos a través del accesor de Propiedad (los métodos
+            <code class="methodname">getSomething()</code> implementados en el objeto
+            de metadatos), entonces se devolverá al usuario como un objeto
+            de metadatos "encontrado".
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.tool.framework.architecture.clients"></a>72.3.5. Clientes</h3></div></div></div>
+<p>
+            Los Clients son la interfaz que conecta a un usuario o
+            herramienta externa con el sistema
+            <code class="classname">Zend_Tool_Framework</code>. Los Clients pueden
+            presentarse en todas las formas y tamaños: puntos finales
+            <acronym class="acronym">RPC</acronym>, Interfaz de Línea de Comandos, o
+            incluso una interfaz web. <code class="classname">Zend_Tool</code> ha
+            implementado la interfaz de línea de comandos como la interfaz
+            predeterminada para interactuar con el sistema
+            <code class="classname">Zend_Tool_Framework</code>.
+        </p>
+<p>
+            Para implementar un cliente, sería necesario extender la
+            siguiente clase abstracta:
+        </p>
+<pre class="programlisting">
+abstract class Zend_Tool_Framework_Client_Abstract
+{
+    /**
+     * This method should be implemented by the client implementation to
+     * construct and set custom loaders, request and response objects.
+     *
+     * (not required, but suggested)
+     */
+    protected function _preInit();
+
+    /**
+     * This method should be implemented by the client implementation to parse
+     * out and set up the request objects action, provider and parameter
+     * information.
+     */
+    abstract protected function _preDispatch();
+
+    /**
+     * This method should be implemented by the client implementation to take
+     * the output of the response object and return it (in an client specific
+     * way) back to the Tooling Client.
+     *
+     * (not required, but suggested)
+     */
+    abstract protected function _postDispatch();
+}
+</pre>
+<p>
+            Como puede ver, se requiere 1 método para satisfacer las
+            necesidades de un cliente (se sugieren otros dos), la
+            inicialización, el prehandling y el posthandling. Para un
+            estudio más detallado de cómo funciona el cliente de línea de
+            comandos, consulte el <a class="ulink" href="http://framework.zend.com/svn/framework/standard/branches/release-1.8/library/Zend/Tool/Framework/Client/Console.php" target="_top">código
+                fuente</a>.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.tool.framework.clitool.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.tool.framework.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.tool.framework.writing-providers.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">72.2. Uso de la herramienta CLI </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 72.4. Creación de proveedores para usar con Zend_Tool_Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

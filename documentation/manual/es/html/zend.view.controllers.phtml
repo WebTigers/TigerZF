@@ -1,0 +1,183 @@
+<?php $title = '78.2. Scripts de controlador'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">78.2. Scripts de controlador</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.view.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 78. Zend_View</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.view.scripts.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.view.controllers"></a>78.2. Scripts de controlador</h2></div></div></div>
+<p>
+        El controlador es donde se instancia y configura <code class="classname">Zend_View</code>.
+        Después se asignan variables a la vista y se indica a la vista que
+        renderice la salida utilizando un script en particular.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.controllers.assign"></a>78.2.1. Asignación de variables</h3></div></div></div>
+<p>
+            El script del controlador debe asignar las variables necesarias a la
+            vista antes de entregar el control al script de la vista. Normalmente,
+            puede realizar las asignaciones una a una asignando a los nombres de
+            propiedad de la instancia de la vista:
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;a = "Hay";
+$view-&gt;b = "Bee";
+$view-&gt;c = "Sea";
+</pre>
+<p>
+            Sin embargo, esto puede resultar tedioso cuando ya ha recopilado los
+            valores que se van a asignar en un array u objeto.
+        </p>
+<p>
+            El método assign() le permite asignar desde un array u objeto "en
+            bloque". Los siguientes ejemplos tienen el mismo efecto que las
+            asignaciones de propiedades una a una anteriores.
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+
+// assign an array of key-value pairs, where the
+// key is the variable name, and the value is
+// the assigned value.
+$array = array(
+    'a' =&gt; "Hay",
+    'b' =&gt; "Bee",
+    'c' =&gt; "Sea",
+);
+$view-&gt;assign($array);
+
+// do the same with an object's public properties;
+// note how we cast it to an array when assigning.
+$obj = new StdClass;
+$obj-&gt;a = "Hay";
+$obj-&gt;b = "Bee";
+$obj-&gt;c = "Sea";
+$view-&gt;assign((array) $obj);
+</pre>
+<p>
+            Alternativamente, puede usar el método assign para asignar
+            una a una pasando un nombre de variable como cadena, y después
+            el valor de la variable.
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;assign('a', "Hay");
+$view-&gt;assign('b', "Bee");
+$view-&gt;assign('c', "Sea");
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.controllers.render"></a>78.2.2. Renderizado de un script de vista</h3></div></div></div>
+<p>
+            Una vez que ha asignado todas las variables necesarias, el controlador
+            debe indicar a <code class="classname">Zend_View</code> que renderice un script de vista
+            en particular. Hágalo llamando al método render(). Tenga en cuenta que el
+            método devolverá la vista renderizada, no la imprimirá, por lo que
+            deberá imprimirla o mostrarla usted mismo en el momento apropiado.
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;a = "Hay";
+$view-&gt;b = "Bee";
+$view-&gt;c = "Sea";
+echo $view-&gt;render('someView.php');
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.controllers.script-paths"></a>78.2.3. Rutas de scripts de vista</h3></div></div></div>
+<p>
+            Por defecto, <code class="classname">Zend_View</code> espera que sus scripts de vista sean
+            relativos al script que los llama. Por ejemplo, si su script de
+            controlador se encuentra en "/path/to/app/controllers" y llama a
+            $view-&gt;render('someView.php'), <code class="classname">Zend_View</code> buscará
+            "/path/to/app/controllers/someView.php".
+        </p>
+<p>
+            Obviamente, sus scripts de vista probablemente estén ubicados en
+            otro lugar. Para indicar a <code class="classname">Zend_View</code> dónde debe buscar
+            los scripts de vista, utilice el método setScriptPath().
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;setScriptPath('/path/to/app/views');
+</pre>
+<p>
+            Ahora, cuando llame a $view-&gt;render('someView.php'), buscará
+            "/path/to/app/views/someView.php".
+        </p>
+<p>
+            De hecho, puede "apilar" rutas usando el método addScriptPath().
+            A medida que agrega rutas a la pila, <code class="classname">Zend_View</code> buscará
+            en la ruta añadida más recientemente el script de vista solicitado.
+            Esto le permite sobrescribir vistas predeterminadas con vistas
+            personalizadas, de modo que pueda crear "temas" o "skins" personalizados
+            para algunas vistas, dejando otras intactas.
+        </p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;addScriptPath('/path/to/app/views');
+$view-&gt;addScriptPath('/path/to/custom/');
+
+// now when you call $view-&gt;render('booklist.php'), Zend_View will
+// look first for "/path/to/custom/booklist.php", then for
+// "/path/to/app/views/booklist.php", and finally in the current
+// directory for "booklist.php".
+</pre>
+<div class="note"><table border="0" summary="Note: Never use user input to set script paths">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nunca use la entrada del usuario para establecer rutas de scripts</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                <code class="classname">Zend_View</code> utiliza rutas de scripts para buscar y
+                renderizar scripts de vista. Como tal, estos directorios deben conocerse
+                de antemano, y estar bajo su control. <span class="emphasis"><em>Nunca</em></span>
+                establezca las rutas de scripts de vista basándose en la entrada del
+                usuario, ya que puede exponerse potencialmente a una vulnerabilidad de
+                inclusión local de archivos si la ruta especificada incluye
+                desplazamientos de directorio superior. Por ejemplo, la siguiente
+                entrada podría desencadenar el problema:
+            </p>
+<pre class="programlisting">
+// $_GET['foo'] == '../../../etc'
+$view-&gt;addScriptPath($_GET['foo']);
+$view-&gt;render('passwd');
+</pre>
+<p>
+                Aunque este ejemplo es artificial, muestra claramente el problema
+                potencial. Si <span class="emphasis"><em>debe</em></span> depender de la entrada del
+                usuario para establecer la ruta de su script, filtre correctamente la
+                entrada y compruebe que existe bajo rutas controladas por su
+                aplicación.
+            </p>
+</td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.view.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.view.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.view.scripts.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 78. Zend_View </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 78.3. Scripts de vista</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,192 @@
+<?php $title = '17.2. Teoría de la caché'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">17.2. Teoría de la caché</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.cache.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 17. Zend_Cache</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.cache.frontends.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.cache.theory"></a>17.2. Teoría de la caché</h2></div></div></div>
+<p>
+        Hay tres conceptos clave en <code class="classname">Zend_Cache</code>. Uno es el identificador
+        único (una cadena) que se usa para identificar los registros de caché. El segundo es la
+        directiva <span class="emphasis"><em>'lifetime'</em></span>, tal como se ve en los ejemplos; define durante cuánto tiempo
+        el recurso cacheado se considera 'fresco'. El tercer concepto clave es la ejecución condicional para
+        que partes de su código puedan omitirse por completo, mejorando el rendimiento. La función principal del
+        frontend (por ejemplo, <code class="methodname">Zend_Cache_Core::get()</code>) siempre está diseñada para devolver
+        <code class="constant">FALSE</code> en caso de fallo de caché si eso tiene sentido para la naturaleza de un
+        frontend. Eso permite
+        a los usuarios finales envolver las partes del código que desean cachear (y omitir) en
+        instrucciones <span class="emphasis"><em><code class="methodname">if()</code>{ ... }</em></span> donde la condición es
+        el propio método de <code class="classname">Zend_Cache</code>. Al final de dichos bloques, sin embargo, debe guardar
+        lo que ha generado (por ejemplo, <code class="methodname">Zend_Cache_Core::save()</code>).
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            El diseño de ejecución condicional de su código de generación no es necesario en algunos
+            frontends (<span class="emphasis"><em>Function</em></span>, por ejemplo) cuando toda la lógica se
+            implementa dentro del frontend.
+        </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            'Acierto de caché' (cache hit) es un término para una condición en la que un registro de caché
+            se encuentra, es válido y está 'fresco' (en otras palabras, no ha expirado todavía). 'Fallo de
+            caché' (cache miss) es todo lo demás. Cuando ocurre un fallo de caché, debe generar sus datos
+            (como haría normalmente) y almacenarlos en caché. Cuando tiene un acierto de caché, en cambio,
+            el backend obtiene el registro de la caché de forma transparente y automática.
+        </p></td></tr>
+</table></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.factory"></a>17.2.1. El método de fábrica de Zend_Cache</h3></div></div></div>
+<p>
+            Una buena manera de construir una instancia utilizable de un frontend de
+            <code class="classname">Zend_Cache</code> se muestra en el siguiente ejemplo:
+        </p>
+<pre class="programlisting">
+// We choose a backend (for example 'File' or 'Sqlite'...)
+$backendName = '[...]';
+
+// We choose a frontend (for example 'Core', 'Output', 'Page'...)
+$frontendName = '[...]';
+
+// We set an array of options for the chosen frontend
+$frontendOptions = array([...]);
+
+// We set an array of options for the chosen backend
+$backendOptions = array([...]);
+
+// We create an instance of Zend_Cache
+// (of course, the two last arguments are optional)
+$cache = Zend_Cache::factory($frontendName,
+                             $backendName,
+                             $frontendOptions,
+                             $backendOptions);
+</pre>
+<p>
+            En los siguientes ejemplos asumiremos que la variable <code class="varname">$cache</code>
+            contiene un frontend válido e instanciado como se muestra, y que usted entiende cómo pasar
+            parámetros a los backends que elija.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Utilice siempre <code class="methodname">Zend_Cache::factory()</code> para obtener instancias de frontend.
+                Instanciar los frontends y backends usted mismo no funcionará como se espera.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.tags"></a>17.2.2. Etiquetado de registros</h3></div></div></div>
+<p>
+            Las etiquetas (tags) son una forma de categorizar los registros de caché. Cuando guarda una caché con el
+            método <code class="methodname">save()</code>, puede establecer un array de etiquetas para aplicar a este
+            registro. Después podrá limpiar todos los registros de caché etiquetados con una etiqueta (o
+            etiquetas) determinada:
+        </p>
+<pre class="programlisting">
+$cache-&gt;save($huge_data, 'myUniqueID', array('tagA', 'tagB', 'tagC'));
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                observe que el método <code class="methodname">save()</code> acepta un cuarto argumento opcional:
+                <code class="varname">$specificLifetime</code> (si es distinto de <code class="constant">FALSE</code>,
+                establece un tiempo de vida específico para ese registro de caché en particular)
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.cache.clean"></a>17.2.3. Limpieza de la caché</h3></div></div></div>
+<p>
+            Para eliminar o invalidar un id de caché en particular, puede usar el
+            método <code class="methodname">remove()</code>:
+        </p>
+<pre class="programlisting">
+$cache-&gt;remove('idToRemove');
+</pre>
+<p>
+            Para eliminar o invalidar varios ids de caché en una sola operación, puede usar el
+            método <code class="methodname">clean()</code>. Por ejemplo, para eliminar todos los registros de caché:
+        </p>
+<pre class="programlisting">
+// clean all records
+$cache-&gt;clean(Zend_Cache::CLEANING_MODE_ALL);
+
+// clean only outdated
+$cache-&gt;clean(Zend_Cache::CLEANING_MODE_OLD);
+</pre>
+<p>
+            Si desea eliminar las entradas de caché que coincidan con las etiquetas 'tagA' y 'tagC':
+        </p>
+<pre class="programlisting">
+$cache-&gt;clean(
+    Zend_Cache::CLEANING_MODE_MATCHING_TAG,
+    array('tagA', 'tagC')
+);
+</pre>
+<p>
+            Si desea eliminar las entradas de caché que no coincidan con las etiquetas 'tagA' o 'tagC':
+        </p>
+<pre class="programlisting">
+$cache-&gt;clean(
+    Zend_Cache::CLEANING_MODE_NOT_MATCHING_TAG,
+    array('tagA', 'tagC')
+);
+</pre>
+<p>
+            Si desea eliminar las entradas de caché que coincidan con las etiquetas 'tagA' o 'tagC':
+        </p>
+<pre class="programlisting">
+$cache-&gt;clean(
+    Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG,
+    array('tagA', 'tagC')
+);
+</pre>
+<p>
+            Los modos de limpieza disponibles son: <code class="constant">CLEANING_MODE_ALL</code>,
+            <code class="constant">CLEANING_MODE_OLD</code>, <code class="constant">CLEANING_MODE_MATCHING_TAG</code>,
+            <code class="constant">CLEANING_MODE_NOT_MATCHING_TAG</code> y
+            <code class="constant">CLEANING_MODE_MATCHING_ANY_TAG</code>. Estos últimos, como sus nombres
+            sugieren, se combinan con un array de etiquetas en las operaciones de limpieza.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.cache.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.cache.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.cache.frontends.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 17. Zend_Cache </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 17.3. Frontends de Zend_Cache</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

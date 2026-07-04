@@ -1,0 +1,130 @@
+<?php $title = '25.6. ¿Qué aspecto tiene la divisa?'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.6. ¿Qué aspecto tiene la divisa?</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.position.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.currency.value.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.number"></a>25.6. ¿Qué aspecto tiene la divisa?</h2></div></div></div>
+<p>
+        Cómo se renderizará el valor de una divisa depende principalmente del locale usado. Hay
+        varias informaciones que se establecen mediante el locale. Cada una de ellas puede sobrescribirse
+        manualmente usando la opción adecuada.
+    </p>
+<p>
+        Por ejemplo, la mayoría de los locales usan la escritura latina para representar números. Pero
+        hay idiomas como el "árabe" que usan otros dígitos. Y cuando tiene un sitio web
+        en árabe, también podría querer renderizar otras divisas usando la escritura árabe. Vea
+        el siguiente ejemplo:
+    </p>
+<div class="example">
+<a name="zend.currency.number.example-1"></a><p class="title"><b>Ejemplo 25.5. Uso de una escritura personalizada</b></p>
+<div class="example-contents">
+<p>
+            Supongamos que de nuevo usamos nuestra divisa "Dólar". Pero ahora queremos
+            renderizar nuestra divisa usando la escritura árabe.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'  =&gt; 1000,
+        'script' =&gt; 'Arab',
+    )
+);
+
+print $currency; // Could return '$ ١٬٠٠٠٫٠٠'
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+        Para más información sobre las escrituras disponibles consulte el
+        <a class="link" href="zend.locale.parsing.phtml#zend.locale.numbersystems" title="43.3.10. Numeral System Conversion">capítulo
+            de <code class="classname">Zend_Locale</code> sobre sistemas de numeración</a>.
+    </p>
+<p>
+        Pero también se puede cambiar el formato de un número de divisa (valor monetario). Por defecto
+        depende del locale usado. Incluye el separador que se usará entre
+        los miles, qué signo se usará como punto decimal, y también la precisión usada.
+    </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD'
+        'format'   =&gt; 'de',
+    )
+);
+
+print $currency; // Could return '$ 1.000'
+</pre>
+<p>
+        Hay dos formas de definir el formato que se usará. Puede indicar un
+        locale o definir un formato manualmente.
+    </p>
+<p>
+        Cuando use un locale para definir el formato, todo se hace automáticamente. El
+        locale 'de', por ejemplo, define '.' como separador de miles y ',' como punto
+        decimal. En inglés esto está invertido.
+    </p>
+<pre class="programlisting">
+$currency_1 = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD'
+        'format'   =&gt; 'de',
+    )
+);
+
+$currency_2 = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD'
+        'format'   =&gt; 'en',
+    )
+);
+
+print $currency_1; // Could return '$ 1.000'
+print $currency_2; // Could return '$ 1,000'
+</pre>
+<p>
+        Cuando lo defina manualmente, debe ajustar el formato según lo descrito en
+        <a class="link" href="zend.locale.parsing.phtml#zend.locale.number.localize.table-1" title="Table 43.4. Format tokens for self generated number formats">este capítulo sobre
+            localización</a>. Vea lo siguiente:
+    </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD'
+        'format'   =&gt; '#0',
+    )
+);
+
+print $currency; // Could return '$ 1000'
+</pre>
+<p>
+        En el fragmento anterior eliminamos el separador y también la precisión.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.position.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.currency.value.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.5. ¿Dónde está la divisa? </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 25.7. ¿Cuánto vale mi divisa?</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

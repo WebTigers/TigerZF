@@ -1,0 +1,132 @@
+<?php $title = '38.13. El adaptador de almacenamiento UserAgent de sesión'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">38.13. El adaptador de almacenamiento UserAgent de sesión</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.http.user-agent-storage.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 38. Zend_Http</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.json.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.http.user-agent-storage-session"></a>38.13. El adaptador de almacenamiento UserAgent de sesión</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-storage-session.intro"></a>38.13.1. Resumen</h3></div></div></div>
+<p>
+            Este <a class="link" href="zend.http.user-agent-storage.phtml" title="38.12. The UserAgent Storage Interface">adaptador de almacenamiento</a> utiliza
+            <code class="classname">Zend_Session_Namespace</code> para persistir las capacidades del dispositivo
+            descubiertas para una sesión de usuario determinada.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-storage-session.quick-start"></a>38.13.2. Inicio rápido</h3></div></div></div>
+<p>
+            Este adaptador de almacenamiento en particular se usa de forma predeterminada con
+            <code class="classname">Zend_Http_UserAgent</code>. Por lo tanto, se beneficiará de él desde el
+            principio sin necesidad de ninguna configuración real.
+        </p>
+<p>
+            Sin embargo, puede alterar ligeramente el comportamiento, modificando el espacio de nombres usado, y la
+            clave (o <span class="emphasis"><em>miembro</em></span>) en la que se escriben los datos. Puede hacerlo
+            especificando las opciones <code class="varname">browser_type</code> (mapeada al espacio de nombres) y
+            <code class="varname">member</code> en su configuración.
+        </p>
+<pre class="programlisting">
+resources.useragent.storage.adapter = "Session"
+resources.useragent.storage.options.browser_type = "all"
+resources.useragent.storage.options.member = "data"
+</pre>
+<p>
+            Normalmente, no pasará la opción <code class="varname">browser_type</code>, y en su lugar dejará que
+            esta sea rellenada por el valor descubierto por la clase <code class="classname">UserAgent</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-storage-session.options"></a>38.13.3. Opciones de configuración</h3></div></div></div>
+<div class="variablelist">
+<p class="title"><b>Opciones de almacenamiento en sesión</b></p>
+<dl class="variablelist">
+<dt><span class="term">browser_type</span></dt>
+<dd><p>
+                        Proporcione esto para codificar de forma fija el espacio de nombres de sesión en el que desea
+                        almacenar los datos de User-Agent. De forma predeterminada, se usará el tipo de navegador
+                        detectado actualmente, o, si no se proporciona, el valor "Zend_Http_UserAgent".
+                    </p></dd>
+<dt><span class="term">member</span></dt>
+<dd><p>
+                        Este es el miembro variable específico dentro del espacio de nombres de sesión en el que
+                        se almacenarán los datos. De forma predeterminada, se usará el valor "storage".
+                    </p></dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.http.user-agent-storage-session.methods"></a>38.13.4. Métodos disponibles</h3></div></div></div>
+<div class="variablelist"><dl class="variablelist">
+<dt>
+<a name="zend.http.user-agent-storage-session.methods.constructor"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">__construct</span>(<span class="methodparam">$options = null</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Acepta un arreglo u objeto que contiene opciones. Consulte la <a class="link" href="zend.http.user-agent-storage-session.phtml#zend.http.user-agent-storage-session.options" title="38.13.3. Configuration Options">sección de opciones de configuración</a> para más detalles sobre la variable <code class="varname">$options</code>.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-storage-session.methods.is-empty"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">isEmpty</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Se usa para determinar si el almacenamiento ha sido rellenado ya o no.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-storage-session.methods.read"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">read</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Recupera los datos previamente almacenados desde el adaptador de almacenamiento.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-storage-session.methods.write"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">write</span>(<span class="methodparam">$contents</span>);</code>
+                </span>
+</dt>
+<dd><p>
+                        Escribe datos en el adaptador de almacenamiento para su posterior recuperación.
+                        <code class="varname">$contents</code> debe ser una cadena que contenga el objeto
+                        <code class="classname">UserAgent</code> serializado.
+                    </p></dd>
+<dt>
+<a name="zend.http.user-agent-storage-session.methods.clear"></a><span class="term">
+                    <code class="methodsynopsis"><span class="methodname">clear</span>();</code>
+                </span>
+</dt>
+<dd><p>
+                        Vacía el almacenamiento de cualquier dato.
+                    </p></dd>
+</dl></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.http.user-agent-storage.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.http.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.json.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">38.12. La interfaz de almacenamiento UserAgent </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 39. Zend_Json</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

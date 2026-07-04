@@ -1,0 +1,111 @@
+<?php $title = '4.2. Objetivos y diseño'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">4.2. Objetivos y diseño</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.autoloading.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 4. Autocarga en Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.autoloading.usage.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.autoloading.design"></a>4.2. Objetivos y diseño</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.autoloading.design.naming"></a>4.2.1. Convenciones de nomenclatura de clases</h3></div></div></div>
+<p>
+            Para comprender la autocarga en Zend Framework, primero es necesario entender la
+            relación entre los nombres de clase y los archivos de clase.
+        </p>
+<p>
+            Zend Framework ha tomado prestada una idea de <a class="ulink" href="http://pear.php.net/" target="_top">PEAR</a>,
+            según la cual los nombres de clase tienen una relación 1:1 con el sistema de archivos. Dicho de forma
+            sencilla, el carácter de subrayado ("_") se reemplaza por un separador de directorio para resolver
+            la ruta al archivo, y luego se añade el sufijo "<code class="filename">.php</code>". Por
+            ejemplo, la clase "<code class="classname">Foo_Bar_Baz</code>" correspondería a
+            "<code class="filename">Foo/Bar/Baz.php</code>" en el sistema de archivos. También se asume
+            que las clases pueden resolverse mediante la configuración
+            <span class="property">include_path</span> de <acronym class="acronym">PHP</acronym>, lo cual permite tanto a
+            <code class="methodname">include()</code> como a <code class="methodname">require()</code> encontrar
+            el nombre de archivo mediante una búsqueda de ruta relativa en el <span class="property">include_path</span>.
+        </p>
+<p>
+            Además, siguiendo tanto a <acronym class="acronym">PEAR</acronym> como al <a class="ulink" href="http://php.net/userlandnaming.tips" target="_top">proyecto PHP</a>, usamos y recomendamos
+            usar un prefijo de proveedor o de proyecto para su código. Esto significa que todas las clases que
+            escriba compartirán un prefijo de clase común; por ejemplo, todo el código de Zend
+            Framework tiene el prefijo "Zend_". Esta convención de nomenclatura ayuda a evitar colisiones de
+            nombres. Dentro de Zend Framework, a menudo nos referimos a esto como el prefijo de "espacio de nombres";
+            hay que tener cuidado de no confundirlo con la implementación nativa de espacios de nombres de
+            <acronym class="acronym">PHP</acronym>.
+        </p>
+<p>
+            Zend Framework sigue estas sencillas reglas internamente, y nuestros estándares de codificación
+            recomiendan que usted haga lo mismo para todo el código de biblioteca.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.autoloading.design.autoloader"></a>4.2.2. Convenciones y diseño del autoloader</h3></div></div></div>
+<p>
+            El soporte de autocarga de Zend Framework, proporcionado principalmente mediante
+            <code class="classname">Zend_Loader_Autoloader</code>, tiene los siguientes objetivos y
+            elementos de diseño:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Proporcionar coincidencia de espacios de nombres</em></span>. Si el prefijo del
+                    espacio de nombres de la clase no está en una lista de espacios de nombres registrados, devuelve
+                    <code class="constant">FALSE</code> inmediatamente. Esto permite una coincidencia más optimista,
+                    así como retroceder a otros autoloaders.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Permitir que el autoloader actúe como un autoloader de reserva</em></span>.
+                    En el caso de que un equipo esté ampliamente distribuido, o utilice un conjunto
+                    indeterminado de prefijos de espacio de nombres, el autoloader debería seguir siendo
+                    configurable de forma que intente coincidir con cualquier prefijo de espacio de nombres. Sin
+                    embargo, cabe señalar que esta práctica no se recomienda, ya que puede provocar
+                    búsquedas innecesarias.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Permitir alternar la supresión de errores</em></span>. Consideramos -- y la
+                    comunidad más amplia de <acronym class="acronym">PHP</acronym> también -- que la supresión de errores
+                    es una mala idea. Es costosa, y enmascara problemas muy reales de la aplicación.
+                    Por eso, de forma predeterminada, debería estar desactivada. Sin embargo, si un desarrollador
+                    <span class="emphasis"><em>insiste</em></span> en activarla, permitimos alternarla.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Permitir especificar callbacks personalizados para la autocarga</em></span>.
+                    Algunos desarrolladores no quieren usar
+                    <code class="methodname">Zend_Loader::loadClass()</code> para la autocarga, pero aun así
+                    quieren aprovechar los mecanismos de Zend Framework.
+                    <code class="classname">Zend_Loader_Autoloader</code> permite especificar un callback
+                    alternativo para la autocarga.
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em>Permitir la manipulación de la cadena de callbacks de autocarga de
+                    <acronym class="acronym">SPL</acronym></em></span>. El propósito de esto es permitir especificar
+                    autoloaders adicionales -- por ejemplo, cargadores de recursos para clases
+                    que no tienen una correspondencia 1:1 con el sistema de archivos -- para que se registren antes
+                    o después del autoloader principal de Zend Framework.
+                </p></li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.autoloading.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.autoloading.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.autoloading.usage.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 4. Autocarga en Zend Framework </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 4.3. Uso básico del autoloader</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

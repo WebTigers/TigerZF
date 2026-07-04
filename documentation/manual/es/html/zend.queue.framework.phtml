@@ -1,0 +1,171 @@
+<?php $title = '57.3. Framework'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">57.3. Framework</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.queue.example.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 57. Zend_Queue</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.queue.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.queue.framework"></a>57.3. Framework</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Queue</code> es un proxy que oculta los detalles
+        de los servicios de cola. Los servicios de cola están representados por
+        <code class="classname">Zend_Queue_Adapter_&lt;service&gt;</code>. Por ejemplo,
+        <code class="classname">Zend_Queue_Adapter_Db</code> es una cola que utilizará
+        tablas de base de datos para almacenar y recuperar mensajes.
+    </p>
+<p>
+        A continuación se muestra un ejemplo de uso de tablas de base de datos para un
+        sistema de colas:
+    </p>
+<pre class="programlisting">
+$options = array(
+    'name'          =&gt; 'queue1',
+    'driverOptions' =&gt; array(
+        'host'      =&gt; '127.0.0.1',
+        'port'      =&gt; '3306',
+        'username'  =&gt; 'queue',
+        'password'  =&gt; 'queue',
+        'dbname'    =&gt; 'queue',
+        'type'      =&gt; 'pdo_mysql'
+    )
+);
+
+// Create a database queue.
+// Zend_Queue will prepend Zend_Queue_Adapter_ to 'Db' for the class name.
+$queue = new Zend_Queue('Db', $options);
+</pre>
+<p>
+        El constructor de <code class="classname">Zend_Queue</code> creará un
+        <code class="classname">Zend_Queue_Adapter_Db</code> e inicializará el adaptador
+        con la configuración indicada.
+    </p>
+<p>
+        Los ajustes de configuración aceptados para cada adaptador se proporcionan
+        en las <a class="link" href="zend.queue.adapters.phtml" title="57.4. Adapters">notas del adaptador</a>.
+    </p>
+<p>
+        <code class="classname">Zend_Queue</code> devuelve mensajes utilizando la clase
+        <code class="classname">Zend_Queue_Message_Iterator</code>, que es una
+        implementación de <acronym class="acronym">SPL</acronym> <code class="classname">Iterator</code> y
+        <code class="classname">Countable</code>.
+        <code class="classname">Zend_Queue_Message_Iterator</code> contiene un array de
+        objetos <code class="classname">Zend_Queue_Message</code>.
+    </p>
+<pre class="programlisting">
+$messages = $queue-&gt;receive(5);
+foreach ($messages as $i =&gt; $message) {
+    echo "$i) Message =&gt; ", $message-&gt;body, "\n";
+}
+</pre>
+<p>
+        Cualquier excepción lanzada es de la clase
+        <code class="classname">Zend_Queue_Exception</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.framework.basics"></a>57.3.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Queue</code> es una clase proxy que representa
+            un adaptador.
+        </p>
+<p>
+            Los métodos <code class="methodname">send()</code>,
+            <code class="methodname">count($queue)</code>, y
+            <code class="methodname">receive()</code> son empleados por cada
+            adaptador para interactuar con las colas.
+        </p>
+<p>
+            Los métodos <code class="methodname">createQueue()</code>,
+            <code class="methodname">deleteQueue()</code> se utilizan para gestionar
+            colas.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.queue.framework.support"></a>57.3.2. Puntos en común entre adaptadores</h3></div></div></div>
+<p>
+            Los servicios de cola soportados por <code class="classname">Zend_Queue</code> no
+            todos admiten las mismas funciones. Por ejemplo,
+            <code class="classname">Zend_Queue_Adapter_Array</code>,
+            <code class="classname">Zend_Queue_Adapter_Db</code>, admiten todas las funciones,
+            mientras que <code class="classname">Zend_Queue_Adapter_Activemq</code> no
+            admite el listado de colas, la eliminación de colas, ni el conteo de mensajes.
+        </p>
+<p>
+            Puede determinar qué funciones están soportadas usando
+            <code class="methodname">Zend_Queue::isSupported()</code> o
+            <code class="methodname">Zend_Queue::getCapabilities()</code>.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="methodname">createQueue()</code></em></span> - crea una cola
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="methodname">deleteQueue()</code></em></span> - elimina una cola
+                </p></li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em><code class="methodname">send()</code></em></span> - envía un mensaje
+                </p>
+<p>
+                    <code class="methodname">send()</code> no está disponible en todos los adaptadores;
+                    <code class="classname">Zend_Queue_Adapter_Null</code> no admite
+                    <code class="methodname">send()</code>.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em><code class="methodname">receive()</code></em></span> - recibe mensajes
+                </p>
+<p>
+                    <code class="methodname">receive()</code> no está disponible en todos los adaptadores;
+                    <code class="classname">Zend_Queue_Adapter_Null</code> no admite
+                    <code class="methodname">receive()</code>.
+                </p>
+</li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="methodname">deleteMessage()</code></em></span> - elimina un
+                    mensaje
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="methodname">count()</code></em></span> - cuenta el número de
+                    mensajes en una cola
+                </p></li>
+<li class="listitem"><p>
+                    <span class="emphasis"><em><code class="methodname">isExists()</code></em></span> - comprueba la existencia
+                    de una cola
+                </p></li>
+</ul></div>
+<p>
+            Los métodos <code class="methodname">receive()</code> son empleados por cada
+            adaptador para interactuar con las colas.
+        </p>
+<p>
+            Los métodos <code class="methodname">createQueue()</code> y
+            <code class="methodname">deleteQueue()</code> se utilizan para gestionar
+            colas.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.queue.example.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.queue.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.queue.adapters.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">57.2. Ejemplo de uso </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 57.4. Adaptadores</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

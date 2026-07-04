@@ -1,0 +1,238 @@
+<?php $title = '7.2. Uso básico de Placeholder'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">7.2. Uso básico de Placeholder</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.view.placeholders.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 7. Primeros pasos con Zend_View Placeholders</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.view.placeholders.standard.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.view.placeholders.basics"></a>7.2. Uso básico de Placeholder</h2></div></div></div>
+<p>
+        Zend Framework define un helper de vista genérico <code class="methodname">placeholder()</code> que
+        puede usar para tantos placeholders personalizados como necesite. También proporciona una variedad de
+        implementaciones específicas de placeholder para funcionalidades habitualmente necesarias, como especificar la
+        declaración <span class="emphasis"><em>DocType</em></span>, el título del documento, y más.
+    </p>
+<p>
+        Todos los placeholders funcionan aproximadamente de la misma manera. Son contenedores y, por tanto, le permiten
+        operar sobre ellos como colecciones. Con ellos puede:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <span class="emphasis"><em>Añadir al final</em></span> o <span class="emphasis"><em>añadir al principio</em></span> elementos a la colección.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Reemplazar</em></span> toda la colección con un único valor.
+            </p></li>
+<li class="listitem"><p>
+                Especificar una cadena con la que <span class="emphasis"><em>anteponer la salida</em></span> de la colección
+                al renderizar.
+            </p></li>
+<li class="listitem"><p>
+                Especificar una cadena con la que <span class="emphasis"><em>añadir al final de la salida</em></span> de la colección
+                al renderizar.
+            </p></li>
+<li class="listitem"><p>
+                Especificar una cadena con la que <span class="emphasis"><em>separar los elementos</em></span> de la colección
+                al renderizar.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Capturar contenido</em></span> hacia la colección.
+            </p></li>
+<li class="listitem"><p>
+                <span class="emphasis"><em>Renderizar</em></span> el contenido agregado.
+            </p></li>
+</ul></div>
+<p>
+        Normalmente, llamará al helper sin argumentos, lo que devolverá un contenedor sobre el
+        cual puede operar. Después, o bien mostrará este contenedor con echo para renderizarlo, o llamará a
+        métodos sobre él para configurarlo o poblarlo. Si el contenedor está vacío, al renderizarlo
+        simplemente devolverá una cadena vacía; de lo contrario, el contenido se agregará según
+        las reglas con las que lo haya configurado.
+    </p>
+<p>
+        Como ejemplo, vamos a crear una barra lateral que conste de varios "bloques" de contenido.
+        Probablemente conozca de antemano la estructura de cada bloque; supongamos para este ejemplo que
+        podría verse así:
+    </p>
+<pre class="programlisting">
+&lt;div class="sidebar"&gt;
+    &lt;div class="block"&gt;
+        &lt;p&gt;
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus
+            consectetur aliquet odio ac consectetur. Nulla quis eleifend
+            tortor. Pellentesque varius, odio quis bibendum consequat, diam
+            lectus porttitor quam, et aliquet mauris orci eu augue.
+        &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="block"&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;a href="/some/target"&gt;Link&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="/some/target"&gt;Link&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+<p>
+        El contenido variará según el controlador y la acción, pero la estructura será la
+        misma. Primero configuremos la barra lateral en un método de recurso de nuestro bootstrap:
+    </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    // ...
+
+    protected function _initSidebar()
+    {
+        $this-&gt;bootstrap('View');
+        $view = $this-&gt;getResource('View');
+
+        $view-&gt;placeholder('sidebar')
+             // "prefix" -&gt; markup to emit once before all items in collection
+             -&gt;setPrefix("&lt;div class=\"sidebar\"&gt;\n    &lt;div class=\"block\"&gt;\n")
+             // "separator" -&gt; markup to emit between items in a collection
+             -&gt;setSeparator("&lt;/div&gt;\n    &lt;div class=\"block\"&gt;\n")
+             // "postfix" -&gt; markup to emit once after all items in a collection
+             -&gt;setPostfix("&lt;/div&gt;\n&lt;/div&gt;");
+    }
+
+    // ...
+}
+</pre>
+<p>
+        Lo anterior define un placeholder, "sidebar", que no tiene elementos. Sin embargo, configura la
+        estructura básica de markup de ese placeholder según nuestros requisitos.
+    </p>
+<p>
+        Ahora, supongamos que para el controlador "user" queremos que todas las acciones muestren un bloque en la
+        parte superior con cierta información. Podríamos lograr esto de dos maneras: (a) podríamos añadir el
+        contenido directamente al placeholder en el método <code class="methodname">preDispatch()</code> del
+        controlador, o (b) podríamos renderizar un script de vista desde dentro del método
+        <code class="methodname">preDispatch()</code>. Usaremos (b), ya que sigue una
+        separación de responsabilidades más adecuada (dejando la lógica y funcionalidad relacionadas con la vista dentro de un
+        script de vista).
+    </p>
+<p>
+        Llamaremos al script de vista "<code class="filename">user/_sidebar.phtml</code>", y lo completaremos de la
+        siguiente manera:
+    </p>
+<pre class="programlisting">
+&lt;?php $this-&gt;placeholder('sidebar')-&gt;captureStart() ?&gt;
+&lt;h4&gt;User Administration&lt;/h4&gt;
+&lt;ul&gt;
+    &lt;li&gt;&lt;a href="&lt;?php $this-&gt;url(array('action' =&gt; 'list')) ?&gt;"&gt;
+        List&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="&lt;?php $this-&gt;url(array('action' =&gt; 'create')) ?&gt;"&gt;
+        Create&lt;/a&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;?php $this-&gt;placeholder('sidebar')-&gt;captureEnd() ?&gt;
+</pre>
+<p>
+        El ejemplo anterior hace uso de la funcionalidad de captura de contenido de los placeholders. Por defecto,
+        el contenido se añade como un nuevo elemento en el contenedor, lo que nos permite agregar contenido. Este
+        ejemplo hace uso de helpers de vista y <acronym class="acronym">HTML</acronym> estático para generar el
+        markup, y el contenido se captura y se añade después al propio placeholder.
+    </p>
+<p>
+        Para invocar el script de vista anterior, escribiríamos lo siguiente en nuestro
+        método <code class="methodname">preDispatch()</code>:
+    </p>
+<pre class="programlisting">
+class UserController extends Zend_Controller_Action
+{
+    // ...
+
+    public function preDispatch()
+    {
+        // ...
+
+        $this-&gt;view-&gt;render('user/_sidebar.phtml');
+
+        // ...
+    }
+
+    // ...
+}
+</pre>
+<p>
+        Observe que no estamos capturando el valor renderizado; no hay necesidad, ya que la totalidad de esa
+        vista se está capturando en un placeholder.
+    </p>
+<p>
+        Ahora, supongamos que nuestra acción "view" en ese mismo controlador necesita presentar cierta
+        información. Dentro del script de vista "<code class="filename">user/view.phtml</code>", podríamos tener
+        el siguiente fragmento de contenido:
+    </p>
+<pre class="programlisting">
+$this-&gt;placeholder('sidebar')
+     -&gt;append('&lt;p&gt;User: ' . $this-&gt;escape($this-&gt;username) .  '&lt;/p&gt;');
+</pre>
+<p>
+        Este ejemplo hace uso del método <code class="methodname">append()</code>, al que se le pasa un poco de
+        markup sencillo para agregar.
+    </p>
+<p>
+        Finalmente, modifiquemos nuestro script de vista de layout, para que renderice el placeholder.
+    </p>
+<pre class="programlisting">
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My Site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="content"&gt;
+        &lt;?php echo $this-&gt;layout()-&gt;content ?&gt;
+    &lt;/div&gt;
+    &lt;?php echo $this-&gt;placeholder('sidebar') ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+        Para los controladores y acciones que no pueblan el placeholder "sidebar", no se renderizará
+        contenido alguno; para aquellos que sí lo hacen, sin embargo, al mostrar el placeholder con echo se renderizará el contenido
+        según las reglas que creamos en nuestro bootstrap, y el contenido que agregamos a lo largo de
+        la aplicación. En el caso de la acción "<code class="filename">/user/view</code>", y suponiendo un
+        nombre de usuario "matthew", obtendríamos el siguiente contenido para la barra lateral (formateado para
+        facilitar la lectura):
+    </p>
+<pre class="programlisting">
+&lt;div class="sidebar"&gt;
+    &lt;div class="block"&gt;
+        &lt;h4&gt;User Administration&lt;/h4&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;a href="/user/list"&gt;List&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="/user/create"&gt;Create&lt;/a&gt;&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;div class="block"&gt;
+        &lt;p&gt;User: matthew&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+<p>
+        Hay una gran cantidad de cosas que puede hacer combinando placeholders y scripts de layout;
+        experimente con ellos, y lea las <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.placeholder" title="78.4.1.6. Placeholder Helper">secciones relevantes del manual</a> para obtener más
+        información.
+    </p>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.view.placeholders.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.view.placeholders.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.view.placeholders.standard.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 7. Primeros pasos con Zend_View Placeholders </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 7.3. Placeholders estándar</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

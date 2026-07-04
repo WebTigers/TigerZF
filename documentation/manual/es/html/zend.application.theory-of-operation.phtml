@@ -1,0 +1,560 @@
+<?php $title = '14.3. Teoría de funcionamiento'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">14.3. Teoría de funcionamiento</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.application.quick-start.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 14. Zend_Application</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.application.examples.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.application.theory-of-operation"></a>14.3. Teoría de funcionamiento</h2></div></div></div>
+<p>
+        Conseguir que una aplicación <acronym class="acronym">MVC</acronym> quede configurada y lista para despachar ha
+        requerido una cantidad de código cada vez mayor a medida que se dispone de más
+        funcionalidades: configurar la base de datos, configurar la vista y los helpers de
+        vista, configurar los layouts, registrar plugins, registrar
+        helpers de acción, y más.
+    </p>
+<p>
+        Además, a menudo querrá reutilizar el mismo código para
+        arrancar sus pruebas, un cronjob o un script de servicio. Aunque es
+        posible simplemente incluir su script de arranque, con frecuencia hay
+        inicializaciones específicas del entorno: puede que no necesite
+        el <acronym class="acronym">MVC</acronym> para un cronjob, o solo la capa de base de datos para un script de servicio.
+    </p>
+<p>
+        <code class="classname">Zend_Application</code> pretende facilitar esto y
+        fomentar la reutilización encapsulando el arranque en paradigmas <acronym class="acronym">OOP</acronym>.
+    </p>
+<p>
+        <code class="classname">Zend_Application</code> se divide en tres ámbitos:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="classname">Zend_Application</code>: carga el entorno <acronym class="acronym">PHP</acronym>,
+                incluyendo los include_paths y la autocarga, e instancia
+                la clase de arranque solicitada.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Zend_Application_Bootstrap</code>: proporciona
+                interfaces para las clases de arranque.
+                <code class="classname">Zend_Application_Bootstrap_Bootstrap</code> proporciona funcionalidad
+                común para la mayoría de las necesidades de arranque, incluyendo
+                algoritmos de comprobación de dependencias y la capacidad de cargar
+                recursos de arranque bajo demanda.
+            </p></li>
+<li class="listitem"><p>
+                <code class="classname">Zend_Application_Resource</code> proporciona una
+                interfaz para los recursos de arranque estándar que pueden ser
+                cargados bajo demanda por una instancia de arranque, así como varias
+                implementaciones de recursos por defecto.
+            </p></li>
+</ul></div>
+<p>
+        Los desarrolladores crean una clase de arranque para su aplicación, extendiendo
+        <code class="classname">Zend_Application_Bootstrap_Bootstrap</code> o implementando (como mínimo)
+        <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>. El punto de entrada
+        (por ejemplo, <code class="filename">public/index.php</code>) cargará
+        <code class="classname">Zend_Application</code>, y la instanciará pasando:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                El entorno actual
+            </p></li>
+<li class="listitem"><p>
+                Opciones para el arranque
+            </p></li>
+</ul></div>
+<p>
+        Las opciones de arranque incluyen la ruta al archivo que contiene la
+        clase de arranque y, opcionalmente:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Cualquier include_paths adicional a establecer
+            </p></li>
+<li class="listitem"><p>
+                Cualquier namespace de autoloader adicional a registrar
+            </p></li>
+<li class="listitem"><p>
+                Cualquier configuración de <code class="filename">php.ini</code> a inicializar
+            </p></li>
+<li class="listitem"><p>
+                El nombre de clase para la clase de arranque (si no es "Bootstrap")
+            </p></li>
+<li class="listitem"><p>
+                Pares de prefijo de recurso a ruta a utilizar
+            </p></li>
+<li class="listitem"><p>
+                Cualquier recurso a utilizar (por nombre de clase o nombre corto)
+            </p></li>
+<li class="listitem"><p>
+                Ruta adicional a un archivo de configuración a cargar
+            </p></li>
+<li class="listitem"><p>
+                Opciones de configuración adicionales
+            </p></li>
+</ul></div>
+<p>
+        Las opciones pueden ser un array, un objeto <code class="classname">Zend_Config</code>, o la ruta
+        a un archivo de configuración.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.theory-of-operation.bootstrap"></a>14.3.1. Arranque (Bootstrapping)</h3></div></div></div>
+<p>
+            La segunda área de responsabilidad de <code class="classname">Zend_Application</code> es
+            ejecutar el arranque de la aplicación. Los arranques necesitan, como mínimo,
+            implementar <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>,
+            que define la siguiente <acronym class="acronym">API</acronym>:
+        </p>
+<pre class="programlisting">
+interface Zend_Application_Bootstrap_Bootstrapper
+{
+    public function __construct($application);
+    public function setOptions(array $options);
+    public function getApplication();
+    public function getEnvironment();
+    public function getClassResources();
+    public function getClassResourceNames();
+    public function bootstrap($resource = null);
+    public function run();
+}
+</pre>
+<p>
+            Esta <acronym class="acronym">API</acronym> permite que el arranque acepte el entorno y la
+            configuración del objeto application, que reporte los recursos de los que es
+            responsable de arrancar, y luego arranque y ejecute la
+            aplicación.
+        </p>
+<p>
+            Puede implementar esta interfaz por su cuenta, extender
+            <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>, o utilizar
+            <code class="classname">Zend_Application_Bootstrap_Bootstrap</code>.
+        </p>
+<p>
+            Además de esta funcionalidad, hay una serie de otras áreas de
+            interés con las que debería familiarizarse.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.theory-of-operation.bootstrap.resource-methods"></a>14.3.1.1. Métodos de recurso</h4></div></div></div>
+<p>
+                La implementación de <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>
+                proporciona una convención sencilla para definir métodos de
+                recurso de clase. Cualquier método protegido cuyo nombre comience con el prefijo
+                <span class="emphasis"><em>_init</em></span> será considerado un método
+                de recurso.
+            </p>
+<p>
+                Para arrancar un único método de recurso, use el
+                método <code class="methodname">bootstrap()</code>, y páselo el nombre del
+                recurso. El nombre será el nombre del método menos el
+                prefijo <span class="emphasis"><em>_init</em></span>.
+            </p>
+<p>
+                Para arrancar varios métodos de recurso, pase un array de nombres.
+                Para arrancar todos los métodos de recurso, no pase nada.
+            </p>
+<p>
+                Tome la siguiente clase de arranque:
+            </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected function _initFoo()
+    {
+        // ...
+    }
+
+    protected function _initBar()
+    {
+        // ...
+    }
+
+    protected function _initBaz()
+    {
+        // ...
+    }
+}
+</pre>
+<p>
+                Para arrancar únicamente el método <code class="methodname">_initFoo()</code>, haga lo
+                siguiente:
+            </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap('foo');
+</pre>
+<p>
+                Para arrancar los métodos <code class="methodname">_initFoo()</code> y
+                <code class="methodname">_initBar()</code>, haga lo siguiente:
+            </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap(array('foo', 'bar'));
+</pre>
+<p>
+                Para arrancar todos los métodos de recurso, llame a <code class="methodname">bootstrap()</code>
+                sin argumentos:
+            </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.theory-of-operation.bootstrap.resource-plugins"></a>14.3.1.2. Arranques que usan plugins de recurso</h4></div></div></div>
+<p>
+                Para hacer sus arranques más reutilizables, hemos proporcionado la
+                capacidad de trasladar sus recursos a clases de plugin de recurso.
+                Esto permite mezclar y combinar recursos simplemente mediante
+                configuración. Veremos <a class="link" href="zend.application.theory-of-operation.phtml#zend.application.theory-of-operation.resources" title="14.3.2. Resource Plugins">cómo
+                    crear recursos</a> más adelante; en
+                esta sección mostraremos solo cómo utilizarlos.
+            </p>
+<p>
+                Si su arranque debe ser capaz de usar plugins de recurso,
+                necesitará implementar una interfaz adicional,
+                <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code>.
+                Esta interfaz define una <acronym class="acronym">API</acronym> para localizar, registrar y
+                cargar plugins de recurso:
+            </p>
+<pre class="programlisting">
+interface Zend_Application_Bootstrap_ResourceBootstrapper
+{
+    public function registerPluginResource($resource, $options = null);
+    public function unregisterPluginResource($resource);
+    public function hasPluginResource($resource);
+    public function getPluginResource($resource);
+    public function getPluginResources();
+    public function getPluginResourceNames();
+    public function setPluginLoader(Zend_Loader_PluginLoader_Interface $loader);
+    public function getPluginLoader();
+}
+</pre>
+<p>
+                Los plugins de recurso básicamente proporcionan la capacidad de crear
+                inicializadores de recurso que pueden reutilizarse entre aplicaciones.
+                Esto permite mantener su arranque real relativamente limpio,
+                e introducir nuevos recursos sin necesidad de tocar el propio
+                arranque.
+            </p>
+<p>
+                <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code> (y
+                <code class="classname">Zend_Application_Bootstrap_Bootstrap</code> por extensión)
+                también implementan esta interfaz, permitiéndole utilizar
+                plugins de recurso.
+            </p>
+<p>
+                Para utilizar plugins de recurso, debe especificarlos en las
+                opciones pasadas al objeto application y/o al arranque. Estas
+                opciones pueden provenir de un archivo de configuración, o pasarse
+                manualmente. Las opciones serán pares de clave a opciones, siendo la clave
+                el nombre del recurso. El nombre del recurso será el segmento
+                que sigue al prefijo de clase. Por ejemplo, los recursos
+                incluidos con Zend Framework tienen el prefijo de clase
+                "<code class="classname">Zend_Application_Resource_</code>"; cualquier cosa que siga a esto sería
+                el nombre del recurso. Como ejemplo,
+            </p>
+<pre class="programlisting">
+$application = new Zend_Application(APPLICATION_ENV, array(
+    'resources' =&gt; array(
+        'FrontController' =&gt; array(
+            'controllerDirectory' =&gt; APPLICATION_PATH . '/controllers',
+        ),
+    ),
+));
+</pre>
+<p>
+                Esto indica que se debe utilizar el recurso "FrontController",
+                con las opciones especificadas.
+            </p>
+<p>
+                Si comienza a escribir sus propios plugins de recurso, o utiliza
+                plugins de recurso de terceros, necesitará indicar a su
+                arranque dónde buscarlos. Internamente, el arranque
+                utiliza <code class="classname">Zend_Loader_PluginLoader</code>, así que solo
+                necesitará indicar el prefijo de clase común y los pares de ruta.
+            </p>
+<p>
+                Como ejemplo, supongamos que tiene plugins de recurso personalizados en
+                <code class="filename">APPLICATION_PATH/resources/</code> y que comparten el
+                prefijo de clase común <code class="classname">My_Resource</code>. Entonces
+                pasaría esa información al objeto application de la siguiente manera:
+            </p>
+<pre class="programlisting">
+$application = new Zend_Application(APPLICATION_ENV, array(
+    'pluginPaths' =&gt; array(
+        'My_Resource' =&gt; APPLICATION_PATH . '/resources/',
+    ),
+    'resources' =&gt; array(
+        'FrontController' =&gt; array(
+            'controllerDirectory' =&gt; APPLICATION_PATH . '/controllers',
+        ),
+    ),
+));
+</pre>
+<p>
+                Ahora podría usar recursos de ese directorio.
+            </p>
+<p>
+                Al igual que con los métodos de recurso, se utiliza el método
+                <code class="methodname">bootstrap()</code> para ejecutar los plugins de recurso. Al igual que con los
+                métodos de recurso, puede especificar un único plugin de recurso,
+                varios plugins (mediante un array), o todos los plugins. Además,
+                puede mezclar y combinar para ejecutar también métodos de recurso.
+            </p>
+<pre class="programlisting">
+// Ejecutar uno:
+$bootstrap-&gt;bootstrap('FrontController');
+
+// Ejecutar varios:
+$bootstrap-&gt;bootstrap(array('FrontController', 'Foo'));
+
+// Ejecutar todos los métodos y plugins de recurso:
+$bootstrap-&gt;bootstrap();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.theory-of-operation.bootstrap.registry"></a>14.3.1.3. Registro de recursos</h4></div></div></div>
+<p>
+                Muchos, si no todos, de sus métodos o plugins de recurso
+                inicializarán objetos, y en muchos casos, estos objetos serán
+                necesarios en otras partes de su aplicación. ¿Cómo puede acceder a ellos?
+            </p>
+<p>
+                <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>
+                proporciona un registro local para estos objetos. Para almacenar sus
+                objetos en él, simplemente los devuelve desde sus recursos.
+            </p>
+<p>
+                Para máxima flexibilidad, este registro se denomina internamente
+                "contenedor"; su único requisito es que sea un
+                objeto. Los recursos se registran entonces como propiedades nombradas según
+                el nombre del recurso. Por defecto, se utiliza una instancia de
+                <code class="classname">Zend_Registry</code>, pero también puede especificar cualquier
+                otro objeto que desee. Los métodos <code class="methodname">setContainer()</code>
+                y <code class="methodname">getContainer()</code> pueden utilizarse para manipular el
+                propio contenedor. <code class="methodname">getResource($resource)</code> puede
+                utilizarse para obtener un recurso determinado del contenedor, y
+                <code class="methodname">hasResource($resource)</code> para comprobar si el recurso
+                ha sido realmente registrado.
+            </p>
+<p>
+                Como ejemplo, considere un recurso de vista básico:
+            </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected function _initView()
+    {
+        $view = new Zend_View();
+        // más inicialización...
+
+        return $view;
+    }
+}
+</pre>
+<p>
+                Puede entonces comprobarlo y/u obtenerlo de la siguiente manera:
+            </p>
+<pre class="programlisting">
+// Usando el par has/getResource():
+if ($bootstrap-&gt;hasResource('view')) {
+    $view = $bootstrap-&gt;getResource('view');
+}
+
+// A través del contenedor:
+$container = $bootstrap-&gt;getContainer();
+if (isset($container-&gt;view)) {
+    $view = $container-&gt;view;
+}
+</pre>
+<p>
+                Tenga en cuenta que el registro, y también el contenedor, no son globales. Esto
+                significa que necesita acceso al arranque para poder obtener
+                recursos. <code class="classname">Zend_Application_Bootstrap_Bootstrap</code>
+                proporciona cierta comodidad para esto: durante su
+                ejecución de <code class="methodname">run()</code>, se registra a sí mismo como el parámetro
+                "bootstrap" del controlador frontal, lo que le permite obtenerlo
+                desde el router, el dispatcher, los plugins y los controladores de acción.
+            </p>
+<p>
+                Como ejemplo, si quisiera acceder al recurso de vista anterior
+                desde su controlador de acción, podría hacer lo siguiente:
+            </p>
+<pre class="programlisting">
+class FooController extends Zend_Controller_Action
+{
+    public function init()
+    {
+        $bootstrap = $this-&gt;getInvokeArg('bootstrap');
+        $view = $bootstrap-&gt;getResource('view');
+        // ...
+    }
+}
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.theory-of-operation.bootstrap.dependency-tracking"></a>14.3.1.4. Seguimiento de dependencias</h4></div></div></div>
+<p>
+                Además de ejecutar métodos y plugins de recurso, es
+                necesario asegurarse de que se ejecuten una única vez; están
+                pensados para arrancar una aplicación, y
+                ejecutarlos varias veces puede provocar sobrecarga de recursos.
+            </p>
+<p>
+                Al mismo tiempo, algunos recursos pueden depender de que se hayan
+                ejecutado otros recursos. Para resolver estos dos problemas,
+                <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>
+                proporciona un mecanismo sencillo y efectivo de seguimiento
+                de dependencias.
+            </p>
+<p>
+                Como se ha señalado anteriormente, todos los recursos -- ya sean métodos o plugins
+                -- se arrancan llamando a <code class="methodname">bootstrap($resource)</code>,
+                donde <code class="varname">$resource</code> es el nombre de un recurso, un array
+                de recursos, o, si se deja vacío, indica que deben ejecutarse todos los
+                recursos.
+            </p>
+<p>
+                Si un recurso depende de otro recurso, debería llamar a
+                <code class="methodname">bootstrap()</code> dentro de su código para asegurarse de que ese recurso
+                se ha ejecutado. Las llamadas posteriores serán entonces ignoradas.
+            </p>
+<p>
+                En un método de recurso, una llamada así se vería de la siguiente manera:
+            </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected function _initRequest()
+    {
+        // Asegurar que el controlador frontal está inicializado
+        $this-&gt;bootstrap('FrontController');
+
+        // Obtener el controlador frontal del registro de arranque
+        $front = $this-&gt;getResource('FrontController');
+
+        $request = new Zend_Controller_Request_Http();
+        $request-&gt;setBaseUrl('/foo');
+        $front-&gt;setRequest($request);
+
+        // Asegurar que la petición se almacena en el registro de arranque
+        return $request;
+    }
+}
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.theory-of-operation.resources"></a>14.3.2. Plugins de recurso</h3></div></div></div>
+<p>
+            <a class="link" href="zend.application.theory-of-operation.phtml#zend.application.theory-of-operation.bootstrap.resource-plugins" title="14.3.1.2. Bootstraps that use resource plugins">Como se ha señalado
+                anteriormente</a>, una buena manera de crear recursos de arranque reutilizables y
+            de trasladar gran parte de su código a clases discretas es utilizar plugins
+            de recurso. Aunque Zend Framework incluye una serie de
+            plugins de recurso estándar, la intención es que los desarrolladores escriban
+            los suyos propios para encapsular sus propias necesidades de inicialización.
+        </p>
+<p>
+            Los plugins de recurso solo necesitan implementar
+            <code class="classname">Zend_Application_Resource_Resource</code>, o, de manera aún más
+            sencilla, extender
+            <code class="classname">Zend_Application_Resource_ResourceAbstract</code>. La interfaz
+            básica es simplemente esta:
+        </p>
+<pre class="programlisting">
+interface Zend_Application_Resource_Resource
+{
+    public function __construct($options = null);
+    public function setBootstrap(
+        Zend_Application_Bootstrap_Bootstrapper $bootstrap
+    );
+    public function getBootstrap();
+    public function setOptions(array $options);
+    public function getOptions();
+    public function init();
+}
+</pre>
+<p>
+            La interfaz define simplemente que un plugin de recurso debe aceptar opciones
+            en el constructor, disponer de mecanismos para establecer y obtener
+            opciones, disponer de mecanismos para establecer y obtener el objeto
+            de arranque, y un método de inicialización.
+        </p>
+<p>
+            Como ejemplo, supongamos que tiene una inicialización de vista común que
+            utiliza en sus aplicaciones. Tiene un doctype, <acronym class="acronym">CSS</acronym> y
+            JavaScript comunes, y quiere poder pasar un título de documento base
+            mediante configuración. Un plugin de recurso así podría ser como sigue:
+        </p>
+<pre class="programlisting">
+class My_Resource_View extends Zend_Application_Resource_ResourceAbstract
+{
+    protected $_view;
+
+    public function init()
+    {
+        // Devolver la vista para que el arranque la almacene en el registro
+        return $this-&gt;getView();
+    }
+
+    public function getView()
+    {
+        if (null === $this-&gt;_view) {
+            $options = $this-&gt;getOptions();
+            $title   = '';
+            if (array_key_exists('title', $options)) {
+                $title = $options['title'];
+                unset($options['title']);
+            }
+
+            $view = new Zend_View($options);
+            $view-&gt;doctype('XHTML1_STRICT');
+            $view-&gt;headTitle($title);
+            $view-&gt;headLink()-&gt;appendStylesheet('/css/site.css');
+            $view-&gt;headScript()-&gt;appendfile('/js/analytics.js');
+
+            $viewRenderer =
+                Zend_Controller_Action_HelperBroker::getStaticHelper(
+                    'ViewRenderer'
+                );
+            $viewRenderer-&gt;setView($view);
+
+            $this-&gt;_view = $view;
+        }
+        return $this-&gt;_view;
+    }
+}
+</pre>
+<p>
+            Mientras registre la ruta de prefijo para este plugin de recurso,
+            podrá utilizarlo en su aplicación. Aún mejor, dado que
+            usa el cargador de plugins, está efectivamente sobrescribiendo el plugin de recurso
+            "View" incluido, asegurando que se utilice el suyo propio.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.application.quick-start.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.application.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.application.examples.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">14.2. Inicio rápido de Zend_Application </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 14.4. Ejemplos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

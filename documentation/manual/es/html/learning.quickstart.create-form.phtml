@@ -1,0 +1,199 @@
+<?php $title = '3.5. Crear un formulario'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">3.5. Crear un formulario</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.quickstart.create-model.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 3. Inicio rápido de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.quickstart.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.quickstart.create-form"></a>3.5. Crear un formulario</h2></div></div></div>
+<p>
+        Para que nuestro libro de visitas sea útil, necesitamos un formulario para enviar nuevas entradas.
+    </p>
+<p>
+        Nuestro primer paso es crear la clase de formulario propiamente dicha. Para crear la clase de
+        formulario vacía, ejecute:
+    </p>
+<pre class="programlisting">
+% zf create form Guestbook
+Creating a form at application/forms/Guestbook.php
+Updating project profile '.zfproject.xml'
+</pre>
+<p>
+        Esto creará el directorio <code class="filename">application/forms/</code> con el archivo de clase
+        <code class="filename">Guestbook.php</code>. Abra ese archivo y actualícelo para que quede así:
+    </p>
+<pre class="programlisting">
+// application/forms/Guestbook.php
+
+class Application_Form_Guestbook extends Zend_Form
+{
+    public function init()
+    {
+        // Set the method for the display form to POST
+        $this-&gt;setMethod('post');
+
+        // Add an email element
+        $this-&gt;addElement('text', 'email', array(
+            'label'      =&gt; 'Your email address:',
+            'required'   =&gt; true,
+            'filters'    =&gt; array('StringTrim'),
+            'validators' =&gt; array(
+                'EmailAddress',
+            )
+        ));
+
+        // Add the comment element
+        $this-&gt;addElement('textarea', 'comment', array(
+            'label'      =&gt; 'Please Comment:',
+            'required'   =&gt; true,
+            'validators' =&gt; array(
+                array('validator' =&gt; 'StringLength', 'options' =&gt; array(0, 20))
+                )
+        ));
+
+        // Add a captcha
+        $this-&gt;addElement('captcha', 'captcha', array(
+            'label'      =&gt; 'Please enter the 5 letters displayed below:',
+            'required'   =&gt; true,
+            'captcha'    =&gt; array(
+                'captcha' =&gt; 'Figlet',
+                'wordLen' =&gt; 5,
+                'timeout' =&gt; 300
+            )
+        ));
+
+        // Add the submit button
+        $this-&gt;addElement('submit', 'submit', array(
+            'ignore'   =&gt; true,
+            'label'    =&gt; 'Sign Guestbook',
+        ));
+
+        // And finally add some CSRF protection
+        $this-&gt;addElement('hash', 'csrf', array(
+            'ignore' =&gt; true,
+        ));
+    }
+}
+</pre>
+<p>
+        El formulario anterior define cinco elementos: un campo de dirección de correo electrónico, un
+        campo de comentario, un <acronym class="acronym">CAPTCHA</acronym> para prevenir envíos de spam, un botón de envío, y un
+        token de protección <acronym class="acronym">CSRF</acronym>.
+    </p>
+<p>
+        A continuación, añadiremos un <code class="methodname">signAction()</code> a nuestro
+        <code class="classname">GuestbookController</code> que procesará el formulario tras el envío. Para
+        crear la acción y el script de vista relacionado, ejecute lo siguiente:
+    </p>
+<pre class="programlisting">
+% zf create action sign Guestbook
+Creating an action named sign inside controller
+    at application/controllers/GuestbookController.php
+Updating project profile '.zfproject.xml'
+Creating a view script for the sign action method
+    at application/views/scripts/guestbook/sign.phtml
+Updating project profile '.zfproject.xml'
+</pre>
+<p>
+        Como puede ver en la salida, esto creará un método <code class="methodname">signAction()</code>
+        en nuestro controlador, así como el script de vista correspondiente.
+    </p>
+<p>
+        Añadamos algo de lógica en la acción sign de nuestro controlador del libro de visitas. Primero
+        necesitamos comprobar si estamos recibiendo una petición <acronym class="acronym">POST</acronym> o una <acronym class="acronym">GET</acronym>; en este último
+        caso, simplemente mostraremos el formulario. Sin embargo, si recibimos una petición <acronym class="acronym">POST</acronym>,
+        querremos validar los datos enviados contra nuestro formulario, y, si son válidos, crear una nueva
+        entrada y guardarla. La lógica podría verse así:
+    </p>
+<pre class="programlisting">
+// application/controllers/GuestbookController.php
+
+class GuestbookController extends Zend_Controller_Action
+{
+    // snipping indexAction()...
+
+    public function signAction()
+    {
+        $request = $this-&gt;getRequest();
+        $form    = new Application_Form_Guestbook();
+
+        if ($this-&gt;getRequest()-&gt;isPost()) {
+            if ($form-&gt;isValid($request-&gt;getPost())) {
+                $comment = new Application_Model_Guestbook($form-&gt;getValues());
+                $mapper  = new Application_Model_GuestbookMapper();
+                $mapper-&gt;save($comment);
+                return $this-&gt;_helper-&gt;redirector('index');
+            }
+        }
+
+        $this-&gt;view-&gt;form = $form;
+    }
+}
+</pre>
+<p>
+        Por supuesto, también necesitamos editar el script de vista; edite
+        <code class="filename">application/views/scripts/guestbook/sign.phtml</code> para que quede así:
+    </p>
+<pre class="programlisting">
+&lt;!-- application/views/scripts/guestbook/sign.phtml --&gt;
+
+Please use the form below to sign our guestbook!
+
+&lt;?php
+$this-&gt;form-&gt;setAction($this-&gt;url());
+echo $this-&gt;form;
+</pre>
+<div class="note"><table border="0" summary="Note: Better Looking Forms">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Formularios con mejor aspecto</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Nadie va a alabar la belleza de este formulario en un futuro cercano. No importa -
+            ¡la apariencia del formulario es totalmente personalizable! Vea la <a class="link" href="zend.form.decorators.phtml" title="36.5. Creating Custom Form Markup Using Zend_Form_Decorator">sección sobre decoradores en la guía de referencia</a>
+            para más detalles.
+        </p>
+<p>
+            Además, puede que le interese <a class="link" href="learning.form.decorators.phtml#learning.form.decorators.intro" title="8.1. Introduction">nuestro tutorial sobre decoradores de formularios</a>.
+        </p>
+</td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Checkpoint">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Punto de control</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Ahora navegue a "http://localhost/guestbook/sign". Debería ver lo siguiente en su
+            navegador:
+        </p>
+<p>
+            <img src="figures/learning.quickstart.create-form.png" align="middle">
+        </p>
+</td></tr>
+</table></div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.quickstart.create-model.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.quickstart.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.quickstart.conclusion.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">3.4. Crear un modelo y una tabla de base de datos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 3.6. ¡Felicidades!</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

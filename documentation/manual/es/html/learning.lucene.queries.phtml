@@ -1,0 +1,234 @@
+<?php $title = '10.6. Consultas soportadas'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">10.6. Consultas soportadas</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.lucene.searching.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 10. Primeros pasos con Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.lucene.pagination.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.lucene.queries"></a>10.6. Consultas soportadas</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Search_Lucene</code> y Java Lucene soportan un potente lenguaje de consultas.
+        Permite buscar términos individuales, frases, rangos de términos; usar comodines y
+        búsqueda difusa; combinar consultas usando operadores booleanos; y así sucesivamente.
+    </p>
+<p>
+        Puede encontrar una descripción detallada del lenguaje de consultas en la <a class="link" href="zend.search.lucene.query-language.phtml" title="61.4. Query Language">
+            documentación del componente Zend_Search_Lucene</a>.
+    </p>
+<p>
+        A continuación se presentan ejemplos de algunos tipos y estrategias de consulta comunes.
+    </p>
+<div class="example">
+<a name="learning.lucene.queries.keyword"></a><p class="title"><b>Ejemplo 10.10. Consulta de una sola palabra</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+hello
+</pre>
+<p>
+            Busca la palabra "hello" en todos los campos del documento.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Default search field">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Campo de búsqueda predeterminado</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            ¡Nota importante! Java Lucene busca únicamente en el campo "contents" de forma predeterminada, pero
+            <code class="classname">Zend_Search_Lucene</code> busca en <span class="emphasis"><em>todos</em></span>
+            los campos. Este comportamiento se puede modificar usando el método
+            <code class="methodname">Zend_Search_Lucene::setDefaultSearchField($fieldName)</code>.
+        </p></td></tr>
+</table></div>
+<div class="example">
+<a name="learning.lucene.queries.multiple-words"></a><p class="title"><b>Ejemplo 10.11. Consulta de varias palabras</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+hello dolly
+</pre>
+<p>
+            Busca dos palabras. Ambas palabras son opcionales; al menos una de ellas debe estar presente en
+            el resultado.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.required-words"></a><p class="title"><b>Ejemplo 10.12. Requerir palabras en una consulta</b></p>
+<div class="example-contents">
+<pre class="programlisting">
++hello dolly
+</pre>
+<p>
+            Busca dos palabras; "hello" es obligatoria, "dolly" es opcional.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.prohibited-words"></a><p class="title"><b>Ejemplo 10.13. Prohibir palabras en los documentos consultados</b></p>
+<div class="example-contents">
+<pre class="programlisting">
++hello -dolly
+</pre>
+<p>
+            Busca dos palabras; "hello" es obligatoria, "dolly" está prohibida. En otras palabras, si
+            el documento coincide con "hello", pero contiene la palabra "dolly", no será devuelto en
+            el conjunto de coincidencias.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.phrases"></a><p class="title"><b>Ejemplo 10.14. Consulta de frases</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+"hello dolly"
+</pre>
+<p>
+            Busca la frase "hello dolly"; un documento solo coincide si esa cadena exacta está
+            presente.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.fields"></a><p class="title"><b>Ejemplo 10.15. Consulta sobre campos específicos</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+title:"The Right Way" AND text:go
+</pre>
+<p>
+            Busca la frase "The Right Way" dentro del campo <span class="property">title</span> y
+            la palabra "go" dentro del campo <span class="property">text</span>.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.fields-and-document"></a><p class="title"><b>Ejemplo 10.16. Consulta sobre campos específicos así como sobre el documento entero</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+title:"The Right Way" AND  go
+</pre>
+<p>
+            Busca la frase "The Right Way" dentro del campo <span class="property">title</span> y
+            la palabra "go" que aparezca en cualquier campo del documento.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.fields-and-document-alt"></a><p class="title"><b>Ejemplo 10.17. Consulta sobre campos específicos así como sobre el documento entero (alternativa)</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+title:Do it right
+</pre>
+<p>
+            Busca la palabra "Do" dentro del campo <span class="property">title</span> y las palabras
+            "it" y "right" en todos los campos; cualquier coincidencia individual dará como resultado
+            una coincidencia del documento.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.wildcard-question"></a><p class="title"><b>Ejemplo 10.18. Consulta con el comodín "?"</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+te?t
+</pre>
+<p>
+            Busca palabras que coincidan con el patrón "te?t", donde "?" es cualquier carácter único.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.wildcard-asterisk"></a><p class="title"><b>Ejemplo 10.19. Consulta con el comodín "*"</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+test*
+</pre>
+<p>
+            Busca palabras que coincidan con el patrón "test*", donde "*" es cualquier secuencia de cero o más
+            caracteres.
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.range-inclusive"></a><p class="title"><b>Ejemplo 10.20. Consulta de un rango inclusivo de términos</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+mod_date:[20020101 TO 20030101]
+</pre>
+<p>
+            Busca el rango de términos (inclusivo).
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.range-exclusive"></a><p class="title"><b>Ejemplo 10.21. Consulta de un rango exclusivo de términos</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+title:{Aida to Carmen}
+</pre>
+<p>
+            Busca el rango de términos (exclusivo).
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.fuzzy"></a><p class="title"><b>Ejemplo 10.22. Búsquedas difusas</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+roam~
+</pre>
+<p>
+            Búsqueda difusa de la palabra "roam".
+        </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="learning.lucene.queries.boolean"></a><p class="title"><b>Ejemplo 10.23. Búsquedas booleanas</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+(framework OR library) AND php
+</pre>
+<p>
+            Consulta booleana.
+        </p>
+</div>
+</div>
+<br class="example-break"><p>
+        Todas las consultas soportadas pueden construirse mediante la <a class="link" href="zend.search.lucene.query-api.phtml" title="61.5. Query Construction API">API de
+            construcción de consultas</a> de <code class="classname">Zend_Search_Lucene</code>. Es más, el análisis de consultas y la construcción de consultas se pueden
+        combinar:
+    </p>
+<div class="example">
+<a name="learning.lucene.queries.combining"></a><p class="title"><b>Ejemplo 10.24. Combinar consultas analizadas y construidas</b></p>
+<div class="example-contents"><pre class="programlisting">
+$userQuery = Zend_Search_Lucene_Search_QueryParser::parse($queryStr);
+
+$query = new Zend_Search_Lucene_Search_Query_Boolean();
+$query-&gt;addSubquery($userQuery, true  /* required */);
+$query-&gt;addSubquery($constructedQuery, true  /* required */);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.lucene.searching.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.lucene.pagination.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">10.5. Búsqueda </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 10.7. Paginación de resultados de búsqueda</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

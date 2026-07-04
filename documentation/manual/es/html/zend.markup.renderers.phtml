@@ -1,0 +1,205 @@
+<?php $title = '46.4. Zend_Markup Renderers'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">46.4. Zend_Markup Renderers</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.markup.parsers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 46. Zend_Markup</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.measure.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.markup.renderers"></a>46.4. Zend_Markup Renderers</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Markup</code> se distribuye actualmente con un renderer, el
+        renderer <acronym class="acronym">HTML</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.markup.renderers.add"></a>46.4.1. Añadir sus propios markups</h3></div></div></div>
+<p>
+            Al añadir sus propios markups, puede añadir su propia funcionalidad a los renderers de
+            <code class="classname">Zend_Markup</code>. Con la estructura de markup, puede añadir
+            prácticamente cualquier funcionalidad que desee. Desde markups simples, hasta
+            estructuras de markup complicadas. Un ejemplo simple para un markup 'foo':
+        </p>
+<pre class="programlisting">
+// Creates instance of Zend_Markup_Renderer_Html,
+// with Zend_Markup_Parser_BbCode as its parser
+$bbcode = Zend_Markup::factory('Bbcode');
+
+// this will create a simple 'foo' markup
+// The first parameter defines the markup's name.
+// The second parameter takes an integer that defines the markups type.
+// The third parameter is an array that defines other things about a
+// markup, like the markup's group, and (in this case) a start and end markup.
+$bbcode-&gt;addMarkup(
+    'foo',
+    Zend_Markup_Renderer_RendererAbstract::TYPE_REPLACE,
+    array(
+        'start' =&gt; '-bar-',
+        'end'   =&gt; '-baz-',
+        'group' =&gt; 'inline'
+    )
+);
+
+// now, this will output: 'my -bar-markup-baz-'
+echo $bbcode-&gt;render('my [foo]markup[/foo]');
+</pre>
+<p>
+            Tenga en cuenta que crear sus propios markups solo tiene sentido cuando su parser
+            también lo admite con una estructura de markup. Actualmente, solo BBCode admite esto.
+        </p>
+<p>
+            Algunos renderers (como el renderer <acronym class="acronym">HTML</acronym>) también
+            tienen soporte para un parámetro 'markup'. Este reemplaza los parámetros 'start' y
+            'end', y renderiza los markups incluyendo algunos atributos por defecto y el markup de
+            cierre.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.markup.renderers.add.callback"></a>46.4.1.1. Añadir un markup callback</h4></div></div></div>
+<p>
+                Al añadir un markup callback, puede hacer mucho más que un simple reemplazo de los
+                markups. Por ejemplo, puede cambiar el contenido, usar los parámetros para influir
+                en la salida, etc.
+            </p>
+<p>
+                Un callback es una clase que implementa la interfaz
+                <code class="classname">Zend_Markup_Renderer_TokenInterface</code>. Un ejemplo de una
+                clase callback:
+            </p>
+<pre class="programlisting">
+class My_Markup_Renderer_Html_Upper
+    implements Zend_Markup_Renderer_TokenConverterInterface
+{
+
+    public function convert(Zend_Markup_Token $token, $text)
+    {
+        return '!up!' . strtoupper($text) . '!up!';
+    }
+
+}
+</pre>
+<p>
+                Ahora puede añadir el markup 'upper', con una instancia de la clase
+                <code class="classname">My_Markup_Renderer_Html_Upper</code> como callback. Un ejemplo
+                simple:
+            </p>
+<pre class="programlisting">
+// Creates instance of Zend_Markup_Renderer_Html,
+// with Zend_Markup_Parser_BbCode as its parser
+$bbcode = Zend_Markup::factory('Bbcode');
+
+// this will create a simple 'foo' markup
+// The first parameter defines the markup's name.
+// The second parameter takes an integer that defines the markups type.
+// The third parameter is an array that defines other things about a
+// markup, like the markup's group, and (in this case) a start and end markup.
+$bbcode-&gt;addMarkup(
+    'upper',
+    Zend_Markup_Renderer_RendererAbstract::TYPE_CALLBACK,
+    array(
+        'callback' =&gt; new My_Markup_Renderer_Html_Upper(),
+        'group'    =&gt; 'inline'
+    )
+);
+
+// now, this will output: 'my !up!MARKUP!up!'
+echo $bbcode-&gt;render('my [upper]markup[/upper]');
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.markup.renderers.list"></a>46.4.2. Lista de markups</h3></div></div></div>
+<div class="table">
+<a name="zend.markup.renderers.list.markups"></a><p class="title"><b>Tabla 46.1. Lista de markups</b></p>
+<div class="table-contents"><table class="table" summary="List of markups" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th align="left">Entrada de ejemplo (bbcode)</th>
+<th align="left">Salida de ejemplo</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">[b]foo[/b]</td>
+<td align="left">&lt;strong&gt;foo&lt;/strong&gt;</td>
+</tr>
+<tr>
+<td align="left">[i]foo[/i]</td>
+<td align="left">&lt;em&gt;foo&lt;/em&gt;</td>
+</tr>
+<tr>
+<td align="left">[cite]foo[/cite]</td>
+<td align="left">&lt;cite&gt;foo&lt;/cite&gt;</td>
+</tr>
+<tr>
+<td align="left">[del]foo[/del]</td>
+<td align="left">&lt;del&gt;foo&lt;/del&gt;</td>
+</tr>
+<tr>
+<td align="left">[ins]foo[/ins]</td>
+<td align="left">&lt;ins&gt;foo&lt;/ins&gt;</td>
+</tr>
+<tr>
+<td align="left">[sup]foo[/sup]</td>
+<td align="left">&lt;sup&gt;foo&lt;/sup&gt;</td>
+</tr>
+<tr>
+<td align="left">[sub]foo[/sub]</td>
+<td align="left">&lt;sub&gt;foo&lt;/sub&gt;</td>
+</tr>
+<tr>
+<td align="left">[span]foo[/span]</td>
+<td align="left">&lt;span&gt;foo&lt;/span&gt;</td>
+</tr>
+<tr>
+<td align="left">[acronym title="PHP Hypertext Preprocessor]PHP[/acronym]</td>
+<td align="left">
+                            &lt;acronym title="PHP Hypertext Preprocessor"&gt;PHP&lt;/acronym&gt;
+                        </td>
+</tr>
+<tr>
+<td align="left">[url=http://framework.zend.com/]Zend Framework[/url]</td>
+<td align="left">
+                            &lt;a href="http://framework.zend.com/"&gt;Zend Framework&lt;/a&gt;
+                        </td>
+</tr>
+<tr>
+<td align="left">[h1]foobar[/h1]</td>
+<td align="left">&lt;h1&gt;foobar&lt;/h1&gt;</td>
+</tr>
+<tr>
+<td align="left">[img]http://framework.zend.com/images/logo.gif[/img]</td>
+<td align="left">
+                            &lt;img src="http://framework.zend.com/images/logo.gif" /&gt;
+                        </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.markup.parsers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.markup.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.measure.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">46.3. Zend_Markup Parsers </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 47. Zend_Measure</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

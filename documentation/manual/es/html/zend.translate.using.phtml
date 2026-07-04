@@ -1,0 +1,306 @@
+<?php $title = '74.3. Uso de adaptadores de traducción'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">74.3. Uso de adaptadores de traducción</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.translate.adapter.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 74. Zend_Translate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.translate.sourcecreation.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.translate.using"></a>74.3. Uso de adaptadores de traducción</h2></div></div></div>
+<p>
+        El siguiente paso es usar el adaptador dentro de su código.
+    </p>
+<div class="example">
+<a name="zend.translate.using.example1"></a><p class="title"><b>Ejemplo 74.1. Ejemplo de código PHP de un solo idioma</b></p>
+<div class="example-contents"><pre class="programlisting">
+print "Example\n";
+print "=======\n";
+print "Here is line one\n";
+print "Today is the " . date("d.m.Y") . "\n";
+print "\n";
+print "Here is line two\n";
+</pre></div>
+</div>
+<br class="example-break"><p>
+        El ejemplo anterior muestra cierta salida sin soporte para traducción.
+        Probablemente usted escribe su código en su idioma nativo.
+        Generalmente necesita traducir no solo la salida,
+        sino también los mensajes de error y de registro (log).
+    </p>
+<p>
+        El siguiente paso es integrar <code class="classname">Zend_Translate</code> en su código
+        existente. Por supuesto, es mucho más fácil si ya hubiera escrito su código
+        pensando en la traducción, que modificar su código después.
+    </p>
+<div class="example">
+<a name="zend.translate.using.example2"></a><p class="title"><b>Ejemplo 74.2. Ejemplo de código PHP multilingüe</b></p>
+<div class="example-contents"><pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/my/path/source-de.mo',
+        'locale'  =&gt; 'de'
+    )
+);
+$translate-&gt;addTranslation(
+    array(
+        'content' =&gt; '/path/to/translation/fr-source.mo',
+        'locale'  =&gt; 'fr'
+    )
+);
+
+print $translate-&gt;_("Example") . "\n";
+print "=======\n";
+print $translate-&gt;_("Here is line one") . "\n";
+printf($translate-&gt;_("Today is the %1\$s") . "\n", date('d.m.Y'));
+print "\n";
+
+$translate-&gt;setLocale('fr');
+print $translate-&gt;_("Here is line two") . "\n";
+</pre></div>
+</div>
+<br class="example-break"><p>
+        Ahora echemos un vistazo más profundo a lo que se ha hecho y cómo
+        integrar <code class="classname">Zend_Translate</code> en su propio código.
+    </p>
+<p>
+        Cree un nuevo objeto <code class="classname">Zend_Translate</code> y defina el adaptador base:
+    </p>
+<pre class="programlisting">
+$translate = new Zend_Translate
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/path/to/translation/source-de.mo',
+        'locale'  =&gt; 'de'
+    )
+);
+</pre>
+<p>
+        En este ejemplo elegimos el
+        <span class="emphasis"><em>Adaptador Gettext</em></span>.
+        Colocamos nuestro archivo <span class="emphasis"><em>source-de.mo</em></span>
+        en el directorio <span class="emphasis"><em>/path/to/translation</em></span>.
+        El archivo gettext incluirá la traducción al alemán,
+        y también añadimos otra fuente de idioma para el francés.
+    </p>
+<p>
+        El siguiente paso es envolver todas las cadenas que se van a traducir.
+        El enfoque más simple es tener solo cadenas o frases simples
+        como esta:
+    </p>
+<pre class="programlisting">
+print $translate-&gt;_("Example") . "\n";
+print "=======\n";
+print $translate-&gt;_("Here is line one") . "\n";
+</pre>
+<p>
+        Algunas cadenas no necesitan ser traducidas.
+        La línea separadora siempre es una línea separadora,
+        incluso en otros idiomas.
+    </p>
+<p>
+        Tener valores de datos integrados en una cadena de traducción también
+        se admite mediante el uso de parámetros incrustados.
+    </p>
+<pre class="programlisting">
+printf($translate-&gt;_("Today is the %1\$s") . "\n", date("d.m.Y"));
+</pre>
+<p>
+        En lugar de <code class="methodname">print()</code>, use la función
+        <code class="methodname">printf()</code> y reemplace todos los parámetros con partes
+        <span class="emphasis"><em>%1\$s</em></span>. El primero es <span class="emphasis"><em>%1\$s</em></span>,
+        el segundo es <span class="emphasis"><em>%2\$s</em></span>,
+        y así sucesivamente. De esta forma una traducción puede hacerse sin conocer
+        el valor exacto. En nuestro ejemplo, la fecha es siempre el día actual,
+        pero la cadena puede traducirse sin el conocimiento del día
+        actual.
+    </p>
+<p>
+        Cada cadena se identifica en el almacén de traducción mediante un ID de mensaje.
+        Puede usar IDs de mensaje en lugar de cadenas en su código, así:
+    </p>
+<pre class="programlisting">
+print $translate-&gt;_(1) . "\n";
+print "=======\n";
+print $translate-&gt;_(2) . "\n";
+</pre>
+<p>
+        Pero hacer esto tiene varias desventajas:
+    </p>
+<p>
+        No puede ver qué debería mostrar su código simplemente viendo su código.
+    </p>
+<p>
+        Además tendrá problemas si algunas cadenas no están traducidas.
+        Siempre debe tener presente cómo funciona la traducción.
+        Primero <code class="classname">Zend_Translate</code> comprueba si el idioma especificado tiene una
+        traducción para el ID de mensaje o cadena dado.
+        Si no se encuentra ninguna cadena de traducción, recurre al siguiente
+        nivel inferior de idioma según lo definido dentro de <code class="classname">Zend_Locale</code>.
+        Así "<span class="emphasis"><em>de_AT</em></span>" se convierte en
+        solo "<span class="emphasis"><em>de</em></span>".
+        Si tampoco se encuentra ninguna traducción para
+        "<span class="emphasis"><em>de</em></span>",
+        entonces se devuelve el mensaje original.
+        De esta forma siempre tiene una salida, incluso en caso de que la traducción del
+        mensaje no exista en su almacén de mensajes.
+        <code class="classname">Zend_Translate</code> nunca lanza un error o excepción al traducir
+        cadenas.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.using.structure"></a>74.3.1. Estructuras de fuentes de traducción</h3></div></div></div>
+<p>
+            Su siguiente paso es crear las fuentes de traducción para los
+            idiomas que desea traducir.
+            Cada adaptador se crea a su propia manera como se describe aquí,
+            pero hay características comunes aplicables a todos los adaptadores.
+        </p>
+<p>
+            Debe decidir dónde almacenar sus archivos de fuentes de traducción.
+            Usando <code class="classname">Zend_Translate</code> no está restringido de ninguna forma.
+            Las siguientes estructuras son preferibles:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    Fuente de estructura única
+                </p>
+<pre class="programlisting">
+/application/
+/languages/
+/languages/lang.en
+/languages/lang.de
+/library/
+</pre>
+<p>
+                    Positivo: todos los archivos de fuente para cada idioma se almacenan
+                    en un directorio. Sin división de archivos relacionados.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    Fuente estructurada por idioma
+                </p>
+<pre class="programlisting">
+/application/
+/languages/
+/languages/en/
+/languages/en/first.en
+/languages/en/second.en
+/languages/de/
+/languages/de/first.de
+/languages/de/second.de
+/library
+</pre>
+<p>
+                    Positivo: cada idioma se almacena en su propio directorio.
+                    Traducción sencilla, ya que cada equipo de idioma solo tiene que traducir
+                    un directorio. Además, el uso de múltiples archivos es transparente.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    Fuente estructurada por aplicación
+                </p>
+<pre class="programlisting">
+/application/
+/application/languages/
+/application/languages/first.en
+/application/languages/first.de
+/application/languages/second.en
+/application/languages/second.de
+/library/
+</pre>
+<p>
+                    Positivo: todos los archivos de fuente para cada idioma se almacenan
+                    en un directorio. Sin división de archivos relacionados.
+                </p>
+<p>
+                    Negativo: tener múltiples archivos para el mismo idioma puede ser
+                    problemático.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    Fuente estructurada al estilo gettext
+                </p>
+<pre class="programlisting">
+/application/
+/languages/
+/languages/de/
+/languages/de/LC_MESSAGES/
+/languages/de/LC_MESSAGES/first.mo
+/languages/de/LC_MESSAGES/second.mo
+/languages/en/
+/languages/en/LC_MESSAGES/
+/languages/en/LC_MESSAGES/first.mo
+/languages/en/LC_MESSAGES/second.mo
+/library/
+</pre>
+<p>
+                    Positivo: las fuentes gettext existentes pueden usarse sin cambiar
+                    la estructura.
+                </p>
+<p>
+                    Negativo: tener subdirectorios anidados puede resultar confuso
+                    para las personas que no han usado gettext antes.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                   Fuente estructurada por archivo
+                </p>
+<pre class="programlisting">
+/application/
+/application/models/
+/application/models/MyModel.php
+/application/models/MyModel.de
+/application/models/MyModel.en
+/application/controllers/
+/application/controllers/MyController.php
+/application/controllers/MyController.de
+/application/controllers/MyController.en
+/library/
+</pre>
+<p>
+                    Positivo: los archivos de traducción están ubicados cerca de su fuente.
+                </p>
+<p>
+                    Negativo: demasiados archivos de traducción pequeños resultan en
+                    que sea tedioso traducir.
+                    Además cada archivo debe añadirse como fuente de traducción.
+                </p>
+</li>
+</ul></div>
+<p>
+            Los archivos de fuente estructurados de forma única y por idioma son los más
+            utilizables para <code class="classname">Zend_Translate</code>.
+        </p>
+<p>
+            Así que ahora, ya que sabemos qué estructura queremos tener,
+            deberíamos crear nuestros archivos de fuente de traducción.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.translate.adapter.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.translate.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.translate.sourcecreation.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">74.2. Adaptadores para Zend_Translate </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 74.4. Creación de archivos de fuente</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

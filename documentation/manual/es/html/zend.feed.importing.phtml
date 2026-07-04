@@ -1,0 +1,353 @@
+<?php $title = '33.2. Importación de feeds'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">33.2. Importación de feeds</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.feed.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 33. Zend_Feed</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.feed.findFeeds.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.feed.importing"></a>33.2. Importación de feeds</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Feed</code> permite a los desarrolladores recuperar feeds muy fácilmente. Si
+        conoce el <acronym class="acronym">URI</acronym> de un feed, simplemente use el
+        método <code class="methodname">Zend_Feed::import()</code>:
+    </p>
+<pre class="programlisting">
+$feed = Zend_Feed::import('http://feeds.example.com/feedName');
+</pre>
+<p>
+        También puede usar <code class="classname">Zend_Feed</code> para obtener el contenido de un feed desde un
+        archivo o el contenido de una variable de cadena <acronym class="acronym">PHP</acronym>:
+    </p>
+<pre class="programlisting">
+// importing a feed from a text file
+$feedFromFile = Zend_Feed::importFile('feed.xml');
+
+// importing a feed from a PHP string variable
+$feedFromPHP = Zend_Feed::importString($feedString);
+</pre>
+<p>
+        En cada uno de los ejemplos anteriores, se devuelve un objeto de una clase que extiende
+        <code class="classname">Zend_Feed_Abstract</code> en caso de éxito, dependiendo del tipo de
+        feed. Si se recuperara un feed <acronym class="acronym">RSS</acronym> mediante uno de los métodos de importación
+        anteriores, entonces se devolvería un objeto <code class="classname">Zend_Feed_Rss</code>. Por otro
+        lado, si se importara un feed Atom, entonces se devuelve un objeto <code class="classname">Zend_Feed_Atom</code>.
+        Los métodos de importación también lanzarán un objeto <code class="classname">Zend_Feed_Exception</code>
+        en caso de fallo, como un feed ilegible o mal formado.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.feed.importing.custom"></a>33.2.1. Feeds personalizados</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Feed</code> permite a los desarrolladores crear feeds personalizados muy fácilmente.
+            Solo tiene que crear un array e importarlo con <code class="classname">Zend_Feed</code>.
+            Este array se puede importar con <code class="methodname">Zend_Feed::importArray()</code> o
+            con <code class="methodname">Zend_Feed::importBuilder()</code>. En este último caso el array
+            se calculará al vuelo mediante una fuente de datos personalizada que implemente
+            <code class="classname">Zend_Feed_Builder_Interface</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.importing.custom.importarray"></a>33.2.1.1. Importación de un array personalizado</h4></div></div></div>
+<pre class="programlisting">
+// importing a feed from an array
+$atomFeedFromArray = Zend_Feed::importArray($array);
+
+// the following line is equivalent to the above;
+// by default a Zend_Feed_Atom instance is returned
+$atomFeedFromArray = Zend_Feed::importArray($array, 'atom');
+
+// importing a rss feed from an array
+$rssFeedFromArray = Zend_Feed::importArray($array, 'rss');
+</pre>
+<p>
+                El formato del array debe ajustarse a esta estructura:
+            </p>
+<pre class="programlisting">
+array(
+    //required
+    'title' =&gt; 'title of the feed',
+    'link'  =&gt; 'canonical url to the feed',
+
+    // optional
+    'lastUpdate' =&gt; 'timestamp of the update date',
+    'published'  =&gt; 'timestamp of the publication date',
+
+    // required
+    'charset' =&gt; 'charset of the textual data',
+
+    // optional
+    'description' =&gt; 'short description of the feed',
+    'author'      =&gt; 'author/publisher of the feed',
+    'email'       =&gt; 'email of the author',
+
+    // optional, ignored if atom is used
+    'webmaster' =&gt; 'email address for person responsible '
+                .  'for technical issues',
+
+    // optional
+    'copyright' =&gt; 'copyright notice',
+    'image'     =&gt; 'url to image',
+    'generator' =&gt; 'generator',
+    'language'  =&gt; 'language the feed is written in',
+
+    // optional, ignored if atom is used
+    'ttl'    =&gt; 'how long in minutes a feed can be cached '
+             .  'before refreshing',
+    'rating' =&gt; 'The PICS rating for the channel.',
+
+    // optional, ignored if atom is used
+    // a cloud to be notified of updates
+    'cloud'       =&gt; array(
+        // required
+        'domain' =&gt; 'domain of the cloud, e.g. rpc.sys.com',
+
+        // optional, defaults to 80
+        'port' =&gt; 'port to connect to',
+
+        // required
+        'path'              =&gt; 'path of the cloud, e.g. /RPC2',
+        'registerProcedure' =&gt; 'procedure to call, e.g. myCloud.rssPlsNotify',
+        'protocol'          =&gt; 'protocol to use, e.g. soap or xml-rpc'
+    ),
+
+    // optional, ignored if atom is used
+    // a text input box that can be displayed with the feed
+    'textInput'   =&gt; array(
+        // required
+        'title'       =&gt; 'label of the Submit button in the text input area',
+        'description' =&gt; 'explains the text input area',
+        'name'        =&gt; 'the name of the text object in the text input area',
+        'link'        =&gt; 'URL of the CGI script processing text input requests'
+    ),
+
+    // optional, ignored if atom is used
+    // Hint telling aggregators which hours they can skip
+    'skipHours' =&gt; array(
+        // up to 24 rows whose value is a number between 0 and 23
+        // e.g 13 (1pm)
+        'hour in 24 format'
+    ),
+
+    // optional, ignored if atom is used
+    // Hint telling aggregators which days they can skip
+    'skipDays ' =&gt; array(
+        // up to 7 rows whose value is
+        // Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday
+        // e.g Monday
+        'a day to skip'
+    ),
+
+    // optional, ignored if atom is used
+    // Itunes extension data
+    'itunes' =&gt; array(
+        // optional, default to the main author value
+        'author' =&gt; 'Artist column',
+
+        // optional, default to the main author value
+        // Owner of the podcast
+        'owner' =&gt; array(
+            'name'  =&gt; 'name of the owner',
+            'email' =&gt; 'email of the owner'
+        ),
+
+        // optional, default to the main image value
+        'image' =&gt; 'album/podcast art',
+
+        // optional, default to the main description value
+        'subtitle' =&gt; 'short description',
+        'summary'  =&gt; 'longer description',
+
+        // optional
+        'block' =&gt; 'Prevent an episode from appearing (yes|no)',
+
+        // required, Category column and in iTunes Music Store Browse
+        'category' =&gt; array(
+            // up to 3 rows
+            array(
+                // required
+                'main' =&gt; 'main category',
+
+                // optional
+                'sub'  =&gt; 'sub category'
+            )
+        ),
+
+        // optional
+        'explicit'     =&gt; 'parental advisory graphic (yes|no|clean)',
+        'keywords'     =&gt; 'a comma separated list of 12 keywords maximum',
+        'new-feed-url' =&gt; 'used to inform iTunes of new feed URL location'
+    ),
+
+    'entries' =&gt; array(
+        array(
+            //required
+            'title' =&gt; 'title of the feed entry',
+            'link'  =&gt; 'url to a feed entry',
+
+            // required, only text, no html
+            'description' =&gt; 'short version of a feed entry',
+
+            // optional
+            'guid' =&gt; 'id of the article, '
+                   .  'if not given link value will used',
+
+            // optional, can contain html
+            'content' =&gt; 'long version',
+
+            // optional
+            'lastUpdate' =&gt; 'timestamp of the publication date',
+            'comments'   =&gt; 'comments page of the feed entry',
+            'commentRss' =&gt; 'the feed url of the associated comments',
+
+            // optional, original source of the feed entry
+            'source' =&gt; array(
+                // required
+                'title' =&gt; 'title of the original source',
+                'url'   =&gt; 'url of the original source'
+            ),
+
+            // optional, list of the attached categories
+            'category' =&gt; array(
+                array(
+                    // required
+                    'term' =&gt; 'first category label',
+
+                    // optional
+                    'scheme' =&gt; 'url that identifies a categorization scheme'
+                ),
+
+                array(
+                    // data for the second category and so on
+                )
+            ),
+
+            // optional, list of the enclosures of the feed entry
+            'enclosure'    =&gt; array(
+                array(
+                    // required
+                    'url' =&gt; 'url of the linked enclosure',
+
+                    // optional
+                    'type' =&gt; 'mime type of the enclosure',
+                    'length' =&gt; 'length of the linked content in octets'
+                ),
+
+                array(
+                    //data for the second enclosure and so on
+                )
+            )
+        ),
+
+        array(
+            //data for the second entry and so on
+        )
+    )
+);
+</pre>
+<p>
+                Referencias:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        Especificación <acronym class="acronym">RSS</acronym> 2.0: <a class="ulink" href="http://blogs.law.harvard.edu/tech/rss" target="_top">RSS 2.0</a>
+                    </p></li>
+<li class="listitem"><p>
+                        Especificación Atom: <a class="ulink" href="http://tools.ietf.org/html/rfc4287" target="_top">RFC 4287</a>
+                    </p></li>
+<li class="listitem"><p>
+                        Especificación <acronym class="acronym">WFW</acronym>: <a class="ulink" href="http://wellformedweb.org/news/wfw_namespace_elements" target="_top">Well
+                            Formed Web</a>
+                    </p></li>
+<li class="listitem"><p>
+                        Especificación de iTunes: <a class="ulink" href="http://www.apple.com/itunes/store/podcaststechspecs.html" target="_top">iTunes
+                            Technical Specifications</a>
+                    </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.importing.custom.importbuilder"></a>33.2.1.2. Importación de una fuente de datos personalizada</h4></div></div></div>
+<p>
+                Puede crear una instancia de <code class="classname">Zeed_Feed</code> a partir de cualquier fuente de datos
+                que implemente <code class="classname">Zend_Feed_Builder_Interface</code>. Solo tiene que
+                implementar los métodos <code class="methodname">getHeader()</code> y
+                <code class="methodname">getEntries()</code> para poder usar su objeto con
+                <code class="methodname">Zend_Feed::importBuilder()</code>. Como implementación de referencia
+                sencilla, puede usar <code class="classname">Zend_Feed_Builder</code>, que toma
+                un array en su constructor, realiza una validación menor, y luego puede usarse
+                en el método <code class="methodname">importBuilder()</code>. El método
+                <code class="methodname">getHeader()</code> debe devolver una instancia de
+                <code class="classname">Zend_Feed_Builder_Header</code>, y
+                <code class="methodname">getEntries()</code> debe devolver un array de instancias de
+                <code class="classname">Zend_Feed_Builder_Entry</code>.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    <code class="classname">Zend_Feed_Builder</code> sirve como una implementación concreta para
+                    demostrar el uso. Se anima a los usuarios a crear sus propias clases para
+                    implementar <code class="classname">Zend_Feed_Builder_Interface</code>.
+                </p></td></tr>
+</table></div>
+<p>
+                A continuación se muestra un ejemplo de uso de <code class="methodname">Zend_Feed::importBuilder()</code>:
+            </p>
+<pre class="programlisting">
+// importing a feed from a custom builder source
+$atomFeedFromArray =
+    Zend_Feed::importBuilder(new Zend_Feed_Builder($array));
+
+// the following line is equivalent to the above;
+// by default a Zend_Feed_Atom instance is returned
+$atomFeedFromArray =
+    Zend_Feed::importBuilder(new Zend_Feed_Builder($array), 'atom');
+
+// importing a rss feed from a custom builder array
+$rssFeedFromArray =
+    Zend_Feed::importBuilder(new Zend_Feed_Builder($array), 'rss');
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.feed.importing.custom.dump"></a>33.2.1.3. Volcado del contenido de un feed</h4></div></div></div>
+<p>
+                Para volcar el contenido de una instancia de <code class="classname">Zend_Feed_Abstract</code>, puede
+                usar los métodos <code class="methodname">send()</code> o <code class="methodname">saveXml()</code>.
+            </p>
+<pre class="programlisting">
+assert($feed instanceof Zend_Feed_Abstract);
+
+// dump the feed to standard output
+print $feed-&gt;saveXML();
+
+// send http headers and dump the feed
+$feed-&gt;send();
+</pre>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.feed.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.feed.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.feed.findFeeds.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 33. Zend_Feed </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 33.3. Obtención de feeds desde páginas web</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,145 @@
+<?php $title = 'Capítulo 51. Zend_Navigation'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 51. Zend_Navigation</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.mobile.push.mpns.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.navigation.pages.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.navigation"></a>Capítulo 51. Zend_Navigation</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.navigation.phtml#zend.navigation.introduction">51.1. Introducción</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.navigation.phtml#zend.navigation.introduction.concepts">51.1.1. Páginas y contenedores</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.navigation.phtml#zend.navigation.introduction.pages">51.1.1.1. Páginas</a></span></dt>
+<dt><span class="sect3"><a href="zend.navigation.phtml#zend.navigation.introduction.containers">51.1.1.2. Contenedores</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.navigation.phtml#zend.navigation.introduction.separation">51.1.2. Separación de los datos (modelo) y la renderización (vista)</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.navigation.pages.phtml">51.2. Páginas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.navigation.pages.phtml#zend.navigation.pages.common">51.2.1. Características comunes de las páginas</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.pages.phtml#zend.navigation.pages.mvc">51.2.2. Zend_Navigation_Page_Mvc</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.pages.phtml#zend.navigation.pages.uri">51.2.3. Zend_Navigation_Page_Uri</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.pages.phtml#zend.navigation.pages.custom">51.2.4. Creación de tipos de página personalizados</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.pages.phtml#zend.navigation.pages.factory">51.2.5. Creación de páginas mediante la fábrica de páginas</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.navigation.containers.phtml">51.3. Contenedores</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.creating">51.3.1. Creación de contenedores</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.adding">51.3.2. Añadir páginas</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.removing">51.3.3. Eliminar páginas</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.finding">51.3.4. Buscar páginas</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.iterating">51.3.5. Iterar contenedores</a></span></dt>
+<dt><span class="sect2"><a href="zend.navigation.containers.phtml#zend.navigation.containers.other">51.3.6. Otras operaciones</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.navigation.introduction"></a>51.1. Introducción</h2></div></div></div>
+<p>
+        <code class="classname">Zend_Navigation</code> es un componente para gestionar
+        árboles de punteros a páginas web.
+        En pocas palabras: puede utilizarse para crear menús, migas de pan, enlaces y
+        mapas del sitio, o servir como modelo para otros propósitos relacionados con la navegación.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.introduction.concepts"></a>51.1.1. Páginas y contenedores</h3></div></div></div>
+<p>
+            Hay dos conceptos principales en <code class="classname">Zend_Navigation</code>:
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.navigation.introduction.pages"></a>51.1.1.1. Páginas</h4></div></div></div>
+<p>
+                Una página (<code class="classname">Zend_Navigation_Page</code>) en
+                <code class="classname">Zend_Navigation</code> –
+                en su forma más básica – es un objeto que contiene un puntero
+                a una página web. Además del propio puntero, el objeto
+                página contiene una serie de propiedades adicionales que
+                normalmente son relevantes para la navegación, como <span class="property">label</span>,
+                <span class="property">title</span>, etc.
+            </p>
+<p>
+                Lea más sobre las páginas en la sección de
+                <a class="link" href="zend.navigation.pages.phtml" title="51.2. Pages">páginas</a>.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.navigation.introduction.containers"></a>51.1.1.2. Contenedores</h4></div></div></div>
+<p>
+                Un contenedor de navegación
+                (<code class="classname">Zend_Navigation_Container</code>) es una
+                clase contenedora para páginas. Tiene métodos para
+                añadir, obtener, eliminar e iterar páginas.
+                Implementa las interfaces <a class="ulink" href="http://php.net/spl" target="_top">SPL</a>
+                <code class="classname">RecursiveIterator</code> y
+                <code class="classname">Countable</code>, y por tanto puede iterarse
+                con iteradores SPL como
+                <code class="classname">RecursiveIteratorIterator</code>.
+            </p>
+<p>
+                Lea más sobre los contenedores en la sección de
+                <a class="link" href="zend.navigation.containers.phtml" title="51.3. Containers">contenedores</a>.
+            </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    <code class="classname">Zend_Navigation_Page</code> extiende
+                    <code class="classname">Zend_Navigation_Container</code>, lo que
+                    significa que una página puede tener subpáginas.
+                </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.navigation.introduction.separation"></a>51.1.2. Separación de los datos (modelo) y la renderización (vista)</h3></div></div></div>
+<p>
+            Las clases del espacio de nombres <code class="classname">Zend_Navigation</code>
+            no se ocupan de la renderización de elementos de navegación.
+            La renderización se realiza mediante ayudantes de vista de navegación. Sin embargo,
+            las páginas contienen información que utilizan los ayudantes de vista
+            al renderizar, como; <span class="property">label</span>, la clase <acronym class="acronym">CSS</acronym>,
+            <span class="property">title</span>, <span class="property">lastmod</span> y las propiedades
+            <span class="property">priority</span> para los mapas del sitio, etc.
+        </p>
+<p>
+            Lea más sobre la renderización de elementos de navegación en
+            la sección del manual sobre
+            <a class="link" href="zend.view.helpers.phtml#zend.view.helpers.initial.navigation" title="78.4.1.18. Navigation Helpers">ayudantes de
+            navegación</a>.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.mobile.push.mpns.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.navigation.pages.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">50.4. Zend_Mobile_Push_Mpns </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 51.2. Páginas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

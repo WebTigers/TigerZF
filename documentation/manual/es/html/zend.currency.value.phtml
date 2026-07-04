@@ -1,0 +1,124 @@
+<?php $title = '25.7. ¿Cuánto vale mi moneda?'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">25.7. ¿Cuánto vale mi moneda?</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.currency.number.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 25. Zend_Currency</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.currency.calculation.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.currency.value"></a>25.7. ¿Cuánto vale mi moneda?</h2></div></div></div>
+<p>
+        Cuando trabaja con monedas, normalmente quiere mostrar una cantidad de
+        dinero. Y cuando trabaja con diferentes monedas, tiene que hacerlo con tres
+        cosas distintas: la cantidad que desea mostrar, la precisión que desea usar, y
+        probablemente el tipo de cambio.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.value.money"></a>25.7.1. Trabajar con valores monetarios</h3></div></div></div>
+<p>
+            El valor de la moneda, es decir, el dinero, que desea usar puede establecerse fácilmente usando la
+            opción <span class="property">value</span>.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD',
+    )
+);
+
+print $currency; // Could return '$ 1.000'
+</pre>
+<p>
+            Usando el método <code class="methodname">setFormat()</code> con esta opción de array, y
+            también usando el método <code class="methodname">setValue()</code>, puede establecer el valor
+            posteriormente.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD',
+    )
+);
+
+print $currency-&gt;setValue(2000); // Could return '$ 2.000'
+</pre>
+<p>
+            Con el método <code class="methodname">getValue()</code> obtendrá el valor
+            actualmente establecido.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.currency.value.precision"></a>25.7.2. Uso de la precisión en las monedas</h3></div></div></div>
+<p>
+            Cuando trabaja con monedas, probablemente también tenga que gestionar la precisión.
+            La mayoría de las monedas usan una precisión de 2. Esto significa que cuando tiene 100 dólares
+            estadounidenses, también podría tener 50 centavos. El valor relacionado es simplemente un valor de coma flotante.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000.50,
+        'currency' =&gt; 'USD',
+    )
+);
+
+print $currency; // Could return '$ 1.000,50'
+</pre>
+<p>
+            Por supuesto, como la precisión por defecto es 2, obtendrá '00' como valor decimal
+            cuando no haya ninguna precisión que mostrar.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'    =&gt; 1000,
+        'currency' =&gt; 'USD',
+    )
+);
+
+print $currency; // Could return '$ 1.000,00'
+</pre>
+<p>
+            Para deshacerse de esta precisión por defecto, simplemente podría usar la
+            opción <span class="property">precision</span> y establecerla en '0'. Y puede establecer cualquier otra
+            precisión que desee usar entre 0 y 9. Todos los valores se redondearán o se ampliarán
+            cuando no se ajusten a la precisión establecida.
+        </p>
+<pre class="programlisting">
+$currency = new Zend_Currency(
+    array(
+        'value'     =&gt; 1000,30,
+        'currency'  =&gt; 'USD',
+        'precision' =&gt; 0
+    )
+);
+
+print $currency; // Could return '$ 1.000'
+</pre>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.currency.number.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.currency.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.currency.calculation.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">25.6. ¿Qué aspecto tiene la moneda? </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 25.8. Cálculos con monedas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

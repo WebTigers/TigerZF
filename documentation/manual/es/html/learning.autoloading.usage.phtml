@@ -1,0 +1,168 @@
+<?php $title = '4.3. Uso básico del Autoloader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">4.3. Uso básico del Autoloader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.autoloading.design.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 4. Autoloading en Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.autoloading.resources.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.autoloading.usage"></a>4.3. Uso básico del Autoloader</h2></div></div></div>
+<p>
+        Ahora que tenemos una idea de qué es el autoloading y cuáles son los objetivos y el
+        diseño de la solución de autoloading de Zend Framework, veamos cómo usar
+        <code class="classname">Zend_Loader_Autoloader</code>.
+    </p>
+<p>
+        En el caso más simple, simplemente requeriría la clase y luego la instanciaría. Dado que
+        <code class="classname">Zend_Loader_Autoloader</code> es un singleton (debido a que el
+        autoloader de <acronym class="acronym">SPL</acronym> es un recurso único), usamos
+        <code class="methodname">getInstance()</code> para obtener una instancia.
+    </p>
+<pre class="programlisting">
+require_once 'Zend/Loader/Autoloader.php';
+Zend_Loader_Autoloader::getInstance();
+</pre>
+<p>
+        Por defecto, esto permitirá cargar cualquier clase con los prefijos de namespace "Zend_"
+        o "ZendX_", siempre que estén en su <span class="property">include_path</span>.
+    </p>
+<p>
+        ¿Qué sucede si tiene otros prefijos de namespace que desea usar? La mejor y más
+        simple manera es llamar al método <code class="methodname">registerNamespace()</code> en la
+        instancia. Puede pasar un único prefijo de namespace, o un array de ellos:
+    </p>
+<pre class="programlisting">
+require_once 'Zend/Loader/Autoloader.php';
+$loader = Zend_Loader_Autoloader::getInstance();
+$loader-&gt;registerNamespace('Foo_');
+$loader-&gt;registerNamespace(array('Foo_', 'Bar_'));
+</pre>
+<p>
+        Alternativamente, puede indicarle a <code class="classname">Zend_Loader_Autoloader</code> que
+        actúe como un autoloader de "respaldo" (fallback). Esto significa que intentará resolver
+        cualquier clase sin importar el prefijo de namespace.
+    </p>
+<pre class="programlisting">
+$loader-&gt;setFallbackAutoloader(true);
+</pre>
+<div class="warning"><table border="0" summary="Warning: Do not use as a fallback autoloader">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">No lo use como autoloader de respaldo</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            Aunque resulta tentador usar <code class="classname">Zend_Loader_Autoloader</code> como un
+            autoloader de respaldo, no recomendamos esta práctica.
+        </p>
+<p>
+            Internamente, <code class="classname">Zend_Loader_Autoloader</code> usa
+            <code class="methodname">Zend_Loader::loadClass()</code> para cargar clases. Ese método usa
+            <code class="methodname">include()</code> para intentar cargar el archivo de clase indicado.
+            <code class="methodname">include()</code> devolverá un booleano <code class="constant">FALSE</code>
+            si no tiene éxito -- pero también emite una advertencia de <acronym class="acronym">PHP</acronym>. Este
+            último hecho puede dar lugar a algunos problemas:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Si <span class="property">display_errors</span> está habilitado, la advertencia se
+                    incluirá en la salida.
+                </p></li>
+<li class="listitem"><p>
+                    Dependiendo del nivel de <span class="property">error_reporting</span> que haya elegido,
+                    también podría saturar sus registros (logs).
+                </p></li>
+</ul></div>
+<p>
+            Puede suprimir los mensajes de error (la documentación de
+            <code class="classname">Zend_Loader_Autoloader</code> detalla esto), pero tenga en cuenta que la
+            supresión solo es relevante cuando <span class="property">display_errors</span> está habilitado; el
+            registro de errores siempre mostrará los mensajes. Por estas razones, recomendamos
+            configurar siempre los prefijos de namespace que el autoloader debe conocer
+        </p>
+</td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note: Namespace Prefixes vs PHP Namespaces">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Prefijos de namespace frente a namespaces de PHP</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+            En el momento de escribir esto, <acronym class="acronym">PHP</acronym> 5.3 ya ha sido lanzado. Con esa
+            versión, <acronym class="acronym">PHP</acronym> ahora cuenta con soporte oficial de namespaces.
+        </p>
+<p>
+            Sin embargo, Zend Framework es anterior a <acronym class="acronym">PHP</acronym> 5.3, y por lo tanto a los
+            namespaces. Dentro de Zend Framework, cuando nos referimos a "namespaces", nos referimos a una
+            práctica mediante la cual las clases se prefijan con un "namespace" de proveedor. Como ejemplo,
+            todos los nombres de clase de Zend Framework se prefijan con "Zend_" -- ese es nuestro "namespace"
+            de proveedor.
+        </p>
+<p>
+            Zend Framework planea ofrecer soporte nativo de namespaces de <acronym class="acronym">PHP</acronym> en el
+            autoloader en revisiones futuras, y su propia librería utilizará namespaces a partir de
+            la versión 2.0.0.
+        </p>
+</td></tr>
+</table></div>
+<p>
+        Si tiene un autoloader personalizado que desea usar con Zend Framework -- quizás un
+        autoloader de una librería de terceros que también está usando -- puede gestionarlo con
+        los métodos <code class="methodname">pushAutoloader()</code> y
+        <code class="methodname">unshiftAutoloader()</code> de <code class="classname">Zend_Loader_Autoloader</code>.
+        Estos métodos añadirán o anteponerán, respectivamente, autoloaders a una cadena que se
+        invoca antes de ejecutar el mecanismo interno de autoloading de Zend Framework. Este
+        enfoque ofrece los siguientes beneficios:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                Cada método toma un segundo argumento opcional, un prefijo de namespace de clase. Esto
+                puede usarse para indicar que el autoloader dado solo debe usarse al buscar
+                clases con ese prefijo de clase. Si la clase que se está resolviendo no tiene ese
+                prefijo, el autoloader se omitirá -- lo que puede llevar a mejoras
+                de rendimiento.
+            </p></li>
+<li class="listitem"><p>
+                Si necesita manipular el registro de <code class="methodname">spl_autoload()</code>, cualquier
+                autoloader que sea un callback que apunte a métodos de instancia puede plantear
+                problemas, ya que <code class="methodname">spl_autoload_functions()</code> no devuelve
+                exactamente los mismos callbacks. <code class="classname">Zend_Loader_Autoloader</code> no tiene
+                tal limitación.
+            </p></li>
+</ul></div>
+<p>
+        Los autoloaders gestionados de esta manera pueden ser cualquier callback válido de
+        <acronym class="acronym">PHP</acronym>.
+    </p>
+<pre class="programlisting">
+// Append function 'my_autoloader' to the stack,
+// to manage classes with the prefix 'My_':
+$loader-&gt;pushAutoloader('my_autoloader', 'My_');
+
+// Prepend static method Foo_Loader::autoload() to the stack,
+// to manage classes with the prefix 'Foo_':
+$loader-&gt;unshiftAutoloader(array('Foo_Loader', 'autoload'), 'Foo_');
+</pre>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.autoloading.design.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.autoloading.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.autoloading.resources.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">4.2. Objetivos y diseño </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 4.4. Autoloading de recursos</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

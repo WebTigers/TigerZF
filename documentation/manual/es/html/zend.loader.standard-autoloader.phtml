@@ -1,0 +1,233 @@
+<?php $title = '42.7. El StandardAutoloader'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">42.7. El StandardAutoloader</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.loader.autoloader-factory.methods.get-registered-autoloaders.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 42. Zend_Loader</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.loader.standard-autoloader.methods.constructor.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.loader.standard-autoloader"></a>42.7. El StandardAutoloader</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.standard-autoloader.intro"></a>42.7.1. Resumen</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Loader_StandardAutoloader</code> está diseñado como un autoloader
+            compatible con <a class="ulink" href="http://groups.google.com/group/php-standards/web/psr-0-final-proposal" target="_top">PSR-0</a>.
+            Asume una correspondencia 1:1 entre el espacio de nombres+nombre de clase y el sistema de
+            archivos, en la que los separadores de espacio de nombres y los guiones bajos se traducen
+            a separadores de directorio. Una instrucción simple que ilustra cómo funciona la
+            resolución es la siguiente:
+        </p>
+<pre class="programlisting">
+$filename = str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $classname)
+          . '.php';
+</pre>
+<p>
+            Las encarnaciones anteriores de autoloaders compatibles con PSR-0 en Zend Framework se
+            basaban en el <code class="varname">include_path</code> para la búsqueda de archivos. Esto ha
+            provocado varios problemas:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Debido al uso de <code class="function">include</code>, si el archivo no se encuentra,
+                    se genera una advertencia, incluso si otro autoloader es capaz de resolver la clase
+                    posteriormente.
+                </p></li>
+<li class="listitem"><p>
+                    Documentar cómo configurar el <code class="varname">include_path</code> ha resultado
+                    ser un concepto difícil de transmitir.
+                </p></li>
+<li class="listitem"><p>
+                    Si existen múltiples instalaciones de Zend Framework en el
+                    <code class="varname">include_path</code>, gana la primera de la ruta, incluso si esa
+                    no era la que el desarrollador pretendía.
+                </p></li>
+</ul></div>
+<p>
+            Para resolver estos problemas, el <code class="classname">StandardAutoloader</code>, por
+            defecto, requiere que registre explícitamente pares de espacio de nombres/ruta (o pares
+            de prefijo de proveedor/ruta), y solo cargará un archivo si existe dentro de la ruta
+            proporcionada. Se pueden proporcionar múltiples pares.
+        </p>
+<p>
+            Como medida de último recurso, también puede usar el
+            <code class="classname">StandardAutoloader</code> como un autoloader de "reserva" (fallback):
+            uno que buscará clases de cualquier espacio de nombres o prefijo de proveedor en el
+            <code class="classname">include_path</code>. Sin embargo, esta práctica no se recomienda debido
+            a las implicaciones de rendimiento.
+        </p>
+<p>
+            Finalmente, como con todos los autoloaders en Zend Framework, el
+            <code class="classname">StandardAutoloader</code> es capaz de registrarse a sí mismo con el
+            registro de autoloaders SPL de PHP.
+        </p>
+<div class="note"><table border="0" summary="Note: Vocabulary: Namespaces vs. Vendor Prefixes">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Vocabulario: espacios de nombres frente a prefijos de proveedor</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                En términos de autoloading, un "espacio de nombres" corresponde a la propia
+                definición de PHP de los espacios de nombres en las versiones 5.3 y posteriores de PHP.
+            </p>
+<p>
+                Un "prefijo de proveedor" hace referencia a la práctica, popularizada en versiones de
+                PHP anteriores a la 5.3, de proporcionar un pseudo-espacio de nombres en forma de
+                palabras separadas por guiones bajos en los nombres de clase. Por ejemplo, la clase
+                <code class="classname">Phly_Couch_Document</code> usa un prefijo de proveedor "Phly", y
+                un prefijo de componente "Phly_Couch", pero es una clase que reside en el espacio de
+                nombres global dentro de PHP 5.3.
+            </p>
+<p>
+                El <code class="classname">StandardAutoloader</code> es capaz de cargar tanto nombres de
+                clase con espacio de nombres como con prefijo de proveedor, pero los trata por separado
+                al intentar hacerlos coincidir con una ruta apropiada.
+            </p>
+</td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.standard-autoloader.quick-start"></a>42.7.2. Inicio rápido</h3></div></div></div>
+<p>
+            El uso básico del <code class="classname">StandardAutoloader</code> requiere simplemente
+            registrar pares de espacio de nombres/ruta. Esto se puede hacer tanto en el momento de la
+            instanciación como mediante llamadas explícitas a métodos después de que el objeto haya
+            sido inicializado. Llamar a <code class="methodname">register()</code> registrará el
+            autoloader con el registro de autoloaders SPL.
+        </p>
+<p>
+            Por defecto, la clase registrará el espacio de nombres "Zend" en el directorio superior a
+            donde se encuentra su propio archivo de clase en el sistema de archivos.
+        </p>
+<div class="example">
+<a name="zend.loader.standard-autoloader.quick-start.example-manual-configuration"></a><p class="title"><b>Ejemplo 42.7. Configuración manual</b></p>
+<div class="example-contents"><pre class="programlisting">
+// This example assumes ZF is on your include_path.
+// You could also load the autoloader class from a path relative to the
+// current script, or via an absolute path.
+require_once 'Zend/Loader/StandardAutoloader.php';
+$loader = new Zend_Loader_StandardAutoloader();
+
+// Register the "Phly" namespace:
+$loader-&gt;registerNamespace('Phly', APPLICATION_PATH . '/../library/Phly');
+
+// Register the "Scapi" vendor prefix:
+$loader-&gt;registerPrefix('Scapi', APPLICATION_PATH . '/../library/Scapi');
+
+// Optionally, specify the autoloader as a "fallback" autoloader;
+// this is not recommended.
+$loader-&gt;setFallbackAutoloader(true);
+
+// Register with spl_autoload:
+$loader-&gt;register();
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.loader.standard-autoloader.quick-start.example-constructor-configuration"></a><p class="title"><b>Ejemplo 42.8. Configuración en la instanciación</b></p>
+<div class="example-contents">
+<p>
+                El <code class="classname">StandardAutoloader</code> también se puede configurar en el
+                momento de la instanciación. Tenga en cuenta:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        El argumento proporcionado puede ser un array o un objeto
+                        <span class="interface">Traversable</span> (como un objeto
+                        <code class="classname">Zend_Config</code>).
+                    </p></li>
+<li class="listitem"><p>
+                        El argumento proporcionado también es un argumento válido para pasar al método
+                        <code class="methodname">setOptions()</code>.
+                    </p></li>
+</ul></div>
+<p>
+                Lo siguiente es equivalente al ejemplo anterior.
+            </p>
+<pre class="programlisting">
+require_once 'Zend/Loader/StandardAutoloader.php';
+$loader = new Zend_Loader_StandardAutoloader(array(
+    'namespaces' =&gt; array(
+        'Phly' =&gt; APPLICATION_PATH . '/../library/Phly',
+    ),
+    'prefixes' =&gt; array(
+        'Scapi' =&gt; APPLICATION_PATH . '/../library/Scapi',
+    ),
+    'fallback_autoloader' =&gt; true,
+));
+
+// Register with spl_autoload:
+$loader-&gt;register();
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.standard-autoloader.options"></a>42.7.3. Opciones de configuración</h3></div></div></div>
+<p>
+            El <code class="classname">StandardAutoloader</code> define las siguientes opciones.
+        </p>
+<div class="variablelist">
+<p class="title"><b>Opciones de StandardAutoloader</b></p>
+<dl class="variablelist">
+<dt><span class="term">namespaces</span></dt>
+<dd><p>
+                        Un array asociativo de pares espacio de nombres/ruta. La ruta debe ser una
+                        ruta absoluta o una ruta relativa al script que la invoca, y debe contener
+                        solo clases que residan en ese espacio de nombres (o en sus subespacios de
+                        nombres). Por defecto, se registra el espacio de nombres "Zend", apuntando al
+                        directorio padre del archivo que define el
+                        <code class="classname">StandardAutoloader</code>.
+                    </p></dd>
+<dt><span class="term">prefixes</span></dt>
+<dd><p>
+                        Un array asociativo de pares prefijo de proveedor/ruta. La ruta debe ser una
+                        ruta absoluta o una ruta relativa al script que la invoca, y debe contener
+                        solo clases que comiencen con el prefijo de proveedor proporcionado.
+                    </p></dd>
+<dt><span class="term">fallback_autoloader</span></dt>
+<dd><p>
+                        Un valor booleano que indica si esta instancia debe actuar o no como un
+                        autoloader de "reserva" (fallback) (es decir, buscar clases de cualquier
+                        espacio de nombres o prefijo de proveedor en el
+                        <code class="varname">include_path</code>). Por defecto,
+                        <code class="constant">false</code>.
+                    </p></dd>
+</dl>
+</div>
+</div>
+<div class="sect2"><div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.standard-autoloader.methods"></a>42.7.4. Métodos disponibles</h3></div></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.loader.standard-autoloader.examples"></a>42.7.5. Ejemplos</h3></div></div></div>
+<p>
+            Consulte los <a class="link" href="zend.loader.standard-autoloader.phtml#zend.loader.standard-autoloader.quick-start" title="42.7.2. Quick Start">ejemplos
+                en el inicio rápido</a> para ver su uso.
+        </p>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.loader.autoloader-factory.methods.get-registered-autoloaders.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.loader.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.loader.standard-autoloader.methods.constructor.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">getRegisteredAutoloaders </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> __construct</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

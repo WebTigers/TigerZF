@@ -1,0 +1,127 @@
+<?php $title = 'Capítulo 47. Zend_Measure'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 47. Zend_Measure</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.markup.renderers.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.measure.creation.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.measure"></a>Capítulo 47. Zend_Measure</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.measure.phtml#zend.measure.introduction">47.1. Introducción</a></span></dt>
+<dt><span class="sect1"><a href="zend.measure.creation.phtml">47.2. Creación de medidas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.measure.creation.phtml#zend.measure.creation.number">47.2.1. Creación de medidas a partir de enteros y flotantes</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.creation.phtml#zend.measure.creation.string">47.2.2. Creación de medidas a partir de cadenas</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.creation.phtml#zend.measure.creation.localized">47.2.3. Medidas a partir de cadenas localizadas</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.measure.output.phtml">47.3. Salida de medidas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.measure.output.phtml#zend.measure.output.auto">47.3.1. Salida automática</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.output.phtml#zend.measure.output.value">47.3.2. Salida de valores</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.output.phtml#zend.measure.output.unit">47.3.3. Salida con unidad de medida</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.output.phtml#zend.measure.output.localized">47.3.4. Salida como cadena localizada</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.measure.edit.phtml">47.4. Manipulación de medidas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.convert">47.4.1. Convertir</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.add">47.4.2. Sumar y restar</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.equal">47.4.3. Comparar</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.compare">47.4.4. Comparar</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.changevalue">47.4.5. Cambiar valores manualmente</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.edit.phtml#zend.measure.edit.changetype">47.4.6. Cambiar tipos manualmente</a></span></dt>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.measure.types.phtml">47.5. Tipos de medidas</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.measure.types.phtml#zend.measure.types.binary">47.5.1. Sugerencias para Zend_Measure_Binary</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.types.phtml#zend.measure.types.decimal">47.5.2. Sugerencias para Zend_Measure_Number</a></span></dt>
+<dt><span class="sect2"><a href="zend.measure.types.phtml#zend.measure.types.roman">47.5.3. Números romanos</a></span></dt>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.measure.introduction"></a>47.1. Introducción</h2></div></div></div>
+<p>
+        Las clases <code class="classname">Zend_Measure_*</code> proporcionan una forma genérica y
+        sencilla de trabajar con medidas. Utilizando las clases <code class="classname">Zend_Measure_*</code>,
+        puede convertir medidas a diferentes unidades del mismo tipo. Se pueden sumar,
+        restar y comparar entre sí. A partir de una entrada dada en el idioma nativo
+        del usuario, la unidad de medida se puede extraer automáticamente. Se admiten
+        numerosas unidades de medida.
+    </p>
+<div class="example">
+<a name="zend.measure.introduction.example-1"></a><p class="title"><b>Ejemplo 47.1. Convirtiendo medidas</b></p>
+<div class="example-contents">
+<p>
+            El siguiente ejemplo introductorio muestra la conversión automática de
+            unidades de medida. Para convertir una medida, se deben conocer su valor
+            y su tipo. El valor puede ser un entero, un flotante, o incluso una
+            cadena que contenga un número. Las conversiones solo son posibles entre
+            unidades del mismo tipo (masa, área, temperatura, velocidad, etc.), no
+            entre tipos.
+        </p>
+<pre class="programlisting">
+$locale = new Zend_Locale('en');
+$unit = new Zend_Measure_Length(100, Zend_Measure_Length::METER, $locale);
+
+// Convert meters to yards
+echo $unit-&gt;convertTo(Zend_Measure_Length::YARD);
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+        <code class="classname">Zend_Measure_*</code> incluye soporte para muchas unidades de
+        medida diferentes. Todas las unidades de medida tienen una notación
+        unificada: <code class="classname">Zend_Measure_&lt;TYPE&gt;::NAME_OF_UNIT</code>, donde
+        &lt;TYPE&gt; corresponde a una propiedad física o numérica conocida. Cada
+        unidad de medida consta de un factor de conversión y una unidad de
+        presentación. Puede encontrarse una lista detallada en el capítulo
+        <a class="link" href="zend.measure.types.phtml" title="47.5. Types of measurements">Tipos de medidas</a>.
+    </p>
+<div class="example">
+<a name="zend.measure.introduction.example-2"></a><p class="title"><b>Ejemplo 47.2. La medida del metro</b></p>
+<div class="example-contents">
+<p>
+            El <span class="emphasis"><em>metro</em></span> se utiliza para medir longitudes, por lo que su
+            constante de tipo se puede encontrar en la clase <code class="classname">Length</code>. Para
+            referirse a esta unidad de medida, debe usarse la notación
+            <code class="constant">Length::METER</code>. La unidad de presentación es
+            <span class="emphasis"><em>m</em></span>.
+        </p>
+<pre class="programlisting">
+echo Zend_Measure_Length::STANDARD;  // outputs 'Length::METER'
+echo Zend_Measure_Length::KILOMETER; // outputs 'Length::KILOMETER'
+
+$unit = new Zend_Measure_Length(100,'METER');
+echo $unit;
+// outputs '100 m'
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.markup.renderers.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.measure.creation.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">46.4. Renderizadores de Zend_Markup </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 47.2. Creación de medidas</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

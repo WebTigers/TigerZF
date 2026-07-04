@@ -1,0 +1,609 @@
+<?php $title = '65.4. Gestión global de sesiones'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">65.4. Gestión global de sesiones</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.session.advanced_usage.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 65. Zend_Session</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.session.savehandler.dbtable.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.session.global_session_management"></a>65.4. Gestión global de sesiones</h2></div></div></div>
+<p>
+        El comportamiento por defecto de las sesiones puede modificarse utilizando los métodos estáticos de
+        <code class="classname">Zend_Session</code>. Toda la gestión y manipulación global de sesiones
+        ocurre usando <code class="classname">Zend_Session</code>, incluyendo la configuración de las
+        <a class="ulink" href="http://www.php.net/session#session.configuration" target="_top">opciones habituales proporcionadas por
+            ext/session</a>, usando <code class="methodname">Zend_Session::setOptions()</code>. Por
+        ejemplo, no asegurar el uso de un <code class="code">save_path</code> seguro o un nombre de cookie único
+        por parte de ext/session usando <code class="methodname">Zend_Session::setOptions()</code> puede resultar en
+        problemas de seguridad.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.configuration_options"></a>65.4.1. Opciones de configuración</h3></div></div></div>
+<p>
+            Cuando se solicita el primer espacio de nombres de sesión, <code class="classname">Zend_Session</code>
+            iniciará automáticamente la sesión <acronym class="acronym">PHP</acronym>, a menos que ya se haya iniciado con
+            <a class="link" href="zend.session.advanced_usage.phtml#zend.session.advanced_usage.starting_a_session" title="65.3.1. Starting a Session"><code class="methodname">Zend_Session::start()</code></a>.
+            La sesión <acronym class="acronym">PHP</acronym> subyacente utilizará los valores por defecto de
+            <code class="classname">Zend_Session</code>, a menos que sean modificados primero mediante
+            <code class="methodname">Zend_Session::setOptions()</code>.
+        </p>
+<p>
+            Para establecer una opción de configuración de sesión, incluya el nombre base (la parte del nombre después de
+            "<code class="code">session.</code>") como clave de un array pasado a
+            <code class="methodname">Zend_Session::setOptions()</code>. El valor correspondiente en el
+            array se utiliza para establecer el valor de la opción de sesión. Si el desarrollador no establece ninguna opción,
+            <code class="classname">Zend_Session</code> utilizará primero las opciones recomendadas por defecto, y luego
+            los valores por defecto de php.ini. Los comentarios de la comunidad sobre las mejores prácticas para estas opciones
+            deben enviarse a <a class="ulink" href="mailto:fw-auth@lists.zend.com" target="_top">fw-auth@lists.zend.com</a>.
+        </p>
+<div class="example">
+<a name="zend.session.global_session_management.setoptions.example"></a><p class="title"><b>Ejemplo 65.16. Uso de Zend_Config para configurar Zend_Session</b></p>
+<div class="example-contents">
+<p>
+                Para configurar este componente usando <a class="link" href="zend.config.adapters.ini.phtml" title="21.3. Zend_Config_Ini"><code class="classname">Zend_Config_Ini</code></a>,
+                primero añada las opciones de configuración al archivo <acronym class="acronym">INI</acronym>:
+            </p>
+<pre class="programlisting">
+; Accept defaults for production
+[production]
+; bug_compat_42
+; bug_compat_warn
+; cache_expire
+; cache_limiter
+; cookie_domain
+; cookie_lifetime
+; cookie_path
+; cookie_secure
+; entropy_file
+; entropy_length
+; gc_divisor
+; gc_maxlifetime
+; gc_probability
+; hash_bits_per_character
+; hash_function
+; name should be unique for each PHP application sharing the same
+; domain name
+name = UNIQUE_NAME
+; referer_check
+; save_handler
+; save_path
+; serialize_handler
+; use_cookies
+; use_only_cookies
+; use_trans_sid
+
+; remember_me_seconds = &lt;integer seconds&gt;
+; strict = on|off
+
+; Development inherits configuration from production, but overrides
+; several values
+[development : production]
+; Don't forget to create this directory and make it rwx (readable and
+; modifiable) by PHP.
+save_path = /home/myaccount/zend_sessions/myapp
+use_only_cookies = on
+; When persisting session id cookies, request a TTL of 10 days
+remember_me_seconds = 864000
+</pre>
+<p>
+                A continuación, cargue el archivo de configuración y pase su representación en array a
+                <code class="methodname">Zend_Session::setOptions()</code>:
+            </p>
+<pre class="programlisting">
+$config = new Zend_Config_Ini('myapp.ini', 'development');
+
+Zend_Session::setOptions($config-&gt;toArray());
+</pre>
+</div>
+</div>
+<br class="example-break"><p>
+            La mayoría de las opciones mostradas arriba no necesitan más explicación que la que se encuentra en la
+            documentación estándar de <acronym class="acronym">PHP</acronym>, pero aquellas de especial interés se detallan a continuación.
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p>
+                        booleano <code class="code">strict</code> - deshabilita el inicio automático de
+                        <code class="classname">Zend_Session</code> al usar
+                        <code class="code">new Zend_Session_Namespace()</code>.
+                    </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                        entero <code class="code">remember_me_seconds</code> - cuánto tiempo debe persistir la cookie del
+                        id de sesión, después de que el user agent haya finalizado (por ejemplo, se cierre la aplicación del navegador).
+                    </p></li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                        cadena <code class="code">save_path</code> - El valor correcto depende del sistema, y
+                        debe ser proporcionado por el desarrollador usando una
+                        <span class="emphasis"><em>ruta absoluta</em></span> a un directorio legible y con permisos de escritura por
+                        el proceso <acronym class="acronym">PHP</acronym>. Si no se proporciona una ruta con permisos de escritura, entonces
+                        <code class="classname">Zend_Session</code> lanzará una excepción al iniciarse
+                        (es decir, cuando se llama a <code class="methodname">start()</code>).
+                    </p>
+<div class="note"><table border="0" summary="Note: Security Risk">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Riesgo de seguridad</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                            Si la ruta es legible por otras aplicaciones, entonces el secuestro de sesión
+                            podría ser posible. Si la ruta tiene permisos de escritura por otras aplicaciones, entonces
+                            el <a class="ulink" href="http://en.wikipedia.org/wiki/Session_poisoning" target="_top">envenenamiento
+                                de sesión</a> podría ser posible. Si esta ruta se comparte con
+                            otros usuarios u otras aplicaciones <acronym class="acronym">PHP</acronym>, pueden ocurrir diversos
+                            problemas de seguridad, incluyendo el robo del contenido de la sesión, el
+                            secuestro de sesiones y la colisión de la recolección de basura (por ejemplo,
+                            la aplicación de otro usuario podría hacer que <acronym class="acronym">PHP</acronym> elimine
+                            los archivos de sesión de su aplicación).
+                        </p>
+<p>
+                            Por ejemplo, un atacante puede visitar el sitio web de la víctima para obtener una
+                            cookie de sesión. Luego, edita la ruta de la cookie hacia su propio dominio en el
+                            mismo servidor, antes de visitar su propio sitio web para ejecutar
+                            <code class="methodname">var_dump($_SESSION)</code>. Armado con conocimiento
+                            detallado del uso que la víctima hace de los datos en sus sesiones, el atacante
+                            puede entonces modificar el estado de la sesión (envenenando la sesión), alterar
+                            la ruta de la cookie de vuelta hacia el sitio web de la víctima, y luego realizar solicitudes desde
+                            el sitio web de la víctima usando la sesión envenenada. Incluso si dos
+                            aplicaciones en el mismo servidor no tienen acceso de lectura/escritura al
+                            <code class="code">save_path</code> de la otra aplicación, si el
+                            <code class="code">save_path</code> es adivinable, y el atacante tiene control sobre
+                            uno de esos dos sitios web, el atacante podría alterar el <code class="code">save_path</code> de
+                            su sitio web para usar el de la otra, y así lograr el
+                            envenenamiento de sesión, bajo algunas configuraciones comunes de
+                            <acronym class="acronym">PHP</acronym>. Por lo tanto, el valor de <code class="code">save_path</code>
+                            no debe hacerse público y debe alterarse hacia una ubicación
+                            segura y única para cada aplicación.
+                        </p>
+</td></tr>
+</table></div>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                        cadena <code class="code">name</code> - El valor correcto depende del sistema y debe
+                        ser proporcionado por el desarrollador usando un valor <span class="emphasis"><em>único</em></span> para
+                        la aplicación.
+                    </p>
+<div class="note"><table border="0" summary="Note: Security Risk">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Riesgo de seguridad</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                            Si el valor de <code class="code">php.ini</code> para <code class="code">session.name</code> es el
+                            mismo (por ejemplo, el valor por defecto "PHPSESSID"), y hay dos o más
+                            aplicaciones <acronym class="acronym">PHP</acronym> accesibles a través del mismo nombre de dominio
+                            entonces compartirán los mismos datos de sesión para los visitantes de ambos
+                            sitios web. Además, podría producirse una posible corrupción de los datos de sesión.
+                        </p></td></tr>
+</table></div>
+</li>
+<li class="listitem" style="list-style-type: circle">
+<p>
+                        booleano <code class="code">use_only_cookies</code> - Para evitar introducir
+                        riesgos de seguridad adicionales, no altere el valor por defecto de esta opción.
+
+                        </p>
+<div class="note"><table border="0" summary="Note: Security Risk">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Riesgo de seguridad</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                                Si esta configuración no está habilitada, un atacante puede fijar fácilmente el id de sesión
+                                de la víctima, usando enlaces en el sitio web del atacante, como
+                                <code class="code">http://www.example.com/index.php?PHPSESSID=fixed_session_id</code>.
+                                La fijación funciona si la víctima aún no tiene una cookie de id de sesión
+                                para example.com. Una vez que la víctima usa un id de sesión conocido,
+                                el atacante puede entonces intentar secuestrar la sesión haciéndose pasar
+                                por la víctima, y emulando el user agent de la víctima.
+                            </p></td></tr>
+</table></div>
+<p>
+                    </p>
+</li>
+</ul></div>
+<p>
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.headers_sent"></a>65.4.2. Error: cabeceras ya enviadas</h3></div></div></div>
+<p>
+            Si ve el mensaje de error, "Cannot modify header information - headers already sent",
+            o, "You must call ... before any output has been sent to the browser; output started in
+            ...", entonces examine cuidadosamente la causa inmediata (función o método) asociada con
+            el mensaje. Cualquier acción que requiera el envío de cabeceras <acronym class="acronym">HTTP</acronym>, como
+            el envío de una cookie, debe realizarse antes de enviar la salida normal (salida sin buffer), excepto
+            cuando se utiliza el buffering de salida de <acronym class="acronym">PHP</acronym>.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p>
+                    Usar el <a class="ulink" href="http://php.net/outcontrol" target="_top">buffering de salida</a> suele ser
+                    suficiente para prevenir este problema, y puede ayudar a mejorar el rendimiento. Por ejemplo,
+                    en <code class="code">php.ini</code>, "<code class="code">output_buffering = 65535</code>" habilita el buffering
+                    de salida con un buffer de 64K. Aunque el buffering de salida puede ser una buena táctica
+                    en servidores de producción para aumentar el rendimiento, confiar únicamente en el buffering para
+                    resolver el problema de "headers already sent" no es suficiente. La aplicación
+                    no debe exceder el tamaño del buffer, o el problema ocurrirá siempre que la salida
+                    enviada (antes de las cabeceras <acronym class="acronym">HTTP</acronym>) exceda el tamaño del buffer.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    Si un método de <code class="classname">Zend_Session</code> está involucrado en causar el mensaje
+                    de error, examine el método cuidadosamente, y asegúrese de que su uso realmente sea necesario en
+                    la aplicación. Por ejemplo, el uso por defecto de
+                    <code class="methodname">destroy()</code> también envía una cabecera <acronym class="acronym">HTTP</acronym>
+                    para expirar la cookie de sesión del lado del cliente. Si esto no es necesario, entonces use
+                    <code class="methodname">destroy(false)</code>, ya que las instrucciones para establecer cookies
+                    se envían con cabeceras <acronym class="acronym">HTTP</acronym>.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    Alternativamente, intente reorganizar la lógica de la aplicación de modo que todas las acciones
+                    que manipulan cabeceras se realicen antes de enviar cualquier salida.
+                </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                    Elimine cualquier etiqueta de cierre "<code class="code">?&gt;</code>", si aparecen al final de un
+                    archivo fuente <acronym class="acronym">PHP</acronym>. No son necesarias, y los saltos de línea y otros
+                    espacios en blanco casi invisibles después de la etiqueta de cierre pueden desencadenar el envío de salida al
+                    cliente.
+                </p></li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.session_identifiers"></a>65.4.3. Identificadores de sesión</h3></div></div></div>
+<p>
+            Introducción: la mejor práctica en relación con el uso de sesiones con Zend Framework recomienda
+            usar una cookie de navegador (es decir, una cookie normal almacenada en su navegador web), en lugar de
+            incrustar un identificador de sesión único en las <acronym class="acronym">URL</acronym>s como medio para rastrear
+            usuarios individuales. Por defecto, este componente usa únicamente cookies para mantener los identificadores
+            de sesión. El valor de la cookie es el identificador único de la sesión de su navegador.
+            El ext/session de <acronym class="acronym">PHP</acronym> usa este identificador para mantener una relación
+            única uno a uno entre los visitantes del sitio web y el almacenamiento de datos de sesión
+            persistente único para cada visitante. <code class="classname">Zend_Session</code>* envuelve este mecanismo
+            de almacenamiento (<code class="varname">$_SESSION</code>) con una interfaz orientada a objetos.
+            Desafortunadamente, si un atacante obtiene acceso al valor de la cookie (el id de sesión),
+            un atacante podría ser capaz de secuestrar la sesión de un visitante. Este problema no es exclusivo de
+            <acronym class="acronym">PHP</acronym>, ni de Zend Framework. El método
+            <code class="methodname">regenerateId()</code> permite a una aplicación cambiar el id de sesión
+            (almacenado en la cookie del visitante) a un valor nuevo, aleatorio e impredecible. Nota: aunque no es lo mismo,
+            para facilitar la lectura de esta sección, usamos los términos "user agent" y "navegador web" indistintamente.
+        </p>
+<p>
+            ¿Por qué?: Si un atacante obtiene un identificador de sesión válido, un atacante podría ser capaz de
+            hacerse pasar por un usuario válido (la víctima), y luego obtener acceso a información
+            confidencial o manipular de otro modo los datos de la víctima gestionados por su aplicación.
+            Cambiar los ids de sesión ayuda a proteger contra el secuestro de sesión. Si el id de sesión
+            se cambia, y un atacante no conoce el nuevo valor, el atacante no puede usar el nuevo
+            id de sesión en sus intentos de secuestrar la sesión del visitante. Incluso si un atacante obtiene
+            acceso a un id de sesión antiguo, <code class="methodname">regenerateId()</code> también mueve los
+            datos de sesión del "handle" del id de sesión antiguo al nuevo, de modo que no quedan datos
+            accesibles a través del id de sesión antiguo.
+        </p>
+<p>
+            Cuándo usar regenerateId(): añadir <code class="methodname">Zend_Session::regenerateId()</code>
+            a su bootstrap de Zend Framework produce una de las formas más seguras
+            de regenerar los ids de sesión en las cookies del user agent. Si no hay lógica condicional para
+            determinar cuándo regenerar el id de sesión, entonces no hay fallos en esa lógica.
+            Aunque regenerar en cada solicitud previene varias posibles vías de ataque, no
+            todo el mundo quiere el pequeño costo asociado en rendimiento y ancho de banda. Por lo tanto, las aplicaciones
+            comúnmente intentan determinar dinámicamente situaciones de mayor riesgo, y solo regeneran
+            los ids de sesión en esas situaciones. Cada vez que se "escalan" los privilegios de la sesión de un
+            visitante del sitio web (por ejemplo, un visitante vuelve a autenticar su identidad antes de editar su
+            "perfil" personal), o cada vez que ocurre un cambio "sensible" de seguridad en un parámetro de sesión,
+            considere usar <code class="methodname">regenerateId()</code> para crear un nuevo id de sesión. Si
+            llama a la función <code class="methodname">rememberMe()</code>, entonces no use
+            <code class="methodname">regenerateId()</code>, ya que la primera llama a la segunda. Si un usuario
+            ha iniciado sesión exitosamente en su sitio web, use <code class="methodname">rememberMe()</code>
+            en lugar de <code class="methodname">regenerateId()</code>.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.session.global_session_management.session_identifiers.hijacking_and_fixation"></a>65.4.3.1. Secuestro y fijación de sesión</h4></div></div></div>
+<p>
+                Evitar las <a class="ulink" href="http://en.wikipedia.org/wiki/Cross_site_scripting" target="_top">vulnerabilidades de
+                    cross-site scripting (XSS)</a> ayuda a prevenir el secuestro de sesión.
+                Según las estadísticas de <a class="ulink" href="http://secunia.com/" target="_top">Secunia</a> los problemas
+                    de XSS ocurren con frecuencia, independientemente de los lenguajes usados para crear aplicaciones
+                web. En lugar de esperar no tener nunca un problema de XSS con una aplicación,
+                planifique para ello siguiendo las mejores prácticas para ayudar a minimizar el daño, si ocurre. Con
+                XSS, un atacante no necesita acceso directo al tráfico de red de la víctima. Si la
+                víctima ya tiene una cookie de sesión, un XSS con Javascript podría permitir a un atacante leer
+                la cookie y robar la sesión. Para víctimas sin cookies de sesión, usando XSS para
+                inyectar Javascript, un atacante podría crear una cookie de id de sesión en el navegador de la víctima
+                con un valor conocido, y luego establecer una cookie idéntica en el sistema del atacante,
+                con el fin de secuestrar la sesión de la víctima. Si la víctima visitó un
+                sitio web del atacante, entonces el atacante también puede emular la mayoría de otras características identificables
+                del user agent de la víctima. Si su sitio web tiene una vulnerabilidad de XSS, el atacante
+                podría insertar un Javascript de <acronym class="acronym">AJAX</acronym> que "visite" en secreto
+                el sitio web del atacante, de modo que el atacante conozca las características del navegador de la víctima
+                y se dé cuenta de una sesión comprometida en el sitio web de la víctima.
+                Sin embargo, el atacante no puede alterar arbitrariamente el estado del lado del servidor de
+                las sesiones <acronym class="acronym">PHP</acronym>, siempre que el desarrollador haya establecido correctamente el valor
+                de la opción <code class="code">save_path</code>.
+            </p>
+<p>
+                Por sí solo, llamar a <code class="methodname">Zend_Session::regenerateId()</code> cuando
+                se usa la sesión del usuario por primera vez, no previene los ataques de fijación de sesión, a menos que
+                pueda distinguir entre una sesión originada por un atacante que emula a la víctima. A
+                primera vista, esto podría parecer contradictorio con la afirmación anterior, hasta que
+                consideramos a un atacante que primero inicia una sesión real en su sitio web. La sesión
+                se "usa por primera vez" por el atacante, quien luego conoce el resultado de la inicialización
+                (<code class="methodname">regenerateId()</code>). El atacante entonces usa el nuevo id de sesión
+                en combinación con una vulnerabilidad de XSS, o inyecta el id de sesión mediante un enlace en
+                el sitio web del atacante (funciona si <code class="code">use_only_cookies = off</code>).
+            </p>
+<p>
+                Si puede distinguir entre un atacante y una víctima que usan el mismo id de sesión,
+                entonces el secuestro de sesión puede tratarse directamente. Sin embargo, tales distinciones
+                generalmente implican algún tipo de compromiso de usabilidad, porque los métodos de distinción
+                suelen ser imprecisos. Por ejemplo, si se recibe una solicitud desde una IP en un país diferente
+                al de la IP de la solicitud cuando se creó la sesión, entonces la nueva
+                solicitud probablemente pertenece a un atacante. Bajo las siguientes condiciones, podría
+                no haber ninguna forma de que una aplicación web distinga entre una víctima y un
+                atacante:
+
+                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p>
+                            el atacante primero inicia una sesión en su sitio web para obtener un
+                            id de sesión válido
+                        </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                            el atacante usa una vulnerabilidad de XSS en su sitio web para crear una cookie en
+                            el navegador de la víctima con el mismo id de sesión válido (es decir, fijación
+                            de sesión)
+                        </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                            tanto la víctima como el atacante se originan desde la misma granja de proxies (por ejemplo,
+                            ambos están detrás del mismo firewall en una gran empresa, como AOL)
+                        </p></li>
+</ul></div>
+<p>
+
+                El código de ejemplo a continuación hace mucho más difícil que un atacante conozca el id de sesión
+                actual de la víctima, a menos que el atacante ya haya realizado los dos primeros pasos
+                anteriores.
+            </p>
+<div class="example">
+<a name="zend.session.global_session_management.session_identifiers.hijacking_and_fixation.example"></a><p class="title"><b>Ejemplo 65.17. Fijación de sesión</b></p>
+<div class="example-contents"><pre class="programlisting">
+$defaultNamespace = new Zend_Session_Namespace();
+
+if (!isset($defaultNamespace-&gt;initialized)) {
+    Zend_Session::regenerateId();
+    $defaultNamespace-&gt;initialized = true;
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.rememberme"></a>65.4.4. rememberMe(integer $seconds)</h3></div></div></div>
+<p>
+            Normalmente, las sesiones terminan cuando el user agent finaliza, como cuando un usuario final cierra
+            un programa de navegador web. Sin embargo, su aplicación puede proporcionar la capacidad de extender las sesiones
+            de usuario más allá del tiempo de vida del programa cliente mediante el uso de cookies
+            persistentes. Use <code class="methodname">Zend_Session::rememberMe()</code> antes de que se inicie una sesión
+            para controlar el tiempo antes de que expire una cookie de sesión persistida. Si no
+            especifica un número de segundos, entonces el tiempo de vida de la cookie de sesión por defecto es
+            <code class="code">remember_me_seconds</code>, que puede establecerse usando
+            <code class="methodname">Zend_Session::setOptions()</code>. Para ayudar a frustrar la fijación/secuestro
+            de sesión, use esta función cuando un usuario se autentique exitosamente con su
+            aplicación (por ejemplo, desde un formulario de "login").
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.forgetme"></a>65.4.5. forgetMe()</h3></div></div></div>
+<p>
+            Esta función complementa a <code class="methodname">rememberMe()</code> escribiendo una cookie
+            de sesión que tiene un tiempo de vida que termina cuando el user agent finaliza.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.sessionexists"></a>65.4.6. sessionExists()</h3></div></div></div>
+<p>
+            Use este método para determinar si ya existe una sesión para el user agent/solicitud
+            actual. Puede usarse antes de iniciar una sesión, e independientemente de todos los demás
+            métodos de <code class="classname">Zend_Session</code> y <code class="classname">Zend_Session_Namespace</code>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.destroy"></a>65.4.7. destroy(bool $remove_cookie = true, bool $readonly = true)</h3></div></div></div>
+<p>
+            <code class="methodname">Zend_Session::destroy()</code> destruye todos los datos persistentes
+            asociados con la sesión actual. Sin embargo, ninguna variable en <acronym class="acronym">PHP</acronym> se ve
+            afectada, por lo que sus sesiones con espacio de nombres (instancias de
+            <code class="classname">Zend_Session_Namespace</code>) siguen siendo legibles. Para completar un "logout",
+            establezca el parámetro opcional como <code class="constant">TRUE</code> (el valor por defecto) para también eliminar
+            la cookie de id de sesión del user agent. El parámetro opcional <code class="varname">$readonly</code>
+            elimina la capacidad de crear nuevas instancias de <code class="classname">Zend_Session_Namespace</code>
+            y de que los métodos de <code class="classname">Zend_Session</code> escriban en el almacén de datos de sesión.
+        </p>
+<p>
+            Si ve el mensaje de error, "Cannot modify header information - headers already sent",
+            entonces evite usar <code class="constant">TRUE</code> como valor del primer argumento
+            (solicitando la eliminación de la cookie de sesión), o vea <a class="link" href="zend.session.global_session_management.phtml#zend.session.global_session_management.headers_sent" title="65.4.2. Error: Headers Already Sent">esta sección</a>.
+            Por lo tanto, <code class="methodname">Zend_Session::destroy(true)</code> debe ser llamado antes de que
+            <acronym class="acronym">PHP</acronym> haya enviado cabeceras <acronym class="acronym">HTTP</acronym>, o el buffering de salida
+            debe estar habilitado. Además, la salida total enviada no debe exceder el tamaño de buffer establecido, con el
+            fin de evitar que se dispare el envío de la salida antes de la llamada a
+            <code class="methodname">destroy()</code>.
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Por defecto, <code class="varname">$readonly</code> está habilitado y cualquier acción posterior que implique
+                escribir en el almacén de datos de sesión lanzará una excepción.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.stop"></a>65.4.8. stop()</h3></div></div></div>
+<p>
+            Este método no hace absolutamente nada más que alternar un indicador en
+            <code class="classname">Zend_Session</code> para evitar más escrituras en el almacén de datos de
+            sesión. Estamos solicitando específicamente comentarios sobre esta característica. Los usos/abusos potenciales
+            podrían incluir deshabilitar temporalmente el uso de instancias de
+            <code class="classname">Zend_Session_Namespace</code> o métodos de
+            <code class="classname">Zend_Session</code> para escribir en el almacén de datos de sesión, mientras
+            la ejecución se transfiere a código relacionado con la vista. Los intentos de realizar acciones de
+            escritura mediante estas instancias o métodos lanzarán una excepción.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.writeclose"></a>65.4.9. writeClose($readonly = true)</h3></div></div></div>
+<p>
+            Apaga la sesión, cierra la escritura y desvincula <code class="varname">$_SESSION</code> del
+            mecanismo de almacenamiento subyacente. Esto completará la transformación interna de datos en esta
+            solicitud. El parámetro booleano opcional <code class="varname">$readonly</code> puede eliminar el acceso
+            de escritura lanzando una excepción ante cualquier intento de escribir en la sesión mediante
+            <code class="classname">Zend_Session</code> o <code class="classname">Zend_Session_Namespace</code>.
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Por defecto, <code class="varname">$readonly</code> está habilitado y cualquier acción posterior que implique
+                escribir en el almacén de datos de sesión lanzará una excepción. Sin embargo, alguna aplicación
+                heredada podría esperar que <code class="varname">$_SESSION</code> permanezca escribible después de
+                terminar la sesión mediante <code class="methodname">session_write_close()</code>. Aunque no se
+                considera "mejor práctica", la opción <code class="varname">$readonly</code> está disponible para
+                quienes la necesiten.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.expiresessioncookie"></a>65.4.10. expireSessionCookie()</h3></div></div></div>
+<p>
+            Este método envía una cookie de id de sesión expirada, causando que el cliente elimine la cookie
+            de sesión. A veces esta técnica se usa para realizar un logout del lado del cliente.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.savehandler"></a>65.4.11. setSaveHandler(Zend_Session_SaveHandler_Interface $interface)</h3></div></div></div>
+<p>
+            La mayoría de los desarrolladores encontrarán suficiente el manejador de almacenamiento por defecto. Este método proporciona un
+            envoltorio orientado a objetos para <a class="ulink" href="http://php.net/session_set_save_handler" target="_top"><code class="methodname">session_set_save_handler()</code></a>.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.namespaceisset"></a>65.4.12. namespaceIsset($namespace)</h3></div></div></div>
+<p>
+            Use este método para determinar si existe un espacio de nombres de sesión, o si un índice
+            en particular existe en un espacio de nombres en particular.
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Se lanzará una excepción si <code class="classname">Zend_Session</code> no está marcado como
+                legible (por ejemplo, antes de que <code class="classname">Zend_Session</code> haya sido iniciado).
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.namespaceunset"></a>65.4.13. namespaceUnset($namespace)</h3></div></div></div>
+<p>
+            Use <code class="methodname">Zend_Session::namespaceUnset($namespace)</code> para eliminar
+            eficientemente un espacio de nombres completo y su contenido. Como con todos los arrays en
+            <acronym class="acronym">PHP</acronym>, si se destruye (unset) una variable que contiene un array, y el array
+            contiene otros objetos, esos objetos permanecerán disponibles, si también se almacenaron por
+            referencia en otros arrays/objetos que permanecen accesibles mediante otras variables. Por lo tanto
+            <code class="methodname">namespaceUnset()</code> no realiza una eliminación "profunda"
+            del contenido de las entradas en el espacio de nombres. Para una explicación más detallada, por favor
+            consulte <a class="ulink" href="http://php.net/references" target="_top">References Explained</a> en el
+            manual de <acronym class="acronym">PHP</acronym>.
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Se lanzará una excepción si el espacio de nombres no tiene permisos de escritura (por ejemplo, después de
+                <code class="methodname">destroy()</code>).
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.namespaceget"></a>65.4.14. namespaceGet($namespace)</h3></div></div></div>
+<p>
+            OBSOLETO: use <code class="methodname">getIterator()</code> en
+            <code class="classname">Zend_Session_Namespace</code>. Este método devuelve un array con el
+            contenido de <code class="varname">$namespace</code>. Si tiene razones lógicas para mantener este
+            método accesible públicamente, por favor proporcione sus comentarios a la lista de correo <a class="ulink" href="mailto:fw-auth@lists.zend.com" target="_top">fw-auth@lists.zend.com</a>.
+            De hecho, se agradece la participación en cualquier tema relevante :)
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Se lanzará una excepción si <code class="classname">Zend_Session</code> no está marcado como
+                legible (por ejemplo, antes de que <code class="classname">Zend_Session</code> haya sido iniciado).
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.session.global_session_management.getiterator"></a>65.4.15. getIterator()</h3></div></div></div>
+<p>
+            Use <code class="methodname">getIterator()</code> para obtener un array que contenga los nombres de
+            todos los espacios de nombres.
+        </p>
+<div class="note"><table border="0" summary="Note: Throws">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Lanza</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Se lanzará una excepción si <code class="classname">Zend_Session</code> no está marcado como
+                legible (por ejemplo, antes de que <code class="classname">Zend_Session</code> haya sido iniciado).
+            </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.session.advanced_usage.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.session.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.session.savehandler.dbtable.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">65.3. Uso avanzado </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 65.5. Zend_Session_SaveHandler_DbTable</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

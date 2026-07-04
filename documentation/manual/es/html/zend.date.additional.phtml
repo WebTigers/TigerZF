@@ -1,0 +1,336 @@
+<?php $title = '26.7. Ejemplos prácticos'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">26.7. Ejemplos prácticos</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.date.constants.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 26. Zend_Date</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.db.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.date.additional"></a>26.7. Ejemplos prácticos</h2></div></div></div>
+<p>
+        En este capítulo describiremos varias funciones adicionales que también están disponibles
+        a través de <code class="classname">Zend_Date</code>. Por supuesto, todas las funciones descritas tienen ejemplos
+        adicionales para mostrar el funcionamiento esperado y la sencilla <acronym class="acronym">API</acronym> para el uso
+        adecuado de las mismas.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.additional.checking"></a>26.7.1. Comprobación de fechas</h3></div></div></div>
+<p>
+            Probablemente la mayoría de las fechas que reciba como entrada serán cadenas de texto. Pero el problema
+            con las cadenas de texto es que no se puede estar seguro de si la cadena es una fecha real. Por ello
+            <code class="classname">Zend_Date</code> ha dedicado una función estática propia para comprobar cadenas de fecha.
+            <code class="classname">Zend_Locale</code> tiene una función propia
+            <code class="methodname">getDate($date, $locale)</code> que analiza una fecha y devuelve las
+            partes de fecha adecuadas y normalizadas. El nombre de un mes, por ejemplo, será reconocido y
+            devuelto simplemente como un número de mes. Pero como <code class="classname">Zend_Locale</code> no conoce
+            nada sobre fechas porque es una clase de normalización y localización, hemos
+            integrado una función propia <code class="methodname">isDate($date)</code> que comprueba esto.
+        </p>
+<p>
+            <code class="methodname">isDate($date, $format, $locale)</code> puede tomar hasta 3 parámetros
+            y necesita como mínimo uno. Así que lo que necesitamos para verificar una fecha es, por supuesto, la
+            fecha misma como cadena de texto. El segundo parámetro puede ser el formato que se espera que tenga la
+            fecha. Si no se proporciona ningún formato, se utiliza el formato de fecha estándar de su configuración regional. Para
+            más detalles sobre cómo deben verse los formatos, consulte el capítulo sobre <a class="link" href="zend.date.constants.phtml#zend.date.constants.selfdefinedformats" title="26.6.3. Self-Defined OUTPUT Formats with ISO">formatos autodefinidos</a>.
+        </p>
+<p>
+            El tercer parámetro es también opcional, como el segundo parámetro, y puede usarse para proporcionar una
+            configuración regional. Necesitamos la configuración regional para normalizar los nombres de meses y días. Así, con el tercer
+            parámetro somos capaces de reconocer fechas como '<span class="command"><strong>01.Jänner.2000</strong></span>' o
+            '<span class="command"><strong>01.January.2000</strong></span>' dependiendo de la configuración regional proporcionada.
+        </p>
+<p>
+            <code class="methodname">isDate()</code> por supuesto comprueba si una fecha existe.
+            <code class="classname">Zend_Date</code> en sí mismo no comprueba una fecha. Así que es posible
+            crear una fecha como '<span class="command"><strong>31.February.2000</strong></span>' con
+            <code class="classname">Zend_Date</code> porque <code class="classname">Zend_Date</code>
+            corregirá automáticamente la fecha y devolverá la fecha adecuada. En nuestro caso
+            '<span class="command"><strong>03.March.2000</strong></span>'. <code class="methodname">isDate()</code> por otro
+            lado hace esta comprobación y devolverá <code class="constant">FALSE</code> en
+            '<span class="command"><strong>31.February.2000</strong></span>' porque sabe que esta fecha es imposible.
+        </p>
+<div class="example">
+<a name="zend.date.additional.checking.example-1"></a><p class="title"><b>Ejemplo 26.17. Comprobación de fechas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Checking dates
+$date = '01.03.2000';
+if (Zend_Date::isDate($date)) {
+    print "String $date is a date";
+} else {
+    print "String $date is NO date";
+}
+
+// Checking localized dates
+$date = '01 February 2000';
+if (Zend_Date::isDate($date,'dd MMMM yyyy', 'en')) {
+    print "String $date is a date";
+} else {
+    print "String $date is NO date";
+}
+
+// Checking impossible dates
+$date = '30 February 2000';
+if (Zend_Date::isDate($date,'dd MMMM yyyy', 'en')) {
+    print "String $date is a date";
+} else {
+    print "String $date is NO date";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.additional.sunrise-sunset"></a>26.7.2. Amanecer y atardecer</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Date</code> también tiene funciones integradas para obtener información
+            sobre el sol. A menudo es necesario obtener la hora del amanecer o del atardecer en un
+            día concreto. Esto es bastante sencillo con <code class="classname">Zend_Date</code>, ya que simplemente
+            hay que indicar el día esperado y, además, la ubicación para la que se debe calcular el
+            amanecer o el atardecer.
+        </p>
+<p>
+            Como la mayoría de las personas no conocen la ubicación de su ciudad, también hemos dedicado una clase auxiliar
+            que proporciona los datos de ubicación de unas 250 ciudades capitales y otras grandes ciudades de todo
+            el mundo. La mayoría de las personas podrían utilizar ciudades cercanas a ellas mismas, ya que la diferencia entre
+            ubicaciones situadas cerca unas de otras solo puede medirse en algunos segundos.
+        </p>
+<p>
+            Para crear un cuadro de lista y elegir una ciudad concreta, puede utilizarse la función
+            <code class="methodname">Zend_Date_Cities::getCityList()</code>. Devuelve los
+            nombres de todas las ciudades predefinidas disponibles para la clase auxiliar.
+        </p>
+<div class="example">
+<a name="zend.date.additional.sunrise-sunset.example-1"></a><p class="title"><b>Ejemplo 26.18. Obtención de todas las ciudades disponibles</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Output the complete list of available cities
+print_r (Zend_Date_Cities::getCityList());
+</pre></div>
+</div>
+<br class="example-break"><p>
+            La ubicación en sí puede obtenerse con la función
+            <code class="methodname">Zend_Date_Cities::city()</code>. Acepta el nombre de la
+            ciudad tal como lo devuelve la función <code class="methodname">Zend_Date_Cities::getCityList()</code>
+            y, opcionalmente, como segundo parámetro, el horizonte a establecer.
+        </p>
+<p>
+            Hay 4 horizontes definidos que pueden usarse con las ubicaciones para obtener la hora exacta
+            del atardecer y el amanecer. El parámetro '<code class="varname">$horizon</code>' siempre es opcional en
+            todas las funciones. Si no se establece, se utiliza el horizonte '<span class="property">effective</span>'.
+        </p>
+<div class="table">
+<a name="zend.date.additional.sunrise-sunset.table"></a><p class="title"><b>Tabla 26.18. Tipos de horizontes admitidos para el atardecer y el amanecer</b></p>
+<div class="table-contents"><table class="table" summary="Types of Supported Horizons for Sunset and Sunrise" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Horizonte</th>
+<th>Descripción</th>
+<th>Uso</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>effective</td>
+<td>Horizonte estándar</td>
+<td>
+                            Espera que el mundo sea una esfera. Este horizonte se utiliza siempre si no se
+                            define ninguno.
+                        </td>
+</tr>
+<tr>
+<td>civil</td>
+<td>Horizonte común</td>
+<td>Utilizado a menudo en medios comunes como la TV o la radio</td>
+</tr>
+<tr>
+<td>nautic</td>
+<td>Horizonte náutico</td>
+<td>Utilizado a menudo en navegación marítima</td>
+</tr>
+<tr>
+<td>astronomic</td>
+<td>Horizonte astronómico</td>
+<td>Utilizado a menudo para cálculos con estrellas</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Por supuesto, también se puede proporcionar y calcular una ubicación autodefinida. Para ello hay que dar una
+            '<span class="property">latitude</span>' y una '<span class="property">longitude</span>'
+            y, opcionalmente, el '<span class="property">horizon</span>'.
+        </p>
+<div class="example">
+<a name="zend.date.additional.sunrise-sunset.example-2"></a><p class="title"><b>Ejemplo 26.19. Obtención de la ubicación de una ciudad</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Get the location for a defined city
+// uses the effective horizon as no horizon is defined
+print_r (Zend_Date_Cities::city('Vienna'));
+
+// use the nautic horizon
+print_r (Zend_Date_Cities::city('Vienna', 'nautic'));
+
+// self definition of a location
+$mylocation = array('latitude' =&gt; 41.5, 'longitude' =&gt; 13.2446);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Como ya se pueden establecer todos los datos necesarios, lo siguiente es crear un
+            objeto <code class="classname">Zend_Date</code> con el día en el que se debe calcular el atardecer o el amanecer.
+            Para el cálculo hay disponibles 3 funciones. Es posible
+            calcular el atardecer con '<code class="methodname">getSunset()</code>', el amanecer con
+            '<code class="methodname">getSunrise()</code>' y toda la información disponible relacionada con el
+            sol con '<code class="methodname">getSunInfo()</code>'. Después del cálculo, se devolverá el
+            objeto <code class="classname">Zend_Date</code> con la hora calculada.
+        </p>
+<div class="example">
+<a name="zend.date.additional.sunrise-sunset.example-3"></a><p class="title"><b>Ejemplo 26.20. Cálculo de información solar</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Get the location for a defined city
+$city = Zend_Date_Cities::city('Vienna');
+
+// create a date object for the day for which the sun has to be calculated
+$date = new Zend_Date('10.03.2007', Zend_Date::ISO_8601, 'de');
+
+// calculate sunset
+$sunset = $date-&gt;getSunset($city);
+print $sunset-&gt;get(Zend_Date::ISO_8601);
+
+// calculate all sun informations
+$info = $date-&gt;getSunInfo($city);
+foreach ($info as $sun) {
+    print "\n" . $sun-&gt;get(Zend_Date::ISO_8601);
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.date.additional.timezones"></a>26.7.3. Zonas horarias</h3></div></div></div>
+<p>
+            Las zonas horarias son tan importantes como las propias fechas. Hay varias zonas horarias dependiendo
+            de dónde en el mundo viva un usuario. Así que trabajar con fechas también significa establecer la
+            zona horaria adecuada. Esto puede sonar complicado, pero es más fácil de lo esperado. Como ya se mencionó
+            en el primer capítulo de <code class="classname">Zend_Date</code>, hay que establecer la zona horaria por defecto.
+            Ya sea mediante <code class="filename">php.ini</code> o mediante una definición en el archivo de arranque.
+        </p>
+<p>
+            Un objeto <code class="classname">Zend_Date</code> por supuesto también almacena la zona horaria actual.
+            Incluso si la zona horaria se cambia después de la creación del objeto, recuerda la
+            zona horaria original y trabaja con ella. Tampoco es necesario cambiar la zona horaria
+            dentro del código con funciones de <acronym class="acronym">PHP</acronym>. <code class="classname">Zend_Date</code>
+            tiene dos funciones integradas que hacen posible gestionar esto.
+        </p>
+<p>
+            <code class="methodname">getTimezone()</code> devuelve la zona horaria actual establecida dentro del
+            objeto <code class="classname">Zend_Date</code>. Recuerde que <code class="classname">Zend_Date</code>
+            no está acoplado con los internos de <acronym class="acronym">PHP</acronym>. Así que la zona horaria devuelta no es
+            la zona horaria del script <acronym class="acronym">PHP</acronym>, sino la zona horaria del objeto.
+            <code class="methodname">setTimezone($zone)</code> es la segunda función y hace posible
+            establecer una nueva zona horaria para <code class="classname">Zend_Date</code>. Una zona horaria dada siempre se
+            comprueba. Si no existe, se lanzará una excepción. Además, la zona horaria actual del
+            script o del sistema se puede establecer en el objeto de fecha llamando a
+            <code class="methodname">setTimezone()</code> sin el parámetro de zona. Esto también se hace
+            automáticamente cuando se crea el objeto de fecha.
+        </p>
+<div class="example">
+<a name="zend.date.additional.timezones.example-1"></a><p class="title"><b>Ejemplo 26.21. Trabajando con zonas horarias</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Set a default timezone... this has to be done within the bootstrap
+// file or php.ini.
+// We do this here just for having a complete example.
+date_default_timezone_set('Europe/Vienna');
+
+// create a date object
+$date = new Zend_Date('10.03.2007', Zend_Date::DATES, 'de');
+
+// view our date object
+print $date-&gt;getIso();
+
+// what timezone do we have ?
+print $date-&gt;getTimezone();
+
+// set another timezone
+$date-&gt;setTimezone('America/Chicago');
+
+// what timezone do we now have ?
+print $date-&gt;getTimezone();
+
+// see the changed date object
+print $date-&gt;getIso();
+</pre></div>
+</div>
+<br class="example-break"><p>
+            <code class="classname">Zend_Date</code> siempre toma la zona horaria actual para la creación del objeto, como
+            se muestra en las primeras líneas del ejemplo. Cambiar la zona horaria dentro del objeto creado
+            también tiene un efecto sobre la fecha en sí. Las fechas siempre están relacionadas con una zona horaria. Cambiar
+            la zona horaria de un objeto <code class="classname">Zend_Date</code> no cambia la hora de
+            <code class="classname">Zend_Date</code>. Recuerde que internamente las fechas siempre se almacenan como
+            marcas de tiempo y en <acronym class="acronym">GMT</acronym>. Así que la zona horaria significa cuántas horas se deben
+            restar o sumar para obtener la hora global actual para la propia zona horaria y región.
+        </p>
+<p>
+            Tener la zona horaria acoplada dentro de <code class="classname">Zend_Date</code> tiene otro efecto
+            positivo. Es posible tener varias fechas con distintas zonas horarias.
+        </p>
+<div class="example">
+<a name="zend.date.additional.timezones.example-2"></a><p class="title"><b>Ejemplo 26.22. Múltiples zonas horarias</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Set a default timezone... this has to be done within the bootstrap
+// file or php.ini.
+// We do this here just for having a complete example.
+date_default_timezone_set('Europe/Vienna');
+
+// create a date object
+$date = new Zend_Date('10.03.2007 00:00:00', Zend_Date::ISO_8601, 'de');
+
+// view our date object
+print $date-&gt;getIso();
+
+// the date stays unchanged even after changeing the timezone
+date_default_timezone_set('America/Chicago');
+print $date-&gt;getIso();
+
+$otherdate = clone $date;
+$otherdate-&gt;setTimezone('Brazil/Acre');
+
+// view our date object
+print $otherdate-&gt;getIso();
+
+// set the object to the actual systems timezone
+$lastdate = clone $date;
+$lastdate-&gt;setTimezone();
+
+// view our date object
+print $lastdate-&gt;getIso();
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.date.constants.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.date.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.db.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">26.6. Constantes para funciones de fecha generales </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 27. Zend_Db</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

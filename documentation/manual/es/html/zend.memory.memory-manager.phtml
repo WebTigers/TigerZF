@@ -1,0 +1,207 @@
+<?php $title = '48.2. Gestor de memoria'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">48.2. Gestor de memoria</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.memory.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 48. Zend_Memory</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.memory.memory-objects.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.memory.memory-manager"></a>48.2. Gestor de memoria</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-manager.creation"></a>48.2.1. Creación de un gestor de memoria</h3></div></div></div>
+<p>
+            Puede crear un nuevo gestor de memoria
+            (objeto <code class="classname">Zend_Memory_Manager</code>) usando el método
+            <code class="methodname">Zend_Memory::factory($backendName [, $backendOprions])</code>.
+        </p>
+<p>
+            El primer argumento <code class="varname">$backendName</code> es una cadena que
+            nombra una de las implementaciones de backend soportadas por <code class="classname">Zend_Cache</code>.
+        </p>
+<p>
+            El segundo argumento <code class="varname">$backendOptions</code> es un array opcional
+            de opciones de backend.
+        </p>
+<pre class="programlisting">
+$backendOptions = array(
+    'cache_dir' =&gt; './tmp/' // Directory where to put the swapped memory blocks
+);
+
+$memoryManager = Zend_Memory::factory('File', $backendOptions);
+</pre>
+<p>
+            <code class="classname">Zend_Memory</code> usa los <a class="link" href="zend.cache.backends.phtml" title="17.4. Zend_Cache Backends"><code class="classname">backends de Zend_Cache</code></a> como
+            proveedores de almacenamiento.
+        </p>
+<p>
+            Puede usar el nombre especial 'None' como nombre de backend,
+            además de los backends estándar de <code class="classname">Zend_Cache</code>.
+        </p>
+<pre class="programlisting">
+$memoryManager = Zend_Memory::factory('None');
+</pre>
+<p>
+            Si usa 'None' como nombre de backend, el gestor de memoria
+            nunca intercambiará (swap) los bloques de memoria. Esto es útil si sabe que
+            la memoria no es limitada o que el tamaño total de los objetos nunca alcanza
+            el límite de memoria.
+        </p>
+<p>
+            El backend 'None' no necesita que se especifique ninguna opción.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-manager.objects-management"></a>48.2.2. Gestión de objetos de memoria</h3></div></div></div>
+<p>
+            Esta sección describe la creación y destrucción de objetos en la
+            memoria gestionada, y las opciones para controlar el comportamiento del gestor de memoria.
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-manager.objects-management.movable"></a>48.2.2.1. Creación de objetos movibles</h4></div></div></div>
+<p>
+                Cree objetos movibles (objetos que pueden ser intercambiados) usando
+                el método <code class="methodname">Zend_Memory_Manager::create([$data])</code>:
+            </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+</pre>
+<p>
+                El argumento <code class="varname">$data</code> es opcional y se usa para
+                inicializar el valor del objeto. Si se omite el argumento
+                <code class="varname">$data</code>, el valor será una cadena vacía.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-manager.objects-management.locked"></a>48.2.2.2. Creación de objetos bloqueados</h4></div></div></div>
+<p>
+                Cree objetos bloqueados (objetos que no se intercambian) usando
+                el método <code class="methodname">Zend_Memory_Manager::createLocked([$data])</code>:
+            </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;createLocked($data);
+</pre>
+<p>
+                El argumento <code class="varname">$data</code> es opcional y se usa para
+                inicializar el valor del objeto. Si se omite el argumento
+                <code class="varname">$data</code>, el valor será una cadena vacía.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-manager.objects-management.destruction"></a>48.2.2.3. Destrucción de objetos</h4></div></div></div>
+<p>
+                Los objetos de memoria se destruyen y eliminan automáticamente de la
+                memoria cuando salen del ámbito (scope):
+            </p>
+<pre class="programlisting">
+function foo()
+{
+    global $memoryManager, $memList;
+
+    ...
+
+    $memObject1 = $memoryManager-&gt;create($data1);
+    $memObject2 = $memoryManager-&gt;create($data2);
+    $memObject3 = $memoryManager-&gt;create($data3);
+
+    ...
+
+    $memList[] = $memObject3;
+
+    ...
+
+    unset($memObject2); // $memObject2 is destroyed here
+
+    ...
+    // $memObject1 is destroyed here
+    // but $memObject3 object is still referenced by $memList
+    // and is not destroyed
+}
+</pre>
+<p>
+                Esto se aplica tanto a objetos movibles como bloqueados.
+            </p>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.memory-manager.settings"></a>48.2.3. Configuración del gestor de memoria</h3></div></div></div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-manager.settings.memory-limit"></a>48.2.3.1. Límite de memoria</h4></div></div></div>
+<p>
+                El límite de memoria es un número de bytes permitidos para ser usados por los
+                objetos movibles cargados.
+            </p>
+<p>
+                Si la carga o creación de un objeto hace que el uso de memoria supere
+                este límite, el gestor de memoria intercambia otros
+                objetos.
+            </p>
+<p>
+                Puede obtener o establecer la configuración de límite de memoria usando los
+                métodos <code class="methodname">getMemoryLimit()</code> y
+                <code class="methodname">setMemoryLimit($newLimit)</code>:
+            </p>
+<pre class="programlisting">
+$oldLimit = $memoryManager-&gt;getMemoryLimit();  // Get memory limit in bytes
+$memoryManager-&gt;setMemoryLimit($newLimit);     // Set memory limit in bytes
+</pre>
+<p>
+                Un valor negativo para el límite de memoria significa "sin límite".
+            </p>
+<p>
+                El valor predeterminado son los dos tercios del valor de
+                'memory_limit' en el php.ini, o "sin límite" (-1)
+                si 'memory_limit' no está definido en el php.ini.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.memory-manager.settings.min-size"></a>48.2.3.2. MinSize</h4></div></div></div>
+<p>
+                MinSize es un tamaño mínimo de los objetos de memoria que pueden ser
+                intercambiados por el gestor de memoria. El gestor de memoria no intercambia
+                objetos que sean más pequeños que este valor. Esto reduce el
+                número de operaciones de intercambio/carga.
+            </p>
+<p>
+                Puede obtener o establecer el tamaño mínimo usando los
+                métodos <code class="methodname">getMinSize()</code> y
+                <code class="methodname">setMinSize($newSize)</code>:
+            </p>
+<pre class="programlisting">
+$oldMinSize = $memoryManager-&gt;getMinSize();  // Get MinSize in bytes
+$memoryManager-&gt;setMinSize($newSize);        // Set MinSize limit in bytes
+</pre>
+<p>
+                El valor predeterminado del tamaño mínimo es 16 KB (16384 bytes).
+            </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.memory.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.memory.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.memory.memory-objects.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 48. Zend_Memory </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 48.3. Objetos de memoria</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

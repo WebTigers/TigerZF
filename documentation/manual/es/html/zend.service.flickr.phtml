@@ -1,0 +1,455 @@
+<?php $title = '64.21. Zend_Service_Flickr'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">64.21. Zend_Service_Flickr</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.service.ebay.finding.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 64. Zend_Service</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.service.livedocx.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.service.flickr"></a>64.21. Zend_Service_Flickr</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.flickr.introduction"></a>64.21.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Flickr</code> es una <acronym class="acronym">API</acronym> simple para usar
+            el servicio web REST de Flickr. Para poder usar los servicios web de Flickr, debe tener una
+            clave <acronym class="acronym">API</acronym>. Para obtener una clave y para más información acerca del
+            servicio web REST de Flickr, visite la <a class="ulink" href="http://www.flickr.com/services/api/" target="_top">documentación de la
+                <acronym class="acronym">API</acronym> de Flickr</a>.
+        </p>
+<p>
+            En el siguiente ejemplo, usamos el método <code class="methodname">tagSearch()</code> para
+            buscar fotos que tengan "php" en las etiquetas.
+        </p>
+<div class="example">
+<a name="zend.service.flickr.introduction.example-1"></a><p class="title"><b>Ejemplo 64.98. Búsqueda simple de fotos en Flickr</b></p>
+<div class="example-contents"><pre class="programlisting">
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr-&gt;tagSearch("php");
+
+foreach ($results as $result) {
+    echo $result-&gt;title . '&lt;br /&gt;';
+}
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Optional parameter">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Parámetro opcional</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="methodname">tagSearch()</code> acepta un segundo parámetro opcional como un
+                array de opciones.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.flickr.finding-users"></a>64.21.2. Búsqueda de fotos e información de usuarios de Flickr</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Flickr</code> proporciona varias formas de obtener información
+            sobre los usuarios de Flickr:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">userSearch()</code>: Acepta una cadena de consulta de etiquetas
+                    separadas por espacios y un segundo parámetro opcional como un array de opciones de
+                    búsqueda, y devuelve un conjunto de fotos como un objeto
+                    <code class="classname">Zend_Service_Flickr_ResultSet</code>.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getIdByUsername()</code>: Devuelve una cadena con el ID de usuario
+                    asociado con el nombre de usuario indicado.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">getIdByEmail()</code>: Devuelve una cadena con el ID de usuario
+                    asociado con la dirección de correo electrónico indicada.
+                </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.service.flickr.finding-users.example-1"></a><p class="title"><b>Ejemplo 64.99. Búsqueda de las fotos públicas de un usuario de Flickr por dirección de correo electrónico</b></p>
+<div class="example-contents">
+<p>
+                En este ejemplo, tenemos la dirección de correo electrónico de un usuario de Flickr, y
+                buscamos las fotos públicas del usuario usando el método <code class="methodname">userSearch()</code>:
+            </p>
+<pre class="programlisting">
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr-&gt;userSearch($userEmail);
+
+foreach ($results as $result) {
+    echo $result-&gt;title . '&lt;br /&gt;';
+}
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.flickr.grouppoolgetphotos"></a>64.21.3. Búsqueda de fotos en el pool de un grupo</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Flickr</code> permite recuperar las fotos del pool de un
+            grupo a partir del ID del grupo. Use el método <code class="methodname">groupPoolGetPhotos()</code>:
+        </p>
+<div class="example">
+<a name="zend.service.flickr.grouppoolgetphotos.example-1"></a><p class="title"><b>Ejemplo 64.100. Recuperación de las fotos del pool de un grupo por ID de grupo</b></p>
+<div class="example-contents"><pre class="programlisting">
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+    $results = $flickr-&gt;groupPoolGetPhotos($groupId);
+
+    foreach ($results as $result) {
+        echo $result-&gt;title . '&lt;br /&gt;';
+    }
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Optional parameter">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Parámetro opcional</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                <code class="methodname">groupPoolGetPhotos()</code> acepta un segundo parámetro opcional
+                como un array de opciones.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.flickr.getimagedetails"></a>64.21.4. Recuperación de detalles de imágenes de Flickr</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Service_Flickr</code> permite obtener de forma rápida y sencilla los
+            detalles de una imagen a partir de un ID de imagen dado. Simplemente use el método
+            <code class="methodname">getImageDetails()</code>, como en el siguiente ejemplo:
+        </p>
+<div class="example">
+<a name="zend.service.flickr.getimagedetails.example-1"></a><p class="title"><b>Ejemplo 64.101. Recuperación de detalles de imágenes de Flickr</b></p>
+<div class="example-contents">
+<p>
+                Una vez que tiene un ID de imagen de Flickr, es sencillo obtener información sobre
+                la imagen:
+            </p>
+<pre class="programlisting">
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$image = $flickr-&gt;getImageDetails($imageId);
+
+echo "Image ID $imageId is $image-&gt;width x $image-&gt;height pixels.&lt;br /&gt;\n";
+echo "&lt;a href=\"$image-&gt;clickUri\"&gt;Click for Image&lt;/a&gt;\n";
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.service.flickr.classes"></a>64.21.5. Clases de resultado de Zend_Service_Flickr</h3></div></div></div>
+<p>
+            Las siguientes clases son devueltas por <code class="methodname">tagSearch()</code> y
+            <code class="methodname">userSearch()</code>:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.resultset" title="64.21.5.1. Zend_Service_Flickr_ResultSet"><code class="classname">Zend_Service_Flickr_ResultSet</code></a>
+                    </p></li>
+<li class="listitem"><p>
+                       <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.result" title="64.21.5.2. Zend_Service_Flickr_Result"><code class="classname">Zend_Service_Flickr_Result</code></a>
+                   </p></li>
+<li class="listitem"><p>
+                        <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image"><code class="classname">Zend_Service_Flickr_Image</code></a>
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.flickr.classes.resultset"></a>64.21.5.1. Zend_Service_Flickr_ResultSet</h4></div></div></div>
+<p>Representa un conjunto de resultados de una búsqueda en Flickr.</p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Implementa la interfaz <code class="classname">SeekableIterator</code> para facilitar la
+                    iteración (por ejemplo, usando <code class="methodname">foreach()</code>), así como el
+                    acceso directo a un resultado específico usando <code class="methodname">seek()</code>.
+                </p></td></tr>
+</table></div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.flickr.classes.resultset.properties"></a>64.21.5.1.1. Propiedades</h5></div></div></div>
+<div class="table">
+<a name="zend.service.flickr.classes.resultset.properties.table-1"></a><p class="title"><b>Tabla 64.16. Propiedades de Zend_Service_Flickr_ResultSet</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Service_Flickr_ResultSet Properties" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>totalResultsAvailable</td>
+<td>int</td>
+<td>Número total de resultados disponibles</td>
+</tr>
+<tr>
+<td>totalResultsReturned</td>
+<td>int</td>
+<td>Número total de resultados devueltos</td>
+</tr>
+<tr>
+<td>firstResultPosition</td>
+<td>int</td>
+<td>El desplazamiento en el conjunto total de resultados de este conjunto de resultados</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.flickr.classes.resultset.totalResults"></a>64.21.5.1.2. Zend_Service_Flickr_ResultSet::totalResults()</h5></div></div></div>
+<p>
+                    <code class="methodsynopsis"><span class="type">int </span><span class="methodname">totalResults</span>();</code>
+                </p>
+<p>
+                    Devuelve el número total de resultados en este conjunto de resultados.
+                </p>
+<p>
+                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes" title="64.21.5. Zend_Service_Flickr Result Classes">Volver a la lista de clases</a>
+                </p>
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.flickr.classes.result"></a>64.21.5.2. Zend_Service_Flickr_Result</h4></div></div></div>
+<p>
+                Un único resultado de imagen de una consulta a Flickr
+            </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.flickr.classes.result.properties"></a>64.21.5.2.1. Propiedades</h5></div></div></div>
+<div class="table">
+<a name="zend.service.flickr.classes.result.properties.table-1"></a><p class="title"><b>Tabla 64.17. Propiedades de Zend_Service_Flickr_Result</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Service_Flickr_Result Properties" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>string</td>
+<td>ID de la imagen</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>string</td>
+<td>El <acronym class="acronym">NSID</acronym> del propietario de la foto.</td>
+</tr>
+<tr>
+<td>secret</td>
+<td>string</td>
+<td>Una clave usada en la construcción de la URL.</td>
+</tr>
+<tr>
+<td>server</td>
+<td>string</td>
+<td>
+                                    El nombre del servidor a usar para la construcción de la <acronym class="acronym">URL</acronym>.
+                                </td>
+</tr>
+<tr>
+<td>title</td>
+<td>string</td>
+<td>El título de la foto.</td>
+</tr>
+<tr>
+<td>ispublic</td>
+<td>string</td>
+<td>La foto es pública.</td>
+</tr>
+<tr>
+<td>isfriend</td>
+<td>string</td>
+<td>
+                                    La foto es visible para usted porque es amigo del
+                                    propietario.
+                                </td>
+</tr>
+<tr>
+<td>isfamily</td>
+<td>string</td>
+<td>
+                                    La foto es visible para usted porque es familiar del propietario.
+                                </td>
+</tr>
+<tr>
+<td>license</td>
+<td>string</td>
+<td>La licencia bajo la cual está disponible la foto.</td>
+</tr>
+<tr>
+<td>dateupload</td>
+<td>string</td>
+<td>La fecha en que se subió la foto.</td>
+</tr>
+<tr>
+<td>datetaken</td>
+<td>string</td>
+<td>La fecha en que se tomó la foto.</td>
+</tr>
+<tr>
+<td>ownername</td>
+<td>string</td>
+<td>El nombre de pantalla del propietario.</td>
+</tr>
+<tr>
+<td>iconserver</td>
+<td>string</td>
+<td>
+                                    El servidor usado para el ensamblado de las <acronym class="acronym">URL</acronym>s de icono.
+                                </td>
+</tr>
+<tr>
+<td>Square</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>Una miniatura de 75x75 de la imagen.</td>
+</tr>
+<tr>
+<td>Thumbnail</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>Una miniatura de 100 píxeles de la imagen.</td>
+</tr>
+<tr>
+<td>Small</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>Una versión de 240 píxeles de la imagen.</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>Una versión de 500 píxeles de la imagen.</td>
+</tr>
+<tr>
+<td>Large</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>Una versión de 640 píxeles de la imagen.</td>
+</tr>
+<tr>
+<td>Original</td>
+<td>
+                                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes.image" title="64.21.5.3. Zend_Service_Flickr_Image">Zend_Service_Flickr_Image</a>
+                                </td>
+<td>La imagen original.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes" title="64.21.5. Zend_Service_Flickr Result Classes">Volver a la lista de clases</a>
+                </p>
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.service.flickr.classes.image"></a>64.21.5.3. Zend_Service_Flickr_Image</h4></div></div></div>
+<p>Representa una imagen devuelta por una búsqueda en Flickr.</p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.service.flickr.classes.image.properties"></a>64.21.5.3.1. Propiedades</h5></div></div></div>
+<div class="table">
+<a name="zend.service.flickr.classes.image.properties.table-1"></a><p class="title"><b>Tabla 64.18. Propiedades de Zend_Service_Flickr_Image</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Service_Flickr_Image Properties" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Nombre</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>uri</td>
+<td>string</td>
+<td>URI de la imagen original</td>
+</tr>
+<tr>
+<td>clickUri</td>
+<td>string</td>
+<td>
+                                    <acronym class="acronym">URI</acronym> pulsable (es decir, la página de Flickr) de la
+                                    imagen
+                                </td>
+</tr>
+<tr>
+<td>width</td>
+<td>int</td>
+<td>Ancho de la imagen</td>
+</tr>
+<tr>
+<td>height</td>
+<td>int</td>
+<td>Alto de la imagen</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+                    <a class="link" href="zend.service.flickr.phtml#zend.service.flickr.classes" title="64.21.5. Zend_Service_Flickr Result Classes">Volver a la lista de clases</a>
+                </p>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.service.ebay.finding.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.service.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.service.livedocx.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">64.20. Zend_Service_Ebay_Finding </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 64.22. Zend_Service_LiveDocx</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

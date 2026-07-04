@@ -1,0 +1,344 @@
+<?php $title = '29.2. Zend_Dojo_Data: envoltorios dojo.data'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">29.2. Zend_Dojo_Data: envoltorios dojo.data</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.dojo.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 29. Zend_Dojo</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.dojo.view.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.dojo.data"></a>29.2. Zend_Dojo_Data: envoltorios dojo.data</h2></div></div></div>
+<p>
+        Dojo proporciona abstracciones de datos para widgets habilitados para datos mediante su
+        componente <span class="command"><strong>dojo.data</strong></span>. Este componente ofrece la capacidad de adjuntar un
+        almacén de datos, proporcionar algunos metadatos relativos al campo de identidad y,
+        opcionalmente, un campo de etiqueta, y una <acronym class="acronym">API</acronym> para consultar, ordenar y
+        recuperar registros y conjuntos de registros del almacén de datos.
+    </p>
+<p>
+        <span class="command"><strong>dojo.data</strong></span> se usa a menudo con XmlHttpRequest para obtener datos dinámicos
+        del servidor. El mecanismo principal para esto es extender el
+        QueryReadStore para apuntar a una <acronym class="acronym">URL</acronym> y especificar la información de consulta. El
+        lado del servidor entonces devuelve datos en el siguiente formato <acronym class="acronym">JSON</acronym>:
+    </p>
+<pre class="programlisting">
+{
+    identifier: '&lt;name&gt;',
+    &lt;label: '&lt;label&gt;',&gt;
+    items: [
+        { name: '...', label: '...', someKey: '...' },
+        ...
+    ]
+}
+</pre>
+<p>
+        <code class="classname">Zend_Dojo_Data</code> proporciona una interfaz sencilla para construir
+        dichas estructuras de forma programática, interactuar con ellas y serializarlas
+        a un array o a <acronym class="acronym">JSON</acronym>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.data.usage"></a>29.2.1. Uso de Zend_Dojo_Data</h3></div></div></div>
+<p>
+            En su forma más simple, <span class="command"><strong>dojo.data</strong></span> requiere que se proporcione el nombre
+            del campo identificador en cada elemento, y un conjunto de elementos (datos). Puede
+            pasarlos mediante el constructor, o mediante mutadores:
+        </p>
+<div class="example">
+<a name="zend.dojo.data.usage.constructor"></a><p class="title"><b>Ejemplo 29.1. Inicialización de Zend_Dojo_Data mediante el constructor</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = new Zend_Dojo_Data('id', $items);
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.dojo.data.usage.mutators"></a><p class="title"><b>Ejemplo 29.2. Inicialización de Zend_Dojo_Data mediante mutadores</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = new Zend_Dojo_Data();
+$data-&gt;setIdentifier('id')
+     -&gt;addItems($items);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            También puede añadir un elemento a la vez, o agregar elementos, usando
+            <code class="methodname">addItem()</code> y <code class="methodname">addItems()</code>.
+        </p>
+<div class="example">
+<a name="zend.dojo.data.usage.append"></a><p class="title"><b>Ejemplo 29.3. Añadir datos a Zend_Dojo_Data</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data = new Zend_Dojo_Data($identifier, $items);
+$data-&gt;addItem($someItem);
+
+$data-&gt;addItems($someMoreItems);
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Always use an identifier!">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">¡Use siempre un identificador!</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Todo almacén de datos <span class="command"><strong>dojo.data</strong></span> requiere que la columna
+                identificadora se proporcione como metadato, incluyendo <code class="classname">Zend_Dojo_Data</code>.
+                De hecho, si intenta añadir elementos sin un identificador, se lanzará una excepción.
+            </p></td></tr>
+</table></div>
+<p>
+            Cada elemento individual puede ser uno de los siguientes:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Arrays asociativos</p></li>
+<li class="listitem"><p>Objetos que implementan un método <code class="methodname">toArray()</code></p></li>
+<li class="listitem"><p>
+                    Cualquier otro objeto (se serializará mediante
+                    <code class="methodname">get_object_vars()</code>)
+                </p></li>
+</ul></div>
+<p>
+            Puede adjuntar colecciones de los elementos anteriores mediante
+            <code class="methodname">addItems()</code> o <code class="methodname">setItems()</code> (sobrescribe
+            todos los elementos establecidos previamente); al hacerlo, puede pasar un único argumento:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Arrays</p></li>
+<li class="listitem"><p>
+                    Objetos que implementan la interfaz <code class="classname">Traversable</code>,
+                    lo que incluye las interfaces <code class="classname">Iterator</code> y
+                    <code class="classname">ArrayAccess</code>.
+                </p></li>
+</ul></div>
+<p>
+            Si desea especificar un campo que actúe como etiqueta para el
+            elemento, llame a <code class="methodname">setLabel()</code>:
+        </p>
+<div class="example">
+<a name="zend.dojo.data.usage.label"></a><p class="title"><b>Ejemplo 29.4. Especificar un campo de etiqueta en Zend_Dojo_Data</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data-&gt;setLabel('name');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Finalmente, también puede cargar un elemento <code class="classname">Zend_Dojo_Data</code> desde un
+            array <acronym class="acronym">JSON</acronym> de <span class="command"><strong>dojo.data</strong></span>, usando el
+            método <code class="methodname">fromJson()</code>.
+        </p>
+<div class="example">
+<a name="zend.dojo.data.usage.populate"></a><p class="title"><b>Ejemplo 29.5. Rellenar Zend_Dojo_Data desde JSON</b></p>
+<div class="example-contents"><pre class="programlisting">
+$data-&gt;fromJson($json);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.data.metadata"></a>29.2.2. Añadir metadatos a sus contenedores</h3></div></div></div>
+<p>
+            Algunos componentes de Dojo requieren metadatos adicionales junto con
+            la carga útil de <span class="command"><strong>dojo.data</strong></span>. Como ejemplo,
+            <span class="command"><strong>dojox.grid.Grid</strong></span> puede obtener datos dinámicamente de un
+            <span class="command"><strong>dojox.data.QueryReadStore</strong></span>. Para que la paginación funcione
+            correctamente, cada carga útil de retorno debe contener una clave
+            <span class="property">numRows</span> con el número total de filas que podría devolver la
+            consulta. Con estos datos, la cuadrícula sabe cuándo continuar haciendo pequeñas
+            peticiones al servidor para subconjuntos de datos y cuándo dejar de
+            hacer más peticiones (es decir, ha llegado a la última página de datos).
+            Esta técnica es útil para servir grandes conjuntos de datos en sus
+            cuadrículas sin cargar el conjunto completo de una sola vez.
+        </p>
+<p>
+            <code class="classname">Zend_Dojo_Data</code> permite asignar propiedades de metadatos
+            al objeto. A continuación se ilustra su uso:
+        </p>
+<pre class="programlisting">
+// Set the "numRows" to 100
+$data-&gt;setMetadata('numRows', 100);
+
+// Set several items at once:
+$data-&gt;setMetadata(array(
+    'numRows' =&gt; 100,
+    'sort'    =&gt; 'name',
+));
+
+// Inspect a single metadata value:
+$numRows = $data-&gt;getMetadata('numRows');
+
+// Inspect all metadata:
+$metadata = $data-&gt;getMetadata();
+
+// Remove a metadata item:
+$data-&gt;clearMetadata('numRows');
+
+// Remove all metadata:
+$data-&gt;clearMetadata();
+</pre>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.dojo.data.advanced"></a>29.2.3. Casos de uso avanzados</h3></div></div></div>
+<p>
+            Además de actuar como un contenedor de datos serializable,
+            <code class="classname">Zend_Dojo_Data</code> también proporciona la capacidad de manipular
+            y recorrer los datos de diversas formas.
+        </p>
+<p>
+            <code class="classname">Zend_Dojo_Data</code> implementa las interfaces
+            <code class="classname">ArrayAccess</code>, <code class="classname">Iterator</code> y
+            <code class="classname">Countable</code>. Por lo tanto, puede usar la colección de
+            datos casi como si fuera un array.
+        </p>
+<p>
+            Todos los elementos se referencian mediante el campo identificador. Dado que los
+            identificadores deben ser únicos, puede usar los valores de este campo para obtener
+            registros individuales. Hay dos formas de hacerlo: con el
+            método <code class="methodname">getItem()</code>, o mediante notación de array.
+        </p>
+<pre class="programlisting">
+// Using getItem():
+$item = $data-&gt;getItem('foo');
+
+// Or use array notation:
+$item = $data['foo'];
+</pre>
+<p>
+            Si conoce el identificador, puede usarlo para recuperar un elemento,
+            actualizarlo, eliminarlo, crearlo o comprobar su existencia:
+        </p>
+<pre class="programlisting">
+// Update or create an item:
+$data['foo'] = array('title' =&gt; 'Foo', 'email' =&gt; 'foo@foo.com');
+
+// Delete an item:
+unset($data['foo']);
+
+// Test for an item:
+if (isset($data[foo])) {
+}
+</pre>
+<p>
+            También puede recorrer todos los elementos en un bucle. Internamente, todos los
+            elementos se almacenan como arrays.
+        </p>
+<pre class="programlisting">
+foreach ($data as $item) {
+    echo $item['title'] . ': ' . $item['description'] . "\n";
+}
+</pre>
+<p>
+            O incluso contar cuántos elementos tiene:
+        </p>
+<pre class="programlisting">
+echo count($data), " items found!";
+</pre>
+<p>
+            Finalmente, como la clase implementa <code class="methodname">__toString()</code>, también puede
+            convertirla a <acronym class="acronym">JSON</acronym> simplemente mostrándola o convirtiéndola a cadena:
+        </p>
+<pre class="programlisting">
+echo $data; // echo as JSON string
+
+$json = (string) $data; // cast to string == cast to JSON
+</pre>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.dojo.data.advanced.methods"></a>29.2.3.1. Métodos disponibles</h4></div></div></div>
+<p>
+                Además de los métodos necesarios para implementar las interfaces
+                mencionadas anteriormente, están disponibles los siguientes métodos.
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                        <code class="methodname">setItems($items)</code>: establece varios elementos a la vez,
+                        sobrescribiendo cualquier elemento establecido previamente en el
+                        objeto. <code class="varname">$items</code> debe ser un array o un objeto
+                        <code class="classname">Traversable</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">setItem($item, $id = null)</code>: establece un elemento
+                        individual, pasando opcionalmente un identificador explícito. Sobrescribe
+                        el elemento si ya está en la colección. Los elementos válidos
+                        incluyen arrays asociativos, objetos que implementan
+                        <code class="methodname">toArray()</code>, o cualquier objeto con propiedades públicas.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">addItem($item, $id = null)</code>: añade un elemento
+                        individual, pasando opcionalmente un identificador explícito. Lanzará
+                        una excepción si el elemento ya existe en la colección.
+                        Los elementos válidos incluyen arrays asociativos, objetos que implementan
+                        <code class="methodname">toArray()</code>, o cualquier objeto con propiedades públicas.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">addItems($items)</code>: añade varios elementos a la vez,
+                        agregándolos a los elementos actuales. Lanzará una excepción
+                        si alguno de los nuevos elementos tiene un identificador que coincide con un
+                        identificador ya presente en la colección. <code class="varname">$items</code>
+                        debe ser un array o un objeto <code class="classname">Traversable</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getItems()</code>: recupera todos los elementos como un array de
+                        arrays.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">hasItem($id)</code>: determina si existe un elemento con
+                        el identificador dado en la colección.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getItem($id)</code>: recupera un elemento con el identificador
+                        dado de la colección; el elemento devuelto será un array asociativo.
+                        Si ningún elemento coincide, se devuelve un valor <code class="constant">NULL</code>.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">removeItem($id)</code>: elimina un elemento con el identificador
+                        dado de la colección.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">clearItems()</code>: elimina todos los elementos de la colección.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">setIdentifier($identifier)</code>: establece el nombre del
+                        campo que representa el identificador único de cada elemento en
+                        la colección.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getIdentifier()</code>: recupera el nombre del
+                        campo identificador.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">setLabel($label)</code>: establece el nombre de un campo
+                        que se usará como etiqueta de visualización para un elemento.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">getLabel()</code>: recupera el nombre del campo de etiqueta.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">toArray()</code>: convierte el objeto a un array. Como
+                        mínimo, el array contendrá las claves 'identifier',
+                        'items' y 'label' si se ha establecido un campo de etiqueta en el objeto.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="methodname">toJson()</code>: convierte el objeto a una representación
+                        <acronym class="acronym">JSON</acronym>.
+                    </p></li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.dojo.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.dojo.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.dojo.view.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 29. Zend_Dojo </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 29.3. Ayudantes de vista de Dojo</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

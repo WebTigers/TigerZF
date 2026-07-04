@@ -1,0 +1,1275 @@
+<?php $title = '14.5. Funcionalidad principal'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">14.5. Funcionalidad principal</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.application.examples.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 14. Zend_Application</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.application.available-resources.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.application.core-functionality"></a>14.5. Funcionalidad principal</h2></div></div></div>
+<p>
+        Aquí encontrará documentación de tipo <acronym class="acronym">API</acronym> sobre todos los componentes principales de
+        <code class="classname">Zend_Application</code>.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.application"></a>14.5.1. Zend_Application</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application</code> proporciona la funcionalidad base del
+        componente, y el punto de entrada a su aplicación de Zend Framework. Su
+        propósito es doble: configurar el entorno de <acronym class="acronym">PHP</acronym> (incluyendo
+        la autocarga), y ejecutar el bootstrap de su aplicación.
+    </p>
+<p>
+        Normalmente, pasará toda la configuración al constructor de
+        <code class="classname">Zend_Application</code>, pero también puede configurar
+        el objeto por completo usando sus propios métodos. Esta referencia pretende
+        ilustrar ambos casos de uso.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.application.api.options"></a><p class="title"><b>Tabla 14.1. Opciones de Zend_Application</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application options" border="1">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><span class="emphasis"><em><span class="property">phpSettings</span></em></span></td>
+<td>
+                        <p>
+                            Array de configuraciones de <code class="filename">php.ini</code> a usar. Las claves deben ser
+                            las claves de <code class="filename">php.ini</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">includePaths</span></em></span></td>
+<td>
+                        <p>
+                            Rutas adicionales a anteponer al <span class="emphasis"><em>include_path</em></span>.
+                            Debe ser un array de rutas.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">autoloaderNamespaces</span></em></span></td>
+<td>
+                        <p>
+                            Array de espacios de nombres adicionales a registrar con la
+                            instancia de <code class="classname">Zend_Loader_Autoloader</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><span class="emphasis"><em><span class="property">bootstrap</span></em></span></td>
+<td>
+                        <p>
+                            Ya sea la ruta en forma de cadena a la clase de bootstrap, o un array
+                            con elementos para 'path' y 'class' para el bootstrap
+                            de la aplicación.
+                        </p>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="note"><table border="0" summary="Note: Option names">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nombres de opciones</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Tenga en cuenta que los nombres de las opciones no distinguen entre mayúsculas y minúsculas.
+        </p></td></tr>
+</table></div>
+<div class="table">
+<a name="zend.application.core-functionality.application.api.table"></a><p class="title"><b>Tabla 14.2. Métodos de Zend_Application</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application Methods" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <code class="methodname">__construct($environment, $options = null)</code>
+                    </td>
+<td><span class="type">Void</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <code class="varname">$environment</code>: <span class="emphasis"><em>requerido</em></span>,.
+                                    Cadena que representa el entorno actual de la
+                                    aplicación. Las cadenas típicas pueden incluir
+                                    "development", "testing", "qa", o
+                                    "production", pero serán definidas por los
+                                    requisitos de su organización.
+                                </p></li>
+<li class="listitem">
+<p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    El argumento puede ser uno de los siguientes valores:
+                                </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem">
+<p>
+                                            <span class="emphasis"><em><span class="type">String</span></em></span>: ruta a
+                                            un archivo <code class="classname">Zend_Config</code> a cargar
+                                            como configuración para su aplicación.
+                                            <code class="varname">$environment</code> se usará
+                                            para determinar qué sección de la
+                                            configuración extraer.
+                                        </p>
+<p>
+                                            A partir de la versión 1.10, también puede pasar múltiples rutas que contengan
+                                            archivos de configuración para fusionarlos en una sola configuración.
+                                            Esto ayuda a reducir la duplicación de configuración entre muchos
+                                            contextos que comparten ajustes comunes (por ejemplo, configuraciones para
+                                            <acronym class="acronym">HTTP</acronym>, o <acronym class="acronym">CLI</acronym>, cada una
+                                            compartiendo algunas características pero con sus propios
+                                            valores en conflicto para otras) o simplemente dividiendo una
+                                            configuración larga en muchos archivos más pequeños y categorizados. El parámetro
+                                            en este caso es un array con una
+                                            única clave "config" cuyo valor es un array de los
+                                            archivos a fusionar. Nota: esto significa que se pasa una
+                                            ruta literal, o
+                                            <span class="command"><strong>array("config"=&gt;array("/path1","/path2"[,...]));</strong></span>.
+                                        </p>
+</li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em><span class="type">Array</span></em></span>: array
+                                            asociativo de datos de configuración para su aplicación.
+                                        </p></li>
+<li class="listitem"><p>
+                                            <span class="emphasis"><em><code class="classname">Zend_Config</code></em></span>:
+                                            instancia de objeto de configuración.
+                                        </p></li>
+</ul></div>
+</li>
+</ul></div>
+                    </td>
+<td>
+                        <p>
+                            Constructor. Los argumentos son como se describe, y se
+                            usarán para establecer el estado inicial del objeto. Se registra una instancia de
+                            <code class="classname">Zend_Loader_Autoloader</code>
+                            durante la instanciación. Las opciones pasadas al
+                            constructor se pasan a <code class="methodname">setOptions()</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getEnvironment()</code></td>
+<td><span class="type">String</span></td>
+<td>N/A</td>
+<td>
+                        <p>Recupera la cadena de entorno pasada al constructor.</p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getAutoloader()</code></td>
+<td><code class="classname">Zend_Loader_Autoloader</code></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera la instancia de <code class="classname">Zend_Loader_Autoloader</code>
+                            registrada durante la instanciación.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">setOptions(array $options)</code></td>
+<td><code class="classname">Zend_Application</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Un array de opciones de la aplicación.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Todas las opciones se almacenan internamente, y llamar al
+                            método varias veces fusionará las opciones. Las opciones
+                            que coincidan con los distintos métodos setter se pasarán
+                            a esos métodos. Por ejemplo, la opción
+                            "phpSettings" se pasará a
+                            <code class="methodname">setPhpSettings()</code>. (Los nombres de las opciones
+                            no distinguen entre mayúsculas y minúsculas).
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getOptions()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera todas las opciones usadas para inicializar el objeto;
+                            podría usarse para almacenar en caché opciones de <code class="classname">Zend_Config</code>
+                            en un formato serializado entre peticiones.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">hasOption($key)</code></td>
+<td><span class="type">Boolean</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$key</code>: clave de opción de tipo cadena a buscar
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Determina si se ha registrado o no una opción con
+                            la clave especificada. Las claves no distinguen entre mayúsculas y minúsculas.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getOption($key)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="varname">$key</code>: clave de opción de tipo cadena a buscar</p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Recupera el valor de la opción de una clave dada. Devuelve
+                            <code class="constant">NULL</code> si la clave no existe.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setPhpSettings(array $settings, $prefix = '')</code>
+                    </td>
+<td><code class="classname">Zend_Application</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <code class="varname">$settings</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Array asociativo de configuraciones
+                                    <acronym class="acronym">INI</acronym> de <acronym class="acronym">PHP</acronym>.
+                                </p></li>
+<li class="listitem"><p>
+                                    <code class="varname">$prefix</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    Cadena de prefijo con la que anteponer las claves de opción. Se usa
+                                    internamente para permitir mapear arrays anidados a claves de
+                                    <code class="filename">php.ini</code> separadas por puntos. En el uso normal, este
+                                    argumento nunca debe ser pasado por un usuario.
+                                </p></li>
+</ul></div>
+                    </td>
+<td>
+                        <p>
+                            Establece configuraciones de <code class="filename">php.ini</code> en tiempo de ejecución. Las
+                            configuraciones separadas por puntos pueden anidarse jerárquicamente (lo cual puede ocurrir
+                            con archivos <acronym class="acronym">INI</acronym> de <code class="classname">Zend_Config</code>)
+                            mediante un array de arrays, y aun así se resolverán correctamente.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setAutoloaderNamespaces(array $namespaces)</code>
+                    </td>
+<td><code class="classname">Zend_Application</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$namespaces</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Array de cadenas que representan los espacios de nombres a
+                                    registrar con la instancia de <code class="classname">Zend_Loader_Autoloader</code>.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Registra espacios de nombres con la
+                            instancia de <code class="classname">Zend_Loader_Autoloader</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">setBootstrap($path, $class = null)</code></td>
+<td><code class="classname">Zend_Application</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <code class="varname">$path</code>: <span class="emphasis"><em>requerido</em></span>. Puede ser
+                                    una instancia de
+                                    <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>,
+                                    una cadena con la ruta a la clase de bootstrap, un
+                                    array asociativo de classname =&gt; filename, o un array
+                                    asociativo con las claves 'class' y 'path'.
+                                </p></li>
+<li class="listitem"><p>
+                                    <code class="varname">$class</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    Si <code class="varname">$path</code> es una cadena,
+                                    se puede especificar <code class="varname">$class</code>, y debería
+                                    ser una cadena con el nombre de la clase contenida en
+                                    el archivo representado por path.
+                                </p></li>
+</ul></div>
+                    </td>
+<td class="auto-generated"> </td>
+</tr>
+<tr>
+<td><code class="methodname">getBootstrap()</code></td>
+<td>
+                        <code class="constant">NULL</code> |
+                        <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>
+                    </td>
+<td>N/A</td>
+<td><p>Recupera la instancia de bootstrap registrada.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">bootstrap()</code></td>
+<td><span class="type">Void</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Llama al método <code class="methodname">bootstrap()</code> del bootstrap
+                            para inicializar la aplicación.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">run()</code></td>
+<td><span class="type">Void</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Llama al método <code class="methodname">run()</code> del bootstrap
+                            para despachar la aplicación.
+                        </p>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.bootstrap-bootstrapper"></a>14.5.2. Zend_Application_Bootstrap_Bootstrapper</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code> es la interfaz base
+        que todas las clases de bootstrap deben implementar. La funcionalidad base está orientada a la
+        configuración, la identificación de recursos, el bootstrapping (ya sea de recursos
+        individuales o de la aplicación completa), y el despacho de la aplicación.
+    </p>
+<p>
+        Los siguientes métodos conforman la definición de la interfaz.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.bootstrap-bootstrapper.methods-table"></a><p class="title"><b>Tabla 14.3. Interfaz Zend_Application_Bootstrap_Bootstrapper</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application_Bootstrap_Bootstrapper Interface" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="methodname">__construct($application)</code></td>
+<td><span class="type">Void</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$application</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Debe aceptar un objeto <code class="classname">Zend_Application</code> o un
+                                    objeto <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>
+                                    como único argumento.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Constructor. Acepta un único argumento, que debe ser un
+                            objeto <code class="classname">Zend_Application</code>, u otro objeto
+                            de bootstrap.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">setOptions(array $options)</code></td>
+<td><code class="classname">Zend_Application_Bootstrap_Bootstrapper</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Array de opciones a establecer.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Normalmente, cualquier opción que tenga un setter coincidente
+                            invocará ese setter; de lo contrario, la opción simplemente se
+                            almacenará para su recuperación posterior.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getApplication()</code></td>
+<td>
+                        <code class="classname">Zend_Application</code> |
+                        <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>
+                    </td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera el objeto de aplicación o bootstrap pasado mediante el
+                            constructor.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getEnvironment()</code></td>
+<td><span class="type">String</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera la cadena de entorno registrada con el
+                            objeto de aplicación o bootstrap padre.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getClassResources()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera una lista de los nombres de inicializadores de recursos disponibles
+                            según se definen en la clase. Esto puede depender de la implementación.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">bootstrap($resource = null)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>opcional</em></span>.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Si <code class="varname">$resource</code> está vacío, ejecuta todos los
+                            recursos de bootstrap. Si es una cadena, ejecuta ese único
+                            recurso; si es un array, ejecuta cada recurso del array.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">run()</code></td>
+<td><span class="type">Void</span></td>
+<td>N/A</td>
+<td>
+                        <p>Define qué lógica de la aplicación ejecutar después del bootstrapping.</p>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.bootstrap-resourcebootstrapper"></a>14.5.3. Zend_Application_Bootstrap_ResourceBootstrapper</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code> es una
+        interfaz a usar cuando una clase de bootstrap va a cargar recursos
+        externos -- es decir, uno o más recursos no se definirán directamente en
+        la clase, sino a través de plugins. Debe usarse junto con <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.bootstrap-bootstrapper" title="14.5.2. Zend_Application_Bootstrap_Bootstrapper">Zend_Application_Bootstrap_Bootstrapper</a>;
+        <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.bootstrap-bootstrapabstract" title="14.5.4. Zend_Application_Bootstrap_BootstrapAbstract">Zend_Application_Bootstrap_BootstrapAbstract</a>
+        implementa esta funcionalidad.
+    </p>
+<p>
+        Los siguientes métodos conforman la definición de la interfaz.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.bootstrap-resourcebootstrapper.methods-table"></a><p class="title"><b>Tabla 14.4. Interfaz Zend_Application_Bootstrap_ResourceBootstrapper</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application_Bootstrap_ResourceBootstrapper Interface" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+                        <code class="methodname">registerPluginResource($resource, $options = null)</code>
+                    </td>
+<td>
+                        <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code>
+                    </td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Un nombre de recurso u objeto
+                                    <code class="classname">Zend_Application_Resource_Resource</code>.
+                                </p></li>
+<li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    Un array u objeto <code class="classname">Zend_Config</code> a pasar
+                                    al recurso al instanciarlo.
+                                </p></li>
+</ul></div>
+                    </td>
+<td>
+                        <p>
+                            Registra un recurso con la clase, proporcionando configuración
+                            opcional a pasar al recurso.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">unregisterPluginResource($resource)</code></td>
+<td>
+                        <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code>
+                    </td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Nombre de un recurso a eliminar del registro de la clase.
+                                </p></li></ul></div>
+                    </td>
+<td><p>Elimina un recurso de plugin de la clase.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">hasPluginResource($resource)</code></td>
+<td><span class="type">Boolean</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Nombre del recurso.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Determina si se ha registrado un recurso específico en la clase.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getPluginResource($resource)</code></td>
+<td><code class="classname">Zend_Application_Resource_Resource</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Nombre de un recurso a recuperar (cadena).
+                                </p></li></ul></div>
+                    </td>
+<td><p>Recupera una instancia de recurso de plugin por nombre.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">getPluginResourceNames()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td>
+                        <p>Recupera una lista de todos los nombres de recursos de plugin registrados.</p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setPluginLoader(Zend_Loader_PluginLoader_Interface
+                            $loader)</code>
+                    </td>
+<td>
+                        <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code>
+                    </td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$loader</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Instancia del cargador de plugins a usar al resolver
+                                    nombres de plugin a clases.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Registra una instancia del cargador de plugins a usar al resolver
+                            nombres de clases de plugin.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getPluginLoader()</code></td>
+<td><code class="classname">Zend_Loader_PluginLoader_Interface</code></td>
+<td>N/A</td>
+<td><p>Recupera el cargador de plugins registrado.</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.bootstrap-bootstrapabstract"></a>14.5.4. Zend_Application_Bootstrap_BootstrapAbstract</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code> es una clase abstracta
+        que proporciona la funcionalidad base de un bootstrap común. Implementa
+        tanto <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.bootstrap-bootstrapper" title="14.5.2. Zend_Application_Bootstrap_Bootstrapper">
+            <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code></a> como <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.bootstrap-resourcebootstrapper" title="14.5.3. Zend_Application_Bootstrap_ResourceBootstrapper">
+            <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code></a>.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.bootstrap-bootstrapabstract.api.table"></a><p class="title"><b>Tabla 14.5. Métodos de Zend_Application_Bootstrap_BootstrapAbstract</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application_Bootstrap_BootstrapAbstract Methods" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="methodname">__construct($application)</code></td>
+<td><span class="type">Void</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$application</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Acepta ya sea un objeto <code class="classname">Zend_Application</code> o un
+                                    objeto <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>
+                                    como único argumento.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Constructor. Acepta un único argumento, que debe ser un
+                            objeto <code class="classname">Zend_Application</code>, u otro objeto
+                            de bootstrap.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">setOptions(array $options)</code></td>
+<td><code class="classname">Zend_Application_Bootstrap_Bootstrapper</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Array de opciones a establecer.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Cualquier opción que tenga un setter coincidente
+                            invocará ese setter; de lo contrario, la opción simplemente se
+                            almacenará para su recuperación posterior. Por ejemplo, si su
+                            clase que extiende define un método <code class="methodname">setFoo()</code>,
+                            la opción 'foo' pasará el valor a ese método.
+                        </p>
+
+                        <p>
+                            También se pueden usar dos claves de opciones especiales adicionales.
+                            <span class="property">pluginPaths</span> se puede usar para especificar prefijos de
+                            rutas a recursos de plugin; debe ser un array de
+                            pares de prefijo de clase a ruta del sistema de archivos.
+                            <span class="property">resources</span> se puede usar para especificar los recursos
+                            de plugin a usar, y debe consistir en pares de
+                            recurso de plugin a opciones de instanciación.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getOptions()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Devuelve todas las opciones registradas mediante
+                            <code class="methodname">setOptions()</code>.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">hasOption($key)</code></td>
+<td><span class="type">Boolean</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$key</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Clave de opción a comprobar.
+                                </p></li></ul></div>
+                    </td>
+<td><p>Determina si una clave de opción está presente.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">getOption($key)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$key</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Clave de opción a recuperar.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Recupera el valor asociado a una clave de opción; devuelve
+                            <code class="constant">NULL</code> si no hay ninguna opción registrada con esa clave.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setApplication(Zend_Application |
+                            Zend_Application_Bootstrap_Bootstrapper $application)</code>
+                    </td>
+<td>
+                        <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>
+                    </td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$application</code>: <span class="emphasis"><em>requerido</em></span>.
+                                </p></li></ul></div>
+                    </td>
+<td><p>Registra el objeto de aplicación o bootstrap padre.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">getApplication()</code></td>
+<td>
+                        <code class="classname">Zend_Application</code> |
+                        <code class="classname">Zend_Application_Bootstrap_Bootstrapper</code>
+                    </td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera el objeto de aplicación o bootstrap pasado mediante el constructor.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getEnvironment()</code></td>
+<td><span class="type">String</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera la cadena de entorno registrada con el
+                            objeto de aplicación o bootstrap padre.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getClassResources()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera una lista de los nombres de inicializadores de recursos disponibles
+                            según se definen en la clase. Esto puede depender de la
+                            implementación.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getContainer()</code></td>
+<td><span class="type">Object</span></td>
+<td>N/A</td>
+<td>
+                        <p>
+                            Recupera el contenedor que almacena los recursos. Si no hay
+                            ningún contenedor registrado actualmente, registra una instancia de <a class="link" href="zend.registry.phtml" title="Chapter 59. Zend_Registry">Zend_Registry</a>
+                            antes de devolverlo.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">setContainer($container)</code></td>
+<td>
+                        <code class="classname">Zend_Application_Bootstrap_BootstrapAbstract</code>
+                    </td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$container</code>, <span class="emphasis"><em>requerido</em></span>.
+                                    Un objeto en el que almacenar recursos.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Proporciona un contenedor en el que almacenar recursos. Cuando un
+                            método o plugin de recurso devuelve un valor, se
+                            almacenará en este contenedor para su recuperación posterior.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">hasResource($name)</code></td>
+<td><span class="type">Boolean</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$name</code>, <span class="emphasis"><em>requerido</em></span>.
+                                    Nombre de un recurso a comprobar.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Cuando un método o plugin de recurso devuelve un valor, se
+                            almacenará en el contenedor de recursos (vea
+                            <code class="methodname">getContainer()</code> y
+                            <code class="methodname">setContainer()</code>. Este método indicará
+                            si se ha establecido o no un valor para ese recurso.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getResource($name)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$name</code>, <span class="emphasis"><em>requerido</em></span>.
+                                    Nombre de un recurso a obtener.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Cuando un método o plugin de recurso devuelve un valor, se
+                            almacenará en el contenedor de recursos (vea
+                            <code class="methodname">getContainer()</code> y
+                            <code class="methodname">setContainer()</code>. Este método recuperará un
+                            recurso del contenedor.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">bootstrap($resource = null)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$resource</code>: <span class="emphasis"><em>opcional</em></span>.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            Si <code class="varname">$resource</code> está vacío, ejecuta todos los
+                            recursos de bootstrap. Si es una cadena, ejecuta ese único
+                            recurso; si es un array, ejecuta cada recurso del array.
+                        </p>
+
+                        <p>
+                            Este método puede usarse para ejecutar bootstraps individuales
+                            definidos ya sea en la propia clase o mediante clases de
+                            plugin de recurso. Un recurso definido en la clase se
+                            ejecutará con preferencia sobre un plugin de recurso en caso de
+                            conflictos de nombres.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">run()</code></td>
+<td><span class="type">Void</span></td>
+<td>N/A</td>
+<td>
+                        <p> Define qué lógica de la aplicación ejecutar después del bootstrapping.</p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">__call($method, $args)</code></td>
+<td><span class="type">Mixed</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                                    <code class="varname">$method</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    El nombre del método a llamar.
+                                </p></li>
+<li class="listitem"><p>
+                                    <code class="varname">$args</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Array de argumentos a usar en la llamada al método.
+                                </p></li>
+</ul></div>
+                    </td>
+<td>
+                        <p>
+                            Proporciona la comodidad de inicializar recursos
+                            individuales permitiéndole llamar a
+                            'bootstrap&lt;ResourceName&gt;()' en lugar de usar el
+                            método <code class="methodname">bootstrap()</code>.
+                        </p>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.bootstrap-bootstrap"></a>14.5.5. Zend_Application_Bootstrap_Bootstrap</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Bootstrap_Bootstrap</code> es una implementación
+        concreta de <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.bootstrap-bootstrapabstract" title="14.5.4. Zend_Application_Bootstrap_BootstrapAbstract">Zend_Application_Bootstrap_BootstrapAbstract</a>.
+        Su característica principal es que registra el recurso <a class="link" href="zend.application.available-resources.phtml#zend.application.available-resources.frontcontroller" title="14.6.4. Zend_Application_Resource_Frontcontroller">Front
+            Controller</a>, y que el método <code class="methodname">run()</code>
+        primero comprueba que se ha definido un módulo por defecto y luego despacha el
+        front controller.
+    </p>
+<p>
+        En la mayoría de los casos, querrá extender esta clase para sus necesidades
+        de bootstrapping, o simplemente usar esta clase y proporcionar una lista de plugins
+        de recurso a utilizar.
+    </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.core-functionality.bootstrap-bootstrap.autoloading"></a>14.5.5.1. Habilitar la autocarga de la aplicación</h4></div></div></div>
+<p>
+            Además, esta implementación de bootstrap ofrece la posibilidad de especificar el
+            "espacio de nombres" o prefijo de clase para los recursos ubicados en su árbol, lo cual habilitará
+            la autocarga de varios recursos de la aplicación; esencialmente, instancia un objeto <a class="link" href="zend.loader.autoloader-resource.phtml#zend.loader.autoloader-resource.module" title="42.3.2. The Module Resource Autoloader">Zend_Application_Module_Autoloader</a>,
+            proporcionando el espacio de nombres solicitado y el directorio del bootstrap como argumentos.
+            Puede habilitar esta funcionalidad proporcionando un espacio de nombres a la opción de configuración
+            "appnamespace". Como ejemplo en <acronym class="acronym">INI</acronym>:
+        </p>
+<pre class="programlisting">
+appnamespace = "Application"
+</pre>
+<p>
+            O en <acronym class="acronym">XML</acronym>:
+        </p>
+<pre class="programlisting">
+&lt;appnamespace&gt;Application&lt;/appnamespace&gt;
+</pre>
+<p>
+            Por defecto, <code class="classname">Zend_Tool</code> habilitará esta opción con el valor
+            "Application".
+        </p>
+<p>
+            Alternativamente, puede simplemente definir la propiedad <code class="varname">$_appNamespace</code> de
+            su clase de bootstrap con el valor apropiado:
+        </p>
+<pre class="programlisting">
+class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
+{
+    protected $_appNamespace = 'Application';
+}
+</pre>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.resource-resource"></a>14.5.6. Zend_Application_Resource_Resource</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_Resource</code> es una interfaz para
+        plugins de recurso usados con clases de bootstrap que implementan
+        <code class="classname">Zend_Application_Bootstrap_ResourceBootstrapper</code>. Se espera que los plugins
+        de recurso permitan configuración, sean conscientes del bootstrap, y
+        implementen un patrón de estrategia para inicializar el recurso.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.resource-resource.api"></a><p class="title"><b>Tabla 14.6. Interfaz Zend_Application_Resource_Resource</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application_Resource_Resource Interface" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="methodname">__construct($options = null)</code></td>
+<td><span class="type">Void</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    Opciones con las que establecer el estado del recurso.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            El constructor debe permitir pasar opciones con las que inicializar
+                            el estado.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setBootstrap(Zend_Application_Bootstrap_Bootstrapper
+                            $bootstrap)</code>
+                    </td>
+<td><code class="classname">Zend_Application_Resource_Resource</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$bootstrap</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Bootstrap padre que inicializa este recurso.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>Debe permitir registrar el objeto de bootstrap padre.</p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getBootstrap()</code></td>
+<td><code class="classname">Zend_Application_Bootstrap_Bootstrapper</code></td>
+<td>N/A</td>
+<td><p>Recupera la instancia de bootstrap registrada.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">setOptions(array $options)</code></td>
+<td><code class="classname">Zend_Application_Resource_Resource</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Opciones con las que establecer el estado.
+                                </p></li></ul></div>
+                    </td>
+<td><p>Establece el estado del recurso.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">getOptions()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td><p>Recupera las opciones registradas.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">init()</code></td>
+<td><span class="type">Mixed</span></td>
+<td>N/A</td>
+<td>
+                        <p>Patrón de estrategia: ejecuta la inicialización del recurso.</p>
+                    </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.application.core-functionality.resource-resourceabstract"></a>14.5.7. Zend_Application_Resource_ResourceAbstract</h3></div></div></div>
+<p>
+        <code class="classname">Zend_Application_Resource_ResourceAbstract</code> es una clase
+        abstracta que implementa <a class="link" href="zend.application.core-functionality.phtml#zend.application.core-functionality.resource-resource" title="14.5.6. Zend_Application_Resource_Resource">Zend_Application_Resource_Resource</a>,
+        y es un buen punto de partida para crear sus propios plugins
+        de recurso personalizados.
+    </p>
+<p>
+        Nota: esta clase abstracta no implementa el método <code class="methodname">init()</code>;
+        esto se deja para su definición en extensiones concretas de la
+        clase.
+    </p>
+<div class="table">
+<a name="zend.application.core-functionality.resource-resourceabstract.api"></a><p class="title"><b>Tabla 14.7. Métodos de Zend_Application_Resource_ResourceAbstract</b></p>
+<div class="table-contents"><table class="table" summary="Zend_Application_Resource_ResourceAbstract Methods" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Método</th>
+<th>Valor de retorno</th>
+<th>Parámetros</th>
+<th>Descripción</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code class="methodname">__construct($options = null)</code></td>
+<td><span class="type">Void</span></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>opcional</em></span>.
+                                    Opciones con las que establecer el estado del recurso.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>
+                            El constructor debe permitir pasar opciones con las que inicializar
+                            el estado.
+                        </p>
+                    </td>
+</tr>
+<tr>
+<td>
+                        <code class="methodname">setBootstrap(Zend_Application_Bootstrap_Bootstrapper
+                            $bootstrap)</code>
+                    </td>
+<td><code class="classname">Zend_Application_Resource_ResourceAbstract</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$bootstrap</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Bootstrap padre que inicializa este recurso.
+                                </p></li></ul></div>
+                    </td>
+<td>
+                        <p>Debe permitir registrar el objeto de bootstrap padre.</p>
+                    </td>
+</tr>
+<tr>
+<td><code class="methodname">getBootstrap()</code></td>
+<td><code class="classname">Zend_Application_Bootstrap_Bootstrapper</code></td>
+<td>N/A</td>
+<td><p>Recupera la instancia de bootstrap registrada.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">setOptions(array $options)</code></td>
+<td><code class="classname">Zend_Application_Resource_ResourceAbstract</code></td>
+<td>
+                        <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                                    <code class="varname">$options</code>: <span class="emphasis"><em>requerido</em></span>.
+                                    Opciones con las que establecer el estado.
+                                </p></li></ul></div>
+                    </td>
+<td><p>Establece el estado del recurso.</p></td>
+</tr>
+<tr>
+<td><code class="methodname">getOptions()</code></td>
+<td><span class="type">Array</span></td>
+<td>N/A</td>
+<td><p>Recupera las opciones registradas.</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.application.core-functionality.resource-resourceabstract.names"></a>14.5.7.1. Nombres de recursos</h4></div></div></div>
+<p>
+            Al registrar plugins de recurso, un problema que surge es cómo
+            debe referirse a ellos desde la clase de bootstrap padre. Hay
+            tres mecanismos diferentes que se pueden usar, dependiendo de cómo
+            haya configurado el bootstrap y sus plugins de recurso.
+        </p>
+<p>
+            Primero, si sus plugins están definidos dentro de una ruta de prefijo definida, puede
+            referirse a ellos simplemente por su "nombre corto" -- es decir, la porción
+            del nombre de clase que sigue al prefijo de clase. Por ejemplo, la
+            clase "<code class="classname">Zend_Application_Resource_View</code>" puede referenciarse como
+            simplemente "View", ya que la ruta de prefijo "<code class="classname">Zend_Application_Resource</code>"
+            ya está registrada. Puede registrarlos usando el nombre de clase completo o el
+            nombre corto:
+        </p>
+<pre class="programlisting">
+$app = new Zend_Application(APPLICATION_ENV, array(
+    'pluginPaths' =&gt; array(
+        'My_Resource' =&gt; 'My/Resource/',
+    ),
+    'resources' =&gt; array(
+        // if the following class exists:
+        'My_Resource_View' =&gt; array(),
+
+        // then this is equivalent:
+        'View' =&gt; array(),
+    ),
+));
+</pre>
+<p>
+            En cada caso, puede entonces inicializar el recurso y recuperarlo
+            posteriormente usando el nombre corto:
+        </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap('view');
+$view = $bootstrap-&gt;getResource('view');
+</pre>
+<p>
+            Segundo, si no hay definida ninguna ruta de plugin coincidente, aun así puede pasar un
+            recurso por el nombre completo de la clase. En este caso, puede referenciarlo
+            usando el nombre completo de clase del recurso:
+        </p>
+<pre class="programlisting">
+$app = new Zend_Application(APPLICATION_ENV, array(
+    'resources' =&gt; array(
+        // This will load the standard 'View' resource:
+        'View' =&gt; array(),
+
+        // While this loads a resource with a specific class name:
+        'My_Resource_View' =&gt; array(),
+    ),
+));
+</pre>
+<p>
+            Obviamente, esto hace que referenciar el recurso sea mucho más detallado:
+        </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap('My_Resource_View');
+$view = $bootstrap-&gt;getResource('My_Resource_View');
+</pre>
+<p>
+            Esto nos lleva a la tercera opción. Puede especificar un nombre explícito
+            con el que se registrará una clase de recurso dada. Esto puede hacerse
+            añadiendo una propiedad pública <code class="varname">$_explicitType</code> a la clase de plugin
+            de recurso, con un valor de cadena; ese valor se usará entonces
+            siempre que desee referenciar el plugin de recurso a través del
+            bootstrap. Como ejemplo, definamos nuestra propia clase de vista:
+        </p>
+<pre class="programlisting">
+class My_Resource_View extends Zend_Application_Resource_ResourceAbstract
+{
+    public $_explicitType = 'My_View';
+
+    public function init()
+    {
+        // do some initialization...
+    }
+}
+</pre>
+<p>
+            Entonces podemos inicializar ese recurso o recuperarlo por el nombre
+            "<code class="classname">My_View</code>":
+        </p>
+<pre class="programlisting">
+$bootstrap-&gt;bootstrap('My_View');
+$view = $bootstrap-&gt;getResource('My_View');
+</pre>
+<p>
+            Usando estos diferentes enfoques de nomenclatura, puede sobrescribir recursos
+            existentes, añadir los suyos propios, combinar múltiples recursos para lograr una
+            inicialización compleja, y más.
+        </p>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.application.examples.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.application.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.application.available-resources.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">14.4. Ejemplos </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 14.6. Plugins de recurso disponibles</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,192 @@
+<?php $title = '61.6. Conjunto de caracteres'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">61.6. Conjunto de caracteres</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-api.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 61. Zend_Search_Lucene</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.search.lucene.extending.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.search.lucene.charset"></a>61.6. Conjunto de caracteres</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.charset.description"></a>61.6.1. Soporte de UTF-8 y de conjuntos de caracteres de un solo byte</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> trabaja internamente con el conjunto de caracteres UTF-8. Los
+            archivos de índice almacenan datos unicode en la "codificación UTF-8 modificada" de Java.
+            El núcleo de <code class="classname">Zend_Search_Lucene</code> soporta completamente esta codificación con
+            una excepción.
+
+            <a href="#ftn.id46992" class="footnote" name="id46992"><sup class="footnote">[15]</sup></a>
+        </p>
+<p>
+            La codificación real de los datos de entrada puede especificarse a través de la
+            <acronym class="acronym">API</acronym> de <code class="classname">Zend_Search_Lucene</code>. Los datos se
+            convertirán automáticamente a codificación UTF-8.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.charset.default_analyzer"></a>61.6.2. Analizador de texto por defecto</h3></div></div></div>
+<p>
+            Sin embargo, el analizador de texto por defecto (que también se usa dentro del analizador de consultas) usa
+            ctype_alpha() para tokenizar el texto y las consultas.
+        </p>
+<p>
+            ctype_alpha() no es compatible con UTF-8, por lo que el analizador convierte el texto a
+            codificación 'ASCII//TRANSLIT' antes de indexar. El mismo procesamiento se realiza
+            de manera transparente durante el análisis de la consulta.
+
+            <a href="#ftn.id47003" class="footnote" name="id47003"><sup class="footnote">[16]</sup></a>
+        </p>
+<div class="note"><table border="0" summary="Note: ">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left"></th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                El analizador por defecto no trata los números como parte de los términos. Use el analizador
+                'Num' correspondiente si no desea que las palabras se dividan por números.
+            </p></td></tr>
+</table></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.search.lucene.charset.utf_analyzer"></a>61.6.3. Analizadores de texto compatibles con UTF-8</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Search_Lucene</code> también contiene un conjunto de analizadores
+            compatibles con UTF-8: <code class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8</code>,
+            <code class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8Num</code>,
+            <code class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8_CaseInsensitive</code>,
+            <code class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8Num_CaseInsensitive</code>.
+        </p>
+<p>
+            Cualquiera de estos analizadores puede habilitarse con un código como el siguiente:
+        </p>
+<pre class="programlisting">
+Zend_Search_Lucene_Analysis_Analyzer::setDefault(
+    new Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8());
+</pre>
+<div class="warning"><table border="0" summary="Warning: ">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left"></th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                Los analizadores compatibles con UTF-8 se mejoraron en Zend Framework 1.5. Las primeras versiones
+                de los analizadores asumían que todos los caracteres no-ascii eran letras. La nueva
+                implementación de los analizadores tiene un comportamiento más preciso.
+            </p>
+<p>
+                Esto puede requerir que reconstruya el índice para que los datos y las consultas de búsqueda se
+                tokenicen de la misma manera, de lo contrario el motor de búsqueda puede devolver conjuntos de resultados incorrectos.
+            </p>
+</td></tr>
+</table></div>
+<p>
+            Todos estos analizadores necesitan que la biblioteca PCRE (Perl-compatible regular expressions) esté
+            compilada con el soporte UTF-8 activado. El soporte UTF-8 de PCRE está activado para las fuentes
+            de la biblioteca PCRE incluidas en la distribución de fuentes de <acronym class="acronym">PHP</acronym>, pero si
+            se usa una biblioteca compartida en lugar de la incluida con las fuentes de <acronym class="acronym">PHP</acronym>, entonces
+            el estado del soporte UTF-8 puede depender de su sistema operativo.
+        </p>
+<p>
+            Use el siguiente código para comprobar si el soporte UTF-8 de PCRE está habilitado:
+        </p>
+<pre class="programlisting">
+if (@preg_match('/\pL/u', 'a') == 1) {
+    echo "PCRE unicode support is turned on.\n";
+} else {
+    echo "PCRE unicode support is turned off.\n";
+}
+</pre>
+<p>
+            Las versiones sensibles a mayúsculas/minúsculas de los analizadores compatibles con UTF-8 también necesitan que la extensión <a class="ulink" href="http://www.php.net/manual/en/ref.mbstring.php" target="_top">mbstring</a> esté
+            habilitada.
+        </p>
+<p>
+            Si no desea que la extensión mbstring esté activada, pero necesita una búsqueda insensible a mayúsculas/minúsculas,
+            puede usar el siguiente enfoque: normalice los datos de origen antes de indexar y la cadena de consulta
+            antes de buscar, convirtiéndolos a minúsculas:
+        </p>
+<pre class="programlisting">
+// Indexing
+setlocale(LC_CTYPE, 'de_DE.iso-8859-1');
+
+...
+
+Zend_Search_Lucene_Analysis_Analyzer::setDefault(
+    new Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8());
+
+...
+
+$doc = new Zend_Search_Lucene_Document();
+
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('contents',
+                                                  strtolower($contents)));
+
+// Title field for search through (indexed, unstored)
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored('title',
+                                                  strtolower($title)));
+
+// Title field for retrieving (unindexed, stored)
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed('_title', $title));
+</pre>
+<pre class="programlisting">
+// Searching
+setlocale(LC_CTYPE, 'de_DE.iso-8859-1');
+
+...
+
+Zend_Search_Lucene_Analysis_Analyzer::setDefault(
+    new Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8());
+
+...
+
+$hits = $index-&gt;find(strtolower($query));
+</pre>
+</div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.id46992" class="footnote">
+<p><a href="#id46992" class="para"><sup class="para">[15] </sup></a>
+                   <code class="classname">Zend_Search_Lucene</code> solo soporta caracteres del Plano Multilingüe
+                   Básico (BMP) (de 0x0000 a 0xFFFF) y no soporta
+                   "caracteres suplementarios" (caracteres cuyos puntos de código son
+                   mayores que 0xFFFF)
+               </p>
+<p>
+                   Java 2 representa estos caracteres como un par de valores char (16 bits),
+                   el primero del rango de "high-surrogates" (0xD800-0xDBFF),
+                   el segundo del rango de "low-surrogates" (0xDC00-0xDFFF). Luego
+                   se codifican como caracteres UTF-8 normales en seis bytes.
+                   La representación UTF-8 estándar usa cuatro bytes para los caracteres
+                   suplementarios.
+               </p>
+</div>
+<div id="ftn.id47003" class="footnote"><p><a href="#id47003" class="para"><sup class="para">[16] </sup></a>
+                   La conversión a 'ASCII//TRANSLIT' puede depender del locale y del sistema operativo actuales.
+               </p></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.search.lucene.query-api.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.search.lucene.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.search.lucene.extending.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">61.5. API de construcción de consultas </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 61.7. Extensibilidad</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

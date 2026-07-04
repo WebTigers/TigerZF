@@ -1,0 +1,1178 @@
+<?php $title = '74.5. Características adicionales para la traducción'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">74.5. Características adicionales para la traducción</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.translate.sourcecreation.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 74. Zend_Translate</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.translate.plurals.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.translate.additional"></a>74.5. Características adicionales para la traducción</h2></div></div></div>
+<p>
+        Existen varias características adicionales que son soportadas por
+        <code class="classname">Zend_Translate</code>. Lea aquí para obtener esta información adicional.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.options"></a>74.5.1. Opciones para los adaptadores</h3></div></div></div>
+<p>
+            Las opciones pueden usarse con todos los adaptadores. Por supuesto las opciones son
+            diferentes para cada adaptador. Puede establecer opciones al crear el adaptador. En
+            realidad hay una opción que está disponible para todos los adaptadores:
+            '<span class="emphasis"><em>clear</em></span>' establece si los datos de traducción deben añadirse a
+            los ya existentes o no. El comportamiento estándar es añadir los nuevos datos de
+            traducción a los existentes. Pero los datos de traducción sólo se limpian para el
+            idioma seleccionado. Así que otros idiomas permanecen intactos.
+        </p>
+<p>
+            Puede establecer opciones temporalmente pasándolas a
+            <code class="methodname">addTranslation()</code>. Y puede usar el método
+            <code class="methodname">setOptions()</code> para establecer opciones de forma permanente.
+        </p>
+<div class="example">
+<a name="zend.translate..additional.options.example"></a><p class="title"><b>Ejemplo 74.7. Uso de opciones de traducción</b></p>
+<div class="example-contents"><pre class="programlisting">
+// define ':' as separator for the translation source files
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'csv',
+        'content' =&gt; '/path/to/mytranslation.csv',
+        'locale'  =&gt; 'de',
+        'delimiter' =&gt; ':'
+    )
+);
+
+...
+
+// clear the defined language and use new translation data
+$translate-&gt;addTranslation(
+    array(
+        'content' =&gt; '/path/to/new.csv',
+        'locale'  =&gt; 'fr',
+        'clear'   =&gt; true
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Aquí puede encontrar todas las opciones disponibles para los diferentes adaptadores con
+            una descripción de su uso:
+        </p>
+<div class="table">
+<a name="zend.translate.additional.options.alloptions"></a><p class="title"><b>Tabla 74.2. Opciones para los adaptadores de traducción</b></p>
+<div class="table-contents"><table class="table" summary="Options for translation adapters" border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Opción</th>
+<th>Adaptador</th>
+<th>Descripción</th>
+<th>Valor por defecto</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>adapter</td>
+<td>
+<code class="classname">Zend_Translate</code> únicamente</td>
+<td>
+                            Define el adaptador que se usará para la traducción. Esta opción sólo
+                            puede darse cuando se crea una nueva instancia de
+                            <code class="classname">Zend_Translate</code>. Cuando se establece
+                            posteriormente, será ignorada
+                        </td>
+<td><span class="emphasis"><em>Debe establecerse ya que no tiene valor por defecto</em></span></td>
+</tr>
+<tr>
+<td>clear</td>
+<td>todos</td>
+<td>
+                            Si se establece a <code class="constant">TRUE</code>, las traducciones ya leídas
+                            se limpiarán. Esto puede usarse en lugar de crear una nueva instancia al
+                            leer nuevos datos de traducción
+                        </td>
+<td><span class="emphasis"><em><code class="constant">FALSE</code></em></span></td>
+</tr>
+<tr>
+<td>cache</td>
+<td>todos</td>
+<td>
+                            Establece una caché para el adaptador de traducción. Debe ser una
+                            instancia de <code class="classname">Zend_Cache_Core</code>
+                        </td>
+<td>
+                            <span class="emphasis"><em>Por defecto no se establece ninguna caché</em></span>
+                        </td>
+</tr>
+<tr>
+<td>content</td>
+<td>todos</td>
+<td>
+                            Establece el contenido para el adaptador de traducción. Puede ser un
+                            array, un nombre de archivo o un directorio. El tipo de contenido
+                            soportado depende del adaptador usado
+                        </td>
+<td>
+                            <span class="emphasis"><em>El valor por defecto depende del adaptador usado</em></span>
+                        </td>
+</tr>
+<tr>
+<td>disableNotices</td>
+<td>todos</td>
+<td>
+                            Si se establece a <code class="constant">TRUE</code>, se deshabilitan todos los
+                            avisos relacionados con traducciones no disponibles. Debería establecer
+                            esta opción a <code class="constant">TRUE</code> en el entorno de producción
+                        </td>
+<td><span class="emphasis"><em><code class="constant">FALSE</code></em></span></td>
+</tr>
+<tr>
+<td>ignore</td>
+<td>todos</td>
+<td>
+                            Todos los directorios y archivos que comiencen con este prefijo serán
+                            ignorados al buscar archivos. Este valor por defecto es
+                            <span class="emphasis"><em>'.'</em></span> lo que da lugar al comportamiento de que
+                            se ignoren todos los archivos ocultos. Establecer este valor a
+                            <span class="emphasis"><em>'tmp'</em></span> significaría que directorios y archivos
+                            como 'tmpImages' y 'tmpFiles' serían ignorados así como todos los
+                            directorios subsiguientes. Esta opción también acepta un array que puede
+                            usarse cuando quiere ignorar más de un prefijo.
+                        </td>
+<td><span class="emphasis"><em>.</em></span></td>
+</tr>
+<tr>
+<td>log</td>
+<td>todos</td>
+<td>
+                            Una instancia de <code class="classname">Zend_Log</code> en la que se escribirán
+                            los mensajes no traducidos y los avisos
+                        </td>
+<td><span class="emphasis"><em><code class="constant">NULL</code></em></span></td>
+</tr>
+<tr>
+<td>logMessage</td>
+<td>todos</td>
+<td>El mensaje que se escribirá en el log</td>
+<td>
+                            <span class="emphasis"><em>Untranslated message within '%locale%': %message%</em></span>
+                        </td>
+</tr>
+<tr>
+<td>logPriority</td>
+<td>todos</td>
+<td>La prioridad que se usa para escribir el mensaje en el log</td>
+<td>
+                            <span class="emphasis"><em>5</em></span>
+                        </td>
+</tr>
+<tr>
+<td>logUntranslated</td>
+<td>todos</td>
+<td>
+                            Cuando esta opción se establece a <code class="constant">TRUE</code>, todos los ID
+                            de mensaje que no puedan ser traducidos se escribirán en el log adjunto
+                        </td>
+<td><span class="emphasis"><em><code class="constant">FALSE</code></em></span></td>
+</tr>
+<tr>
+<td>reload</td>
+<td>todos</td>
+<td>
+                            Cuando esta opción se establece a <code class="constant">TRUE</code>, los archivos
+                            se recargan en la caché. Esta opción puede usarse para recrear la caché,
+                            o para añadir traducciones a los datos ya cacheados después de que la
+                            caché ya haya sido creada.
+                        </td>
+<td><span class="emphasis"><em><code class="constant">FALSE</code></em></span></td>
+</tr>
+<tr>
+<td>route</td>
+<td>todos</td>
+<td>
+                            Esta opción permite usar el reenrutamiento desde traducciones no
+                            existentes a otros idiomas. Vea la <a class="link" href="zend.translate.additional.phtml#zend.translate.additional.rerouting" title="74.5.4. Routing for translations">sección de reenrutamiento</a> para detalles sobre esta opción.
+                        </td>
+<td><span class="emphasis"><em><code class="constant">NULL</code></em></span></td>
+</tr>
+<tr>
+<td>scan</td>
+<td>todos</td>
+<td>
+                            Si se establece a <code class="constant">NULL</code>, no se realizará ningún
+                            escaneo de la estructura del directorio. Si se establece a
+                            <code class="constant">Zend_Translate::LOCALE_DIRECTORY</code> el
+                            idioma se detectará dentro del directorio. Si se establece a
+                            <code class="constant">Zend_Translate::LOCALE_FILENAME</code> el idioma se
+                            detectará dentro del nombre de archivo. Vea <a class="link" href="zend.translate.additional.phtml#zend.translate.additional.detection" title="74.5.3. Automatic source detection">este capítulo</a>
+                            para más detalles
+                        </td>
+<td><span class="emphasis"><em><code class="constant">NULL</code></em></span></td>
+</tr>
+<tr>
+<td>tag</td>
+<td>todos</td>
+<td>
+                            Establece una etiqueta individual que se usa para la caché adjunta. Usar
+                            esta opción permite usar y limpiar la caché para instancias individuales.
+                            Cuando esta opción no está establecida, la caché adjunta se usa para
+                            todas las instancias combinadas
+                        </td>
+<td><span class="emphasis"><em><code class="classname">Zend_Translate</code></em></span></td>
+</tr>
+<tr>
+<td>delimiter</td>
+<td>Csv</td>
+<td>
+                            Define qué signo se usa como delimitador para separar el origen y la
+                            traducción
+                        </td>
+<td><span class="emphasis"><em>;</em></span></td>
+</tr>
+<tr>
+<td>enclosure</td>
+<td>Csv</td>
+<td>
+                            Define el carácter de encierro a usar. Por defecto es una comilla doble
+                        </td>
+<td><span class="emphasis"><em>"</em></span></td>
+</tr>
+<tr>
+<td>length</td>
+<td>Csv</td>
+<td>
+                            Define la longitud máxima de una línea csv. Cuando se establece a 0 se
+                            detectará automáticamente
+                        </td>
+<td><span class="emphasis"><em>0</em></span></td>
+</tr>
+<tr>
+<td>useId</td>
+<td>Xliff y Tmx</td>
+<td>
+                            Si establece esta opción a <code class="constant">FALSE</code>, se usará la cadena
+                            de origen como ID de mensaje. El valor por defecto de esta opción es
+                            <code class="constant">TRUE</code>, lo que significa que se usará el Id del
+                            elemento trans-unit como ID de mensaje
+                        </td>
+<td><span class="emphasis"><em><code class="constant">TRUE</code></em></span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<br class="table-break"><p>
+            Cuando quiera tener opciones definidas por usted mismo, también puede usarlas dentro de
+            todos los adaptadores. El método <code class="methodname">setOptions()</code> puede usarse para
+            definir su opción. <code class="methodname">setOptions()</code> necesita un array con las
+            opciones que quiere establecer. Si una opción dada existe será sobrescrita. Puede definir
+            tantas opciones como necesite ya que no serán comprobadas por el adaptador. Sólo
+            asegúrese de no sobrescribir ninguna opción existente que sea usada por un adaptador.
+        </p>
+<p>
+            Para devolver la opción puede usar el método <code class="methodname">getOptions()</code>. Cuando
+            <code class="methodname">getOptions()</code> se llama sin parámetro devolverá todas las opciones
+            establecidas. Cuando se da el parámetro opcional sólo obtendrá la opción especificada.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.languages"></a>74.5.2. Manejo de idiomas</h3></div></div></div>
+<p>
+            Cuando se trabaja con diferentes idiomas hay algunos métodos que serán útiles.
+        </p>
+<p>
+            El método <code class="methodname">getLocale()</code> puede usarse para obtener el idioma
+            establecido actualmente. Puede contener una instancia de <code class="classname">Zend_Locale</code>
+            o el identificador de un locale.
+        </p>
+<p>
+            El método <code class="methodname">setLocale()</code> establece un nuevo idioma estándar para la
+            traducción. Esto evita la necesidad de establecer el parámetro opcional de idioma más de
+            una vez al método <code class="methodname">translate()</code>. Si el idioma dado no existe, o no
+            hay datos de traducción disponibles para el idioma,
+            <code class="methodname">setLocale()</code> intenta degradarlo al idioma sin la región si se dio
+            alguna. Un idioma <span class="emphasis"><em>en_US</em></span> se degradaría a
+            <span class="emphasis"><em>en</em></span>. Cuando ni siquiera el idioma degradado se puede encontrar
+            se lanzará una excepción.
+        </p>
+<p>
+            El método <code class="methodname">isAvailable()</code> comprueba si un idioma dado ya está
+            disponible. Devuelve <code class="constant">TRUE</code> si existen datos para el idioma dado.
+        </p>
+<p>
+            Y por último el método <code class="methodname">getList()</code> puede usarse para obtener todos
+            los idiomas actualmente establecidos para un adaptador, devueltos como array.
+        </p>
+<div class="example">
+<a name="zend.translate.additional.languages.example"></a><p class="title"><b>Ejemplo 74.8. Manejo de idiomas con adaptadores</b></p>
+<div class="example-contents"><pre class="programlisting">
+// returns the currently set language
+$actual = $translate-&gt;getLocale();
+
+// you can use the optional parameter while translating
+echo $translate-&gt;_("my_text", "fr");
+// or set a new language
+$translate-&gt;setLocale("fr");
+echo $translate-&gt;_("my_text");
+// refer to the base language
+// fr_CH will be downgraded to fr
+$translate-&gt;setLocale("fr_CH");
+echo $translate-&gt;_("my_text");
+
+// check if this language exist
+if ($translate-&gt;isAvailable("fr")) {
+    // language exists
+}
+</pre></div>
+</div>
+<br class="example-break"><div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.additional.languages.automatic"></a>74.5.2.1. Manejo automático de idiomas</h4></div></div></div>
+<p>
+                Tenga en cuenta que mientras sólo añada nuevos orígenes de traducción con el método
+                <code class="methodname">addTranslation()</code>
+                <code class="classname">Zend_Translate</code> establecerá automáticamente el idioma que
+                mejor se ajuste a su entorno cuando use uno de los locales automáticos que son
+                '<span class="emphasis"><em>auto</em></span>' o '<span class="emphasis"><em>browser</em></span>'. Así que
+                normalmente no necesitará llamar a <code class="methodname">setLocale()</code>. Esto sólo
+                debería usarse junto con la detección automática de origen.
+            </p>
+<p>
+                El algoritmo buscará el locale que mejor se ajuste dependiendo del navegador del
+                usuario y su entorno. Vea el siguiente ejemplo para más detalles:
+            </p>
+<div class="example">
+<a name="zend.translate.additional.languages.automatic.example"></a><p class="title"><b>Ejemplo 74.9. Detección automática de idioma</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Let's expect the browser returns these language settings:
+// HTTP_ACCEPT_LANGUAGE = "de_AT=1;fr=1;en_US=0.8";
+
+// Example 1:
+// When no fitting language is found, the message ID is returned
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; 'my_it.mo',
+        'locale'  =&gt; 'auto',
+        'scan' =&gt; Zend_Translate::LOCALE_FILENAME
+    )
+);
+
+// Example 2:
+// Best found fitting language is 'fr'
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; 'my_fr.mo',
+        'locale'  =&gt; 'auto',
+        'scan' =&gt; Zend_Translate::LOCALE_FILENAME
+    )
+);
+
+// Example 3:
+// Best found fitting language is 'de' ('de_AT' will be degraded)
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; 'my_de.mo',
+        'locale'  =&gt; 'auto',
+        'scan' =&gt; Zend_Translate::LOCALE_FILENAME
+    )
+);
+
+// Example 4:
+// Returns 'it' as translation source and overrides the automatic settings
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; 'my_it.mo',
+        'locale'  =&gt; 'auto',
+        'scan' =&gt; Zend_Translate::LOCALE_FILENAME
+    )
+);
+
+$translate-&gt;addTranslation(array('content' =&gt; 'my_ru.mo', 'locale' =&gt; 'ru'));
+$translate-&gt;setLocale('it_IT');
+</pre></div>
+</div>
+<br class="example-break"><p>
+                Después de establecer un idioma manualmente con el método
+                <code class="methodname">setLocale()</code> la detección automática se desactivará y
+                sobrescribirá.
+            </p>
+<p>
+                Si quiere usarla de nuevo, puede establecer el idioma
+                <span class="emphasis"><em>auto</em></span> con <code class="methodname">setLocale()</code> lo que
+                reactivará la detección automática para <code class="classname">Zend_Translate</code>.
+            </p>
+<p>
+                Desde Zend Framework 1.7.0 <code class="classname">Zend_Translate</code> también reconoce un
+                locale a nivel de aplicación. Puede simplemente establecer una instancia de
+                <code class="classname">Zend_Locale</code> en el registro como se muestra a continuación. Con
+                esta notación puede olvidarse de establecer el locale manualmente en cada instancia
+                cuando quiera usar el mismo locale varias veces.
+            </p>
+<pre class="programlisting">
+// in your bootstrap file
+$locale = new Zend_Locale();
+Zend_Registry::set('Zend_Locale', $locale);
+
+// default language when requested language is not available
+$defaultlanguage = 'en';
+
+// somewhere in your application
+$translate = new Zend_Translate(
+    array('adapter' =&gt; 'gettext', 'content' =&gt; 'my_de.mo')
+);
+
+if (!$translate-&gt;isAvailable($locale-&gt;getLanguage())) {
+    // not available languages are rerouted to another language
+    $translate-&gt;setLocale($defaultlanguage);
+}
+
+$translate-&gt;getLocale();
+</pre>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.additional.languages.territory"></a>74.5.2.2. Uso de un país como idioma</h4></div></div></div>
+<p>
+                También puede usar un país como parámetro de locale. Esto puede ser útil cuando
+                proporciona a su usuario banderas, que representan el país en el que vive, y cuando
+                selecciona su bandera, obtendría automáticamente el idioma por defecto para ese
+                país.
+            </p>
+<p>
+                Por ejemplo, cuando el usuario selecciona <span class="emphasis"><em>US</em></span> obtendría
+                <span class="emphasis"><em>en_US</em></span> a cambio como locale usado. Esto lleva
+                automáticamente al idioma <span class="emphasis"><em>en</em></span> que es el idioma por defecto
+                para el país <span class="emphasis"><em>US</em></span>.
+            </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; 'my_de.mo',
+        'locale'  =&gt; 'US'
+    )
+);
+</pre>
+<div class="note"><table border="0" summary="Note: Always uppercase countries">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Los países siempre en mayúsculas</th>
+</tr>
+<tr><td align="left" valign="top">
+<p>
+                    Usando esta sintaxis debería siempre poner en mayúsculas la entrada cuando sepa
+                    que se trata de un país. La razón es que también hay idiomas que tienen las
+                    mismas letras que un país. Tome por ejemplo <span class="emphasis"><em>om</em></span>. Podría
+                    esperar obtener <span class="emphasis"><em>ar_OM</em></span> cuando se refiere al país "Omán", o
+                    podría esperar el idioma "Oromo" que se habla en Kenia por ejemplo.
+                </p>
+<p>
+                    Como <code class="classname">Zend_Translate</code> está relacionado con idiomas siempre
+                    usará el idioma en este caso. Por lo tanto, ponga siempre en mayúsculas el locale
+                    cuando quiera que sea reconocido como país.
+                </p>
+</td></tr>
+</table></div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.detection"></a>74.5.3. Detección automática de origen</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Translate</code> puede detectar orígenes de traducción
+            automáticamente. Así que no tiene que declarar cada archivo de origen manualmente. Puede
+            dejar que <code class="classname">Zend_Translate</code> haga este trabajo y escanee la estructura
+            completa de directorios en busca de archivos de origen.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                La detección automática de origen está disponible desde la versión 1.5 de Zend Framework.
+            </p></td></tr>
+</table></div>
+<p>
+            El uso es bastante similar a iniciar un único origen de traducción con una diferencia.
+            Debe dar un directorio que debe ser escaneado en lugar de un archivo.
+        </p>
+<div class="example">
+<a name="zend.translate.additional.languages.directory.example"></a><p class="title"><b>Ejemplo 74.10. Escanear una estructura de directorios en busca de orígenes</b></p>
+<div class="example-contents"><pre class="programlisting">
+// assuming we have the following structure
+//  /language/
+//  /language/login/login.tmx
+//  /language/logout/logout.tmx
+//  /language/error/loginerror.tmx
+//  /language/error/logouterror.tmx
+
+$translate = new Zend_Translate(
+    array('adapter' =&gt; 'tmx', 'content' =&gt; '/language')
+);
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Así que <code class="classname">Zend_Translate</code> no sólo busca en el directorio dado, sino
+            también en todos los subdirectorios en busca de archivos de origen de traducción. Esto
+            hace que el uso sea bastante sencillo. Pero <code class="classname">Zend_Translate</code>
+            ignorará todos los archivos que no sean orígenes o que produzcan errores al leer los
+            datos de traducción. Así que debe asegurarse de que todos sus orígenes de traducción son
+            correctos y legibles porque no obtendrá ningún fallo si un archivo es incorrecto o no se
+            puede leer.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Dependiendo de la profundidad de su estructura de directorios y de cuántos archivos
+                haya dentro de esta estructura puede llevar mucho tiempo a
+                <code class="classname">Zend_Translate</code> completarlo.
+            </p></td></tr>
+</table></div>
+<p>
+            En nuestro ejemplo hemos usado el formato <acronym class="acronym">TMX</acronym> que incluye el
+            idioma a usar dentro del origen. Pero muchos de los otros formatos de origen no son
+            capaces de incluir el idioma dentro del archivo. Incluso estos orígenes pueden usarse
+            con el escaneo automático si realiza algunos prerrequisitos como se describe a
+            continuación:
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.additional.detection.directory"></a>74.5.3.1. Idioma a través del nombrado de directorios</h4></div></div></div>
+<p>
+                Una forma de incluir la detección automática de idioma es nombrar los directorios
+                según el idioma que se usa para los orígenes dentro de ese directorio. Esta es la
+                forma más sencilla y se usa por ejemplo en implementaciones estándar de gettext.
+            </p>
+<p>
+                <code class="classname">Zend_Translate</code> necesita la opción '<span class="property">scan</span>'
+                para saber que debe buscar idiomas en los nombres de todos los directorios. Vea el
+                siguiente ejemplo para más detalles:
+            </p>
+<div class="example">
+<a name="zend.translate.additional.detection.directory.example"></a><p class="title"><b>Ejemplo 74.11. Escaneo de directorios en busca de idiomas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// assuming we have the following structure
+//  /language/
+//  /language/de/login/login.mo
+//  /language/de/error/loginerror.mo
+//  /language/en/login/login.mo
+//  /language/en/error/loginerror.mo
+
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/language',
+        'scan' =&gt; Zend_Translate::LOCALE_DIRECTORY
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Esto sólo funciona para adaptadores que no incluyan el idioma dentro del archivo
+                    de origen. Usar esta opción por ejemplo con <acronym class="acronym">TMX</acronym> será
+                    ignorado. Además las definiciones de idioma dentro del nombre de archivo serán
+                    ignoradas cuando se use esta opción.
+                </p></td></tr>
+</table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    Debe tener en cuenta si tiene varios subdirectorios bajo la misma estructura.
+                    Suponiendo que tenemos una estructura como
+                    <code class="filename">/language/module/de/en/file.mo</code>. En este caso la ruta
+                    contiene varias cadenas que se detectarían como locale. Podría ser
+                    <span class="emphasis"><em>de</em></span> o <span class="emphasis"><em>en</em></span>. En tal caso el
+                    comportamiento no está definido y se recomienda usar la detección por archivo en
+                    tales situaciones.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.additional.detection.filename"></a>74.5.3.2. Idioma a través de nombres de archivo</h4></div></div></div>
+<p>
+                Otra forma de detectar el idioma automáticamente es usar nombres de archivo
+                especiales. Puede nombrar el archivo completo o partes de un archivo según el idioma
+                usado. Para usar esta forma de detección tendrá que establecer la opción
+                '<span class="property">scan</span>' en la inicialización. Hay varias formas de nombrar los
+                archivos de origen que se describen a continuación:
+            </p>
+<div class="example">
+<a name="zend.translate.additional.detection.filename.example"></a><p class="title"><b>Ejemplo 74.12. Escaneo de nombres de archivo en busca de idiomas</b></p>
+<div class="example-contents"><pre class="programlisting">
+// assuming we have the following structure
+//  /language/
+//  /language/login/login_en.mo
+//  /language/login/login_de.mo
+//  /language/error/loginerror_en.mo
+//  /language/error/loginerror_de.mo
+
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '/language',
+        'scan' =&gt; Zend_Translate::LOCALE_FILENAME
+    )
+);
+</pre></div>
+</div>
+<br class="example-break"><div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.filename.complete"></a>74.5.3.2.1. Nombre de archivo completo</h5></div></div></div>
+<p>
+                    Tener el archivo completo nombrado según el idioma es la forma más sencilla pero
+                    sólo viable si tiene sólo un archivo por idioma.
+                </p>
+<pre class="programlisting">
+/languages/
+/languages/en.mo
+/languages/de.mo
+/languages/es.mo
+</pre>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.filename.extension"></a>74.5.3.2.2. Extensión del archivo</h5></div></div></div>
+<p>
+                    Otra forma sencilla es usar la extensión del archivo para la detección de
+                    idioma. Pero esto puede resultar confuso ya que ya no tendrá una idea de qué
+                    extensión tenía originalmente el archivo.
+                </p>
+<pre class="programlisting">
+/languages/
+/languages/view.en
+/languages/view.de
+/languages/view.es
+</pre>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.filename.token"></a>74.5.3.2.3. Tokens de nombre de archivo</h5></div></div></div>
+<p>
+                    <code class="classname">Zend_Translate</code> también es capaz de detectar el idioma si
+                    está incluido dentro del nombre de archivo. Pero si sigue este camino tendrá que
+                    separar el idioma con un token. Hay tres tokens soportados que se pueden usar: un
+                    punto '.', un guion bajo '_', o un guion '-'.
+                </p>
+<pre class="programlisting">
+/languages/
+/languages/view_en.mo -&gt; detects english
+/languages/view_de.mo -&gt; detects german
+/languages/view_it.mo -&gt; detects italian
+</pre>
+<p>
+                    Se usará la primera cadena encontrada delimitada por un token que pueda
+                    interpretarse como un locale. Vea el siguiente ejemplo para más detalles.
+                </p>
+<pre class="programlisting">
+/languages/
+/languages/view_en_de.mo -&gt; detects english
+/languages/view_en_es.mo -&gt; detects english and overwrites the first file
+/languages/view_it_it.mo -&gt; detects italian
+</pre>
+<p>
+                    Los tres tokens se usan para detectar el locale. Cuando el nombre de archivo
+                    contiene varios tokens, el primer token encontrado depende del orden de los
+                    tokens que se usan. Vea el siguiente ejemplo para más detalles.
+                </p>
+<pre class="programlisting">
+/languages/
+/languages/view_en-it.mo -&gt; detects english because '_' will be used before '-'
+/languages/view-en_it.mo -&gt; detects italian because '_' will be used before '-'
+/languages/view_en.it.mo -&gt; detects italian because '.' will be used before '_'
+</pre>
+</div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.translate.additional.detection.ignore"></a>74.5.3.3. Ignorar archivos y directorios especiales</h4></div></div></div>
+<p>
+                A veces es útil excluir archivos o incluso directorios de ser añadidos
+                automáticamente. Para ello puede usar la opción <span class="property">ignore</span> que
+                acepta 3 posibles usos.
+            </p>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.ignore.string"></a>74.5.3.3.1. Ignorar un directorio o archivo especial</h5></div></div></div>
+<p>
+                    Por defecto <code class="classname">Zend_Translate</code> está establecido para ignorar
+                    todos los archivos y directorios que comiencen con
+                    <span class="emphasis"><em>'<code class="filename">/.</code>'</em></span>. Esto significa que
+                    todos los archivos <acronym class="acronym">SVN</acronym> serán ignorados.
+                </p>
+<p>
+                    Puede establecer su propia sintaxis dando una cadena para la opción
+                    <span class="property">ignore</span>. El separador de directorio se adjuntará
+                    automáticamente y debe omitirse.
+                </p>
+<pre class="programlisting">
+$options   = array('ignore' =&gt; 'test');
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; $adapter,
+        'content' =&gt; $content,
+        'locale'  =&gt; $locale,
+        'ignore'  =&gt; 'test'
+    )
+);
+</pre>
+<p>
+                    El ejemplo anterior ignorará todos los archivos y directorios que comiencen con
+                    <span class="emphasis"><em>test</em></span>. Esto significa por ejemplo
+                    <code class="filename">/test/en.mo</code>, <code class="filename">/testing/en.mo</code> y
+                    <code class="filename">/dir/test_en.mo</code>. Pero aún así añadiría
+                    <code class="filename">/mytest/en.mo</code> o <code class="filename">/dir/atest.mo</code>.
+                </p>
+<div class="note"><table border="0" summary="Note: Prevent SVN files from being searched">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Evitar que se busque en los archivos SVN</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                        Cuando establece esta opción, el valor por defecto
+                        <span class="emphasis"><em>'<code class="filename">/.</code>'</em></span> se
+                        borrará. Esto significa que <code class="classname">Zend_Translate</code> entonces
+                        añadirá todos los archivos de los directorios <acronym class="acronym">SVN</acronym> ocultos.
+                        Cuando esté trabajando con <acronym class="acronym">SVN</acronym>, debería usar la sintaxis
+                        de array descrita en la siguiente sección.
+                    </p></td></tr>
+</table></div>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.ignore.array.files"></a>74.5.3.3.2. Ignorar varios directorios o archivos</h5></div></div></div>
+<p>
+                    También puede ignorar varios archivos y directorios. En lugar de una cadena,
+                    puede simplemente dar un array con todos los nombres deseados que se ignorarán.
+                </p>
+<pre class="programlisting">
+$options = array('ignore' =&gt; array('.', 'test', 'old'));
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; $adapter,
+        'content' =&gt; $content,
+        'locale'  =&gt; $locale,
+        'ignore'  =&gt; array('.', 'test', 'old')
+    )
+);
+</pre>
+<p>
+                    En el caso anterior las 3 sintaxis serán ignoradas. Pero aún así deben comenzar
+                    con la sintaxis para ser detectadas e ignoradas.
+                </p>
+</div>
+<div class="sect4">
+<div class="titlepage"><div><div><h5 class="title">
+<a name="zend.translate.additional.detection.ignore.array.names"></a>74.5.3.3.3. Ignorar nombres específicos</h5></div></div></div>
+<p>
+                    Para ignorar archivos y directorios que no comienzan con una sintaxis definida
+                    pero tienen una sintaxis especial en cualquier parte de su nombre puede usar una
+                    expresión regular.
+                </p>
+<p>
+                    Para usar una expresión regular la clave del array de la opción
+                    <span class="property">ignore</span> debe comenzar con <span class="emphasis"><em>regex</em></span>.
+                </p>
+<pre class="programlisting">
+$options = array(
+    'ignore' =&gt; array(
+        'regex' =&gt; '/test/u',
+        'regex_2' =&gt; '/deleted$/u'
+    )
+);
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; $adapter,
+        'content' =&gt; $content,
+        'locale'  =&gt; $locale,
+        'ignore'  =&gt; array('regex' =&gt; '/test/u', 'regex_2' =&gt; '/deleted$/u')
+    )
+);
+</pre>
+<p>
+                    En el caso anterior hemos definido 2 expresiones regulares. Los archivos y
+                    directorios siempre se buscarán con todas las expresiones regulares dadas. En
+                    nuestro ejemplo esto significa que cualquier archivo que contenga
+                    <span class="emphasis"><em>test</em></span> en cualquier parte de su nombre será ignorado.
+                    Adicionalmente todos los archivos y directorios que terminen con
+                    <span class="emphasis"><em>deleted</em></span> no se añadirán como traducción.
+                </p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.rerouting"></a>74.5.4. Enrutamiento de traducciones</h3></div></div></div>
+<p>
+            No todos los ID de mensaje pueden traducirse. Pero a veces puede ser útil mostrar la
+            traducción de otro idioma en lugar de devolver el propio ID de mensaje. Puede lograr
+            esto usando la opción <span class="property">route</span>.
+        </p>
+<p>
+            Puede añadir una ruta para cada idioma. Vea el siguiente ejemplo:
+        </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; $adapter,
+        'content' =&gt; $content,
+        'locale'  =&gt; $locale,
+        'route'   =&gt; array('fr' =&gt; 'en', 'de' =&gt; 'fr')
+    )
+);
+</pre>
+<p>
+            Lo anterior devuelve una traducción en inglés para todos los mensajes que no puedan
+            traducirse al francés. Y devuelve una traducción en francés para todos los mensajes que
+            no puedan traducirse al alemán. Incluso devolverá una traducción en inglés para todos
+            los mensajes que no se puedan traducir ni al alemán ni al francés. Así que incluso puede
+            definir una cadena completa de traducción.
+        </p>
+<p>
+            Esta característica puede parecer interesante para cualquiera. Pero tenga en cuenta que
+            devolver traducciones para idiomas incorrectos u otros idiomas puede ser problemático
+            cuando el usuario no entiende ese idioma. Así que siempre debería usar esta
+            característica con moderación.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.combination"></a>74.5.5. Combinación de múltiples orígenes de traducción</h3></div></div></div>
+<p>
+            Cuando trabaja con múltiples traducciones puede llegar a una situación en la que quiera
+            usar diferentes tipos de origen. Por ejemplo los archivos de recursos que proporciona el
+            framework y sus propias traducciones que están disponibles usando el adaptador gettext.
+        </p>
+<p>
+            Al combinar múltiples adaptadores de traducción puede usarlos dentro de una instancia.
+            Vea el siguiente ejemplo:
+        </p>
+<pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; '\path\to\translation.mo',
+        'locale'  =&gt; 'en'
+    )
+);
+
+$translate_second = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'array',
+        'content' =&gt; '\resources\languages\en\Zend_Validate.php',
+        'locale'  =&gt; 'en'
+    )
+);
+
+$translate-&gt;addTranslation(array('content' =&gt; $translate_second));
+</pre>
+<p>
+            Ahora la primera instancia contiene todas las traducciones de la segunda instancia y
+            puede usarla dentro de la aplicación incluso si usó diferentes tipos de origen.
+        </p>
+<div class="note"><table border="0" summary="Note: Memory savings">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Ahorro de memoria</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Como habrá notado, la segunda instancia ya no se usa una vez que ha sido añadida a
+                la primera instancia. Para ahorrar algo de memoria puede querer eliminarla.
+            </p></td></tr>
+</table></div>
+<p>
+            Cuando esté escaneando directorios puede además querer usar sólo un idioma definido. Los
+            recursos predefinidos por ejemplo están disponibles en más de 10 idiomas. Pero su
+            aplicación no está disponible en todos esos idiomas. Por lo tanto también puede añadir
+            sólo un idioma del segundo adaptador.
+        </p>
+<pre class="programlisting">
+$translate-&gt;addTranslation(
+    array(
+        'content' =&gt; $translate_second,
+        'locale'  =&gt; 'en'
+    )
+);
+</pre>
+<p>
+            Esto le permite seguir escaneando los directorios y aun así añadir sólo aquellos idiomas
+            que sean relevantes para su aplicación.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.istranslated"></a>74.5.6. Comprobación de traducciones</h3></div></div></div>
+<p>
+            Normalmente el texto se traducirá sin ningún cómputo. Pero a veces es necesario saber si
+            un texto está traducido o no, para ello puede usarse el método
+            <code class="methodname">isTranslated()</code>.
+        </p>
+<p>
+            <code class="methodname">isTranslated($messageId, $original = false, $locale = null)</code>
+            toma el texto que quiere comprobar como su primer parámetro, y como tercer parámetro
+            opcional el locale para el que quiere hacer la comprobación. El segundo parámetro
+            opcional declara si la traducción está fijada al idioma declarado o si se puede usar un
+            conjunto inferior de traducciones. Si tiene un texto que puede devolverse para 'en' pero
+            no para 'en_US' normalmente obtendrá la traducción devuelta, pero al establecer
+            <code class="varname">$original</code> a <code class="constant">TRUE</code>,
+            <code class="methodname">isTranslated()</code> devolverá <code class="constant">FALSE</code>.
+        </p>
+<div class="example">
+<a name="zend.translate.additional.istranslated.example"></a><p class="title"><b>Ejemplo 74.13. Comprobar si un texto es traducible</b></p>
+<div class="example-contents"><pre class="programlisting">
+$english = array(
+    'message1' =&gt; 'Nachricht 1',
+    'message2' =&gt; 'Nachricht 2',
+    'message3' =&gt; 'Nachricht 3');
+
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'array',
+        'content' =&gt; $english,
+        'locale' =&gt; 'de_AT'
+    )
+);
+
+if ($translate-&gt;isTranslated('message1')) {
+    print "'message1' can be translated";
+}
+
+if (!($translate-&gt;isTranslated('message1', true, 'de'))) {
+    print "'message1' can not be translated to 'de'"
+        . " as it's available only in 'de_AT'";
+}
+
+if ($translate-&gt;isTranslated('message1', false, 'de')) {
+    print "'message1' can be translated in 'de_AT' as it falls back to 'de'";
+}
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.logging"></a>74.5.7. Cómo registrar traducciones no encontradas</h3></div></div></div>
+<p>
+            Cuando tiene un sitio más grande o está creando los archivos de traducción manualmente,
+            a menudo tiene el problema de que algunos mensajes no están traducidos. Pero hay una
+            solución fácil para usted cuando usa <code class="classname">Zend_Translate</code>.
+        </p>
+<p>
+            Debe seguir dos o tres pasos sencillos. Primero, debe crear una instancia de
+            <code class="classname">Zend_Log</code>. Luego debe adjuntar esta instancia a
+            <code class="classname">Zend_Translate</code>. Vea el siguiente ejemplo:
+        </p>
+<div class="example">
+<a name="zend.translate.additional.logging.example"></a><p class="title"><b>Ejemplo 74.14. Registrar traducciones</b></p>
+<div class="example-contents"><pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; $path,
+        'locale' =&gt; 'de'
+    )
+);
+
+// Create a log instance
+$writer = new Zend_Log_Writer_Stream('/path/to/file.log');
+$log    = new Zend_Log($writer);
+
+// Attach it to the translation instance
+$translate-&gt;setOptions(
+    array(
+        'log'             =&gt; $log,
+        'logUntranslated' =&gt; true
+    )
+);
+
+$translate-&gt;translate('unknown string');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Ahora tendrá un nuevo aviso en el log:
+            <span class="emphasis"><em>Untranslated message within 'de': unknown string</em></span>.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Debe tener en cuenta que cualquier traducción que no se pueda encontrar se
+                registrará. Esto significa todas las traducciones cuando un usuario solicita un
+                idioma que no está soportado. También cada solicitud de un mensaje que no se pueda
+                traducir se registrará. Tenga en cuenta, que 100 personas solicitando la misma
+                traducción, dará como resultado 100 avisos registrados.
+            </p></td></tr>
+</table></div>
+<p>
+            Esta característica no sólo puede usarse para registrar mensajes sino también para
+            adjuntar estos mensajes no traducidos en un archivo de traducción vacío. Para hacerlo
+            tendrá que escribir su propio escritor de log que escriba el formato que quiera tener y
+            elimine el prefijo "Untranslated message".
+        </p>
+<p>
+            También puede establecer la opción '<span class="property">logMessage</span>' cuando quiera
+            tener su propio mensaje de log. Use el token '<span class="emphasis"><em>%message%</em></span>' para
+            colocar el messageId dentro de su mensaje de log, y el token
+            '<span class="emphasis"><em>%locale%</em></span>' para el locale solicitado. Vea el siguiente
+            ejemplo para un mensaje de log autodefinido:
+        </p>
+<div class="example">
+<a name="zend.translate.additional.logging.example2"></a><p class="title"><b>Ejemplo 74.15. Mensajes de log autodefinidos</b></p>
+<div class="example-contents"><pre class="programlisting">
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; $path,
+        'locale'  =&gt; 'de'
+    )
+);
+
+// Create a log instance
+$writer = new Zend_Log_Writer_Stream('/path/to/file.log');
+$log    = new Zend_Log($writer);
+
+// Attach it to the translation instance
+$translate-&gt;setOptions(
+    array(
+        'log'             =&gt; $log,
+        'logMessage'      =&gt; "Missing '%message%' within locale '%locale%'",
+        'logUntranslated' =&gt; true
+    )
+);
+
+$translate-&gt;translate('unknown string');
+</pre></div>
+</div>
+<br class="example-break"><p>
+            Adicionalmente también puede cambiar la prioridad que se usa para escribir el mensaje en
+            el log. Por defecto se usa la prioridad <span class="emphasis"><em>Zend_Log::NOTICE</em></span>.
+            Equivale a <span class="emphasis"><em>5</em></span>. Cuando quiera cambiar la prioridad puede usar
+            cualquiera de las prioridades de <code class="classname">Zend_Log</code>. Vea el siguiente
+            ejemplo:
+        </p>
+<div class="example">
+<a name="zend.translate.additional.logging.example3"></a><p class="title"><b>Ejemplo 74.16. Prioridad de log autodefinida</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Create a log instance
+$writer = new Zend_Log_Writer_Stream('/path/to/file.log');
+$log    = new Zend_Log($writer);
+
+$translate = new Zend_Translate(
+    array(
+        'adapter' =&gt; 'gettext',
+        'content' =&gt; $path,
+        'locale'  =&gt; 'de',
+        'log'             =&gt; $log,
+        'logMessage'      =&gt; "Missing '%message%' within locale '%locale%'",
+        'logPriority'     =&gt; Zend_Log::ALERT,
+        'logUntranslated' =&gt; true
+    )
+);
+
+$translate-&gt;translate('unknown string');
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.translate.additional.sourcedata"></a>74.5.8. Acceso a los datos de origen</h3></div></div></div>
+<p>
+            A veces es útil tener acceso a los datos de origen de traducción. Para ello se
+            proporcionan las dos funciones siguientes.
+        </p>
+<p>
+            El método <code class="methodname">getMessageIds($locale = null)</code> devuelve todos los ID de
+            mensaje conocidos como array.
+        </p>
+<p>
+            Cuando quiera saber el ID de mensaje para una traducción dada puede usar el método
+            <code class="methodname">getMessageId()</code>.
+        </p>
+<p>
+            El método <code class="methodname">getMessages($locale = null)</code> devuelve el origen de
+            traducción completo como un array. El ID de mensaje se usa como clave y los datos de
+            traducción como valor.
+        </p>
+<p>
+            Ambos métodos aceptan un parámetro opcional <code class="varname">$locale</code> que, si se
+            establece, devuelve los datos de traducción para el idioma especificado. Si este
+            parámetro no se da, se usará el idioma establecido actualmente. Tenga en cuenta que
+            normalmente todas las traducciones deberían estar disponibles en todos los idiomas. Lo
+            que significa que en una situación normal no tendrá que establecer este parámetro.
+        </p>
+<p>
+            Adicionalmente el método <code class="methodname">getMessages()</code> puede usarse para
+            devolver el diccionario de traducción completo usando el pseudo-locale 'all'. Esto
+            devolverá todos los datos de traducción disponibles para cada locale añadido.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Nota</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Atención: el array devuelto puede ser <span class="emphasis"><em>muy grande</em></span>,
+                dependiendo del número de locales añadidos y de la cantidad de datos de traducción.
+            </p></td></tr>
+</table></div>
+<div class="example">
+<a name="zend.translate.additional.sourcedata.example"></a><p class="title"><b>Ejemplo 74.17. Manejo de idiomas con adaptadores</b></p>
+<div class="example-contents"><pre class="programlisting">
+// returns all known message IDs
+$messageIds = $translate-&gt;getMessageIds();
+print_r($messageIds);
+
+// or just for the specified language
+$messageIds = $translate-&gt;getMessageIds('en_US');
+print_r($messageIds);
+
+// returns all the complete translation data
+$source = $translate-&gt;getMessages();
+print_r($source);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.translate.sourcecreation.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.translate.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.translate.plurals.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">74.4. Creación de archivos de origen </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 74.6. Notaciones plurales para la traducción</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

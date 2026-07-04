@@ -1,0 +1,384 @@
+<?php $title = 'Capítulo 56. Zend_ProgressBar'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Capítulo 56. Zend_ProgressBar</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.pdf.usage.phtml">Anterior</a> </td>
+<th width="60%" align="center">Parte III. Referencia de Zend Framework</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.queue.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.progressbar"></a>Capítulo 56. Zend_ProgressBar</h2></div></div></div>
+<div class="toc">
+<p><b>Tabla de contenidos</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.progressbar.phtml#zend.progressbar.introduction">56.1. Zend_ProgressBar</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.progressbar.phtml#zend.progressbar.whatisit">56.1.1. Introducción</a></span></dt>
+<dt><span class="sect2"><a href="zend.progressbar.phtml#zend.progressbar.basic">56.1.2. Uso básico de Zend_Progressbar</a></span></dt>
+<dt><span class="sect2"><a href="zend.progressbar.phtml#zend.progressbar.persistent">56.1.3. Progreso persistente</a></span></dt>
+<dt><span class="sect2"><a href="zend.progressbar.phtml#zend.progressbar.adapters">56.1.4. Adaptadores estándar</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.progressbar.phtml#zend.progressbar.adapter.console">56.1.4.1. Zend_ProgressBar_Adapter_Console</a></span></dt>
+<dt><span class="sect3"><a href="zend.progressbar.phtml#zend.progressbar.adapter.jspush">56.1.4.2. Zend_ProgressBar_Adapter_JsPush</a></span></dt>
+<dt><span class="sect3"><a href="zend.progressbar.phtml#zend.progressbar.adapter.jspull">56.1.4.3. Zend_ProgressBar_Adapter_JsPull</a></span></dt>
+</dl></dd>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.progressbar.introduction"></a>56.1. Zend_ProgressBar</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.progressbar.whatisit"></a>56.1.1. Introducción</h3></div></div></div>
+<p>
+            <code class="classname">Zend_ProgressBar</code> es un componente para crear y actualizar
+            barras de progreso en diferentes entornos. Consiste en un único
+            backend, que muestra el progreso a través de uno de los múltiples
+            adaptadores. En cada actualización, toma un valor absoluto y opcionalmente
+            un mensaje de estado, y luego llama al adaptador con algunos valores
+            precalculados como el porcentaje y el tiempo restante estimado.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.progressbar.basic"></a>56.1.2. Uso básico de Zend_Progressbar</h3></div></div></div>
+<p>
+            <code class="classname">Zend_ProgressBar</code> es bastante sencillo de usar. Simplemente
+            crea una nueva instancia de <code class="classname">Zend_Progressbar</code>, definiendo un
+            valor mínimo y uno máximo, y elige un adaptador para mostrar los datos. Si
+            deseas procesar un archivo, harías algo como:
+        </p>
+<pre class="programlisting">
+$progressBar = new Zend_ProgressBar($adapter, 0, $fileSize);
+
+while (!feof($fp)) {
+    // Do something
+
+    $progressBar-&gt;update($currentByteCount);
+}
+
+$progressBar-&gt;finish();
+</pre>
+<p>
+            En el primer paso, se crea una instancia de <code class="classname">Zend_ProgressBar</code>,
+            con un adaptador específico, un valor mínimo de 0 y un valor máximo
+            equivalente al tamaño total del archivo. Luego se procesa un archivo y en cada bucle
+            la barra de progreso se actualiza con el conteo actual de bytes. Al final
+            del bucle, el estado de la barra de progreso se establece como terminado.
+        </p>
+<p>
+            También puedes llamar al método <code class="methodname">update()</code> de
+            <code class="classname">Zend_ProgressBar</code> sin argumentos, lo que simplemente
+            recalcula el ETA y notifica al adaptador. Esto es útil cuando no
+            hay una actualización de datos, pero quieres que la barra de progreso se actualice.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.progressbar.persistent"></a>56.1.3. Progreso persistente</h3></div></div></div>
+<p>
+            Si deseas que la barra de progreso sea persistente entre varias peticiones,
+            puedes indicar el nombre de un espacio de nombres de sesión como cuarto argumento
+            del constructor. En ese caso, la barra de progreso no notificará
+            al adaptador dentro del constructor, sino solo cuando llames a
+            <code class="methodname">update()</code> o <code class="methodname">finish()</code>. Además, el valor
+            actual, el texto de estado y la hora de inicio para el cálculo del ETA se
+            recuperarán de nuevo en la siguiente ejecución de la petición.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.progressbar.adapters"></a>56.1.4. Adaptadores estándar</h3></div></div></div>
+<p>
+            <code class="classname">Zend_ProgressBar</code> viene con los siguientes tres adaptadores:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: opencircle; ">
+<li class="listitem" style="list-style-type: circle"><p>
+                        <a class="link" href="zend.progressbar.phtml#zend.progressbar.adapter.console" title="56.1.4.1. Zend_ProgressBar_Adapter_Console">Zend_ProgressBar_Adapter_Console</a>
+                    </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                        <a class="link" href="zend.progressbar.phtml#zend.progressbar.adapter.jspush" title="56.1.4.2. Zend_ProgressBar_Adapter_JsPush">Zend_ProgressBar_Adapter_JsPush</a>
+                    </p></li>
+<li class="listitem" style="list-style-type: circle"><p>
+                        <a class="link" href="zend.progressbar.phtml#zend.progressbar.adapter.jspull" title="56.1.4.3. Zend_ProgressBar_Adapter_JsPull">Zend_ProgressBar_Adapter_JsPull</a>
+                    </p></li>
+</ul></div>
+<p>
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.progressbar.adapter.console"></a>56.1.4.1. Zend_ProgressBar_Adapter_Console</h4></div></div></div>
+<p>
+        <code class="classname">Zend_ProgressBar_Adapter_Console</code> es un adaptador basado en texto
+        para terminales. Puede detectar automáticamente el ancho del terminal, pero también admite
+        anchos personalizados. Puedes definir qué elementos se muestran con
+        la barra de progreso y también personalizar el orden de los mismos. También puedes
+        definir el estilo de la propia barra de progreso.
+    </p>
+<div class="note"><table border="0" summary="Note: Automatic console width recognition">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Reconocimiento automático del ancho de la consola</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            <code class="code">shell_exec</code> es necesario para que esta funcionalidad funcione en
+            sistemas *nix. En Windows, siempre hay un ancho de terminal
+            fijo de 80 caracteres, por lo que no se necesita reconocimiento allí.
+        </p></td></tr>
+</table></div>
+<p>
+        Puedes establecer las opciones del adaptador ya sea a través de los métodos <code class="code">set*</code>
+        o proporcionando un array o una instancia de <code class="classname">Zend_Config</code> con las opciones como primer
+        parámetro del constructor. Las opciones disponibles son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="code">outputStream</code>: Un flujo de salida diferente, si no
+                deseas transmitir a STDOUT. Puede ser cualquier otro flujo como
+                <code class="code">php://stderr</code> o una ruta a un archivo.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">width</code>: Ya sea un entero o la constante <code class="constant">AUTO</code>
+                de <code class="classname">Zend_Console_ProgressBar</code>.
+            </p></li>
+<li class="listitem">
+<p>
+                <code class="code">elements</code>: Ya sea <code class="constant">NULL</code> para el valor por defecto
+                o un array con al menos una de las siguientes constantes
+                de <code class="classname">Zend_Console_ProgressBar</code> como valor:
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
+<li class="listitem"><p>
+                        <code class="constant">ELEMENT_PERCENT</code>: El valor actual en porcentaje.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">ELEMENT_BAR</code>: La barra visual que muestra
+                        el porcentaje.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">ELEMENT_ETA</code>: El ETA calculado automáticamente.
+                        Este elemento se muestra por primera vez después de cinco segundos,
+                        porque en ese tiempo no es posible calcular
+                        resultados precisos.
+                    </p></li>
+<li class="listitem"><p>
+                        <code class="constant">ELEMENT_TEXT</code>: Un mensaje de estado opcional
+                        sobre el proceso actual.
+                    </p></li>
+</ul></div>
+</li>
+<li class="listitem"><p>
+                <code class="code">textWidth</code>: Ancho en caracteres del
+                elemento <code class="constant">ELEMENT_TEXT</code>. El valor por defecto es 20.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">charset</code>: Charset del
+                elemento <code class="constant">ELEMENT_TEXT</code>. El valor por defecto es utf-8.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">barLeftChar</code>: Una cadena que se utiliza a la izquierda
+                del indicador en la barra de progreso.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">barRightChar</code>: Una cadena que se utiliza a la derecha
+                del indicador en la barra de progreso.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">barIndicatorChar</code>: Una cadena que se utiliza para
+                el indicador en la barra de progreso. Esta puede estar vacía.
+            </p></li>
+</ul></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.progressbar.adapter.jspush"></a>56.1.4.2. Zend_ProgressBar_Adapter_JsPush</h4></div></div></div>
+<p>
+        <code class="classname">Zend_ProgressBar_Adapter_JsPush</code> es un adaptador que permite
+        actualizar una barra de progreso en un navegador mediante Javascript Push. Esto significa
+        que no se requiere una segunda conexión para recopilar el estado de un
+        proceso en ejecución, sino que el propio proceso envía su estado directamente
+        al navegador.
+    </p>
+<p>
+        Puedes establecer las opciones del adaptador ya sea a través de los métodos <code class="code">set*</code>
+        o proporcionando un array o una instancia de <code class="classname">Zend_Config</code> con las opciones como primer
+        parámetro del constructor. Las opciones disponibles son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="code">updateMethodName</code>: El método javascript que
+                debe llamarse en cada actualización. El valor por defecto es
+                <code class="classname">Zend_ProgressBar_Update</code>.
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">finishMethodName</code>: El método javascript que
+                debe llamarse después de que se establezca el estado de finalización. El valor por defecto es
+                <code class="constant">NULL</code>, lo que significa que no se hace nada.
+            </p></li>
+</ul></div>
+<p>
+        El uso de este adaptador es bastante sencillo. Primero creas una barra de progreso
+        en tu navegador, ya sea con JavaScript o creada previamente con
+        <acronym class="acronym">HTML</acronym> plano. Luego defines el método de actualización y opcionalmente el método de finalización
+        en JavaScript, ambos recibiendo un objeto json como único argumento. Luego
+        llamas a una página web con el proceso de larga duración en un
+        <code class="code">iframe</code> o etiqueta <code class="code">object</code> oculta. Mientras el proceso está
+        en ejecución, el adaptador llamará al método de actualización en cada actualización con
+        un objeto json, que contiene los siguientes parámetros:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                <code class="code">current</code>: El valor absoluto actual
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">max</code>: El valor absoluto máximo
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">percent</code>: El porcentaje calculado
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">timeTaken</code>: El tiempo que el proceso lleva ejecutándose
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">timeRemaining</code>: El tiempo esperado para que el proceso finalice
+            </p></li>
+<li class="listitem"><p>
+                <code class="code">text</code>: El mensaje de estado opcional, si se proporciona
+            </p></li>
+</ul></div>
+<div class="example">
+<a name="zend.progressbar-adapter.jspush.example"></a><p class="title"><b>Ejemplo 56.1. Ejemplo básico para la parte del cliente</b></p>
+<div class="example-contents">
+<p>
+            Este ejemplo ilustra una configuración básica de <acronym class="acronym">HTML</acronym>,
+            <acronym class="acronym">CSS</acronym> y JavaScript para el adaptador JsPush
+        </p>
+<pre class="programlisting">
+&lt;div id="zend-progressbar-container"&gt;
+    &lt;div id="zend-progressbar-done"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;iframe src="long-running-process.php" id="long-running-process"&gt;&lt;/iframe&gt;
+</pre>
+<pre class="programlisting">
+#long-running-process {
+    position: absolute;
+    left: -100px;
+    top: -100px;
+
+    width: 1px;
+    height: 1px;
+}
+
+#zend-progressbar-container {
+    width: 100px;
+    height: 30px;
+
+    border: 1px solid #000000;
+    background-color: #ffffff;
+}
+
+#zend-progressbar-done {
+    width: 0;
+    height: 30px;
+
+    background-color: #000000;
+}
+</pre>
+<pre class="programlisting">
+function Zend_ProgressBar_Update(data)
+{
+    document.getElementById('zend-progressbar-done').style.width =
+         data.percent + '%';
+}
+</pre>
+<p>
+            Esto creará un contenedor simple con un borde negro y un
+            bloque que indica el proceso actual. No deberías ocultar
+            el <code class="code">iframe</code> u <code class="code">object</code> mediante <code class="code">display: none;</code>,
+            ya que algunos navegadores como Safari 2 no cargarán el contenido real en ese caso.
+        </p>
+<p>
+            En lugar de crear tu propia barra de progreso personalizada, quizás quieras usar
+            una de las bibliotecas JavaScript disponibles como Dojo, jQuery, etc.
+            Por ejemplo, existen:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    Dojo: <a class="ulink" href="http://dojotoolkit.org/reference-guide/dijit/ProgressBar.html" target="_top">http://dojotoolkit.org/reference-guide/dijit/ProgressBar.html</a>
+                </p></li>
+<li class="listitem"><p>
+                    jQuery: <a class="ulink" href="http://t.wits.sg/2008/06/20/jquery-progress-bar-11/" target="_top">http://t.wits.sg/2008/06/20/jquery-progress-bar-11/</a>
+                </p></li>
+<li class="listitem"><p>
+                    MooTools: <a class="ulink" href="http://davidwalsh.name/dw-content/progress-bar.php" target="_top">http://davidwalsh.name/dw-content/progress-bar.php</a>
+                </p></li>
+<li class="listitem"><p>
+                    Prototype: <a class="ulink" href="http://livepipe.net/control/progressbar" target="_top">http://livepipe.net/control/progressbar</a>
+                </p></li>
+</ul></div>
+</div>
+</div>
+<br class="example-break"><div class="note"><table border="0" summary="Note: Interval of updates">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Intervalo de actualizaciones</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Debes tener cuidado de no enviar demasiadas actualizaciones, ya que cada actualización
+            tiene un tamaño mínimo de 1kb. Este es un requisito para que el navegador Safari
+            realmente procese y ejecute la llamada a la función. Internet Explorer
+            tiene una limitación similar de 256 bytes.
+        </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.progressbar.adapter.jspull"></a>56.1.4.3. Zend_ProgressBar_Adapter_JsPull</h4></div></div></div>
+<p>
+        <code class="classname">Zend_ProgressBar_Adapter_JsPull</code> es lo opuesto a jsPush,
+        ya que requiere consultar (pull) las nuevas actualizaciones, en lugar de enviarlas (push)
+        a los navegadores. Generalmente deberías usar este adaptador con la opción de
+        persistencia de <code class="classname">Zend_ProgressBar</code>. Al notificar,
+        el adaptador envía una cadena <acronym class="acronym">JSON</acronym> al navegador, que se ve exactamente
+        igual que la cadena <acronym class="acronym">JSON</acronym> enviada por el adaptador jsPush. La única
+        diferencia es que contiene un parámetro adicional,
+        <span class="property">finished</span>, que es <code class="constant">FALSE</code> cuando
+        se llama a <code class="methodname">update()</code> o <code class="constant">TRUE</code>, cuando
+        se llama a <code class="methodname">finish()</code>.
+    </p>
+<p>
+        Puedes establecer las opciones del adaptador ya sea a través de los métodos <code class="methodname">set*()</code>
+        o proporcionando un array o una instancia de <code class="classname">Zend_Config</code> con las opciones como primer
+        parámetro del constructor. Las opciones disponibles son:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+                <span class="property">exitAfterSend</span>: Sale de la petición actual después de que los
+                datos se hayan enviado al navegador. El valor por defecto es <code class="constant">TRUE</code>.
+            </p></li></ul></div>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.pdf.usage.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.queue.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">55.8. Ejemplo de uso del módulo Zend_Pdf </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> Capítulo 57. Zend_Queue</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

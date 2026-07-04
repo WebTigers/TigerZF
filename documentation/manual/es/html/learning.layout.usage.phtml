@@ -1,0 +1,237 @@
+<?php $title = '6.2. Uso de Zend_Layout'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">6.2. Uso de Zend_Layout</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="learning.layout.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 6. Primeros pasos con Zend_Layout</th>
+<td width="20%" align="right"> <a accesskey="n" href="learning.layout.conclusions.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="learning.layout.usage"></a>6.2. Uso de Zend_Layout</h2></div></div></div>
+<p>
+        El uso básico de <code class="classname">Zend_Layout</code> es bastante trivial. Suponiendo que ya
+        estés usando <code class="classname">Zend_Application</code>, simplemente puedes proporcionar algunas
+        opciones de configuración y crear un script de vista de layout.
+    </p>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.layout.usage.configuration"></a>6.2.1. Configuración del layout</h3></div></div></div>
+<p>
+            La ubicación recomendada para los layouts es un subdirectorio "<code class="filename">layouts/scripts/</code>"
+            de tu aplicación:
+        </p>
+<pre class="programlisting">
+application
+|-- Bootstrap.php
+|-- configs
+|   `-- application.ini
+|-- controllers
+|-- layouts
+|   `-- scripts
+|       |-- layout.phtml
+</pre>
+<p>
+            Para inicializar <code class="classname">Zend_Layout</code>, añade lo siguiente a tu
+            archivo de configuración ("<code class="filename">application/configs/application.ini</code>"):
+        </p>
+<pre class="programlisting">
+resources.layout.layoutPath = APPLICATION_PATH "/layouts/scripts"
+resources.layout.layout = "layout"
+</pre>
+<p>
+            La primera línea indica dónde buscar los scripts de layout; la segunda línea indica el
+            nombre del layout a usar, sin la extensión del script de vista (que se asume que es
+            "<code class="filename">.phtml</code>" por defecto).
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.layout.usage.layout-script"></a>6.2.2. Crear un script de layout</h3></div></div></div>
+<p>
+            Ahora que tienes tu configuración en su lugar, necesitas crear tu script de layout.
+            Primero, asegúrate de haber creado el directorio
+            "<code class="filename">application/layouts/scripts</code>"; luego,
+            abre un editor y crea el marcado para tu layout. Los scripts de layout son simplemente scripts
+            de vista, con algunas ligeras diferencias.
+        </p>
+<pre class="programlisting">
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My Site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;?php echo $this-&gt;layout()-&gt;content ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+            En el ejemplo anterior, notarás la llamada a un helper de vista <code class="methodname">layout()</code>.
+            Cuando registras el recurso <code class="classname">Zend_Layout</code>, también obtienes
+            acceso tanto a un helper de acción como a un helper de vista que te permiten acceder a la
+            instancia de <code class="classname">Zend_Layout</code>; luego puedes llamar operaciones sobre el objeto
+            layout. En este caso, estamos recuperando una variable con nombre, <code class="varname">$content</code>,
+            y mostrándola. Por defecto, la variable <code class="varname">$content</code> se rellena
+            automáticamente a partir del script de vista de la aplicación renderizado. Por lo demás, cualquier cosa que normalmente harías
+            en un script de vista es perfectamente válida: llama a cualquier helper o método de vista que desees.
+        </p>
+<p>
+            Llegados a este punto, tienes un script de layout funcionando, y tu aplicación está informada de su
+            ubicación y sabe que debe renderizarlo.
+        </p>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.layout.usage.access"></a>6.2.3. Acceso al objeto layout</h3></div></div></div>
+<p>
+            En ocasiones, puede que necesites acceso directo al objeto layout. Hay tres formas de
+            hacer esto:
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>Dentro de scripts de vista:</em></span> usa el
+                    helper de vista <code class="methodname">layout()</code>, que devuelve la
+                    instancia de <code class="classname">Zend_Layout</code> registrada con el plugin del
+                    controlador frontal.
+                </p>
+<pre class="programlisting">
+&lt;?php $layout = $this-&gt;layout(); ?&gt;
+</pre>
+<p>
+                    Dado que devuelve la instancia del layout, también puedes simplemente llamar métodos sobre ella,
+                    en lugar de asignarla a una variable.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>Dentro de controladores de acción:</em></span> usa el
+                    helper de acción <code class="methodname">layout()</code>, que actúa igual que el helper
+                    de vista.
+                </p>
+<pre class="programlisting">
+// Calling helper as a method of the helper broker:
+$layout = $this-&gt;_helper-&gt;layout();
+
+// Or, more verbosely:
+$helper = $this-&gt;_helper-&gt;getHelper('Layout');
+$layout = $helper-&gt;getLayoutInstance();
+</pre>
+<p>
+                    Al igual que con el helper de vista, dado que el helper de acción devuelve la instancia del layout,
+                    también puedes simplemente llamar métodos sobre ella, en lugar de asignarla a una variable.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>En cualquier otro lugar: </em></span> usa el método estático
+                    <code class="methodname">getMvcInstance()</code>. Esto devolverá la instancia del layout
+                    registrada por el recurso de bootstrap.
+                </p>
+<pre class="programlisting">
+$layout = Zend_Layout::getMvcInstance();
+</pre>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>A través del bootstrap: </em></span> recupera el recurso de layout, que
+                    será la instancia de <code class="classname">Zend_Layout</code>.
+                </p>
+<pre class="programlisting">
+$layout = $bootstrap-&gt;getResource('Layout');
+</pre>
+<p>
+                    Siempre que tengas acceso al objeto bootstrap, este método es preferible frente a
+                    usar el método estático <code class="methodname">getMvcInstance()</code>.
+                </p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="learning.layout.usage.other-operations"></a>6.2.4. Otras operaciones</h3></div></div></div>
+<p>
+            En la mayoría de los casos, la configuración anterior y el script de layout (con modificaciones) te darán
+            lo que necesitas. Sin embargo, existe otra funcionalidad que probablemente usarás tarde
+            o temprano. En todos los siguientes ejemplos, puedes usar uno de los <a class="link" href="learning.layout.usage.phtml#learning.layout.usage.access" title="6.2.3. Acceso al objeto layout">métodos listados anteriormente</a> para recuperar
+            el objeto layout.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>Establecer variables de layout</em></span>.
+                    <code class="classname">Zend_Layout</code> mantiene su propio registro de variables de vista
+                    específicas del layout a las que puedes acceder; la clave <code class="varname">$content</code> mencionada en
+                    el ejemplo inicial de script de layout es un ejemplo de ello. Puedes asignar y
+                    recuperar estas usando el acceso normal a propiedades, o mediante el
+                    método <code class="methodname">assign()</code>.
+                </p>
+<pre class="programlisting">
+// Setting content:
+$layout-&gt;somekey = "foo"
+
+// Echoing that same content:
+echo $layout-&gt;somekey; // 'foo'
+
+// Using the assign() method:
+$layout-&gt;assign('someotherkey', 'bar');
+
+// Access to assign()'d variables remains the same:
+echo $layout-&gt;someotherkey; // 'bar'
+</pre>
+</li>
+<li class="listitem">
+<p>
+                    <code class="methodname">disableLayout()</code>. Ocasionalmente, puede que quieras deshabilitar
+                    los layouts; por ejemplo, al responder a una petición Ajax, o al proporcionar una representación
+                    RESTful de un recurso. En estos casos, puedes llamar al método
+                    <code class="methodname">disableLayout()</code> sobre tu objeto layout.
+                </p>
+<pre class="programlisting">
+$layout-&gt;disableLayout();
+</pre>
+<p>
+                    El opuesto de este método es, por supuesto,
+                    <code class="methodname">enableLayout()</code>, que se puede llamar en cualquier momento para
+                    volver a habilitar los layouts para la acción solicitada.
+                </p>
+</li>
+<li class="listitem">
+<p>
+                    <span class="emphasis"><em>Seleccionar un layout alternativo</em></span>: Si tienes múltiples
+                    layouts para tu sitio o aplicación, puedes seleccionar el layout a usar en cualquier
+                    momento simplemente llamando al método <code class="methodname">setLayout()</code>. Llámalo
+                    especificando el nombre del script de layout sin el sufijo del archivo.
+                </p>
+<pre class="programlisting">
+// Use the layout script "alternate.phtml":
+$layout-&gt;setLayout('alternate');
+</pre>
+<p>
+                    El script de layout debe residir en el directorio <code class="varname">$layoutPath</code> especificado
+                    en tu configuración. <code class="classname">Zend_Layout</code> entonces
+                    usará este nuevo layout al renderizar.
+                </p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="learning.layout.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="learning.layout.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="learning.layout.conclusions.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 6. Primeros pasos con Zend_Layout </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 6.3. Zend_Layout: Conclusiones</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

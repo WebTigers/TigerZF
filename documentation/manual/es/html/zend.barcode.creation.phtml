@@ -1,0 +1,197 @@
+<?php $title = '16.2. Creación de códigos de barras usando la clase Zend_Barcode'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">16.2. Creación de códigos de barras usando la clase Zend_Barcode</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.barcode.phtml">Anterior</a> </td>
+<th width="60%" align="center">Capítulo 16. Zend_Barcode</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.barcode.objects.phtml">Siguiente</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.barcode.creation"></a>16.2. Creación de códigos de barras usando la clase Zend_Barcode</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.creation.configuration"></a>16.2.1. Uso de Zend_Barcode::factory</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Barcode</code> utiliza un método factory para crear una instancia de un
+            renderizador (renderer) que extiende <code class="classname">Zend_Barcode_Renderer_RendererAbstract</code>. El
+            método factory acepta cinco argumentos.
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>El nombre del formato de código de barras (por ejemplo, "code39") (obligatorio)</p></li>
+<li class="listitem"><p>El nombre del renderizador (por ejemplo, "image") (obligatorio)</p></li>
+<li class="listitem"><p>
+                    Opciones para pasar al objeto del código de barras (un array o un objeto
+                    <code class="classname">Zend_Config</code>) (opcional)
+                </p></li>
+<li class="listitem"><p>
+                    Opciones para pasar al objeto renderizador (un array o un objeto
+                    <code class="classname">Zend_Config</code>) (opcional)
+                </p></li>
+<li class="listitem"><p>
+                    Valor booleano que indica si se deben renderizar automáticamente los errores o no. Si ocurre una
+                    excepción, el objeto de código de barras proporcionado se sustituirá por una representación de
+                    error (opcional, valor por defecto <code class="constant">TRUE</code>)
+                </p></li>
+</ol></div>
+<div class="example">
+<a name="zend.barcode.creation.configuration.example-1"></a><p class="title"><b>Ejemplo 16.1. Obtener un renderizador con Zend_Barcode::factory()</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">Zend_Barcode::factory()</code> instancia objetos de código de barras y
+                renderizadores y los enlaza entre sí. En este primer ejemplo, usaremos el
+                tipo de código de barras <span class="emphasis"><em>Code39</em></span> junto con el
+                renderizador <span class="emphasis"><em>Image</em></span>.
+            </p>
+<pre class="programlisting">
+// Only the text to draw is required
+$barcodeOptions = array('text' =&gt; 'ZEND-FRAMEWORK');
+
+// No required options
+$rendererOptions = array();
+$renderer = Zend_Barcode::factory(
+    'code39', 'image', $barcodeOptions, $rendererOptions
+);
+</pre>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.barcode.creation.configuration.example-2"></a><p class="title"><b>Ejemplo 16.2. Uso de Zend_Barcode::factory() con objetos Zend_Config</b></p>
+<div class="example-contents">
+<p>
+                Puede pasar un objeto <code class="classname">Zend_Config</code> al factory para
+                crear los objetos necesarios. El siguiente ejemplo es funcionalmente equivalente al
+                anterior.
+            </p>
+<pre class="programlisting">
+// Using only one Zend_Config object
+$config = new Zend_Config(array(
+    'barcode'        =&gt; 'code39',
+    'barcodeParams'  =&gt; array('text' =&gt; 'ZEND-FRAMEWORK'),
+    'renderer'       =&gt; 'image',
+    'rendererParams' =&gt; array('imageType' =&gt; 'gif'),
+));
+
+$renderer = Zend_Barcode::factory($config);
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.creation.drawing"></a>16.2.2. Dibujar un código de barras</h3></div></div></div>
+<p>
+            Cuando <span class="emphasis"><em>dibuja</em></span> el código de barras, recupera el recurso en el que se
+            dibuja el código de barras. Para dibujar un código de barras, puede llamar a <code class="methodname">draw()</code> del
+            renderizador, o simplemente usar el método proxy proporcionado por
+            <code class="classname">Zend_Barcode</code>.
+        </p>
+<div class="example">
+<a name="zend.barcode.creation.drawing.example-1"></a><p class="title"><b>Ejemplo 16.3. Dibujar un código de barras con el objeto renderizador</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Only the text to draw is required
+$barcodeOptions = array('text' =&gt; 'ZEND-FRAMEWORK');
+
+// No required options
+$rendererOptions = array();
+
+// Draw the barcode in a new image,
+$imageResource = Zend_Barcode::factory(
+    'code39', 'image', $barcodeOptions, $rendererOptions
+)-&gt;draw();
+</pre></div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.barcode.creation.drawing.example-2"></a><p class="title"><b>Ejemplo 16.4. Dibujar un código de barras con Zend_Barcode::draw()</b></p>
+<div class="example-contents"><pre class="programlisting">
+// Only the text to draw is required
+$barcodeOptions = array('text' =&gt; 'ZEND-FRAMEWORK');
+
+// No required options
+$rendererOptions = array();
+
+// Draw the barcode in a new image,
+$imageResource = Zend_Barcode::draw(
+    'code39', 'image', $barcodeOptions, $rendererOptions
+);
+</pre></div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.barcode.creation.renderering"></a>16.2.3. Renderizar un código de barras</h3></div></div></div>
+<p>
+            Cuando renderiza un código de barras, dibuja el código de barras, envía las cabeceras y envía el
+            recurso (por ejemplo, a un navegador). Para renderizar un código de barras, puede llamar al método
+            <code class="methodname">render()</code> del renderizador o simplemente usar el método proxy
+            proporcionado por <code class="classname">Zend_Barcode</code>.
+        </p>
+<div class="example">
+<a name="zend.barcode.creation.renderering.example-1"></a><p class="title"><b>Ejemplo 16.5. Renderizar un código de barras con el objeto renderizador</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+// Only the text to draw is required
+$barcodeOptions = array('text' =&gt; 'ZEND-FRAMEWORK');
+
+// No required options
+$rendererOptions = array();
+
+// Draw the barcode in a new image,
+// send the headers and the image
+Zend_Barcode::factory(
+    'code39', 'image', $barcodeOptions, $rendererOptions
+)-&gt;render();
+</pre>
+<p>
+                Esto generará este código de barras:
+            </p>
+<p>
+                <img src="figures/zend.barcode.introduction.example-1.png" align="middle" width="275">
+            </p>
+</div>
+</div>
+<br class="example-break"><div class="example">
+<a name="zend.barcode.creation.renderering.example-2"></a><p class="title"><b>Ejemplo 16.6. Renderizar un código de barras con Zend_Barcode::render()</b></p>
+<div class="example-contents">
+<pre class="programlisting">
+// Only the text to draw is required
+$barcodeOptions = array('text' =&gt; 'ZEND-FRAMEWORK');
+
+// No required options
+$rendererOptions = array();
+
+// Draw the barcode in a new image,
+// send the headers and the image
+Zend_Barcode::render(
+    'code39', 'image', $barcodeOptions, $rendererOptions
+);
+</pre>
+<p>
+                Esto generará el mismo código de barras que el ejemplo anterior.
+            </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.barcode.phtml">Anterior</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.barcode.phtml">Subir</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.barcode.objects.phtml">Siguiente</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Capítulo 16. Zend_Barcode </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Inicio</a></td>
+<td width="40%" align="right" valign="top"> 16.3. Objetos Zend_Barcode</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>
