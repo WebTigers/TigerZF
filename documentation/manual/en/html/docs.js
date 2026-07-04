@@ -24,6 +24,67 @@
     doc.addEventListener("click", function (e) { if (langPick.open && !langPick.contains(e.target)) langPick.open = false; });
     doc.addEventListener("keydown", function (e) { if (e.key === "Escape") langPick.open = false; });
   }
+
+  /* ---------- header search: live dropdown (FTS5 via search.php) ---------- */
+  (function () {
+    var boxEl = doc.querySelector(".tzf-header .tzf-search");
+    var input = boxEl && boxEl.querySelector("input");
+    if (!input) return;
+    var panel = doc.createElement("div");
+    panel.className = "tzf-search-results";
+    boxEl.appendChild(panel);
+    var opts = [], sel = -1, timer = null, lastQ = null;
+
+    function encq(s) { return encodeURIComponent(s); }
+    function toPage(q) { location.href = "search.phtml?q=" + encq(q); }
+    function close() { panel.classList.remove("open"); panel.innerHTML = ""; opts = []; sel = -1; }
+
+    function render(data) {
+      var res = data.results || [], html = "";
+      if (!res.length) {
+        panel.innerHTML = '<div class="tzf-sr-empty">' + (i18n.search_none || "No results for") +
+          ' “' + input.value.replace(/[&<>]/g, "") + '”</div>';
+        panel.classList.add("open"); opts = []; sel = -1; return;
+      }
+      res.forEach(function (r) {
+        html += '<a class="tzf-sr-item" href="' + r.url + '">' +
+                  '<span class="tzf-sr-title">' + r.title + '</span>' +
+                  '<span class="tzf-sr-snip">' + r.snippet + '</span></a>';
+      });
+      html += '<a class="tzf-sr-all" href="search.phtml?q=' + encq(data.q) + '">' +
+                (i18n.search_all || "See all results") + ' →</a>';
+      panel.innerHTML = html;
+      opts = Array.prototype.slice.call(panel.children);
+      sel = -1; panel.classList.add("open");
+    }
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim();
+      if (q === lastQ) return; lastQ = q;
+      clearTimeout(timer);
+      if (q.length < 2) { close(); return; }
+      timer = setTimeout(function () {
+        fetch("search.php?q=" + encq(q))
+          .then(function (r) { return r.json(); })
+          .then(function (d) { if (input.value.trim() === d.q) render(d); })
+          .catch(close);
+      }, 160);
+    });
+
+    function mark() { opts.forEach(function (el, i) { el.classList.toggle("active", i === sel); });
+      if (sel >= 0) opts[sel].scrollIntoView({ block: "nearest" }); }
+
+    input.addEventListener("keydown", function (e) {
+      var open = panel.classList.contains("open");
+      if (e.key === "ArrowDown" && open) { e.preventDefault(); sel = Math.min(sel + 1, opts.length - 1); mark(); }
+      else if (e.key === "ArrowUp" && open) { e.preventDefault(); sel = Math.max(sel - 1, -1); mark(); }
+      else if (e.key === "Enter") {
+        if (open && sel >= 0) { e.preventDefault(); location.href = opts[sel].getAttribute("href"); }
+        else if (input.value.trim().length >= 2) { e.preventDefault(); toPage(input.value.trim()); }
+      } else if (e.key === "Escape") { close(); input.blur(); }
+    });
+    doc.addEventListener("click", function (e) { if (!boxEl.contains(e.target)) close(); });
+  })();
   var headSearch = doc.querySelector(".tzf-header .tzf-search input");
   doc.addEventListener("keydown", function (e) {
     if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) {

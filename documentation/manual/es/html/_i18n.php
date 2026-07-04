@@ -20,4 +20,8 @@ $T = [
     'toggle_nav'  => 'Mostrar u ocultar la navegación',
     'language'    => 'Idioma',
     'onthispage'  => 'En esta página',
+    'search_results' => 'Resultados de búsqueda',
+    'search_none'    => 'Sin resultados para',
+    'search_all'     => 'Ver todos los resultados',
+    'search_count'   => 'resultados para',
 ];
