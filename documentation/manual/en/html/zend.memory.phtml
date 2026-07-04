@@ -1,0 +1,222 @@
+<?php $title = 'Chapter 48. Zend_Memory'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Chapter 48. Zend_Memory</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.measure.types.phtml">Prev</a> </td>
+<th width="60%" align="center">Part III. Zend Framework Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.memory.memory-manager.phtml">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="zend.memory"></a>Chapter 48. Zend_Memory</h2></div></div></div>
+<div class="toc">
+<p><b>Table of Contents</b></p>
+<dl class="toc">
+<dt><span class="sect1"><a href="zend.memory.phtml#zend.memory.overview">48.1. Overview</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.memory.phtml#zend.memory.introduction">48.1.1. Introduction</a></span></dt>
+<dt><span class="sect2"><a href="zend.memory.phtml#zend.memory.theory-of-operation">48.1.2. Theory of Operation</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.memory.phtml#zend.memory.theory-of-operation.manager">48.1.2.1. Memory manager</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.phtml#zend.memory.theory-of-operation.container">48.1.2.2. Memory container</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.phtml#zend.memory.theory-of-operation.locked">48.1.2.3. Locked memory</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.phtml#zend.memory.theory-of-operation.movable">48.1.2.4. Movable memory</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.memory.memory-manager.phtml">48.2. Memory Manager</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.creation">48.2.1. Creating a Memory Manager</a></span></dt>
+<dt><span class="sect2"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.objects-management">48.2.2. Managing Memory Objects</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.objects-management.movable">48.2.2.1. Creating Movable Objects</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.objects-management.locked">48.2.2.2. Creating Locked Objects</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.objects-management.destruction">48.2.2.3. Destroying Objects</a></span></dt>
+</dl></dd>
+<dt><span class="sect2"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.settings">48.2.3. Memory Manager Settings</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.settings.memory-limit">48.2.3.1. Memory Limit</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.settings.min-size">48.2.3.2. MinSize</a></span></dt>
+</dl></dd>
+</dl></dd>
+<dt><span class="sect1"><a href="zend.memory.memory-objects.phtml">48.3. Memory Objects</a></span></dt>
+<dd><dl>
+<dt><span class="sect2"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.movable">48.3.1. Movable</a></span></dt>
+<dt><span class="sect2"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.locked">48.3.2. Locked</a></span></dt>
+<dt><span class="sect2"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.value">48.3.3. Memory container 'value' property</a></span></dt>
+<dt><span class="sect2"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api">48.3.4. Memory container interface</a></span></dt>
+<dd><dl>
+<dt><span class="sect3"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.getRef">48.3.4.1. getRef() method</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.touch">48.3.4.2. touch() method</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.lock">48.3.4.3. lock() method</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.unlock">48.3.4.4. unlock() method</a></span></dt>
+<dt><span class="sect3"><a href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.isLocked">48.3.4.5. isLocked() method</a></span></dt>
+</dl></dd>
+</dl></dd>
+</dl>
+</div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.memory.overview"></a>48.1. Overview</h2></div></div></div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.introduction"></a>48.1.1. Introduction</h3></div></div></div>
+<p>
+            The <code class="classname">Zend_Memory</code> component is intended to manage data in an
+            environment with limited memory.
+        </p>
+<p>
+            Memory objects (memory containers) are generated by memory manager
+            by request and transparently swapped/loaded when it's necessary.
+        </p>
+<p>
+            For example, if creating or loading a managed object would cause
+            the total memory usage to exceed the limit you specify, some
+            managed objects are copied to cache storage outside of memory.
+            In this way, the total memory used by managed objects does not
+            exceed the limit you need to enforce.
+        </p>
+<p>
+            The memory manager uses
+            <a class="link" href="zend.cache.backends.phtml" title="17.4. Zend_Cache Backends">Zend_Cache backends</a>
+            as storage providers.
+        </p>
+<div class="example">
+<a name="zend.memory.introduction.example-1"></a><p class="title"><b>Example 48.1. Using Zend_Memory component</b></p>
+<div class="example-contents">
+<p>
+                <code class="methodname">Zend_Memory::factory()</code> instantiates the memory
+                manager object with specified backend options.
+            </p>
+<pre class="programlisting">
+$backendOptions = array(
+    'cache_dir' =&gt; './tmp/' // Directory where to put the swapped memory blocks
+);
+
+$memoryManager = Zend_Memory::factory('File', $backendOptions);
+
+$loadedFiles = array();
+
+for ($count = 0; $count &lt; 10000; $count++) {
+    $f = fopen($fileNames[$count], 'rb');
+    $data = fread($f, filesize($fileNames[$count]));
+    $fclose($f);
+
+    $loadedFiles[] = $memoryManager-&gt;create($data);
+}
+
+echo $loadedFiles[$index1]-&gt;value;
+
+$loadedFiles[$index2]-&gt;value = $newValue;
+
+$loadedFiles[$index3]-&gt;value[$charIndex] = '_';
+</pre>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.memory.theory-of-operation"></a>48.1.2. Theory of Operation</h3></div></div></div>
+<p>
+            <code class="classname">Zend_Memory</code> component operates with the following concepts:
+
+            </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>Memory manager</p></li>
+<li class="listitem"><p>Memory container</p></li>
+<li class="listitem"><p>Locked memory object</p></li>
+<li class="listitem"><p>Movable memory object</p></li>
+</ul></div>
+<p>
+        </p>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.theory-of-operation.manager"></a>48.1.2.1. Memory manager</h4></div></div></div>
+<p>
+                The memory manager generates memory objects (locked or movable)
+                by request of user application and returns them wrapped into
+                a memory container object.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.theory-of-operation.container"></a>48.1.2.2. Memory container</h4></div></div></div>
+<p>
+                The memory container has a virtual or actual <span class="property">value</span>
+                attribute of string type. This attribute contains the data value
+                specified at memory object creation time.
+            </p>
+<p>
+                You can operate with this <span class="property">value</span> attribute as
+                an object property:
+            </p>
+<pre class="programlisting">
+$memObject = $memoryManager-&gt;create($data);
+
+echo $memObject-&gt;value;
+
+$memObject-&gt;value = $newValue;
+
+$memObject-&gt;value[$index] = '_';
+
+echo ord($memObject-&gt;value[$index1]);
+
+$memObject-&gt;value = substr($memObject-&gt;value, $start, $length);
+</pre>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                    If you are using a <acronym class="acronym">PHP</acronym> version earlier than 5.2, use the
+                    <a class="link" href="zend.memory.memory-objects.phtml#zend.memory.memory-objects.api.getRef" title="48.3.4.1. getRef() method">getRef()</a>
+                    method instead of accessing the value property directly.
+                </p></td></tr>
+</table></div>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.theory-of-operation.locked"></a>48.1.2.3. Locked memory</h4></div></div></div>
+<p>
+                Locked memory objects are always stored in memory.
+                Data stored in locked memory are never swapped to the cache
+                backend.
+            </p>
+</div>
+<div class="sect3">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="zend.memory.theory-of-operation.movable"></a>48.1.2.4. Movable memory</h4></div></div></div>
+<p>
+                Movable memory objects are transparently swapped and loaded
+                to/from the cache backend by <code class="classname">Zend_Memory</code> when it's necessary.
+            </p>
+<p>
+                The memory manager doesn't swap objects with size less than
+                the specified minimum, due to performance considerations.
+                See <a class="link" href="zend.memory.memory-manager.phtml#zend.memory.memory-manager.settings.min-size" title="48.2.3.2. MinSize">this section</a>
+                for more details.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.measure.types.phtml">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="reference.phtml">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.memory.memory-manager.phtml">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">47.5. Types of measurements </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Home</a></td>
+<td width="40%" align="right" valign="top"> 48.2. Memory Manager</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>

@@ -1,0 +1,73 @@
+<?php $title = '57.2. Example usage'; include __DIR__ . '/_header.phtml'; ?>
+<div class="navheader"><table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">57.2. Example usage</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="zend.queue.phtml">Prev</a> </td>
+<th width="60%" align="center">Chapter 57. Zend_Queue</th>
+<td width="20%" align="right"> <a accesskey="n" href="zend.queue.framework.phtml">Next</a>
+</td>
+</tr>
+</table></div>
+<div class="sect1">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="zend.queue.example"></a>57.2. Example usage</h2></div></div></div>
+<p>
+        The below example of <code class="classname">Zend_Queue</code> shows a variety of
+        features, including queue creation, queue retrieval, message retrieval,
+        message deletion, and sending messages.
+    </p>
+<pre class="programlisting">
+// For configuration options
+// @see Zend_Queue_Adapater::__construct()
+$options = array(
+    'name' =&gt; 'queue1',
+);
+
+// Create an array queue
+$queue = new Zend_Queue('Array', $options);
+
+// Get list of queues
+foreach ($queue-&gt;getQueues() as $name) {
+    echo $name, "\n";
+}
+
+// Create a new queue
+$queue2 = $queue-&gt;createQueue('queue2');
+
+// Get number of messages in a queue (supports Countable interface from SPL)
+echo count($queue);
+
+// Get up to 5 messages from a queue
+$messages = $queue-&gt;receive(5);
+
+foreach ($messages as $i =&gt; $message) {
+    echo $message-&gt;body, "\n";
+
+    // We have processed the message; now we remove it from the queue.
+    $queue-&gt;deleteMessage($message);
+}
+
+// Send a message to the currently active queue
+$queue-&gt;send('My Test Message');
+
+// Delete a queue we created and all of it's messages
+$queue-&gt;deleteQueue('queue2');
+</pre>
+</div>
+<div class="navfooter"><table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="zend.queue.phtml">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="zend.queue.phtml">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="zend.queue.framework.phtml">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 57. Zend_Queue </td>
+<td width="20%" align="center"><a accesskey="h" href="index.phtml">Home</a></td>
+<td width="40%" align="right" valign="top"> 57.3. Framework</td>
+</tr>
+</table></div>
+<div class="revinfo"></div>
+<?php include __DIR__ . '/_footer.phtml'; ?>
