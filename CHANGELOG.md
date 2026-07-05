@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2026-07-05
+
+### Added
+
+* `Zend_Log_Formatter_Json` — structured one-object-per-line JSON log formatter (upstream ZF1 shipped only Simple + Xml); the shape modern pipelines query by field (CloudWatch Logs Insights, GCP Logs Explorer, Azure Log Analytics / Kusto)
+* `Zend_Log_Writer_ErrorLog` — writer that emits through PHP's native `error_log()`, the zero-dependency sink every cloud log agent already collects
+* `Zend_Log_Writer_Buffered` — abstract base for batch/remote writers: buffers events and flushes on threshold + shutdown, and degrades to `error_log()` if a batch fails to ship, so a transport error never propagates into the request
+* `Zend_Log_Writer_Cloudwatch` — AWS CloudWatch Logs writer (`PutLogEvents`); `aws/aws-sdk-php` is an optional dependency, guarded so the class loads without it and the caller can fall back
+* `Zend_Log_Writer_Googlecloud` — Google Cloud Logging writer (`writeBatch`); `google/cloud-logging` is an optional dependency, guarded
+* `Zend_Log_Writer_Azuremonitor` — Azure Monitor / Application Insights writer over HTTPS (`ext/curl` only, no SDK)
+
+### Changed
+
+* `Zend_Version::VERSION` bumped `1.25.0` → `1.31.0` to track the package release — the constant had drifted behind the Composer/tag version
+
 ## [1.30.0] - 2026-07-04
 
 ### Changed
