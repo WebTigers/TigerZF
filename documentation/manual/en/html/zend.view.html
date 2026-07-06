@@ -148,6 +148,7 @@
 <dt><span class="sect2"><a href="zend.view.html#zend.view.introduction.options">78.1.3. Options</a></span></dt>
 <dt><span class="sect2"><a href="zend.view.html#zend.view.introduction.shortTags">78.1.4. Short Tags with View Scripts</a></span></dt>
 <dt><span class="sect2"><a href="zend.view.html#zend.view.introduction.accessors">78.1.5. Utility Accessors</a></span></dt>
+<dt><span class="sect2"><a href="zend.view.html#zend.view.introduction.renderstring">78.1.6. String / Non-File Rendering (TigerZF)</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="zend.view.controllers.html">78.2. Controller Scripts</a></span></dt>
 <dd><dl>
@@ -482,6 +483,78 @@ $view-&gt;setUseStreamWrapper(true);
                     filter paths.
                 </p></li>
 </ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.introduction.renderstring"></a>78.1.6. String / Non-File Rendering (TigerZF)</h3></div></div></div>
+<p>
+            In addition to rendering a view script <span class="emphasis"><em>file</em></span>,
+            <code class="classname">Zend_View</code> (as extended by <span class="emphasis"><em>TigerZF</em></span>) can render
+            a template supplied as a <span class="emphasis"><em>string</em></span>. This is useful when the template
+            does not live on disk &mdash; for example a <acronym class="acronym">CMS</acronym> page, layout, or
+            partial stored in a database, or an e-mail body. The string executes in exactly the same scope
+            as a view script: <code class="literal">$this</code> is the view instance, so assigned variables and
+            every view helper (<code class="methodname">escape()</code>, <code class="methodname">partial()</code>,
+            <code class="methodname">url()</code>, &hellip;) are available.
+        </p>
+<p>Three entry points are provided:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setContent($source)</code> / <code class="methodname">getContent()</code>
+                    &mdash; set (fluently) the template source to render, matching Zend_View's
+                    "configure the object, then render" idiom.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">render()</code> &mdash; called with <span class="emphasis"><em>no argument</em></span>
+                    it renders the source set via <code class="methodname">setContent()</code>; called with a
+                    script name (<code class="methodname">render('booklist.php')</code>) it renders a file, exactly
+                    as before.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">renderString($template = null, $vars = null)</code> &mdash; render a
+                    source string directly (optionally assigning <code class="literal">$vars</code> first), or the
+                    <code class="methodname">setContent()</code> source when called with no template.
+                </p></li>
+</ul></div>
+<p>The stateful form mirrors ordinary view usage:</p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;assign('title', 'Peanuts');
+$view-&gt;assign('posts', $posts);
+
+$view-&gt;setContent('&lt;h1&gt;&lt;?= $this-&gt;escape($this-&gt;title) ?&gt;&lt;/h1&gt;');
+
+$html = $view-&gt;render();     // no argument: renders the string set above
+</pre>
+<p>Or as a one-liner, passing the source and variables together:</p>
+<pre class="programlisting">
+$html = $view-&gt;renderString(
+    '&lt;h1&gt;&lt;?= $this-&gt;escape($this-&gt;title) ?&gt;&lt;/h1&gt;'
+    . '&lt;ul&gt;&lt;?php foreach ($this-&gt;posts as $p): ?&gt;'
+    . '&lt;li&gt;&lt;?= $this-&gt;escape($p) ?&gt;&lt;/li&gt;&lt;?php endforeach; ?&gt;&lt;/ul&gt;',
+    array('title' =&gt; 'Peanuts', 'posts' =&gt; array('First', 'Second'))
+);
+</pre>
+<p>
+            Templates use <code class="literal">&lt;?php</code> and <code class="literal">&lt;?=</code> tags, just like view
+            scripts (a bare <code class="literal">&lt;?</code> short tag is not rewritten in string mode &mdash; use
+            <code class="literal">&lt;?php</code>). A malformed template raises the usual PHP
+            <code class="classname">ParseError</code>, which the caller may catch; the output buffer is cleaned
+            first so nothing leaks. View output-filters (<code class="methodname">setFilter()</code>) are not
+            applied to string rendering.
+        </p>
+<div class="warning"><table border="0" summary="Warning: String Templates Are Code">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">String Templates Are Code</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                A string template is evaluated as <acronym class="acronym">PHP</acronym> &mdash; it can run any code.
+                Only ever render <span class="emphasis"><em>trusted</em></span> templates (for example, content authored by a
+                trusted administrator). Never pass untrusted user input to
+                <code class="methodname">renderString()</code> or <code class="methodname">setContent()</code>.
+            </p></td></tr>
+</table></div>
 </div>
 </div>
 </div>

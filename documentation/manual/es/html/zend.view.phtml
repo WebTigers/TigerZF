@@ -22,6 +22,7 @@
 <dt><span class="sect2"><a href="zend.view.phtml#zend.view.introduction.options">78.1.3. Opciones</a></span></dt>
 <dt><span class="sect2"><a href="zend.view.phtml#zend.view.introduction.shortTags">78.1.4. Etiquetas cortas con scripts de vista</a></span></dt>
 <dt><span class="sect2"><a href="zend.view.phtml#zend.view.introduction.accessors">78.1.5. Accesores de utilidad</a></span></dt>
+<dt><span class="sect2"><a href="zend.view.phtml#zend.view.introduction.renderstring">78.1.6. Renderizado desde una cadena / sin archivo (TigerZF)</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="zend.view.controllers.phtml">78.2. Scripts del controlador</a></span></dt>
 <dd><dl>
@@ -356,6 +357,79 @@ $view-&gt;setUseStreamWrapper(true);
                     registradas.
                 </p></li>
 </ul></div>
+</div>
+<div class="sect2">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="zend.view.introduction.renderstring"></a>78.1.6. Renderizado desde una cadena / sin archivo (TigerZF)</h3></div></div></div>
+<p>
+            Además de renderizar un <span class="emphasis"><em>archivo</em></span> de script de vista,
+            <code class="classname">Zend_View</code> (extendido por <span class="emphasis"><em>TigerZF</em></span>) puede renderizar
+            una plantilla proporcionada como una <span class="emphasis"><em>cadena</em></span>. Esto es útil cuando la plantilla
+            no reside en disco &mdash; por ejemplo, una página, un layout o un parcial de un
+            <acronym class="acronym">CMS</acronym> almacenados en una base de datos, o el cuerpo de un correo electrónico. La cadena
+            se ejecuta exactamente en el mismo ámbito que un script de vista: <code class="literal">$this</code> es la
+            instancia de la vista, por lo que las variables asignadas y todos los ayudantes de vista
+            (<code class="methodname">escape()</code>, <code class="methodname">partial()</code>,
+            <code class="methodname">url()</code>, &hellip;) están disponibles.
+        </p>
+<p>Se proporcionan tres puntos de entrada:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>
+                    <code class="methodname">setContent($source)</code> / <code class="methodname">getContent()</code>
+                    &mdash; establece (de forma fluida) el origen de la plantilla a renderizar, siguiendo el
+                    idioma de Zend_View de "configurar el objeto y luego renderizar".
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">render()</code> &mdash; llamado <span class="emphasis"><em>sin argumento</em></span>
+                    renderiza el origen establecido mediante <code class="methodname">setContent()</code>; llamado con un
+                    nombre de script (<code class="methodname">render('booklist.php')</code>) renderiza un archivo, tal
+                    como antes.
+                </p></li>
+<li class="listitem"><p>
+                    <code class="methodname">renderString($template = null, $vars = null)</code> &mdash; renderiza una
+                    cadena de origen directamente (asignando opcionalmente <code class="literal">$vars</code> primero), o el
+                    origen de <code class="methodname">setContent()</code> cuando se llama sin plantilla.
+                </p></li>
+</ul></div>
+<p>La forma con estado refleja el uso habitual de una vista:</p>
+<pre class="programlisting">
+$view = new Zend_View();
+$view-&gt;assign('title', 'Peanuts');
+$view-&gt;assign('posts', $posts);
+
+$view-&gt;setContent('&lt;h1&gt;&lt;?= $this-&gt;escape($this-&gt;title) ?&gt;&lt;/h1&gt;');
+
+$html = $view-&gt;render();     // sin argumento: renderiza la cadena establecida arriba
+</pre>
+<p>O en una sola línea, pasando el origen y las variables juntos:</p>
+<pre class="programlisting">
+$html = $view-&gt;renderString(
+    '&lt;h1&gt;&lt;?= $this-&gt;escape($this-&gt;title) ?&gt;&lt;/h1&gt;'
+    . '&lt;ul&gt;&lt;?php foreach ($this-&gt;posts as $p): ?&gt;'
+    . '&lt;li&gt;&lt;?= $this-&gt;escape($p) ?&gt;&lt;/li&gt;&lt;?php endforeach; ?&gt;&lt;/ul&gt;',
+    array('title' =&gt; 'Peanuts', 'posts' =&gt; array('First', 'Second'))
+);
+</pre>
+<p>
+            Las plantillas usan las etiquetas <code class="literal">&lt;?php</code> y <code class="literal">&lt;?=</code>, igual que los
+            scripts de vista (una etiqueta corta <code class="literal">&lt;?</code> no se reescribe en modo cadena &mdash; use
+            <code class="literal">&lt;?php</code>). Una plantilla mal formada genera el habitual
+            <code class="classname">ParseError</code> de PHP, que el llamador puede capturar; el búfer de salida se limpia
+            primero para que no se filtre nada. Los filtros de salida de la vista
+            (<code class="methodname">setFilter()</code>) no se aplican al renderizado de cadenas.
+        </p>
+<div class="warning"><table border="0" summary="Warning: String Templates Are Code">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td>
+<th align="left">Las plantillas de cadena son código</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+                Una plantilla de cadena se evalúa como <acronym class="acronym">PHP</acronym> &mdash; puede ejecutar cualquier código.
+                Renderice únicamente plantillas <span class="emphasis"><em>de confianza</em></span> (por ejemplo, contenido creado por un
+                administrador de confianza). Nunca pase entrada de usuario no confiable a
+                <code class="methodname">renderString()</code> ni a <code class="methodname">setContent()</code>.
+            </p></td></tr>
+</table></div>
 </div>
 </div>
 </div>
