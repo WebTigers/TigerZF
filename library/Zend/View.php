@@ -98,6 +98,13 @@ class Zend_View extends Zend_View_Abstract
     private $_useStreamWrapper = false;
 
     /**
+     * Template source set via setContent() — rendered by render() (no arg) or
+     * renderString().
+     * @var string|null
+     */
+    protected $_content = null;
+
+    /**
      * Constructor
      *
      * Register Zend_View_Stream stream wrapper if short tags are disabled.
@@ -156,5 +163,106 @@ class Zend_View extends Zend_View_Abstract
         } else {
             include func_get_arg(0);
         }
+    }
+
+    /**
+     * Render — a view script FILE or a STRING (TigerZF extension).
+     *
+     * With a script $name it renders that view script (stock ZF behavior). With NO
+     * argument it renders the template set via setContent(), so the familiar
+     * "configure the view, then render()" flow works for DB/string templates too:
+     *
+     *   $view->assign('var1', 'Peanuts');
+     *   $view->setContent($templateString);
+     *   $html = $view->render();
+     *
+     * @param  string|null $name a view script, or null to render setContent()
+     * @return string
+     */
+    public function render($name = null)
+    {
+        if ($name === null && $this->_content !== null) {
+            return $this->renderString();
+        }
+        return parent::render($name);
+    }
+
+    /**
+     * Set the template SOURCE to render (fluent) — for string / DB templates.
+     * Rendered by render() (no arg) or renderString().
+     *
+     * @param  string $content
+     * @return Zend_View
+     */
+    public function setContent($content)
+    {
+        $this->_content = (string) $content;
+        return $this;
+    }
+
+    /**
+     * The template source set via setContent(), or null.
+     *
+     * @return string|null
+     */
+    public function getContent()
+    {
+        return $this->_content;
+    }
+
+    /**
+     * Render a template from a STRING rather than a script file.
+     *
+     * The non-file counterpart to render(): the template runs in the same scope —
+     * `$this` is the view, so assigned variables (`$this->foo`) and every view
+     * helper (`$this->escape()`, `$this->partial()`, `$this->url()`, …) are
+     * available. Purpose-built for templates that don't live on disk: DB-stored CMS
+     * pages/layouts/partials, email bodies, message templates. Pass the source, or
+     * set it first with setContent() and call with no argument:
+     *
+     *   echo $view->renderString('<h1><?= $this->escape($this->title) ?></h1>', ['title' => 'Hi']);
+     *   // or, the stateful flow:
+     *   $view->setContent($tpl)->assign('title', 'Hi');
+     *   echo $view->renderString();          // (or $view->render();)
+     *
+     * SECURITY: the string is evaluated as PHP — it IS code. Only ever pass TRUSTED
+     * templates (e.g. admin-authored). Never pass untrusted user input. (In Tiger
+     * this is the `phtml` format, gated to trusted authors; `html`/`markdown`
+     * content never reaches here.)
+     *
+     * Short tags: `<?php` and `<?=` work; a bare `<?` is not rewritten — use `<?php`.
+     * A malformed template raises the usual ParseError/Throwable (the output buffer
+     * is cleaned first). View output-filters (setFilter) are not applied.
+     *
+     * @param  string|null $template the source, or null to use setContent()
+     * @param  array|null  $vars     optional variables to assign() before rendering
+     * @return string
+     */
+    public function renderString($template = null, array $vars = null)
+    {
+        if ($vars !== null) {
+            $this->assign($vars);
+        }
+        $source = ($template !== null) ? (string) $template : (string) $this->_content;
+
+        ob_start();
+        try {
+            $this->_runString($source);
+        } catch (Throwable $e) {
+            ob_end_clean();   // don't leak the open buffer on a template parse/runtime error
+            throw $e;
+        }
+        return ob_get_clean();
+    }
+
+    /**
+     * Evaluate a template string in a scope exposing only public $this. Mirrors
+     * _run(): the source is taken via func_get_arg(0) so a `$template` in the
+     * template can't collide with a local, and the leading `?>` puts eval into
+     * output (template) mode.
+     */
+    protected function _runString()
+    {
+        eval('?>' . func_get_arg(0));
     }
 }

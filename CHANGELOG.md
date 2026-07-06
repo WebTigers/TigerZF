@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2026-07-06
+
+### Added
+
+* `Zend_View` string / non-file rendering — render a template from a STRING instead of a script file, in the same scope as `render()` (`$this` is the view; assigned vars + all helpers available). Enables non-file templates: DB-stored CMS pages/layouts/partials, email/message bodies. The string is evaluated as PHP, so it is for TRUSTED templates only (documented). API:
+  * `setContent($source)` / `getContent()` — set the template source (fluent), matching Zend_View's "configure then render" idiom.
+  * `render()` with **no argument** now renders the `setContent()` source; `render('script.phtml')` renders a file as before.
+  * `renderString($template = null, $vars = null)` — render a source directly, or the `setContent()` one if omitted.
+
+### Changed
+
+* `Zend_Version::VERSION` bumped `1.31.0` → `1.32.0`.
+
 ## [1.31.0] - 2026-07-05
 
 ### Added
