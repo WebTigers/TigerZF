@@ -105,7 +105,7 @@ TigerZF development is sponsored by:
 
 ## License
 
-TigerZF's own code and modernization work are released under the **MIT License** (see [LICENSE](LICENSE)). It incorporates Zend Framework 1, which remains under the original **BSD 3-Clause License** (see [LICENSE.txt](LICENSE.txt)); those notices are retained in the inherited source files.
+TigerZF is released under the **BSD 3-Clause License** (see [LICENSE](LICENSE)) — the same license as its heritage. It continues Zend Framework 1 (via [zf1-future](https://github.com/Shardj/zf1-future)), distributed under the New BSD (BSD 3-Clause) License, © 2005-2015 Zend Technologies USA, Inc.; the original notice is preserved verbatim in [LICENSE.txt](LICENSE.txt) and retained in the inherited source files.
 
 ## Acknowledgments
 
