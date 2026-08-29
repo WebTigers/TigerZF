@@ -238,7 +238,7 @@ class Zend_View extends Zend_View_Abstract
      * @param  array|null  $vars     optional variables to assign() before rendering
      * @return string
      */
-    public function renderString($template = null, array $vars = null)
+    public function renderString($template = null, ?array $vars = null)
     {
         if ($vars !== null) {
             $this->assign($vars);
