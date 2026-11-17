@@ -58,7 +58,7 @@ class Zend_Log_Writer_Cloudwatch extends Zend_Log_Writer_Buffered
     {
         if ($this->_client === null) {
             $class = 'Aws\\CloudWatchLogs\\CloudWatchLogsClient';
-            $this->_client = new $class(array('version' => '2014-03-28', 'region' => $this->_region));
+            $this->_client = new $class(['version' => '2014-03-28', 'region' => $this->_region]);
         }
         return $this->_client;
     }
@@ -70,10 +70,10 @@ class Zend_Log_Writer_Cloudwatch extends Zend_Log_Writer_Buffered
             return;
         }
         $this->_ensured = true;
-        foreach (array(
-            array('createLogGroup',  array('logGroupName' => $this->_group)),
-            array('createLogStream', array('logGroupName' => $this->_group, 'logStreamName' => $this->_stream)),
-        ) as $call) {
+        foreach ([
+            ['createLogGroup',  ['logGroupName' => $this->_group]],
+            ['createLogStream', ['logGroupName' => $this->_group, 'logStreamName' => $this->_stream]],
+        ] as $call) {
             try { $this->_client()->{$call[0]}($call[1]); }
             catch (Throwable $e) { /* ResourceAlreadyExistsException — fine */ }
         }
@@ -83,21 +83,21 @@ class Zend_Log_Writer_Cloudwatch extends Zend_Log_Writer_Buffered
     {
         $this->_ensure();
 
-        $logEvents = array();
+        $logEvents = [];
         foreach ($events as $event) {
-            $logEvents[] = array(
+            $logEvents[] = [
                 'timestamp' => $this->_epochMillis($event),
                 'message'   => rtrim($this->_formatter->format($event), "\r\n"),
-            );
+            ];
         }
         // CloudWatch requires events in chronological order within a batch.
         usort($logEvents, function ($a, $b) { return $a['timestamp'] <=> $b['timestamp']; });
 
-        $this->_client()->putLogEvents(array(
+        $this->_client()->putLogEvents([
             'logGroupName'  => $this->_group,
             'logStreamName' => $this->_stream,
             'logEvents'     => $logEvents,
-        ));
+        ]);
     }
 
     /**
@@ -112,6 +112,6 @@ class Zend_Log_Writer_Cloudwatch extends Zend_Log_Writer_Buffered
     protected static function _toArray($config)
     {
         if ($config instanceof Zend_Config) { return $config->toArray(); }
-        return is_array($config) ? $config : array();
+        return is_array($config) ? $config : [];
     }
 }
