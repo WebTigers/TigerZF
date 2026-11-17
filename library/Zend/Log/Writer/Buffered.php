@@ -21,7 +21,7 @@
 abstract class Zend_Log_Writer_Buffered extends Zend_Log_Writer_Abstract
 {
     /** @var array buffered events awaiting ship */
-    protected $_events = array();
+    protected $_events = [];
 
     /** @var int flush the buffer once it reaches this many events */
     protected $_max = 200;
@@ -32,7 +32,7 @@ abstract class Zend_Log_Writer_Buffered extends Zend_Log_Writer_Abstract
     public function __construct()
     {
         $this->_formatter = new Zend_Log_Formatter_Json();
-        register_shutdown_function(array($this, 'shutdown'));
+        register_shutdown_function([$this, 'shutdown']);
     }
 
     /** Buffer the event; flush eagerly when the batch is full. */
@@ -61,7 +61,7 @@ abstract class Zend_Log_Writer_Buffered extends Zend_Log_Writer_Abstract
             return;
         }
         $events = $this->_events;
-        $this->_events = array();
+        $this->_events = [];
 
         try {
             $this->_ship($events);

@@ -29,11 +29,11 @@ class Zend_Log_Writer_Googlecloud extends Zend_Log_Writer_Buffered
     /** @var object|null */ protected $_logger = null;
 
     /** Zend_Log priority name -> Cloud Logging severity. */
-    protected static $_severity = array(
+    protected static $_severity = [
         'DEBUG' => 'DEBUG', 'INFO' => 'INFO', 'NOTICE' => 'NOTICE',
         'WARN'  => 'WARNING', 'ERR' => 'ERROR', 'CRIT' => 'CRITICAL',
         'ALERT' => 'ALERT', 'EMERG' => 'EMERGENCY',
-    );
+    ];
 
     /**
      * @param  array|Zend_Config|null $config
@@ -57,7 +57,7 @@ class Zend_Log_Writer_Googlecloud extends Zend_Log_Writer_Buffered
     {
         if ($this->_logger === null) {
             $class   = 'Google\\Cloud\\Logging\\LoggingClient';
-            $options = $this->_project ? array('projectId' => $this->_project) : array();
+            $options = $this->_project ? ['projectId' => $this->_project] : [];
             $client  = new $class($options);
             $this->_logger = $client->logger($this->_logName);
         }
@@ -67,21 +67,21 @@ class Zend_Log_Writer_Googlecloud extends Zend_Log_Writer_Buffered
     protected function _ship(array $events)
     {
         $logger  = $this->_logger();
-        $entries = array();
+        $entries = [];
         foreach ($events as $event) {
             $name     = $this->_severityName($event);
             $severity = isset(self::$_severity[$name]) ? self::$_severity[$name] : 'DEFAULT';
 
             // Structured payload: Logs Explorer indexes jsonPayload.* fields.
-            $payload = array(
+            $payload = [
                 'message' => isset($event['message']) ? (string) $event['message'] : '',
                 'channel' => isset($event['channel']) ? $event['channel'] : 'app',
-            );
+            ];
             if (!empty($event['context']) && is_array($event['context'])) {
                 $payload['context'] = $event['context'];
             }
 
-            $entries[] = $logger->entry($payload, array('severity' => $severity));
+            $entries[] = $logger->entry($payload, ['severity' => $severity]);
         }
         $logger->writeBatch($entries);
     }
@@ -98,6 +98,6 @@ class Zend_Log_Writer_Googlecloud extends Zend_Log_Writer_Buffered
     protected static function _toArray($config)
     {
         if ($config instanceof Zend_Config) { return $config->toArray(); }
-        return is_array($config) ? $config : array();
+        return is_array($config) ? $config : [];
     }
 }

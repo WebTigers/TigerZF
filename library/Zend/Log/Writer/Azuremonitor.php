@@ -28,10 +28,10 @@ class Zend_Log_Writer_Azuremonitor extends Zend_Log_Writer_Buffered
     /** @var string */ protected $_role;
 
     /** Zend_Log priority name -> App Insights severityLevel (0..4). */
-    protected static $_severity = array(
+    protected static $_severity = [
         'DEBUG' => 0, 'INFO' => 1, 'NOTICE' => 1,
         'WARN'  => 2, 'ERR' => 3, 'CRIT' => 4, 'ALERT' => 4, 'EMERG' => 4,
-    );
+    ];
 
     /**
      * @param  array|Zend_Config|null $config
@@ -70,12 +70,12 @@ class Zend_Log_Writer_Azuremonitor extends Zend_Log_Writer_Buffered
 
     protected function _ship(array $events)
     {
-        $envelopes = array();
+        $envelopes = [];
         foreach ($events as $event) {
             $name  = $this->_severityName($event);
             $level = isset(self::$_severity[$name]) ? self::$_severity[$name] : 1;
 
-            $props = array('channel' => isset($event['channel']) ? $event['channel'] : 'app');
+            $props = ['channel' => isset($event['channel']) ? $event['channel'] : 'app'];
             if (!empty($event['context']) && is_array($event['context'])) {
                 // App Insights customDimensions are string->string.
                 foreach ($event['context'] as $k => $v) {
@@ -83,32 +83,32 @@ class Zend_Log_Writer_Azuremonitor extends Zend_Log_Writer_Buffered
                 }
             }
 
-            $envelopes[] = array(
+            $envelopes[] = [
                 'name' => 'Microsoft.ApplicationInsights.Message',
                 'time' => isset($event['timestamp']) ? (string) $event['timestamp'] : date('c'),
                 'iKey' => $this->_iKey,
-                'tags' => array('ai.cloud.role' => $this->_role),
-                'data' => array(
+                'tags' => ['ai.cloud.role' => $this->_role],
+                'data' => [
                     'baseType' => 'MessageData',
-                    'baseData' => array(
+                    'baseData' => [
                         'ver'           => 2,
                         'message'       => isset($event['message']) ? (string) $event['message'] : '',
                         'severityLevel' => $level,
                         'properties'    => $props,
-                    ),
-                ),
-            );
+                    ],
+                ],
+            ];
         }
 
         $ch = curl_init($this->_endpoint . '/v2/track');
-        curl_setopt_array($ch, array(
+        curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => json_encode($envelopes, JSON_UNESCAPED_SLASHES),
-            CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 5,
             CURLOPT_CONNECTTIMEOUT => 3,
-        ));
+        ]);
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err  = curl_error($ch);
@@ -131,6 +131,6 @@ class Zend_Log_Writer_Azuremonitor extends Zend_Log_Writer_Buffered
     protected static function _toArray($config)
     {
         if ($config instanceof Zend_Config) { return $config->toArray(); }
-        return is_array($config) ? $config : array();
+        return is_array($config) ? $config : [];
     }
 }

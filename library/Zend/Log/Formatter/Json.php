@@ -24,12 +24,12 @@ class Zend_Log_Formatter_Json implements Zend_Log_Formatter_Interface
      */
     public function format($event)
     {
-        $line = array(
+        $line = [
             'ts'      => isset($event['timestamp'])    ? $event['timestamp']    : date('c'),
             'level'   => isset($event['priorityName']) ? $event['priorityName'] : 'UNKNOWN',
             'channel' => isset($event['channel'])      ? $event['channel']      : 'app',
             'msg'     => isset($event['message'])      ? (string) $event['message'] : '',
-        );
+        ];
 
         if (!empty($event['context']) && is_array($event['context'])) {
             $line['context'] = $event['context'];
@@ -54,7 +54,7 @@ class Zend_Log_Formatter_Json implements Zend_Log_Formatter_Interface
      * @param  array|Zend_Config $config
      * @return Zend_Log_Formatter_Json
      */
-    public static function factory($config = array())
+    public static function factory($config = [])
     {
         return new self();
     }
