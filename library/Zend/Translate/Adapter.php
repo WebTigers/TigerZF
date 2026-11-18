@@ -770,8 +770,10 @@ abstract class Zend_Translate_Adapter {
                 $this->_routed = [];
                 return $this->_translate[$locale][$plural[0]][$rule];
             }
-        } else if (strlen($locale) !== 2) {
-            // faster than creating a new locale and separate the leading part
+        } else if (strpos($locale, '_') !== false) {
+            // Strip the region (en_US -> en). Keyed on the separator, not the length: a 3-letter
+            // language with no region (tlh, qya) used to land here and be cut to '', which lost
+            // both its translations and its 'route' fallback.
             $locale = substr($locale, 0, -strlen(strrchr($locale, '_')));
 
             if ((is_string($messageId) || is_int($messageId)) && isset($this->_translate[$locale][$messageId])) {
@@ -900,8 +902,8 @@ abstract class Zend_Translate_Adapter {
         if ((is_string($messageId) || is_int($messageId)) && isset($this->_translate[$locale][$messageId])) {
             // return original translation
             return true;
-        } else if ((strlen($locale) !== 2) && ($original === false)) {
-            // faster than creating a new locale and separate the leading part
+        } else if ((strpos($locale, '_') !== false) && ($original === false)) {
+            // Strip the region (en_US -> en) — only when there is one (see translate()).
             $locale = substr($locale, 0, -strlen(strrchr($locale, '_')));
 
             if ((is_string($messageId) || is_int($messageId)) && isset($this->_translate[$locale][$messageId])) {
