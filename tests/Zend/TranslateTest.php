@@ -835,6 +835,37 @@ class Zend_TranslateTest extends TestCase
     }
 
     /**
+     * A 3-letter language with no region (ISO 639-2/3, e.g. tlh) keeps its own strings, its
+     * isTranslated() answer, and its 'route' fallback. It used to fall into the region-stripping
+     * branch, which cut it to '' and lost the route — so a missing key came back raw.
+     */
+    public function testThreeLetterLocaleWithoutRegionKeepsItsRoute()
+    {
+        $ref  = new ReflectionProperty('Zend_Locale', '_localeData');
+        $orig = $ref->getValue();
+        $ref->setValue(null, $orig + ['tlh' => true]);   // register it the way an app adds a non-CLDR locale
+        try {
+            $translate = new Zend_Translate([
+                'adapter'        => Zend_Translate::AN_ARRAY,
+                'content'        => ['save' => 'Save', 'title' => 'Title'],
+                'locale'         => 'en',
+                'disableNotices' => true,
+                'route'          => ['tlh' => 'en'],
+            ]);
+            $translate->addTranslation(['content' => ['save' => "Qa'"], 'locale' => 'tlh']);
+            $translate->setLocale('tlh');
+
+            $this->assertEquals("Qa'", $translate->translate('save'));
+            $this->assertEquals('Title', $translate->translate('title'), 'a missing key follows the route');
+            $this->assertEquals('nowhere', $translate->translate('nowhere'), 'missing everywhere -> the key');
+            $this->assertTrue($translate->isTranslated('save', false, 'tlh'));
+            $this->assertFalse($translate->isTranslated('title', false, 'tlh'));
+        } finally {
+            $ref->setValue(null, $orig);
+        }
+    }
+
+    /**
      * @group ZF-2736
      */
     public function testDoubleReroutingForTranslations()
